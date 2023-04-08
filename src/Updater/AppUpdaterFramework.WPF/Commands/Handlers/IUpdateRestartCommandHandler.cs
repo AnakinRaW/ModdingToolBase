@@ -1,8 +1,8 @@
-﻿using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
-using AnakinRaW.ExternalUpdater.Options;
+﻿using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 
 namespace AnakinRaW.AppUpdaterFramework.Commands.Handlers;
 
-public interface IUpdateRestartCommandHandler : ICommandHandler<ExternalUpdaterOptions>
+public interface IUpdateRestartCommandHandler : ICommandHandler<RequiredRestartOptionsKind>
 {
 }

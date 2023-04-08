@@ -1,6 +1,5 @@
 ﻿using AnakinRaW.AppUpdaterFramework.Conditions;
 using AnakinRaW.AppUpdaterFramework.Elevation;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater;
 using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Installer;
 using AnakinRaW.AppUpdaterFramework.Interaction;
@@ -10,9 +9,7 @@ using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AnakinRaW.AppUpdaterFramework;
 
@@ -37,6 +34,8 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IDiskSpaceCalculator>(sp => new DiskSpaceCalculator(sp));
 
         serviceCollection.AddSingleton<IBackupManager>(sp => new BackupManager(sp));
+        serviceCollection.AddSingleton<IReadonlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
+
 
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
 
@@ -49,13 +48,11 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IProcessElevation>(_ => new ProcessElevation());
 
         serviceCollection.AddSingleton(sp => new DownloadRepository(sp));
+        serviceCollection.AddSingleton<IReadonlyDownloadRepository>(sp => sp.GetRequiredService<DownloadRepository>());
+
         serviceCollection.AddSingleton(sp => new BackupRepository(sp));
 
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
         serviceCollection.AddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
-
-        serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
-        serviceCollection.TryAddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
-        serviceCollection.TryAddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));
     }
 }

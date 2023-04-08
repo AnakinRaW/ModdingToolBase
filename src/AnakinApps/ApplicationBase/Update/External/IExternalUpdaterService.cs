@@ -3,7 +3,7 @@ using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.ExternalUpdater.Options;
 
-namespace AnakinRaW.AppUpdaterFramework.ExternalUpdater;
+namespace AnakinRaW.ApplicationBase.Update.External;
 
 public interface IExternalUpdaterService
 {

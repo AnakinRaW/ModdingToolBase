@@ -4,15 +4,18 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal interface IFileRepository
+public interface IReadonlyRepository
 {
-    IFileInfo AddComponent(IInstallableComponent component);
-
     IFileInfo? GetComponent(IInstallableComponent component);
 
     IDictionary<IInstallableComponent, IFileInfo> GetComponents();
 
     ISet<IFileInfo> GetFiles();
+}
+
+internal interface IFileRepository : IReadonlyRepository
+{
+    IFileInfo AddComponent(IInstallableComponent component);
 
     void RemoveComponent(IInstallableComponent component);
 

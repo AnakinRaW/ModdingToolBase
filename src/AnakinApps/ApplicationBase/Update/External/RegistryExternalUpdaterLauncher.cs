@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater.Registry;
-using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.ApplicationBase.Services;
+using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AnakinRaW.AppUpdaterFramework.ExternalUpdater;
+namespace AnakinRaW.ApplicationBase.Update.External;
 
 public sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdaterLauncher
 {

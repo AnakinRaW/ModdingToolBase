@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Security.AccessControl;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater.Registry;
 using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.CommonUtilities.FileSystem.Windows;
 using Microsoft.Extensions.DependencyInjection;

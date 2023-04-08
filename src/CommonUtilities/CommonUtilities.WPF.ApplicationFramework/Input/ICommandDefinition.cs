@@ -20,7 +20,7 @@ public interface ICommandHandler<in T> : ICommandHandler
 {
     new IDelegateCommand<T> Command { get; }
 
-    void Handle(T parameter);
+    void Handle(T optionsKind);
 
     Task HandleAsync(T parameter);
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Input;
 using AnakinRaW.AppUpdaterFramework.Commands.Handlers;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater;
 using AnakinRaW.AppUpdaterFramework.Imaging;
+using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Input;
@@ -21,7 +21,7 @@ internal class ElevateApplicationCommand : CommandDefinition
     public ElevateApplicationCommand(IServiceProvider serviceProvider)
     {
         var handler = serviceProvider.GetRequiredService<IUpdateRestartCommandHandler>();
-        var args = serviceProvider.GetRequiredService<IExternalUpdaterService>().CreateRestartOptions(true);
-        Command = new DelegateCommand(() => handler.Command.Execute(args), () => handler.Command.CanExecute(args));
+        var options = RequiredRestartOptionsKind.RestartElevated;
+        Command = new DelegateCommand(() => handler.Command.Execute(options), () => handler.Command.CanExecute(options));
     }
 }

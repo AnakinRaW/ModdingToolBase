@@ -5,7 +5,7 @@ using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
 
-namespace AnakinRaW.AppUpdaterFramework.ExternalUpdater.Registry;
+namespace AnakinRaW.ApplicationBase.Services;
 
 public sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 {

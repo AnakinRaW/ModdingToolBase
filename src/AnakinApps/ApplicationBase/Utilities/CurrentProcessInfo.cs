@@ -1,11 +1,9 @@
-﻿using System.Diagnostics;
-using System;
-#if !NET6_0_OR_GREATER
+﻿using System;
+using System.Diagnostics;
 using Vanara.PInvoke;
-#endif
 
 
-namespace AnakinRaW.AppUpdaterFramework.Utilities;
+namespace AnakinRaW.ApplicationBase.Utilities;
 
 internal class CurrentProcessInfo
 {

@@ -1,9 +1,9 @@
 ﻿using System;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater.Registry;
+using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.ExternalUpdater;
 using Validation;
 
-namespace AnakinRaW.AppUpdaterFramework.ExternalUpdater;
+namespace AnakinRaW.ApplicationBase.Update.External;
 
 public class ExternalUpdaterResultHandler
 {

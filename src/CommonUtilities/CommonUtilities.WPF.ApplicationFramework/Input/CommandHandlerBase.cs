@@ -13,7 +13,7 @@ public abstract class CommandHandlerBase<T> : ICommandHandler<T>
         Command = new DelegateCommand<T>(Handle, CanHandle);
     }
 
-    public abstract void Handle(T parameter);
+    public abstract void Handle(T optionsKind);
 
     public virtual Task HandleAsync(T parameter)
     {

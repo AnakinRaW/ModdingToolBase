@@ -32,7 +32,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.Windows\CommonUtilities.Windows.csproj" />
-	  <ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

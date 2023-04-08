@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Windows.Input;
 using AnakinRaW.AppUpdaterFramework.Commands.Handlers;
+using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Input;
-using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Commands;
@@ -16,10 +16,10 @@ internal class UpdateRestartCommand : CommandDefinition
     public override ICommand Command { get; }
     public override string? Tooltip => null;
 
-    public UpdateRestartCommand(ExternalUpdaterOptions updaterOptions, IServiceProvider serviceProvider)
+    public UpdateRestartCommand(IServiceProvider serviceProvider)
     {
+        var options = RequiredRestartOptionsKind.Update;
         var handler = serviceProvider.GetRequiredService<IUpdateRestartCommandHandler>();
-        Command = new DelegateCommand(() => handler.Command.Execute(updaterOptions),
-            () => handler.Command.CanExecute(updaterOptions));
+        Command = new DelegateCommand(() => handler.Command.Execute(options), () => handler.Command.CanExecute(options));
     }
 }

@@ -20,6 +20,7 @@
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.Windows\CommonUtilities.Windows.csproj" />
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.WPF.ApplicationFramework\CommonUtilities.WPF.ApplicationFramework.csproj" />
 	  <ProjectReference Include="..\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+	  <ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

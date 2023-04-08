@@ -19,11 +19,9 @@ public static class LibraryInitialization
 
         serviceCollection.AddSingleton<IUpdateCommandsFactory>(sp => new UpdateCommandsFactory(sp));
         serviceCollection.AddSingleton<IUpdateCommandHandler>(sp => new UpdateCommandHandler(sp));
-        serviceCollection.AddSingleton<IUpdateRestartCommandHandler>(sp => new UpdateRestartCommandHandler(sp));
         serviceCollection.AddSingleton<IUpdateResultHandler>(sp => new UpdateResultHandler(sp));
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IInteractionHandler>(sp => new DialogInteractionHandler(sp)));
-
 
 
         ImageLibrary.Instance.LoadCatalog(ImageCatalog.Instance);

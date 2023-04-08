@@ -1,7 +1,5 @@
 ﻿using System;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Commands.Factories;
@@ -18,8 +16,7 @@ internal class UpdateCommandsFactory : IUpdateCommandsFactory
 
     public ICommandDefinition CreateRestart()
     {
-        var options = _serviceProvider.GetRequiredService<IExternalUpdaterService>().CreateUpdateOptions();
-        return new UpdateRestartCommand(options, _serviceProvider);
+        return new UpdateRestartCommand(_serviceProvider);
     }
 
     public ICommandDefinition CreateElevate()

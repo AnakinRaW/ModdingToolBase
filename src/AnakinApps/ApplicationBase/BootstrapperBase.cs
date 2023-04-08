@@ -3,8 +3,6 @@ using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Configuration;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater;
-using AnakinRaW.AppUpdaterFramework.ExternalUpdater.Registry;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities.FileSystem;
@@ -18,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.ApplicationBase.Update.External;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -112,6 +111,8 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton(windowsFileSystemService);
         serviceCollection.AddSingleton<IWindowsPathService>(_ => new WindowsPathService(fileSystem));
         serviceCollection.AddTransient<IRegistry>(_ => new WindowsRegistry());
+
+        serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
 
         CreateCoreServicesBeforeEnvironment(serviceCollection);
 

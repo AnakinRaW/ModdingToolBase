@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal interface IBackupManager
+internal interface IBackupManager : IReadonlyBackupManager
 {
-    IDictionary<IInstallableComponent, BackupValueData> Backups { get; }
 
     void BackupComponent(IInstallableComponent component);
 
