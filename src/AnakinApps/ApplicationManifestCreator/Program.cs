@@ -9,19 +9,6 @@ using Microsoft.Extensions.Logging.Debug;
 
 namespace AnakinRaW.ApplicationManifestCreator;
 
-internal class ManifestCreator
-{
-    public ManifestCreator(ManifestCreatorOptions options, IServiceProvider serviceProvider)
-    {
-        
-    }
-
-    public async Task<int> Run()
-    {
-        return 0;
-    }
-}
-
 internal class Program
 {
     private static async Task<int> Main(string[] args)
@@ -76,19 +63,3 @@ internal class Program
         return services.BuildServiceProvider();
     }
 }
-
-internal class ManifestCreatorOptions
-{
-    [Option('a', "applicationFile", Required = true, HelpText = "The file of the application to create the manifest for.")]
-    public string ApplicationFile { get; init; }
-
-    [Option('c', "configFile", Required = true, HelpText = "File to configure the tool.")]
-    public string Configuration { get; init; }
-
-    [Option("appDataFiles", HelpText = "Files which shall be installed to the application's AppData directory")]
-    public ICollection<string> AppDataComponents { get; init; }
-
-    [Option("installDirFiles", HelpText = "Files which shall be installed to the application's install directory")]
-    public ICollection<string> InstallDirComponents { get; init; }
-}
-

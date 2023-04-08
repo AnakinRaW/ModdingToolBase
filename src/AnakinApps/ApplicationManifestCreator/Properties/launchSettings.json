@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ApplicationManifestCreator": {
+      "commandName": "Project",
+      "commandLineArgs": "-a app.exe -c config.json -o manifest.json"
+    }
+  }
+}

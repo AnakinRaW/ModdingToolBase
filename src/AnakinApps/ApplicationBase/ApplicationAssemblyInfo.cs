@@ -9,33 +9,35 @@ public class ApplicationAssemblyInfo
 {
     public Assembly CurrentAssembly { get; }
 
-    public string ProductName { get; }
+    public string? ProductName { get; }
 
-    public string InformationalVersion { get; }
+    public string? InformationalVersion { get; }
 
-    public string FileVersion { get; }
+    public string? FileVersion { get; }
 
-    public string AssemblyVersion { get; }
+    public string? AssemblyVersion { get; }
 
-    public string Title { get; }
+    public string? Title { get; }
 
     public string ExecutableFileName { get; }
 
     public ApplicationAssemblyInfo(Assembly assembly)
     {
         CurrentAssembly = assembly;
-        InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+        InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-        var fv = FileVersionInfo.GetVersionInfo(assembly.Location);
-        FileVersion = fv.FileVersion;
-        ProductName = fv.ProductName;
-        AssemblyVersion = assembly.GetName().Version.ToString();
-        Title = assembly.GetCustomAttribute<AssemblyTitleAttribute>().Title;
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+        FileVersion = fileVersionInfo.FileVersion;
+        ProductName = fileVersionInfo.ProductName;
+        AssemblyVersion = assembly.GetName().Version?.ToString();
+        Title = assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
         ExecutableFileName = assembly.Modules.First().Name;
     }
 
     public SemVersion? InformationalAsSemVer()
     {
+        if (InformationalVersion is null)
+            return null;
         SemVersion.TryParse(InformationalVersion, SemVersionStyles.Any, out var version);
         return version;
     }

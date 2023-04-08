@@ -28,7 +28,7 @@ public class JsonManifestLoader : ManifestLoaderBase
 
     protected override async Task<IProductManifest> LoadManifestCore(Stream manifest, IProductReference productReference, CancellationToken cancellationToken)
     {
-        var appManifest = await JsonSerializer.DeserializeAsync<UpdateManifest>(manifest, JsonSerializerOptions, cancellationToken);
+        var appManifest = await JsonSerializer.DeserializeAsync<ApplicationManifest>(manifest, JsonSerializerOptions, cancellationToken);
         if (appManifest is null)
             throw new CatalogException("Serialized manifest is null");
 
@@ -38,19 +38,19 @@ public class JsonManifestLoader : ManifestLoaderBase
         return new ProductManifest(availProduct, catalog);
     }
 
-    private IProductReference BuildReference(UpdateManifest updateManifest)
+    private IProductReference BuildReference(ApplicationManifest applicationManifest)
     {
         SemVersion? version = null;
-        if (updateManifest.Version is not null)
-            version = SemVersion.Parse(updateManifest.Version, SemVersionStyles.Any);
+        if (applicationManifest.Version is not null)
+            version = SemVersion.Parse(applicationManifest.Version, SemVersionStyles.Any);
 
         ProductBranch? branch = null;
-        if (version is not null && updateManifest.Branch is not null)
+        if (version is not null && applicationManifest.Branch is not null)
         {
             var branchManager = ServiceProvider.GetRequiredService<IBranchManager>();
             branch = branchManager.GetBranchFromVersion(version);
         }
-        return new ProductReference(updateManifest.Name, version, branch);
+        return new ProductReference(applicationManifest.Name, version, branch);
     }
 
     private static IReadOnlyList<IProductComponent> BuildCatalog(IEnumerable<AppComponent> manifestComponents)

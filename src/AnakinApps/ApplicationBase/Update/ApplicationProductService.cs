@@ -26,7 +26,9 @@ internal class ApplicationProductService : ProductServiceBase
     protected override IProductReference CreateCurrentProductReference()
     {
         var version = _applicationEnvironment.AssemblyInfo.InformationalVersion;
-        var branch = _branchManager.GetBranchFromVersion(version);
+        ProductBranch? branch = null;
+        if (version is not null) 
+            branch = _branchManager.GetBranchFromVersion(version);
         return new ProductReference(_applicationEnvironment.ApplicationName, version, branch);
     }
 

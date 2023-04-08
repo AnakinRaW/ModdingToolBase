@@ -24,10 +24,10 @@ public abstract record AppComponentBase(
     }
 }
 
-public record UpdateManifest(
+public record ApplicationManifest(
     [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("branch")] string? Branch,
     [property: JsonPropertyName("version")] string? Version,
+    [property: JsonPropertyName("branch")] string? Branch,
     [property: JsonPropertyName("components")] IReadOnlyList<AppComponent> Components
 );
 

@@ -13,6 +13,6 @@ internal class ApplicationVersionViewModel : ObservableObject, IDialogAdditional
     public ApplicationVersionViewModel(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        Version = serviceProvider.GetRequiredService<IApplicationEnvironment>().AssemblyInfo.InformationalVersion;
+        Version = serviceProvider.GetRequiredService<IApplicationEnvironment>().AssemblyInfo.InformationalVersion ?? "NO VERSION";
     }
 }
