@@ -20,10 +20,13 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
 		<PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.4" />
 		<PackageReference Include="Validation" Version="2.5.51" />
+		<PackageReference Include="Flurl" Version="3.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
 	</ItemGroup>
+
+	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />
 
 </Project>

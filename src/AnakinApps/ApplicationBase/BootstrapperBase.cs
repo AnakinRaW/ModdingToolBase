@@ -94,8 +94,9 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
         serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
-        serviceCollection.AddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
+
+        serviceCollection.TryAddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
     }
 
     protected abstract int Execute(string[] args, IServiceCollection serviceCollection);
@@ -127,7 +128,7 @@ public abstract class BootstrapperBase
         serviceCollection.TryAddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));
 
         serviceCollection.TryAddSingleton<IResourceExtractor>(sp =>
-            new CosturaResourceExtractor(environment.AssemblyInfo.CurrentAssembly, sp));
+            new CosturaResourceExtractor(environment.AssemblyInfo.Assembly, sp));
 
         serviceCollection.TryAddSingleton<IAppResetHandler>(sp => new AppResetHandler(sp));
         serviceCollection.TryAddTransient<IUnhandledExceptionHandler>(sp => new UnhandledExceptionHandler(sp));

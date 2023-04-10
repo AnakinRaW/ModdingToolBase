@@ -7,20 +7,16 @@ public class ProductComponentIdentityComparer : IEqualityComparer<IProductCompon
 {
     public static readonly ProductComponentIdentityComparer Default = new();
     public static readonly ProductComponentIdentityComparer VersionIndependent = new(true);
-    public static readonly ProductComponentIdentityComparer VersionAndBranchIndependent = new(true, excludeBranch: true);
     private readonly StringComparison _comparisonType;
     private readonly bool _excludeVersion;
-    private readonly bool _excludeBranch;
     private readonly StringComparer _comparer;
 
     public ProductComponentIdentityComparer(
         bool excludeVersion = false,
-        StringComparison comparisonType = StringComparison.OrdinalIgnoreCase,
-        bool excludeBranch = false)
+        StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
     {
         _excludeVersion = excludeVersion;
         _comparisonType = comparisonType;
-        _excludeBranch = excludeBranch;
         _comparer = comparisonType switch
         {
             StringComparison.CurrentCulture => StringComparer.CurrentCulture,
@@ -41,11 +37,6 @@ public class ProductComponentIdentityComparer : IEqualityComparer<IProductCompon
             return false;
         if (!x.Id.Equals(y.Id, _comparisonType))
             return false;
-        if (!_excludeBranch)
-        {
-            if (!string.Equals(x.Branch, y.Branch, _comparisonType))
-                return false;
-        }
         if (!_excludeVersion)
         {
             if (x.Version != null)
@@ -61,10 +52,7 @@ public class ProductComponentIdentityComparer : IEqualityComparer<IProductCompon
         if (obj == null)
             return 0;
         var num = 0;
-        if (obj.Id != null)
-            num ^= _comparer.GetHashCode(obj.Id);
-        if (!_excludeBranch && obj.Branch != null)
-            num ^= _comparer.GetHashCode(obj.Branch);
+        num ^= _comparer.GetHashCode(obj.Id);
         if (!_excludeVersion && obj.Version != null)
             num ^= obj.Version.GetHashCode();
         return num;

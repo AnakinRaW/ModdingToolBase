@@ -13,16 +13,12 @@ namespace AnakinRaW.ApplicationBase.Update;
 
 public class ApplicationBranchManager : BranchManager
 {
-    private const string StableBranchNameConst = "stable";
-    private const string BranchLookupFileName = "branches";
-    private const string ManifestFileName = "manifest.json";
-
     private readonly IApplicationEnvironment _applicationEnvironment;
 
     private Url BranchLookupUrl =>
-        _applicationEnvironment.UpdateRootUrl.AppendPathSegment(BranchLookupFileName);
+        _applicationEnvironment.UpdateRootUrl.AppendPathSegment(ApplicationConstants.BranchLookupFileName);
 
-    public override string StableBranchName => StableBranchNameConst;
+    public override string StableBranchName => ApplicationConstants.StableBranchName;
 
     public ApplicationBranchManager(IServiceProvider serviceProvider) : base(serviceProvider)
     {
@@ -47,6 +43,6 @@ public class ApplicationBranchManager : BranchManager
     protected override Uri BuildManifestUri(string branchName)
     {
         return new Uri(@"C:\manifest.json", UriKind.Absolute);
-        //return _applicationEnvironment.UpdateRootUrl.AppendPathSegments(branchName, ManifestFileName).ToUri();
+        //return new BranchUriBuilder(_applicationEnvironment.UpdateRootUrl).Build(branchName);
     }
 }

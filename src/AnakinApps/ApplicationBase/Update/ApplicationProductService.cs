@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,8 +10,8 @@ namespace AnakinRaW.ApplicationBase.Update;
 
 internal class ApplicationProductService : ProductServiceBase
 {
-    private readonly IBranchManager _branchManager;
     private readonly IApplicationEnvironment _applicationEnvironment;
+    private readonly IMetadataExtractor _metadataExtractor;
 
     private IDirectoryInfo? _installLocation;
 
@@ -19,30 +20,26 @@ internal class ApplicationProductService : ProductServiceBase
 
     public ApplicationProductService(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
         _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
+        _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
     }
 
     protected override IProductReference CreateCurrentProductReference()
     {
-        var version = _applicationEnvironment.AssemblyInfo.InformationalVersion;
-        ProductBranch? branch = null;
-        if (version is not null) 
-            branch = _branchManager.GetBranchFromVersion(version);
-        return new ProductReference(_applicationEnvironment.ApplicationName, version, branch);
+        return _metadataExtractor.ProductReferenceFromAssembly(_applicationEnvironment.AssemblyInfo.Assembly);
     }
 
     protected override void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
     {
         variables.Add(ApplicationVariablesKeys.AppData, _applicationEnvironment.ApplicationLocalPath);
-        variables.Add(ApplicationVariablesKeys.ApplicationFileName, _applicationEnvironment.AssemblyInfo.ExecutableFileName);
+        variables.Add(ApplicationVariablesKeys.AppFileName, _applicationEnvironment.AssemblyInfo.ExecutableFileName);
     }
 
 
     private IDirectoryInfo GetInstallLocation()
     {
         var fs = ServiceProvider.GetRequiredService<IFileSystem>();
-        var locationPath = _applicationEnvironment.AssemblyInfo.CurrentAssembly.Location;
+        var locationPath = _applicationEnvironment.AssemblyInfo.Assembly.Location;
         var directory = fs.FileInfo.New(locationPath).Directory;
         if (directory is null || !directory.Exists)
             throw new DirectoryNotFoundException("Unable to find location of current assembly.");

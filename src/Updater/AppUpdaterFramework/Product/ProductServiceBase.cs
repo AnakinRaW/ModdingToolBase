@@ -66,13 +66,12 @@ public abstract class ProductServiceBase : IProductService
         return new ProductReference(current.Name, version, branch);
     }
 
-    public virtual bool IsProductCompatible(IProductReference product)
-    {
-        var installed = GetCurrentInstance();
-        return !ProductReferenceEqualityComparer.NameOnly.Equals(installed, product);
-    }
-
     protected abstract IProductReference CreateCurrentProductReference();
+    
+
+    protected virtual void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
+    {
+    }
 
     private ProductState FetchInstallState()
     {
@@ -83,11 +82,6 @@ public abstract class ProductServiceBase : IProductService
         if (_restartManager.RequiredRestartType == RestartType.ApplicationElevation)
             state = ProductState.ElevationRequired;
         return state;
-    }
-
-
-    protected virtual void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
-    {
     }
 
     private void Initialize()

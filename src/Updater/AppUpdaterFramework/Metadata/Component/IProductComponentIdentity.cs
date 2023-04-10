@@ -9,7 +9,5 @@ public interface IProductComponentIdentity : IEquatable<IProductComponentIdentit
 
     SemVersion? Version { get; }
 
-    string? Branch { get; }
-
     string GetUniqueId();
 }

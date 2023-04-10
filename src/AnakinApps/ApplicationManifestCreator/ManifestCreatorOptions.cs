@@ -8,11 +8,8 @@ internal class ManifestCreatorOptions
     [Option('a', "applicationFile", Required = true, HelpText = "The file of the application to create the manifest for.")]
     public string ApplicationFile { get; init; }
 
-    [Option('c', "configFile", Required = true, HelpText = "File to configure the tool.")]
-    public string Configuration { get; init; }
-
     [Option('o', "output", Required = true, HelpText = "File path of the manifest file.")]
-    public string OuputFile { get; init; }
+    public string OuputPath { get; init; }
 
     [Option("appDataFiles", HelpText = "Files which shall be installed to the application's AppData directory.")]
     public ICollection<string> AppDataComponents { get; init; }

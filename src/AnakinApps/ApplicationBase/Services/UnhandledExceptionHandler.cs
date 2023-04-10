@@ -9,8 +9,9 @@ namespace AnakinRaW.ApplicationBase.Services;
 
 internal class UnhandledExceptionHandler : DisposableObject, IUnhandledExceptionHandler
 {
-    public IServiceProvider Services { get; }
     private readonly ILogger? _logger;
+
+    protected IServiceProvider Services { get; }
 
     public UnhandledExceptionHandler(IServiceProvider services)
     {

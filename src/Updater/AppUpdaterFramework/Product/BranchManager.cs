@@ -34,13 +34,20 @@ public abstract class BranchManager : IBranchManager
 
     public abstract Task<IEnumerable<ProductBranch>> GetAvailableBranches();
 
-    public virtual ProductBranch GetBranchFromVersion(SemVersion version)
+    public static string GetBranchName(SemVersion version, string defaultName, out bool isPrerelease)
     {
         var branchName = version.Prerelease;
         if (string.IsNullOrEmpty(branchName))
-            branchName = StableBranchName;
+            branchName = defaultName;
+        isPrerelease = version.IsPrerelease;
+        return branchName;
+    }
+
+    public virtual ProductBranch GetBranchFromVersion(SemVersion version)
+    {
+        var branchName = GetBranchName(version, StableBranchName, out var preRelease);
         var manifestUri = BuildManifestUri(branchName);
-        return new ProductBranch(branchName, manifestUri, version.IsPrerelease);
+        return new ProductBranch(branchName, manifestUri, preRelease);
     }
 
     public async Task<IProductManifest> GetManifest(IProductReference productReference, CancellationToken token = default)

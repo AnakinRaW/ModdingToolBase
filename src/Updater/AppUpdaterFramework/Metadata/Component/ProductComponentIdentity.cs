@@ -7,14 +7,12 @@ public class ProductComponentIdentity : IProductComponentIdentity
 {
     public string Id { get; }
     public SemVersion? Version { get; }
-    public string? Branch { get; }
-        
-    public ProductComponentIdentity(string id, SemVersion? version = null, string? branch = null)
+
+    public ProductComponentIdentity(string id, SemVersion? version = null)
     {
         Requires.NotNullOrEmpty(id, nameof(id));
         Id = id;
         Version = version;
-        Branch = branch;
     }
 
     public override string ToString()
@@ -34,6 +32,6 @@ public class ProductComponentIdentity : IProductComponentIdentity
     internal static string Format(IProductComponentIdentity identity, bool excludeVersion = false)
     {
         Requires.NotNull(identity, nameof(identity));
-        return Utilities.FormatIdentity(identity.Id, excludeVersion ? null : identity.Version, identity.Branch);
+        return Utilities.FormatIdentity(identity.Id, excludeVersion ? null : identity.Version, null);
     }
 }

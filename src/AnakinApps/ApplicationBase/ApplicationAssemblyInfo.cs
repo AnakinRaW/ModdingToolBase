@@ -2,12 +2,13 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Validation;
 
 namespace AnakinRaW.ApplicationBase;
 
 public class ApplicationAssemblyInfo
 {
-    public Assembly CurrentAssembly { get; }
+    public Assembly Assembly { get; }
 
     public string? ProductName { get; }
 
@@ -23,7 +24,8 @@ public class ApplicationAssemblyInfo
 
     public ApplicationAssemblyInfo(Assembly assembly)
     {
-        CurrentAssembly = assembly;
+        Requires.NotNull(assembly, nameof(assembly));
+        Assembly = assembly;
         InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);

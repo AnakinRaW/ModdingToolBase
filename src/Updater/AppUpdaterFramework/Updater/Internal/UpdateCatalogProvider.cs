@@ -72,7 +72,7 @@ internal class UpdateCatalogProvider : IUpdateCatalogProvider
         foreach (var availableItem in availableComponents)
         {
             var installedComponent = currentItems.FirstOrDefault(c =>
-                ProductComponentIdentityComparer.VersionAndBranchIndependent.Equals(c, availableItem));
+                ProductComponentIdentityComparer.VersionIndependent.Equals(c, availableItem));
 
             if (installedComponent is not null)
                 currentItems.Remove(installedComponent);

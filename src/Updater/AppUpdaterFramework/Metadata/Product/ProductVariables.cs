@@ -104,6 +104,13 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
         _variables = new Dictionary<string, Variable>();
     }
 
+    public static string ToVar(string value)
+    {
+        value = value.TrimStart('[');
+        value = value.TrimEnd(']');
+        return $"[{value}]";
+    }
+
     public bool Contains(string name)
     {
         Requires.NotNullOrEmpty(name, nameof(name));
@@ -125,8 +132,8 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
         try
         {
             string? str = null;
-            if (_variables.ContainsKey(name))
-                str = _variables[name].Value;
+            if (_variables.TryGetValue(name, out var variable))
+                str = variable.Value;
             return str ?? defaultValue;
         }
         finally

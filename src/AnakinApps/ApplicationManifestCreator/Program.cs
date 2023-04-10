@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Metadata;
+using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -45,6 +48,9 @@ internal class Program
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
+        services.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
+        services.AddSingleton<IHashingService>(_ => new HashingService());
+        services.AddSingleton<IBranchManager>(_ => new AppCreatorBranchManager());
 
         services.AddLogging(l =>
         {

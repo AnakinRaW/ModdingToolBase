@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using AnakinRaW.ApplicationBase.Utilities;
-using AnakinRaW.AppUpdaterFramework.Conditions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -21,18 +20,13 @@ namespace AnakinRaW.ApplicationBase.Update.External;
 internal class ExternalUpdaterService : IExternalUpdaterService
 {
     private readonly IServiceProvider _serviceProvider;
-    private const string Identity = "ExternalUpdater";
-    private const string ComponentName = "External Updater";
-
     private readonly IFileSystem _fileSystem;
     private readonly IProductService _productService;
     private readonly IExternalUpdaterLauncher _launcher;
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadonlyBackupManager _backupManager;
     private readonly IReadonlyDownloadRepository _downloadRepository;
-
-    public string UpdaterIdentity => Identity;
-
+    
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
@@ -43,27 +37,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadonlyBackupManager>();
         _downloadRepository = serviceProvider.GetRequiredService<IReadonlyDownloadRepository>();
-    }
-
-    public IInstallableComponent GetExternalUpdaterComponent(Stream assemblyStream, string installDirectory)
-    {
-        var assemblyInformation = ExternalUpdaterInformation.FromAssemblyStream(assemblyStream);
-
-        var fileVersion = assemblyInformation.FileVersion;
-        var filePath = _fileSystem.Path.Combine(installDirectory, ExternalUpdaterConstants.AppUpdaterModuleName);
-        var identity = new ProductComponentIdentity(UpdaterIdentity, assemblyInformation.InformationalVersion);
-
-        return new SingleFileComponent(identity, installDirectory, ExternalUpdaterConstants.AppUpdaterModuleName, null)
-        {
-            Name = ComponentName,
-            DetectConditions = new[]
-            {
-                new FileCondition(filePath)
-                {
-                    Version = fileVersion
-                }
-            }
-        };
     }
 
     public UpdateOptions CreateUpdateOptions()
@@ -93,7 +66,10 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public IFileInfo GetExternalUpdater()
     {
-        if (_productService.GetInstalledComponents().Items.FirstOrDefault(c => c.Id == UpdaterIdentity) is not SingleFileComponent updaterComponent)
+        var updater = _productService.GetInstalledComponents().Items
+            .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
+
+        if (updater is not SingleFileComponent updaterComponent)
             throw new NotSupportedException("External updater component not registered to current product.");
 
         var filePath = updaterComponent.GetFullPath(_serviceProvider, _productService.GetCurrentInstance().Variables);

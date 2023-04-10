@@ -34,4 +34,6 @@
 	  <ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
 
+	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />
+
 </Project>

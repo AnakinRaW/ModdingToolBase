@@ -17,7 +17,7 @@ internal class AppResetHandler : IAppResetHandler
     private readonly IWindowsPathService _pathService;
     private readonly ILogger? _logger;
 
-    public IServiceProvider Services { get; }
+    protected IServiceProvider Services { get; }
 
     public AppResetHandler(IServiceProvider services)
     {

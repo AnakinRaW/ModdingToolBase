@@ -9,9 +9,9 @@ internal class CurrentProcessInfo
 {
     public static readonly CurrentProcessInfo Current = new();
 
-    public string ProcessFilePath;
+    public readonly string ProcessFilePath;
 
-    public int Id;
+    public readonly int Id;
 
     private CurrentProcessInfo()
     {

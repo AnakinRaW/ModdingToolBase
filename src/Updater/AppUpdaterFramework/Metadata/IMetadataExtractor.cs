@@ -9,9 +9,13 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
 public interface IMetadataExtractor
 {
-    Task<IInstallableComponent> ComponentFromFile(IFileInfo file, string installLocation);
-    Task<IInstallableComponent> ComponentFromStream(Stream stream, string installLocation);
-    Task<IInstallableComponent> ComponentFromAssembly(Assembly file, string installLocation);
+    IInstallableComponent ComponentFromStream(Stream stream, string installLocation, ExtractorAdditionalInformation additionalInformation = default);
 
-    Task<IProductReference> ProductReferenceFromFile(string optionsApplicationFile);
+    IInstallableComponent ComponentFromAssembly(Assembly assembly, string installLocation, ExtractorAdditionalInformation additionalInformation = default);
+
+    Task<IInstallableComponent> ComponentFromFileAsync(IFileInfo file, string installLocation, ExtractorAdditionalInformation additionalInformation = default);
+
+    Task<IProductReference> ProductReferenceFromFileAsync(IFileInfo file);
+
+    IProductReference ProductReferenceFromAssembly(Assembly assembly);
 }

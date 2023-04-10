@@ -26,7 +26,7 @@ internal class ManifestInstallationDetector : IManifestInstallationDetector
         Requires.NotNull(manifest, nameof(manifest));
         productVariables ??= new ProductVariables();
 
-        var installedComponents = new HashSet<IInstallableComponent>(ProductComponentIdentityComparer.VersionAndBranchIndependent);
+        var installedComponents = new HashSet<IInstallableComponent>(ProductComponentIdentityComparer.VersionIndependent);
         foreach (var manifestItem in manifest.Items)
         {
             if (manifestItem is not IInstallableComponent installable)
