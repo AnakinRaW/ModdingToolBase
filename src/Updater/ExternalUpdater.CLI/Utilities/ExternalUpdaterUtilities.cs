@@ -9,42 +9,42 @@ namespace AnakinRaW.ExternalUpdater.Utilities;
 
 internal static class ExternalUpdaterUtilities
 {
-    public static bool IsValidAssembly(Stream assemblyStream, out ExternalUpdaterInformation? assemblyInformation)
-    {
-        assemblyInformation = null;
+    //public static bool IsValidAssembly(Stream assemblyStream, out ExternalUpdaterInformation? assemblyInformation)
+    //{
+    //    assemblyInformation = null;
 
-        var assemblyDef = AssemblyDefinition.ReadAssembly(assemblyStream);
-        var moduleDefinition = assemblyDef.MainModule;
+    //    var assemblyDef = AssemblyDefinition.ReadAssembly(assemblyStream);
+    //    var moduleDefinition = assemblyDef.MainModule;
 
-        var binaryName = moduleDefinition.Name;
+    //    var binaryName = moduleDefinition.Name;
 
-        if (!binaryName.Equals(ExternalUpdaterConstants.AppUpdaterModuleName))
-            return false;
+    //    if (!binaryName.Equals(ExternalUpdaterConstants.AppUpdaterModuleName))
+    //        return false;
 
-        var assemblyNameInfo = assemblyDef.Name;
+    //    var assemblyNameInfo = assemblyDef.Name;
 
-        var name = assemblyNameInfo.Name;
+    //    var name = assemblyNameInfo.Name;
 
-        try
-        {
-            var fileVersion = GetFileVersion(assemblyDef);
-            var infoVersion = GetInformationalVersion(assemblyDef);
+    //    try
+    //    {
+    //        var fileVersion = GetFileVersion(assemblyDef);
+    //        var infoVersion = GetInformationalVersion(assemblyDef);
 
-            assemblyInformation = new ExternalUpdaterInformation
-            {
-                Name = name,
-                FileVersion = fileVersion,
-                InformationalVersion = infoVersion
-            };
+    //        assemblyInformation = new ExternalUpdaterInformation
+    //        {
+    //            Name = name,
+    //            FileVersion = fileVersion,
+    //            InformationalVersion = infoVersion
+    //        };
 
-            return true;
-        }
-        catch (Exception)
-        {
-            assemblyInformation = null;
-            return false;
-        }
-    }
+    //        return true;
+    //    }
+    //    catch (Exception)
+    //    {
+    //        assemblyInformation = null;
+    //        return false;
+    //    }
+    //}
 
     private static Version GetFileVersion(ICustomAttributeProvider assemblyDefinition)
     {
