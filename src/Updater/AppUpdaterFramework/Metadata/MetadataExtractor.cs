@@ -9,7 +9,6 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
-using Semver;
 using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata;
@@ -20,13 +19,13 @@ public sealed class MetadataExtractor : IMetadataExtractor
 
     private readonly IFileSystem _fileSystem;
     private readonly IBranchManager _branchManager;
-    private readonly IHashingService _hashingService;
+    private readonly IAssemblyMetadataExtractor _assemblyMetadataExtractor;
 
     public MetadataExtractor(IServiceProvider serviceProvider)
     {
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _hashingService = serviceProvider.GetRequiredService<IHashingService>();
         _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
+        _assemblyMetadataExtractor = serviceProvider.GetService<IAssemblyMetadataExtractor>() ?? new AssemblyMetadataExtractor(serviceProvider);
     }
 
     public IInstallableComponent ComponentFromAssembly(Assembly assembly, string installLocation,
@@ -56,19 +55,26 @@ public sealed class MetadataExtractor : IMetadataExtractor
         });
     }
 
+    public ComponentFileInformation InformationFromStream(Stream stream)
+    {
+        return _assemblyMetadataExtractor.ReadComponentInformation(stream);
+    }
+
     public IInstallableComponent ComponentFromStream(Stream stream, string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
         Requires.NotNull(stream, nameof(stream));
         Requires.NotNullOrEmpty(installLocation, nameof(installLocation));
 
-        var componentInformation = ReadComponentInformation(stream);
+        var componentInformation = InformationFromStream(stream);
 
         var id = new ProductComponentIdentity(componentInformation.Id, componentInformation.InformationalVersion);
         var fileName = additionalInformation.OverrideFileName ?? componentInformation.FileName;
         var filePath = _fileSystem.Path.Combine(installLocation, fileName);
+        var integrityInfo = new ComponentIntegrityInformation(componentInformation.Hash, FileHashType);
+        var originInfo = CreateOriginInfo(additionalInformation.Origin, integrityInfo, componentInformation.Size);
 
-        return new SingleFileComponent(id, installLocation, fileName, null)
+        return new SingleFileComponent(id, installLocation, fileName, originInfo)
         {
             Name = componentInformation.Name,
             InstallationSize = GetSize(componentInformation.Size, additionalInformation.Drive),
@@ -77,7 +83,7 @@ public sealed class MetadataExtractor : IMetadataExtractor
                 new FileCondition(filePath)
                 {
                     Version = componentInformation.FileVersion,
-                    IntegrityInformation = new ComponentIntegrityInformation(componentInformation.Hash, FileHashType)
+                    IntegrityInformation = integrityInfo
                 }
             }
         };
@@ -108,50 +114,29 @@ public sealed class MetadataExtractor : IMetadataExtractor
 
     public IProductReference ProductReferenceFromStream(Stream assemblyStream)
     {
-        var productInfo = ReadProductInformation(assemblyStream);
+        var productInfo = _assemblyMetadataExtractor.ReadProductInformation(assemblyStream);
         ProductBranch? branch = null;
         if (productInfo.Version is not null)
             branch = _branchManager.GetBranchFromVersion(productInfo.Version);
         return new ProductReference(productInfo.ProductName, productInfo.Version, branch);
     }
 
-    private ComponentFileInformation ReadComponentInformation(Stream assemblyStream)
+    private OriginInfo? CreateOriginInfo(Uri? origin, ComponentIntegrityInformation integrityInformation, long? size = null)
     {
-        return null;
-    }
+        if (origin is null)
+            return null;
+        if (!origin.IsAbsoluteUri)
+            throw new InvalidOperationException("Origin uri must be absolute");
 
-    private ProductInformation ReadProductInformation(Stream assemblyStream)
-    {
-        return null;
+        return new OriginInfo(origin)
+        {
+            Size = size,
+            IntegrityInformation = integrityInformation
+        };
     }
 
     private static InstallationSize GetSize(long size, ExtractorAdditionalInformation.InstallDrive drive)
     {
         return drive == ExtractorAdditionalInformation.InstallDrive.System ? new InstallationSize(size, 0) : new InstallationSize(0, size);
     }
-}
-
-internal record ProductInformation 
-{
-    public required string ProductName { get; init; }
-
-    public SemVersion? Version { get; init; }
-}
-
-
-internal record ComponentFileInformation
-{
-    public required string Id { get; init; }
-
-    public required string FileName { get; init; }
-
-    public required Version FileVersion { get; init; }
-
-    public required long Size { get; init; }
-
-    public required byte[] Hash { get; init; }
-
-    public string? Name { get; init; }
-
-    public SemVersion? InformationalVersion { get; init; }
 }

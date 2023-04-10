@@ -21,6 +21,7 @@ internal class ManifestCreator
     private readonly ILogger? _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IMetadataExtractor _metadataExtractor;
+    private readonly AppCreatorBranchManager _branchManager;
 
     public ManifestCreatorOptions Options { get; }
 
@@ -33,6 +34,7 @@ internal class ManifestCreator
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
+        _branchManager = serviceProvider.GetRequiredService<AppCreatorBranchManager>();
 
         Options = options;
         JsonOptions = new JsonSerializerOptions
@@ -50,18 +52,40 @@ internal class ManifestCreator
 
     private async Task<ApplicationManifest> CreateManifest()
     {
+        var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
+
+        var branch = productReference.Branch;
+        if (branch is null)
+            throw new InvalidOperationException("No product branch created");
+
         var application = _fileSystem.FileInfo.New(Options.ApplicationFile);
-        var appComponent = await _metadataExtractor.ComponentFromFileAsync(application, ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir));
+        var appComponent = await _metadataExtractor.ComponentFromFileAsync(
+            application,
+            ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir),
+            new ExtractorAdditionalInformation
+            {
+                Drive = ExtractorAdditionalInformation.InstallDrive.App,
+                OverrideFileName = ProductVariables.ToVar(ApplicationVariablesKeys.AppFileName),
+                Origin = _branchManager.GetComponentOrigin(application, branch)
+            });
 
         var installables =
             new HashSet<IInstallableComponent>(ProductComponentIdentityComparer.VersionIndependent)
             {
                 appComponent
             };
-        await AddToComponents(Options.InstallDirComponents, ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir), installables);
-        await AddToComponents(Options.AppDataComponents, ProductVariables.ToVar(ApplicationVariablesKeys.AppData), installables);
-
-        var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
+        await AddToComponents(
+            Options.InstallDirComponents,
+            ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir),
+            ExtractorAdditionalInformation.InstallDrive.App,
+            branch,
+            installables);
+        await AddToComponents(
+            Options.AppDataComponents, 
+            ProductVariables.ToVar(ApplicationVariablesKeys.AppData),
+            ExtractorAdditionalInformation.InstallDrive.System,
+            branch,
+            installables);
 
         var allComponents = installables.Cast<IProductComponent>().ToList();
         allComponents.Insert(0, CreateGroup(productReference, installables));
@@ -69,13 +93,24 @@ internal class ManifestCreator
        return productReference.ToApplicationManifest(allComponents);
     }
 
-    private async Task AddToComponents(IEnumerable<string> files, string installLocation, ISet<IInstallableComponent> set)
+    private async Task AddToComponents(
+        IEnumerable<string> files, 
+        string installLocation, 
+        ExtractorAdditionalInformation.InstallDrive drive, 
+        ProductBranch branch,
+        ISet<IInstallableComponent> set)
     {
         foreach (var component in files.Select(_fileSystem.FileInfo.New))
         {
             if (!component.Exists)
                 throw new FileNotFoundException("Could not find component file:", component.FullName);
-            var installableComponent = await _metadataExtractor.ComponentFromFileAsync(component, installLocation);
+            var installableComponent = await _metadataExtractor.ComponentFromFileAsync(component, installLocation, new ExtractorAdditionalInformation
+            {
+                Drive = drive,
+                Origin = _branchManager.GetComponentOrigin(component, branch)
+            });
+
+
             if (!set.Add(installableComponent))
                 throw new InvalidOperationException($"A duplicate component was created named: {installableComponent.Id}");
         }

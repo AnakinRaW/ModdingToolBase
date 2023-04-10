@@ -9,6 +9,8 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
 public interface IMetadataExtractor
 {
+    ComponentFileInformation InformationFromStream(Stream stream);
+
     IInstallableComponent ComponentFromStream(Stream stream, string installLocation, ExtractorAdditionalInformation additionalInformation = default);
 
     IInstallableComponent ComponentFromAssembly(Assembly assembly, string installLocation, ExtractorAdditionalInformation additionalInformation = default);

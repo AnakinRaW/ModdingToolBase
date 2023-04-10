@@ -11,5 +11,6 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ApplicationConstants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApplicationVariablesKeys.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BranchedUriBuilder.cs" />
   </ItemGroup>
 </Project>

@@ -42,7 +42,7 @@ public class ApplicationBranchManager : BranchManager
 
     protected override Uri BuildManifestUri(string branchName)
     {
-        return new Uri(@"C:\manifest.json", UriKind.Absolute);
-        //return new BranchUriBuilder(_applicationEnvironment.UpdateRootUrl).Build(branchName);
+        //return new Uri(@"C:\manifest.json", UriKind.Absolute);
+        return new BranchedUriBuilder(_applicationEnvironment.UpdateRootUrl).BuildManifestUri(branchName);
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "ApplicationManifestCreator": {
       "commandName": "Project",
-      "commandLineArgs": "-a app.exe -o manifest.json"
+      "commandLineArgs": "-a \"C:/Test/Foc Launcher.exe\" --appDataFiles C:/Test/AnakinRaW.ExternalUpdater.exe -o manifest.json --origin https://google.de/"
     }
   }
 }

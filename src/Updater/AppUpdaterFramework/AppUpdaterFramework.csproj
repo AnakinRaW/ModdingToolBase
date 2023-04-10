@@ -32,6 +32,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.Windows\CommonUtilities.Windows.csproj" />
+	  <ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

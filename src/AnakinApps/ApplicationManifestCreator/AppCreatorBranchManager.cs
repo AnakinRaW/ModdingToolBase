@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
@@ -12,18 +13,29 @@ namespace AnakinRaW.ApplicationManifestCreator;
 
 internal class AppCreatorBranchManager : IBranchManager
 {
+    private readonly BranchedUriBuilder _uriBuilder;
     public string StableBranchName => ApplicationConstants.StableBranchName;
+
+    public AppCreatorBranchManager(ManifestCreatorOptions options)
+    {
+        _uriBuilder = new BranchedUriBuilder(options.OriginRootUri);
+    }
 
     public Task<IEnumerable<ProductBranch>> GetAvailableBranches()
     {
         throw new NotSupportedException();
     }
 
+    public Uri GetComponentOrigin(IFileInfo componentFile, ProductBranch branch)
+    {
+        return _uriBuilder.BuildComponentUri(branch.Name, componentFile.Name);
+    }
+
+
     public ProductBranch GetBranchFromVersion(SemVersion version)
     {
         var name = BranchManager.GetBranchName(version, StableBranchName, out var isPrerelease);
-        var builder = new BranchUriBuilder(new Uri(""));
-        return new ProductBranch(name, builder.Build(name), isPrerelease);
+        return new ProductBranch(name, _uriBuilder.BuildManifestUri(name), isPrerelease);
     }
 
     public Task<IProductManifest> GetManifest(IProductReference branch, CancellationToken token = default)

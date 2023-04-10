@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Description>Provides attribues and the means the read assembly information required for the AppUpdaterFramework.</Description>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>AnakinRaW.AppUpdaterFramework</RootNamespace>
+		<AssemblyName>AnakinRaW.AppUpdaterFramework.Core</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="5.0.1" />
+		<PackageReference Include="Semver" Version="2.3.0" />
+	</ItemGroup>
+
+</Project>

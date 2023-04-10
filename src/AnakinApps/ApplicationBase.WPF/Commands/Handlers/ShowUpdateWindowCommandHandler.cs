@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Utilities;
+using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.ViewModels;
 using AnakinRaW.CommonUtilities.Windows;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
@@ -16,11 +17,13 @@ internal class ShowUpdateWindowCommandHandler : AsyncCommandHandlerBase, IShowUp
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IConnectionManager _connectionManager;
+    private readonly IMetadataExtractor _metadataExtractor;
 
     public ShowUpdateWindowCommandHandler(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         _connectionManager = serviceProvider.GetRequiredService<IConnectionManager>();
+        _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
     }
 
     public override async Task HandleAsync()
@@ -45,11 +48,11 @@ internal class ShowUpdateWindowCommandHandler : AsyncCommandHandlerBase, IShowUp
             .ExtractAsync(ExternalUpdaterConstants.AppUpdaterModuleName, env.ApplicationLocalPath, ShouldOverwriteUpdater);
     }
 
-    private static bool ShouldOverwriteUpdater(string filePath, Stream assemblyStream)
+    private bool ShouldOverwriteUpdater(string filePath, Stream assemblyStream)
     {
-        var resourceInfo = ExternalUpdaterInformation.FromAssemblyStream(assemblyStream);
         if (!Version.TryParse(FileVersionInfo.GetVersionInfo(filePath).FileVersion, out var installedVersion))
             return true;
-        return resourceInfo.FileVersion > installedVersion;
+        var streamVersion = _metadataExtractor.InformationFromStream(assemblyStream).FileVersion;
+        return streamVersion > installedVersion;
     }
 }

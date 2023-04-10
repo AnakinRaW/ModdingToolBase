@@ -28,7 +28,7 @@ internal class Program
 
     private static async Task<int> CreateManifest(ManifestCreatorOptions opts)
     {
-        var services = CreateServices();
+        var services = CreateServices(opts);
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
@@ -43,14 +43,17 @@ internal class Program
         }
     }
 
-    private static IServiceProvider CreateServices()
+    private static IServiceProvider CreateServices(ManifestCreatorOptions options)
     {
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         services.AddSingleton<IHashingService>(_ => new HashingService());
-        services.AddSingleton<IBranchManager>(_ => new AppCreatorBranchManager());
+
+        var bm = new AppCreatorBranchManager(options);
+        services.AddSingleton<IBranchManager>(bm);
+        services.AddSingleton(bm);
 
         services.AddLogging(l =>
         {
