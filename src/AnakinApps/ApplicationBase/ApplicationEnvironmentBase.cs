@@ -14,8 +14,8 @@ public abstract class ApplicationEnvironmentBase : IApplicationEnvironment
     private readonly IFileSystem _fileSystem;
 
     public abstract string ApplicationName { get; }
-    public abstract Url? RepositoryUrl { get; }
-    public abstract Url UpdateRootUrl { get; }
+    public abstract Uri? RepositoryUrl { get; }
+    public abstract Uri UpdateRootUrl { get; }
     public abstract string ApplicationRegistryPath { get; }
     public string ApplicationLocalPath => LazyInitializer.EnsureInitialized(ref _launcherLocalPath, BuildLocalPath)!;
     public IDirectoryInfo ApplicationLocalDirectory =>

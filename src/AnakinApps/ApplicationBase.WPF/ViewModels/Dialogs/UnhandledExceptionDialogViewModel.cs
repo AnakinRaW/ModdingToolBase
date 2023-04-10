@@ -45,7 +45,7 @@ public partial class UnhandledExceptionDialogViewModel : ModalWindowViewModel, I
 
         if (env.RepositoryUrl != null)
         {
-            _repositoryUrl = env.RepositoryUrl.ToUri().AbsolutePath;
+            _repositoryUrl = env.RepositoryUrl.AbsoluteUri;
             Handler = new DelegateCommand(OnCreateIssue);
             if (env.RepositoryUrl.Host.Equals("github", StringComparison.OrdinalIgnoreCase))
                 HandlerIcon = new BitmapImage(ImageCatalog.GithubDefinition.Source);

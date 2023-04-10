@@ -9,7 +9,7 @@ internal class ManifestCreatorOptions
     [Option('a', "applicationFile", Required = true, HelpText = "The file of the application to create the manifest for.")]
     public string ApplicationFile { get; init; }
 
-    [Option('o', "output", Required = true, HelpText = "File path of the manifest file.")]
+    [Option('o', "output", Default = "", Required = false, HelpText = "File path of the manifest file.")]
     public string OuputPath { get; init; }
 
     [Option("origin", Required = true, HelpText = "Root url where all components are expected to be deployed. Must be an absolute uri.")]

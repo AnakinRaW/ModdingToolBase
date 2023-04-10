@@ -26,8 +26,6 @@ internal class AssemblyMetadataExtractor : IAssemblyMetadataExtractor
         using var assembly = GetAssemblyDefinition(assemblyStream);
         assemblyStream.Position = 0;
 
-        var m = ModuleDefinition.ReadModule(assemblyStream);
-
         var componentId = GetComponentId(assembly);
         var name = GetComponentName(assembly);
         var fileName = assembly.MainModule.Name;

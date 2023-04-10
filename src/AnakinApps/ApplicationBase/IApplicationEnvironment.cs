@@ -1,5 +1,5 @@
-﻿using System.IO.Abstractions;
-using Flurl;
+﻿using System;
+using System.IO.Abstractions;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -13,9 +13,9 @@ public interface IApplicationEnvironment
 
     IDirectoryInfo ApplicationLocalDirectory { get; }
 
-    Url? RepositoryUrl { get; }
+    Uri? RepositoryUrl { get; }
 
-    Url UpdateRootUrl { get; }
+    Uri UpdateRootUrl { get; }
 
     string ApplicationRegistryPath { get; }
 }

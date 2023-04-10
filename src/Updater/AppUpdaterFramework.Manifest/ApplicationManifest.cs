@@ -88,14 +88,14 @@ public record ComponentId(string Id, string? Version) : AppComponentBase(Id, Ver
 public record DetectCondition(
     [property: JsonPropertyName("type")] ConditionType Type,
     [property: JsonPropertyName("filePath")] string FilePath,
-    [property: JsonPropertyName("version")] string Version,
-    [property: JsonPropertyName("sha256")] string Sha256
+    [property: JsonPropertyName("version")] string? Version,
+    [property: JsonPropertyName("sha256")] string? Sha256
 )
 {
     public ICondition ToCondition()
     {
         if (Type != ConditionType.File)
-            throw new InvalidOperationException($"{Type} currently not supported");
+            throw new NotSupportedException($"{Type} currently not supported");
 
         if (string.IsNullOrEmpty(FilePath))
             throw new CatalogException($"Illegal manifest: {nameof(FilePath)} must not be null or empty.");

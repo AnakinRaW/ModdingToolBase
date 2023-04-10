@@ -5,9 +5,9 @@ namespace AnakinRaW.ApplicationBase;
 
 public class BranchedUriBuilder
 {
-    private readonly Url _appRootUri;
+    private readonly Uri _appRootUri;
 
-    public BranchedUriBuilder(Url appRootUri)
+    public BranchedUriBuilder(Uri appRootUri)
     {
         _appRootUri = appRootUri;
     }
