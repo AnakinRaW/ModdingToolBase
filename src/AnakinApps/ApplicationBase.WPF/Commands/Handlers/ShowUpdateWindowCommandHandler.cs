@@ -53,6 +53,8 @@ internal class ShowUpdateWindowCommandHandler : AsyncCommandHandlerBase, IShowUp
         if (!Version.TryParse(FileVersionInfo.GetVersionInfo(filePath).FileVersion, out var installedVersion))
             return true;
         var streamVersion = _metadataExtractor.InformationFromStream(assemblyStream).FileVersion;
+        if (streamVersion is null)
+            return true;
         return streamVersion > installedVersion;
     }
 }

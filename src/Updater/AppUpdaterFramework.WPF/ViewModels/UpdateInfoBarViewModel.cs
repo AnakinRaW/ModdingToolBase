@@ -29,7 +29,7 @@ public partial class UpdateInfoBarViewModel : ViewModelBase, IUpdateInfoBarViewM
                 UpdateStatus.UpdateAvailable => "Updates are available.",
                 UpdateStatus.NoUpdate => "No update available.",
                 UpdateStatus.Updating => "Updating Product...",
-                UpdateStatus.FailedChecking => "FailedChecking to get update information.",
+                UpdateStatus.FailedChecking => "Failed to get update information.",
                 _ => "No update available."
             };
         }

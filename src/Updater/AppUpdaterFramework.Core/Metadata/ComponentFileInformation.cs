@@ -9,7 +9,7 @@ public record ComponentFileInformation
 
     public required string FileName { get; init; }
 
-    public required Version FileVersion { get; init; }
+    public required Version? FileVersion { get; init; }
 
     public required long Size { get; init; }
 

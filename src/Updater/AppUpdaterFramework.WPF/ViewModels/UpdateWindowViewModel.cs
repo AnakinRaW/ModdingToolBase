@@ -164,6 +164,10 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
                 _serviceProvider.GetRequiredService<IQueuedDialogService>().ShowDialog(model).Forget();
             }
         }
+        catch (Exception e)
+        {
+
+        }
         finally
         {
             _semaphoreLock.Release();
