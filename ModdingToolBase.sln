@@ -35,6 +35,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.WPF.Core", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.WPF.Imaging", "src\CommonUtilities\CommonUtilities.WPF.Imaging\CommonUtilities.WPF.Imaging.csproj", "{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ApplicationConstants", "src\AnakinApps\ApplicationConstants\ApplicationConstants.shproj", "{B297A13A-8E3A-436C-BA97-8B5F57827FFE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppUpdaterFramework.Core", "src\Updater\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj", "{E35EE0D4-5517-460F-A369-42F21929FD27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +97,10 @@ Global
 		{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E35EE0D4-5517-460F-A369-42F21929FD27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E35EE0D4-5517-460F-A369-42F21929FD27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E35EE0D4-5517-460F-A369-42F21929FD27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E35EE0D4-5517-460F-A369-42F21929FD27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,8 +119,15 @@ Global
 		{617A8CAB-1187-4BCD-B7A9-8F8C79AE0C22} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
 		{03437A7C-DD22-485E-84C4-C994F511E297} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
 		{783B77D6-1D37-47DF-97A2-9A43EFB6FD32} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
+		{B297A13A-8E3A-436C-BA97-8B5F57827FFE} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
+		{E35EE0D4-5517-460F-A369-42F21929FD27} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DEE17D6-FFB9-40DF-B176-62A708BABB71}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{96907c99-deab-4c71-bdf9-28c900460659}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{b297a13a-8e3a-436c-ba97-8b5f57827ffe}*SharedItemsImports = 13
+		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{cf2a0a06-f0bd-40ea-953c-717da03c7e89}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
