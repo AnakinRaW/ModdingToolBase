@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0-windows;net48</TargetFrameworks>
+		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.CommonUtilities.Wpf.Imaging</RootNamespace>
 		<AssemblyName>AnakinRaW.CommonUtilities.WPF.Imaging</AssemblyName>
 		<UseWPF>true</UseWPF>
@@ -19,12 +19,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Validation" Version="2.5.51" PrivateAssets="all"/>
+		<PackageReference Include="Validation" Version="2.5.51" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" PrivateAssets="all"/>
-		<PackageReference Include="System.Memory" Version="4.5.5" PrivateAssets="all"/>
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" PrivateAssets="all" />
+		<PackageReference Include="System.Memory" Version="4.5.5" PrivateAssets="all" />
 	</ItemGroup>
 	
 
