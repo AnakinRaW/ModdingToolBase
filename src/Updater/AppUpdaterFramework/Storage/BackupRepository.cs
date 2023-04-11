@@ -20,7 +20,7 @@ internal sealed class BackupRepository : FileRepository
         if (string.IsNullOrEmpty(location))
             throw new InvalidOperationException("backup directory not specified.");
 
-        var root = fileSystem.DirectoryInfo.New(location);
+        var root = fileSystem.DirectoryInfo.New(location!);
         root.Create();
 
         Root = root;

@@ -8,7 +8,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
 		<RootNamespace>AnakinRaW.ApplicationManifestCreator</RootNamespace>
-		<AssemblyName>AnakinRaW.ApplicationManifestCreatorss</AssemblyName>
+		<AssemblyName>AnakinRaW.ApplicationManifestCreator</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>

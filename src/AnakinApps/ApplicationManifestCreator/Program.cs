@@ -8,7 +8,10 @@ using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+#if DEBUG
 using Microsoft.Extensions.Logging.Debug;
+#endif
+
 
 namespace AnakinRaW.ApplicationManifestCreator;
 

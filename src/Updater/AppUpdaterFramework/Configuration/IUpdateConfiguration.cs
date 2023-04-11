@@ -8,7 +8,7 @@ public interface IUpdateConfiguration
 
     string DownloadLocation { get; }
 
-    string BackupLocation { get; }
+    string? BackupLocation { get; }
 
     BackupPolicy BackupPolicy { get; }
 
@@ -35,7 +35,7 @@ public sealed record UpdateConfiguration : IUpdateConfiguration
 
     public bool SupportsRestart { get; init; }
 
-    public string BackupLocation { get; init; }
+    public string? BackupLocation { get; init; }
 
     public bool ValidateInstallation { get; init; }
 }

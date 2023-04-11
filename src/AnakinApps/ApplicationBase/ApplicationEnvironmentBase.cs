@@ -2,7 +2,7 @@
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading;
-using Flurl;
+using Microsoft.Extensions.DependencyInjection;
 using Validation;
 
 namespace AnakinRaW.ApplicationBase;
@@ -25,11 +25,11 @@ public abstract class ApplicationEnvironmentBase : IApplicationEnvironment
 
     protected abstract string ApplicationLocalDirectoryName { get; }
 
-    protected ApplicationEnvironmentBase(Assembly assembly, IFileSystem fileSystem)
+    protected ApplicationEnvironmentBase(Assembly assembly, IServiceProvider serviceProvider)
     {
         Requires.NotNull(assembly, nameof(assembly));
-        Requires.NotNull(fileSystem, nameof(fileSystem));
-        _fileSystem = fileSystem;
+        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         AssemblyInfo = new ApplicationAssemblyInfo(assembly);
     }
 
