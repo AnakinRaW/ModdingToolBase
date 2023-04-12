@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -11,9 +10,6 @@ using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Validation;
-#if NET6_0
-using System.Diagnostics.CodeAnalysis;
-#endif
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
@@ -145,47 +141,5 @@ internal class BackupManager : IBackupManager
 
         var backupFile = _repository.AddComponent(component);
         return new BackupValueData(destination, backupFile);
-    }
-}
-
-public class BackupValueData : IEquatable<BackupValueData>
-{
-    public IFileInfo Destination { get; }
-
-    public IFileInfo? Backup { get; }
-
-    public BackupValueData(IFileInfo destination)
-    {
-        Destination = destination;
-        Backup = null;
-    }
-
-    public BackupValueData(IFileInfo destination, IFileInfo backup)
-    {
-        Destination = destination;
-        Backup = backup;
-    }
-
-#if NET
-        [MemberNotNullWhen(false, nameof(Destination))]
-#endif
-    public bool IsOriginallyMissing()
-    {
-        return Backup is null;
-    }
-
-    public bool Equals(BackupValueData? other)
-    {
-        return Destination.Equals(other?.Destination) && Equals(Backup, other.Backup);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is BackupValueData other && Equals(other);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Destination, Backup);
     }
 }

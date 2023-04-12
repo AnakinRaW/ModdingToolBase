@@ -8,8 +8,8 @@ using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.CommonUtilities.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -36,7 +36,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IInteractionHandler>(sp => new DefaultInteractionHandler(sp));
         serviceCollection.AddSingleton<ILockingProcessManagerFactory>(_ => new LockingProcessManagerFactory());
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
-        serviceCollection.AddSingleton<IProcessElevation>(_ => new ProcessElevation());
+        serviceCollection.AddSingleton<IProcessElevation>(_ => ProcessElevation.Default);
         serviceCollection.AddSingleton(sp => new DownloadRepository(sp));
         serviceCollection.AddSingleton<IReadonlyDownloadRepository>(sp => sp.GetRequiredService<DownloadRepository>());
         serviceCollection.AddSingleton(sp => new BackupRepository(sp));

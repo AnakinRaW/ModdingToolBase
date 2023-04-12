@@ -30,7 +30,7 @@ internal class AssemblyMetadataExtractor : IAssemblyMetadataExtractor
         var name = GetComponentName(assembly);
         var fileName = assembly.MainModule.Name;
         var fileVersion = GetFileVersion(assembly);
-        var hash = _hashingService.GetStreamHash(assemblyStream, HashType.Sha256, true);
+        var hash = _hashingService.GetStreamHash(assemblyStream, HashType.Sha256);
         var infoVersion = GetInformationalVersion(assembly);
 
         return new ComponentFileInformation

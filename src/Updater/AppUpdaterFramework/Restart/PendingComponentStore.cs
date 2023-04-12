@@ -6,8 +6,8 @@ namespace AnakinRaW.AppUpdaterFramework.Restart;
 
 internal class PendingComponentStore : IWritablePendingComponentStore
 {
-#if NET
-     private readonly ConcurrentBag<PendingComponent> _pendingComponents = new();
+#if NETSTANDARD2_1
+    private readonly ConcurrentBag<PendingComponent> _pendingComponents = new();
 #else
     private readonly ConcurrentStack<PendingComponent> _pendingComponents = new();
 #endif
@@ -20,7 +20,7 @@ internal class PendingComponentStore : IWritablePendingComponentStore
 
     public void AddComponent(PendingComponent component)
     {
-#if NET
+#if NETSTANDARD2_1
         _pendingComponents.Add(component);
 #else
         _pendingComponents.Push(component);

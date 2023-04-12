@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
-using AnakinRaW.CommonUtilities.Windows;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
@@ -42,7 +42,7 @@ public class ExternalUpdaterLauncher : IExternalUpdaterLauncher
 #endif
         };
 
-        if (_elevation.IsElevated)
+        if (_elevation.IsCurrentProcessElevated)
             externalUpdateStartInfo.Verb = "runas";
 
         externalUpdateStartInfo.Arguments = options.ToArgs();

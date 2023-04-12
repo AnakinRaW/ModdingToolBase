@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Runtime.InteropServices;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 using AnakinRaW.AppUpdaterFramework.Interaction;
@@ -29,6 +30,12 @@ internal class LockedFileHandler : InteractiveHandlerBase, ILockedFileHandler
         Requires.NotNull(component, nameof(component));
         Requires.NotNull(component, nameof(component));
         Assumes.True(file.Exists, $"Expected '{file}' to exist.");
+
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Logger?.LogWarning("Handling locked files is only supported for windows applications!");
+            return ILockedFileHandler.Result.Locked;
+        }
 
         using var lockingProcessManager = _lockingProcessManagerFactory.Create();
         lockingProcessManager.Register(new[] { file.FullName });

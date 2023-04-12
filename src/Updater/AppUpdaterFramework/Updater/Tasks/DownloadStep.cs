@@ -170,7 +170,7 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
 
         try
         {
-#if NET
+#if NETSTANDARD2_1
             await using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 #else
             using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
