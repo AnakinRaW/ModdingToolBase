@@ -50,6 +50,8 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         try
         {
             var fileVersion = FileVersionInfo.GetVersionInfo(filePath).FileVersion;
+            if (string.IsNullOrEmpty(fileVersion))
+                return false;
             return Version.Parse(fileVersion).Equals(version);
         }
         catch (Exception)

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using AnakinRaW.AppUpdaterFramework.Elevation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Windows;

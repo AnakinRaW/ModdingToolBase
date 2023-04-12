@@ -28,12 +28,12 @@ internal class UpdateSession : IUpdateSession
     {
         try
         {
-            _updater.Progress += OnProgress;
+            _updater.Progress += OnProgress!;
             return await _updater.UpdateAsync(_cts.Token);
         }
         finally
         {
-            _updater.Progress -= OnProgress;
+            _updater.Progress -= OnProgress!;
         }
     }
 

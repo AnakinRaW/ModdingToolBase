@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.Elevation;
+using AnakinRaW.CommonUtilities.Windows;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;

@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
 		<AssemblyName>AnakinRaW.ExternalUpdater.CLI</AssemblyName>
 	</PropertyGroup>
@@ -14,10 +14,10 @@
 		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="5.0.1" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="2.3.0" />
-		<PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.4" />
+		<PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.9" />
 		<PackageReference Include="Validation" Version="2.5.51" PrivateAssets="build;compile" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-		<PackageReference Include="System.Text.Json" Version="7.0.2" PrivateAssets="build;compile" />
+		<PackageReference Include="System.Text.Json" Version="7.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>

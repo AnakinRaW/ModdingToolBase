@@ -14,9 +14,9 @@ internal class ComponentStepComparer : IEqualityComparer<IComponentStep>
         _comparer = comparer ?? ProductComponentIdentityComparer.Default;
     }
 
-    public bool Equals(IComponentStep x, IComponentStep y)
+    public bool Equals(IComponentStep? x, IComponentStep? y)
     {
-        return _comparer.Equals(x.Component, y.Component);
+        return _comparer.Equals(x?.Component, y?.Component);
     }
 
     public int GetHashCode(IComponentStep obj)

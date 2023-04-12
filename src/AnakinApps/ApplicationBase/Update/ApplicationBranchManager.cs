@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
@@ -27,7 +27,7 @@ public class ApplicationBranchManager : BranchManager
 
     public override async Task<IEnumerable<ProductBranch>> GetAvailableBranches()
     {
-        var branchesData = await new WebClient().DownloadDataTaskAsync(BranchLookupUrl.ToUri());
+        var branchesData = await new HttpClient().GetByteArrayAsync(BranchLookupUrl.ToUri());
         var branchNames = Encoding.UTF8.GetString(branchesData).Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
         if (!branchNames.Any())
             throw new InvalidOperationException($"No branches detected in '{BranchLookupUrl}'");
@@ -42,7 +42,6 @@ public class ApplicationBranchManager : BranchManager
 
     protected override Uri BuildManifestUri(string branchName)
     {
-        return new Uri(@"C:\manifest.json", UriKind.Absolute);
-        //return new BranchedUriBuilder(_applicationEnvironment.UpdateRootUrl.ToUri()).BuildManifestUri(branchName);
+        return new BranchedUriBuilder(_applicationEnvironment.UpdateRootUrl).BuildManifestUri(branchName);
     }
 }

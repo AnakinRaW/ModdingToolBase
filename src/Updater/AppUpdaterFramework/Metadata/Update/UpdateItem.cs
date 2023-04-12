@@ -30,9 +30,9 @@ public sealed class UpdateItem : IUpdateItem
         Action = action;
     }
 
-    public bool Equals(IUpdateItem other)
+    public bool Equals(IUpdateItem? other)
     {
-        return ComponentId == other.ComponentId;
+        return ComponentId == other?.ComponentId;
     }
 
     public override bool Equals(object? obj)

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+#if NETFRAMEWORK
 using Vanara.PInvoke;
-
+#endif
 
 namespace AnakinRaW.ApplicationBase.Utilities;
 

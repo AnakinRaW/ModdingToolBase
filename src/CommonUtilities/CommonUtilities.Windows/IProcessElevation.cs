@@ -1,4 +1,4 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Elevation;
+﻿namespace AnakinRaW.CommonUtilities.Windows;
 
 public interface IProcessElevation
 {

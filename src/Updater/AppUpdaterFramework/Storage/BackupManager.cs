@@ -174,9 +174,9 @@ public class BackupValueData : IEquatable<BackupValueData>
         return Backup is null;
     }
 
-    public bool Equals(BackupValueData other)
+    public bool Equals(BackupValueData? other)
     {
-        return Destination.Equals(other.Destination) && Equals(Backup, other.Backup);
+        return Destination.Equals(other?.Destination) && Equals(Backup, other.Backup);
     }
 
     public override bool Equals(object? obj)

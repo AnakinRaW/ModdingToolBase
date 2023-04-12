@@ -6,7 +6,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net48;net6.0</TargetFrameworks>
+		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
 		<AssemblyName>AnakinRaW.ExternalUpdater</AssemblyName>
 	</PropertyGroup>
@@ -25,7 +25,6 @@
 		<PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
 		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem.Windows" Version="5.0.1" />
 		<PackageReference Include="AnakinRaW.CommonUtilities" Version="5.0.1" />
-		<PackageReference Include="System.Text.Json" Version="7.0.2" PrivateAssets="build;compile" />
 	</ItemGroup>
 
 	<ItemGroup>
