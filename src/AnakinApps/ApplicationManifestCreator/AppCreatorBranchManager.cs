@@ -13,29 +13,29 @@ namespace AnakinRaW.ApplicationManifestCreator;
 
 internal class AppCreatorBranchManager : IBranchManager
 {
-    private readonly BranchedUriBuilder _uriBuilder;
+    private readonly ApplicationBranchUtilities _branchUtilities;
     public string StableBranchName => ApplicationConstants.StableBranchName;
 
     public AppCreatorBranchManager(ManifestCreatorOptions options)
     {
-        _uriBuilder = new BranchedUriBuilder(options.OriginRootUri);
+        _branchUtilities = new ApplicationBranchUtilities(options.OriginRootUri);
     }
 
     public Task<IEnumerable<ProductBranch>> GetAvailableBranches()
     {
-        throw new NotSupportedException();
+        return _branchUtilities.GetAvailableBranchesAsync();
     }
 
     public Uri GetComponentOrigin(IFileInfo componentFile, ProductBranch branch)
     {
-        return _uriBuilder.BuildComponentUri(branch.Name, componentFile.Name);
+        return _branchUtilities.BuildComponentUri(branch.Name, componentFile.Name);
     }
 
 
     public ProductBranch GetBranchFromVersion(SemVersion version)
     {
         var name = BranchManager.GetBranchName(version, StableBranchName, out var isPrerelease);
-        return new ProductBranch(name, _uriBuilder.BuildManifestUri(name), isPrerelease);
+        return new ProductBranch(name, _branchUtilities.BuildManifestUri(name), isPrerelease);
     }
 
     public Task<IProductManifest> GetManifest(IProductReference branch, CancellationToken token = default)
