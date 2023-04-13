@@ -48,18 +48,43 @@ internal class ManifestCreator
 
     public async Task<int> Run()
     {
-        var manifest = await CreateManifest();
+        var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
+        var branch = productReference.Branch;
+        if (branch is null)
+            throw new InvalidOperationException("No product newBranch created");
+
+        var manifest = await CreateManifest(productReference);
         await WriteManifest(manifest);
+
+        var currentOnlineBranches = (await _branchManager.GetAvailableBranches()).ToList();
+        if (currentOnlineBranches.Contains(branch)) 
+            await WriteBranchesFile(currentOnlineBranches, branch);
+
         return 0;
     }
 
-    private async Task<ApplicationManifest> CreateManifest()
+    private async Task WriteBranchesFile(List<ProductBranch> currentOnlineBranches, ProductBranch newBranch)
     {
-        var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
+        var branches = currentOnlineBranches.Select(b => b.Name).ToHashSet();
+        if (!branches.Add(newBranch.Name))
+            return;
 
+        var outputFilePath = _fileSystem.Path.Combine(Options.OuputPath, ApplicationConstants.BranchLookupFileName);
+        var outputFile = _fileSystem.FileInfo.New(outputFilePath);
+        outputFile.Directory?.Create();
+
+        _logger?.LogTrace($"Writing branches lookup file to '{outputFile.FullName}'");
+        await using var fileStream = outputFile.Create();
+        await using var textWriter = new StreamWriter(fileStream);
+        foreach (var branch in branches) 
+            await textWriter.WriteLineAsync(branch);
+    }
+
+    private async Task<ApplicationManifest> CreateManifest(IProductReference productReference)
+    {
         var branch = productReference.Branch;
         if (branch is null)
-            throw new InvalidOperationException("No product branch created");
+            throw new InvalidOperationException("No product newBranch created");
 
         var application = _fileSystem.FileInfo.New(Options.ApplicationFile);
         var appComponent = await _metadataExtractor.ComponentFromFileAsync(
