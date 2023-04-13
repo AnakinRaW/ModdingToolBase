@@ -1,14 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Description>Creates an update manifest for a given application.</Description>
+		<Description>Uploads files to a given (S)FTP instance.</Description>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net7.0</TargetFramework>
-		<RootNamespace>AnakinRaW.ApplicationManifestCreator</RootNamespace>
-		<AssemblyName>AnakinRaW.ApplicationManifestCreator</AssemblyName>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>AnakinRaW.FtpUploader</RootNamespace>
+		<AssemblyName>AnakinRaW.FtpUploader</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -18,15 +20,11 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+		<PackageReference Include="SSH.NET" Version="2020.0.2" />
 		<PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.11" />
 		<PackageReference Include="Validation" Version="2.5.51" />
 		<PackageReference Include="Flurl" Version="3.0.7" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
-	</ItemGroup>
-
-	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />
 
 </Project>

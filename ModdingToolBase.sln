@@ -39,6 +39,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ApplicationConstants", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppUpdaterFramework.Core", "src\Updater\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj", "{E35EE0D4-5517-460F-A369-42F21929FD27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FtpUploader", "src\AnakinApps\FtpUploader\FtpUploader.csproj", "{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E35EE0D4-5517-460F-A369-42F21929FD27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E35EE0D4-5517-460F-A369-42F21929FD27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +109,7 @@ Global
 		{783B77D6-1D37-47DF-97A2-9A43EFB6FD32} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
 		{B297A13A-8E3A-436C-BA97-8B5F57827FFE} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
 		{E35EE0D4-5517-460F-A369-42F21929FD27} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
+		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DEE17D6-FFB9-40DF-B176-62A708BABB71}
