@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -24,6 +25,11 @@ public class JsonManifestLoader : ManifestLoaderBase
 
     public JsonManifestLoader(IServiceProvider serviceProvider) : base(serviceProvider)
     {
+    }
+
+    public ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream)
+    {
+        return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, CancellationToken.None);
     }
 
     protected override async Task<IProductManifest> LoadManifestCore(Stream manifest, IProductReference productReference, CancellationToken cancellationToken)

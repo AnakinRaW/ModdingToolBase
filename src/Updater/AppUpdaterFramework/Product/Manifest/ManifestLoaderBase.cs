@@ -18,27 +18,12 @@ public abstract class ManifestLoaderBase : IManifestLoader
         ServiceProvider = serviceProvider;
     }
 
-    public async Task<IProductManifest> LoadManifest(IFileInfo manifestFile, IProductReference productReference, CancellationToken cancellationToken)
+    public async Task<IProductManifest> LoadManifest(IFileInfo manifestFile, IProductReference productReference, CancellationToken cancellationToken = default)
     {
         Requires.NotNull(manifestFile, nameof(manifestFile));
         Requires.NotNull(productReference, nameof(productReference));
         using var manifest = manifestFile.OpenRead();
         return await LoadManifestCore(manifest, productReference, cancellationToken);
-    }
-
-    public async Task<IProductManifest> LoadManifest(Stream manifest, IProductReference productReference, CancellationToken cancellationToken, bool keepOpen = false)
-    {
-        Requires.NotNull(manifest, nameof(manifest));
-        Requires.NotNull(productReference, nameof(productReference));
-        try
-        {
-            return await LoadManifestCore(manifest, productReference, cancellationToken);
-        }
-        finally
-        {
-            if (!keepOpen)
-                manifest.Close();
-        }
     }
 
     protected abstract Task<IProductManifest> LoadManifestCore(Stream manifest, IProductReference productReference, CancellationToken cancellationToken);

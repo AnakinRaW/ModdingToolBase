@@ -26,5 +26,11 @@
 		<PackageReference Include="Flurl" Version="3.0.7" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
+	</ItemGroup>
+
+	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />
+
 
 </Project>
