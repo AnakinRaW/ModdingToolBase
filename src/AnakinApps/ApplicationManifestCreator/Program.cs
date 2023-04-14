@@ -54,7 +54,7 @@ internal class Program
         services.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         services.AddSingleton<IHashingService>(_ => new HashingService());
 
-        var bm = new AppCreatorBranchManager(options);
+        var bm = new AppManifestCreatorBranchManager(options);
         services.AddSingleton<IBranchManager>(bm);
         services.AddSingleton(bm);
 

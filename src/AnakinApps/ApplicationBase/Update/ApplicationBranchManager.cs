@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -21,7 +18,7 @@ public class ApplicationBranchManager : BranchManager
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         var applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
-        _branchUtilities = new ApplicationBranchUtilities(applicationEnvironment.UpdateRootUrl);
+        _branchUtilities = new ApplicationBranchUtilities(applicationEnvironment.UpdateMirrors);
     }
 
     public override Task<IEnumerable<ProductBranch>> GetAvailableBranches()
@@ -29,8 +26,8 @@ public class ApplicationBranchManager : BranchManager
         return _branchUtilities.GetAvailableBranchesAsync();
     }
 
-    protected override Uri BuildManifestUri(string branchName)
+    protected override ICollection<Uri> BuildManifestUris(string branchName)
     {
-        return _branchUtilities.BuildManifestUri(branchName);
+        return _branchUtilities.BuildManifestUris(branchName);
     }
 }

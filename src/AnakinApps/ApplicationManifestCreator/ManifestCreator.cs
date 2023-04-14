@@ -22,7 +22,7 @@ internal class ManifestCreator
     private readonly ILogger? _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IMetadataExtractor _metadataExtractor;
-    private readonly AppCreatorBranchManager _branchManager;
+    private readonly AppManifestCreatorBranchManager _branchManager;
 
     public ManifestCreatorOptions Options { get; }
 
@@ -35,7 +35,7 @@ internal class ManifestCreator
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
-        _branchManager = serviceProvider.GetRequiredService<AppCreatorBranchManager>();
+        _branchManager = serviceProvider.GetRequiredService<AppManifestCreatorBranchManager>();
 
         Options = options;
         JsonOptions = new JsonSerializerOptions

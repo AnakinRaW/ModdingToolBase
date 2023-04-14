@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
@@ -11,12 +12,12 @@ using Semver;
 
 namespace AnakinRaW.ApplicationManifestCreator;
 
-internal class AppCreatorBranchManager : IBranchManager
+internal class AppManifestCreatorBranchManager : IBranchManager
 {
     private readonly ApplicationBranchUtilities _branchUtilities;
     public string StableBranchName => ApplicationConstants.StableBranchName;
 
-    public AppCreatorBranchManager(ManifestCreatorOptions options)
+    public AppManifestCreatorBranchManager(ManifestCreatorOptions options)
     {
         _branchUtilities = new ApplicationBranchUtilities(options.OriginRootUri);
     }
@@ -28,14 +29,14 @@ internal class AppCreatorBranchManager : IBranchManager
 
     public Uri GetComponentOrigin(IFileInfo componentFile, ProductBranch branch)
     {
-        return _branchUtilities.BuildComponentUri(branch.Name, componentFile.Name);
+        return ApplicationBranchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
     }
 
 
     public ProductBranch GetBranchFromVersion(SemVersion version)
     {
         var name = BranchManager.GetBranchName(version, StableBranchName, out var isPrerelease);
-        return new ProductBranch(name, _branchUtilities.BuildManifestUri(name), isPrerelease);
+        return new ProductBranch(name, _branchUtilities.BuildManifestUris(name), isPrerelease);
     }
 
     public Task<IProductManifest> GetManifest(IProductReference branch, CancellationToken token = default)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ internal class DesignerUpdateWindowViewModel : IUpdateWindowViewModel
     public ObservableCollection<ProductBranch> Branches { get; } = new();
 
     public ProductBranch CurrentBranch { get; set; } =
-        new ProductBranch("Test", new Uri("http://example.org", UriKind.Absolute), false);
+        new ProductBranch("Test", new List<Uri>{ new("http://example.org", UriKind.Absolute) }, false);
 
     public bool CanSwitchBranches { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading;
@@ -15,7 +16,7 @@ public abstract class ApplicationEnvironmentBase : IApplicationEnvironment
 
     public abstract string ApplicationName { get; }
     public abstract Uri? RepositoryUrl { get; }
-    public abstract Uri UpdateRootUrl { get; }
+    public abstract ICollection<Uri> UpdateMirrors { get; }
     public abstract string ApplicationRegistryPath { get; }
     public string ApplicationLocalPath => LazyInitializer.EnsureInitialized(ref _launcherLocalPath, BuildLocalPath)!;
     public IDirectoryInfo ApplicationLocalDirectory =>

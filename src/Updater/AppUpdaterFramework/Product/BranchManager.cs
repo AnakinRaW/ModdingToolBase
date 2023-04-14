@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
@@ -46,8 +47,8 @@ public abstract class BranchManager : IBranchManager
     public virtual ProductBranch GetBranchFromVersion(SemVersion version)
     {
         var branchName = GetBranchName(version, StableBranchName, out var preRelease);
-        var manifestUri = BuildManifestUri(branchName);
-        return new ProductBranch(branchName, manifestUri, preRelease);
+        var manifestUris = BuildManifestUris(branchName);
+        return new ProductBranch(branchName, manifestUris, preRelease);
     }
 
     public async Task<IProductManifest> GetManifest(IProductReference productReference, CancellationToken token = default)
@@ -58,27 +59,33 @@ public abstract class BranchManager : IBranchManager
             throw new InvalidOperationException("No branch specified.");
 
         var branch = productReference.Branch;
-        ValidateBranchUri(branch.ManifestLocation);
 
-        try
+        IFileInfo manifestFile = null!;
+
+        DownloadFailedException? lastException = null;
+
+        foreach (var manifestLocation in branch.ManifestLocations)
         {
-            var manifestFile = await _manifestDownloader.GetManifest(branch.ManifestLocation, token);
+            token.ThrowIfCancellationRequested();
             try
             {
-                var manifest = await ManifestLoader.LoadManifest(manifestFile, productReference, token);
-                return manifest ?? throw new CatalogException("No catalog was created");
+                manifestFile = await _manifestDownloader.GetManifest(manifestLocation, token);
             }
-            finally
+            catch (DownloadFailedException ex)
             {
-                try
-                {
-                    _fileSystemHelper.DeleteFileIfInTemp(manifestFile);
-                }
-                catch (Exception e)
-                {
-                    _logger?.LogWarning($"Failed to delete manifest {e.Message}");
-                }
+                _logger?.LogError(ex, ex.Message);
+                lastException = ex;
             }
+        }
+
+        if (lastException is not null)
+            throw new CatalogDownloadException("Could not download branch manifest from all sources.", lastException);
+        
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            var manifest = await ManifestLoader.LoadManifest(manifestFile, productReference, token);
+            return manifest ?? throw new CatalogException("No catalog was created");
         }
         catch (CatalogException ex)
         {
@@ -89,35 +96,24 @@ public abstract class BranchManager : IBranchManager
         {
             throw;
         }
-        catch (DownloadFailedException ex)
-        {
-            var message = $"Could not download branch manifest from '{branch.ManifestLocation.AbsoluteUri}'";
-            _logger?.LogError(ex, message);
-            throw new CatalogDownloadException(message, ex);
-        }
         catch (Exception ex)
         {
             var message = $"Unable to get manifest of branch:' {branch.Name}'";
             _logger?.LogError(ex, message);
             throw new CatalogException(message, ex);
         }
+        finally
+        {
+            try
+            {
+                _fileSystemHelper.DeleteFileIfInTemp(manifestFile);
+            }
+            catch (Exception e)
+            {
+                _logger?.LogWarning($"Failed to delete manifest {e.Message}");
+            }
+        }
     }
     
-    protected abstract Uri BuildManifestUri(string branchName);
-
-    private void ValidateBranchUri(Uri branchManifestLocation)
-    {
-        if (branchManifestLocation is null)
-        {
-            var ex = new InvalidOperationException("The branch's manifest location is null.");
-            _logger?.LogError(ex, ex.Message);
-            throw ex;
-        }
-        if (!branchManifestLocation.IsAbsoluteUri)
-        {
-            var ex = new InvalidOperationException($"The branch's manifest location: '{branchManifestLocation.AbsoluteUri}' needs to be an absolute uri.");
-            _logger?.LogError(ex, ex.Message);
-            throw ex;
-        }
-    }
+    protected abstract ICollection<Uri> BuildManifestUris(string branchName);
 }

@@ -11,18 +11,21 @@ namespace AnakinRaW.ApplicationBase;
 
 public class ApplicationBranchUtilities
 {
-    private readonly Uri _appRootUri;
-
-    private Url BranchLookupUrl => _appRootUri.AppendPathSegment(ApplicationConstants.BranchLookupFileName);
-
-    public ApplicationBranchUtilities(Uri appRootUri)
+    public ICollection<Uri> Mirrors { get; }
+    
+    public ApplicationBranchUtilities(Uri appRootUri) : this(new List<Uri>{appRootUri})
     {
-        _appRootUri = appRootUri;
+    }
+
+    public ApplicationBranchUtilities(ICollection<Uri> mirrors)
+    {
+        Mirrors = mirrors;
     }
 
     public async Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync()
     {
-        var branchesData = await new HttpClient().GetByteArrayAsync(BranchLookupUrl.ToUri());
+        var lookupUri = Mirrors.Select(GetBranchLookupUrl);
+        var branchesData = await DownloadFromMirrors(lookupUri);
         var branchNames = Encoding.UTF8.GetString(branchesData).Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
         
         if (!branchNames.Any())
@@ -32,18 +35,39 @@ public class ApplicationBranchUtilities
         foreach (var name in branchNames)
         {
             var isPrerelease = !name.Equals(ApplicationConstants.StableBranchName, StringComparison.InvariantCultureIgnoreCase);
-            branches.Add(new ProductBranch(name, BuildManifestUri(name), isPrerelease));
+            branches.Add(new ProductBranch(name, BuildManifestUris(name), isPrerelease));
         }
         return branches;
     }
 
-    public Uri BuildManifestUri(string branchName)
+    private async Task<byte[]> DownloadFromMirrors(IEnumerable<Url> downloadLocations)
     {
-        return _appRootUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri();
+        foreach (var requestUri in downloadLocations)
+        {
+            try
+            {
+                return await new HttpClient().GetByteArrayAsync(requestUri);
+            }
+            catch (HttpRequestException)
+            {
+                // Ignore and try next mirror
+            }
+        }
+        throw new InvalidOperationException("Unable to download");
     }
 
-    public Uri BuildComponentUri(string branchName, string fileName)
+    private static Url GetBranchLookupUrl(Uri baseUri)
     {
-        return _appRootUri.AppendPathSegments(branchName, fileName).ToUri();
+        return baseUri.AppendPathSegment(ApplicationConstants.BranchLookupFileName);
+    }
+
+    public ICollection<Uri> BuildManifestUris(string branchName)
+    {
+        return Mirrors.Select(mirrorUri => mirrorUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri()).ToList();
+    }
+
+    public static Url BuildComponentUri(Uri baseUri, string branchName, string fileName)
+    {
+        return baseUri.AppendPathSegments(branchName, fileName);
     }
 }

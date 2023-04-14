@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -6,15 +7,16 @@ public class ProductBranch : IEquatable<ProductBranch>
 {
     public string Name { get; }
 
-    public Uri ManifestLocation { get; }
+    public ICollection<Uri> ManifestLocations { get; }
 
     public bool IsPrerelease { get; }
 
-    public ProductBranch(string name, Uri manifestLocation, bool isPrerelease)
+    public ProductBranch(string name, ICollection<Uri> manifestLocations, bool isPrerelease)
     {
         Name = name;
-        ManifestLocation = manifestLocation;
+        ManifestLocations = manifestLocations;
         IsPrerelease = isPrerelease;
+        ValidateManifestUris();
     }
 
     public override string ToString()
@@ -40,5 +42,16 @@ public class ProductBranch : IEquatable<ProductBranch>
     public override int GetHashCode()
     {
         return Name.GetHashCode();
+    }
+
+    private void ValidateManifestUris()
+    {
+        foreach (var manifestLocation in ManifestLocations)
+        {
+            if (manifestLocation is null)
+                throw new InvalidOperationException("The branch's manifest location is null.");
+            if (!manifestLocation.IsAbsoluteUri)
+                throw new InvalidOperationException($"The branch's manifest location: '{manifestLocation.AbsoluteUri}' needs to be an absolute uri.");
+        }
     }
 }

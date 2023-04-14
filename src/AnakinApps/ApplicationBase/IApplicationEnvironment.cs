@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 
 namespace AnakinRaW.ApplicationBase;
@@ -15,7 +16,7 @@ public interface IApplicationEnvironment
 
     Uri? RepositoryUrl { get; }
 
-    Uri UpdateRootUrl { get; }
+    ICollection<Uri> UpdateMirrors { get; }
 
     string ApplicationRegistryPath { get; }
 }
