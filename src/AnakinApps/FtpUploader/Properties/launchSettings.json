@@ -2,7 +2,7 @@
   "profiles": {
     "FtpUploader": {
       "commandName": "Project",
-      "commandLineArgs": "-h republicatwar.com --port 1579 -u raw -p 123 --base downloads/TestTool/ -s ./binaries"
+      "commandLineArgs": "-h republicatwar.com --port 1579 -u raw -p 123 --base downloads/TestTool/ -s C:/test"
     }
   }
 }

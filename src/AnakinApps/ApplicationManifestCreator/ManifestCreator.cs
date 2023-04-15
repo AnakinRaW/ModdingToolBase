@@ -57,7 +57,7 @@ internal class ManifestCreator
         await WriteManifest(manifest);
 
         var currentOnlineBranches = (await _branchManager.GetAvailableBranches()).ToList();
-        if (currentOnlineBranches.Contains(branch)) 
+        if (!currentOnlineBranches.Contains(branch)) 
             await WriteBranchesFile(currentOnlineBranches, branch);
 
         return 0;
