@@ -29,8 +29,9 @@ internal class Program
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
-            var result = await new Uploader(opts, services).Run();
-            logger?.LogTrace($"Uploader finished with result: {result}");
+            await using var uploader = new Uploader(opts, services);
+            await uploader.Run();
+            logger?.LogTrace("Uploader finished");
             return 0;
         }
         catch (Exception e)
