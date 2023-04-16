@@ -26,7 +26,7 @@ namespace AnakinRaW.AppUpdaterFramework.ViewModels;
 
 public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindowViewModel
 {
-    private static readonly ProductBranch LoadingProductBranch = new ("Loading...", null!, true);
+    private static readonly ProductBranch LoadingProductBranch = new ("Loading...", false);
 
     private readonly SemaphoreSlim _semaphoreLock;
     private readonly IServiceProvider _serviceProvider;
@@ -163,10 +163,6 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
                     "Installing or uninstalling a product is currently not supported.");
                 _serviceProvider.GetRequiredService<IQueuedDialogService>().ShowDialog(model).Forget();
             }
-        }
-        catch (Exception e)
-        {
-
         }
         finally
         {

@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework) == 'net48'">
-		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.4.13" />
+		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.4.14" />
 	</ItemGroup>
 
 	<ItemGroup>
