@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Description>Base application framework for my command line apps.</Description>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<RootNamespace>AnakinRaW.ApplicationBase</RootNamespace>
+		<AssemblyName>AnakinRaW.ApplicationBase.CLI</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<EnableNETAnalyzers>True</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+		<ProjectReference Include="..\ApplicationBase\ApplicationBase.csproj" />
+	</ItemGroup>
+
+</Project>

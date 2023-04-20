@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Description>Abstraction layer to support self-updates, resetting and global error handling for my apps.</Description>
+		<Description>Base application framework for my WPF apps.</Description>
 	</PropertyGroup>
 
 	<PropertyGroup>

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-#if NETFRAMEWORK
+using System.Runtime.InteropServices;
 using Vanara.PInvoke;
-#endif
 
 namespace AnakinRaW.ApplicationBase.Utilities;
 
@@ -21,10 +20,12 @@ internal class CurrentProcessInfo
 #if NET6_0
         var processPath = Environment.ProcessPath;
 #else
-        var processPath = Kernel32.GetModuleFileName(HINSTANCE.NULL);
+        var processPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? Kernel32.GetModuleFileName(HINSTANCE.NULL)
+            : Process.GetCurrentProcess().MainModule.FileName;
 #endif
         if (string.IsNullOrEmpty(processPath))
             throw new InvalidOperationException("Unable to get current process path");
-        ProcessFilePath = processPath;
+        ProcessFilePath = processPath!;
     }
 }

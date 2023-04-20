@@ -6,9 +6,6 @@ using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities.FileSystem;
-using AnakinRaW.CommonUtilities.FileSystem.Windows;
-using AnakinRaW.CommonUtilities.Registry;
-using AnakinRaW.CommonUtilities.Registry.Windows;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.ApplicationBase.Update.External;
+using AnakinRaW.CommonUtilities.Registry;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -24,6 +22,9 @@ public abstract class BootstrapperBase
 {
     protected abstract IApplicationEnvironment CreateEnvironment(IServiceProvider serviceProvider);
 
+    protected abstract IRegistry CreateRegistry();
+
+    protected abstract int Execute(string[] args, IServiceCollection serviceCollection);
 
     protected virtual void CreateCoreServicesBeforeEnvironment(IServiceCollection serviceCollection) { }
 
@@ -52,6 +53,16 @@ public abstract class BootstrapperBase
         {
             return ExecuteInternal(args, serviceCollection);
         }
+    }
+
+    private protected virtual void CreateApplicationServices(IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
+        serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
+        serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
+        serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
+
+        serviceCollection.TryAddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
     }
 
 
@@ -89,31 +100,16 @@ public abstract class BootstrapperBase
         return exitCode;
     }
 
-    private protected virtual void CreateApplicationServices(IServiceCollection serviceCollection)
-    {
-        serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
-        serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
-        serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
-        serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
-
-        serviceCollection.TryAddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
-    }
-
-    protected abstract int Execute(string[] args, IServiceCollection serviceCollection);
-
     private IServiceCollection CreateCoreServices()
     {
         var serviceCollection = new ServiceCollection();
         
         var fileSystem = new FileSystem();
-        var windowsFileSystemService = new WindowsFileSystemService(fileSystem);
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
-        serviceCollection.AddSingleton<IFileSystemService>(windowsFileSystemService);
-        serviceCollection.AddSingleton(windowsFileSystemService);
-        serviceCollection.AddSingleton<IWindowsPathService>(_ => new WindowsPathService(fileSystem));
-        serviceCollection.AddTransient<IRegistry>(_ => new WindowsRegistry());
-
+        serviceCollection.AddSingleton<IFileSystemService>(sp => new FileSystemService(fileSystem));
         serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
+
+        serviceCollection.AddSingleton(CreateRegistry());
 
         CreateCoreServicesBeforeEnvironment(serviceCollection);
 

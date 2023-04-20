@@ -21,8 +21,6 @@ internal class UpdateCommandHandler : AsyncCommandHandlerBase<IUpdateCatalog>, I
     private readonly IAppDispatcher _dispatcher;
     private readonly IUpdateResultHandler _resultHandler;
 
-
-
     private bool _isUpdateInProgress;
 
     public UpdateCommandHandler(IServiceProvider serviceProvider)
