@@ -94,7 +94,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _serviceProvider = serviceProvider;
-        Title = "Application Update";
+        Title = "Application UpdateAsync";
         HasMaximizeButton = false;
         HasMinimizeButton = false;
         IsResizable = false;
@@ -256,7 +256,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
                 CancellationTokenSource.CreateLinkedTokenSource(_updateWindowCancellationTokenSource.Token);
             
             var updateRef = _serviceProvider.GetRequiredService<IProductService>().CreateProductReference(null, CurrentBranch);
-            await _updateService.CheckForUpdates(updateRef, searchUpdateCancellationTokenSource.Token);
+            await _updateService.CheckForUpdatesAsync(updateRef, searchUpdateCancellationTokenSource.Token);
         }
         catch (TaskCanceledException)
         {

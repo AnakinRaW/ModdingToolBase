@@ -62,7 +62,7 @@ internal class CommandLineToolSelfUpdater
         try
         {
             _logger?.LogInformation("Checking for updates...");
-            await _updateService.CheckForUpdates(updateRef);
+            await _updateService.CheckForUpdatesAsync(updateRef);
         }
         catch (Exception ex)
         {

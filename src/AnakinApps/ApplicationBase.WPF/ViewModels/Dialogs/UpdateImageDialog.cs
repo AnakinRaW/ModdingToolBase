@@ -15,7 +15,7 @@ internal abstract class UpdateImageDialog : DialogViewModel, IImageDialogViewMod
         IsResizable = false;
         HasMaximizeButton = false;
         HasMinimizeButton = false;
-        Title = "Application Update";
+        Title = "Application UpdateAsync";
     }
 
     public virtual Task InitializeAsync()

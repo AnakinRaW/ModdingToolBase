@@ -11,6 +11,8 @@ using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Designer;
 
+// ReSharper disable All 
+#pragma warning disable CS0067
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class ErrorMessageDialogViewModel : IErrorMessageDialogViewModel
 {
@@ -27,7 +29,7 @@ internal class ErrorMessageDialogViewModel : IErrorMessageDialogViewModel
     public bool IsGripVisible { get; set; }
     public bool ShowIcon { get; set; }
     public string? ResultButton { get; }
-    public IList<IButtonViewModel> Buttons { get; }
+    public IList<IButtonViewModel> Buttons { get; } = null!;
     public IDialogAdditionalInformationViewModel? AdditionalInformation { get; }
     public bool HasDialogFrame { get; set; }
     public bool IsCloseButtonEnabled { get; set; }

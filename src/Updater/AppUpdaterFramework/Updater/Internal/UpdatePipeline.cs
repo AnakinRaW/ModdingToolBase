@@ -203,7 +203,7 @@ internal sealed class UpdatePipeline : Pipeline
         if (_restartManager.RequiredRestartType != RestartType.ApplicationElevation)
             return;
 
-        _logger?.LogWarning("Elevation requested. Update gets cancelled");
+        _logger?.LogWarning("Elevation requested. UpdateAsync gets cancelled");
         _linkedCancellationTokenSource?.Cancel();
         _restartManager.RestartRequired -= OnRestartRequired;
     }

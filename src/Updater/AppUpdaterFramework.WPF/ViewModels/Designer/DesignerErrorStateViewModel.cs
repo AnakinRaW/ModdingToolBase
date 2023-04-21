@@ -4,6 +4,8 @@ using AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Designer;
 
+// ReSharper disable All 
+#pragma warning disable CS0067
 [EditorBrowsable(EditorBrowsableState.Never)]
 public class DesignerErrorStateViewModel : IErrorStateViewModel
 {

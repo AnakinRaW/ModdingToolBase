@@ -38,7 +38,7 @@ internal class UpdateService : IUpdateService
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public async Task CheckForUpdates(IProductReference productReference, CancellationToken token = default)
+    public async Task CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default)
     {
         lock (_syncObject)
         {
@@ -87,7 +87,7 @@ internal class UpdateService : IUpdateService
         }
     }
 
-    public async Task<UpdateResult> Update(IUpdateCatalog updateCatalog)
+    public async Task<UpdateResult> UpdateAsync(IUpdateCatalog updateCatalog)
     {
         var updater = CreateUpdater(updateCatalog);
         var updateSession = new UpdateSession(updateCatalog.UpdateReference, updater);

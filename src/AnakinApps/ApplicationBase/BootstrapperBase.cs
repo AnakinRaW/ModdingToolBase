@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.ApplicationBase.Update.External;
+using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
 
 namespace AnakinRaW.ApplicationBase;
@@ -63,6 +64,7 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
 
         serviceCollection.TryAddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
+        serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp)));
     }
 
 
@@ -79,7 +81,7 @@ public abstract class BootstrapperBase
 
         if (updateRegistry.RequiresUpdate)
         {
-            logger?.LogInformation("Update required: Running external updater...");
+            logger?.LogInformation("UpdateAsync required: Running external updater...");
             try
             {
                 coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();

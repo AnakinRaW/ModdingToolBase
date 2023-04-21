@@ -7,6 +7,7 @@ using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater;
+using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -33,7 +34,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IBackupManager>(sp => new BackupManager(sp));
         serviceCollection.AddSingleton<IReadonlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
-        serviceCollection.AddSingleton<IInteractionHandler>(sp => new DefaultInteractionHandler(sp));
+        serviceCollection.AddSingleton<IUpdateInteractionHandler>(sp => new DefaultUpdateInteractionHandler(sp));
         serviceCollection.AddSingleton<ILockingProcessManagerFactory>(_ => new LockingProcessManagerFactory());
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IProcessElevation>(_ => ProcessElevation.Default);
@@ -42,6 +43,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton(sp => new BackupRepository(sp));
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
         serviceCollection.AddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
+        serviceCollection.AddSingleton<IUpdateHandler>(sp => new UpdateHandler(sp));
 
         serviceCollection.TryAddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         serviceCollection.TryAddSingleton<IHashingService>(_ => new HashingService());

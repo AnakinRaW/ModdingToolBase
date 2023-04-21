@@ -63,7 +63,7 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, $"Update operation failed with error: {e.Message}");
+            _logger?.LogError(e, $"UpdateAsync operation failed with error: {e.Message}");
             return CreateResult(e);
         }
     }
@@ -105,7 +105,7 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, $"Update operation failed with error: {e.Message}");
+            _logger?.LogError(e, $"UpdateAsync operation failed with error: {e.Message}");
             return CreateResult(e);
         }
     }
