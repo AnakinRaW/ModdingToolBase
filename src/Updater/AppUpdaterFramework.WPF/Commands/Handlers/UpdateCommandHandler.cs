@@ -15,7 +15,7 @@ namespace AnakinRaW.AppUpdaterFramework.Commands.Handlers;
 
 internal class UpdateCommandHandler : AsyncCommandHandlerBase<IUpdateCatalog>, IUpdateCommandHandler
 {
-    private readonly ILogger? _logger;
+    private readonly IUpdateHandler _updateHandler;
     private readonly IUpdateService _updateService;
 
     private readonly IAppDispatcher _dispatcher;
@@ -26,9 +26,8 @@ internal class UpdateCommandHandler : AsyncCommandHandlerBase<IUpdateCatalog>, I
     public UpdateCommandHandler(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        _resultHandler = serviceProvider.GetRequiredService<IUpdateResultHandler>();
-        
+        _updateHandler = serviceProvider.GetRequiredService<IUpdateHandler>();
+       
         _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
 
         _updateService = serviceProvider.GetRequiredService<IUpdateService>();
@@ -48,24 +47,9 @@ internal class UpdateCommandHandler : AsyncCommandHandlerBase<IUpdateCatalog>, I
         _dispatcher.BeginInvoke(DispatcherPriority.Background, CommandManager.InvalidateRequerySuggested);
     }
 
-    public override async Task HandleAsync(IUpdateCatalog parameter)
+    public override Task HandleAsync(IUpdateCatalog parameter)
     {
-        UpdateResult updateResult;
-        try
-        {
-            updateResult = await UpdateAsync(parameter).ConfigureAwait(false);
-        }
-        catch (Exception e)
-        {
-            _logger?.LogError(e, $"Unhandled exception {e.GetType()} encountered: {e.Message}");
-            updateResult = new UpdateResult
-            {
-                Exception = e,
-                IsCanceled = e.IsOperationCanceledException()
-            };
-        }
-
-        await _resultHandler.Handle(updateResult).ConfigureAwait(false);
+        return _updateHandler.HandleAsync(parameter);
     }
 
     public override bool CanHandle(IUpdateCatalog? parameter)
