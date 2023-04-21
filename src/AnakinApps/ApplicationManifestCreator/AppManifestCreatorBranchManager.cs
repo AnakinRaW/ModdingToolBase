@@ -29,7 +29,7 @@ internal class AppManifestCreatorBranchManager : IBranchManager
 
     public Uri GetComponentOrigin(IFileInfo componentFile, ProductBranch branch)
     {
-        return _branchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
+        return ApplicationBranchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
     }
 
 

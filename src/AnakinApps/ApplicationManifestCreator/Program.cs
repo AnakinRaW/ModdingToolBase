@@ -4,6 +4,8 @@ using System.IO.Abstractions;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.DownloadManager.Verification;
 using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +55,8 @@ internal class Program
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         services.AddSingleton<IHashingService>(_ => new HashingService());
+        services.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
+        services.AddSingleton<IVerificationManager>(sp => new VerificationManager(sp));
 
         services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
         services.AddSingleton<IBranchManager>(sp => sp.GetRequiredService<AppManifestCreatorBranchManager>());

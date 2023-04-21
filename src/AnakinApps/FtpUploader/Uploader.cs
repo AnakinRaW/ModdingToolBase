@@ -44,7 +44,7 @@ internal class Uploader : IAsyncDisposable
         CreateFolders(toolBasePath, branchPath);
 
 
-        await UploadFile(fileInformation.Manifest, toolBasePath);
+        await UploadFile(fileInformation.Manifest, branchPath);
 
         if (fileInformation.BranchLookup is not null)
             await UploadFile(fileInformation.BranchLookup, toolBasePath);
