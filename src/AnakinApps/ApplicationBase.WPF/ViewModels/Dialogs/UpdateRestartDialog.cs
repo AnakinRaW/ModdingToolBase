@@ -52,7 +52,7 @@ internal class UpdateRestartDialog : UpdateImageDialog, IUpdateRestartDialog
     public static IUpdateRestartDialog CreateRestart(IServiceProvider serviceProvider)
     {
         return new UpdateRestartDialog(
-            "UpdateAsync requires restart", 
+            "Update requires restart", 
             "The update will be completed after a restart of the application.", 
             false, 
             serviceProvider);
@@ -61,7 +61,7 @@ internal class UpdateRestartDialog : UpdateImageDialog, IUpdateRestartDialog
     public static IUpdateRestartDialog CreateElevationRestart(IServiceProvider serviceProvider)
     {
         return new UpdateRestartDialog(
-            "UpdateAsync requires additional permissions", 
+            "Update requires additional permissions", 
             "For a successful update, administrator rights are required, because some files or directories have write protection.", 
             true, 
             serviceProvider);

@@ -70,6 +70,8 @@ public abstract class BranchManager : IBranchManager
             try
             {
                 manifestFile = await _manifestDownloader.GetManifest(manifestLocation, token);
+                if (manifestFile.Exists && manifestFile.Length != 0)
+                    break;
             }
             catch (DownloadFailedException ex)
             {

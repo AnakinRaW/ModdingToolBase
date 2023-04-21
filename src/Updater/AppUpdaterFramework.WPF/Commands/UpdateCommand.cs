@@ -25,9 +25,9 @@ internal class UpdateCommand : CommandDefinition
     {
         var handler = serviceProvider.GetRequiredService<IUpdateHandler>();
 
-        Command = new AsyncRelayCommand(() => handler.UpdateAsync(updateCatalog), () => handler.IsUpdating);
+        Command = new AsyncRelayCommand(() => handler.UpdateAsync(updateCatalog), () => !handler.IsUpdating);
 
         UpdateCatalog = updateCatalog;
-        Text = isRepair ? "Repair" : "UpdateAsync";
+        Text = isRepair ? "Repair" : "Update";
     }
 }

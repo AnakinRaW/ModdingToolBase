@@ -37,7 +37,6 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IUpdateInteractionHandler>(sp => new DefaultUpdateInteractionHandler(sp));
         serviceCollection.AddSingleton<ILockingProcessManagerFactory>(_ => new LockingProcessManagerFactory());
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
-        serviceCollection.AddSingleton<IProcessElevation>(_ => ProcessElevation.Default);
         serviceCollection.AddSingleton(sp => new DownloadRepository(sp));
         serviceCollection.AddSingleton<IReadonlyDownloadRepository>(sp => sp.GetRequiredService<DownloadRepository>());
         serviceCollection.AddSingleton(sp => new BackupRepository(sp));
@@ -45,6 +44,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
         serviceCollection.AddSingleton<IUpdateHandler>(sp => new UpdateHandler(sp));
 
+        serviceCollection.TryAddSingleton<IProcessElevation>(_ => ProcessElevation.Default);
         serviceCollection.TryAddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         serviceCollection.TryAddSingleton<IHashingService>(_ => new HashingService());
     }

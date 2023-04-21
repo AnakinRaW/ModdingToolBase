@@ -18,6 +18,7 @@ public static class LibraryInitialization
 
         serviceCollection.AddSingleton<IProductViewModelFactory>(sp => new ProductViewModelFactory(sp));
         serviceCollection.AddSingleton<IUpdateCommandsFactory>(sp => new UpdateCommandsFactory(sp));
+        serviceCollection.AddSingleton<IUpdateResultInteractionHandler>(sp => new DialogResultInteractionHandler(sp));
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp)));
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateInteractionHandler>(sp => new DialogUpdateInteractionHandler(sp)));

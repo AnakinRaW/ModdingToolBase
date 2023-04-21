@@ -17,9 +17,9 @@ internal class AppManifestCreatorBranchManager : IBranchManager
     private readonly ApplicationBranchUtilities _branchUtilities;
     public string StableBranchName => ApplicationConstants.StableBranchName;
 
-    public AppManifestCreatorBranchManager(ManifestCreatorOptions options)
+    public AppManifestCreatorBranchManager(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     {
-        _branchUtilities = new ApplicationBranchUtilities(options.OriginRootUri);
+        _branchUtilities = new ApplicationBranchUtilities(options.OriginRootUri, serviceProvider);
     }
 
     public Task<IEnumerable<ProductBranch>> GetAvailableBranches()
@@ -29,7 +29,7 @@ internal class AppManifestCreatorBranchManager : IBranchManager
 
     public Uri GetComponentOrigin(IFileInfo componentFile, ProductBranch branch)
     {
-        return ApplicationBranchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
+        return _branchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
     }
 
 

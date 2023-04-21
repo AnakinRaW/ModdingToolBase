@@ -16,6 +16,7 @@ using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.ApplicationBase.Update.External;
 using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
+using AnakinRaW.CommonUtilities;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -81,7 +82,7 @@ public abstract class BootstrapperBase
 
         if (updateRegistry.RequiresUpdate)
         {
-            logger?.LogInformation("UpdateAsync required: Running external updater...");
+            logger?.LogInformation("Update required: Running external updater...");
             try
             {
                 coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();
@@ -108,8 +109,9 @@ public abstract class BootstrapperBase
         
         var fileSystem = new FileSystem();
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
-        serviceCollection.AddSingleton<IFileSystemService>(sp => new FileSystemService(fileSystem));
+        serviceCollection.AddSingleton<IFileSystemService>(_ => new FileSystemService(fileSystem));
         serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
+        serviceCollection.TryAddSingleton(_ => ProcessElevation.Default);
 
         serviceCollection.AddSingleton(CreateRegistry());
 

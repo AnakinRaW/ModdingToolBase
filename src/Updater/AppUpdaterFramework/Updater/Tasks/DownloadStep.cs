@@ -166,7 +166,7 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
     private async Task DownloadAndVerifyAsync(IDownloadManager downloadManager, IFileInfo destination, CancellationToken token)
     {
         var integrityInformation = Component.OriginInfo!.IntegrityInformation;
-        var hashContext = new HashVerificationContext(integrityInformation.Hash, HashType.None);
+        var hashContext = new HashVerificationContext(integrityInformation.Hash, HashType.Sha256);
 
         try
         {

@@ -1,24 +1,36 @@
 ﻿using System;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using AnakinRaW.CommonUtilities.DownloadManager;
 using Flurl;
+using Microsoft.Extensions.DependencyInjection;
+using Validation;
 
 namespace AnakinRaW.ApplicationBase;
 
 public class ApplicationBranchUtilities
 {
+    private readonly IFileSystem _fileSystem;
+    private readonly IDownloadManager _downloadManager;
+
     public ICollection<Uri> Mirrors { get; }
     
-    public ApplicationBranchUtilities(Uri appRootUri) : this(new List<Uri>{appRootUri})
+    public ApplicationBranchUtilities(Uri appRootUri, IServiceProvider serviceProvider) : this(new List<Uri>{appRootUri}, serviceProvider)
     {
     }
 
-    public ApplicationBranchUtilities(ICollection<Uri> mirrors)
+    public ApplicationBranchUtilities(ICollection<Uri> mirrors, IServiceProvider serviceProvider)
     {
+        Requires.NotNull(mirrors, nameof(mirrors));
+        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+        _downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
         Mirrors = mirrors;
     }
 
@@ -46,9 +58,11 @@ public class ApplicationBranchUtilities
         {
             try
             {
-                return await new HttpClient().GetByteArrayAsync(requestUri);
+                using var ms = new MemoryStream();
+                await _downloadManager.DownloadAsync(requestUri.ToUri(), ms, null);
+                return ms.ToArray();
             }
-            catch (HttpRequestException)
+            catch (Exception e) when (e is HttpRequestException or DownloadFailedException)
             {
                 // Ignore and try next mirror
             }
@@ -66,8 +80,18 @@ public class ApplicationBranchUtilities
         return Mirrors.Select(mirrorUri => mirrorUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri()).ToList();
     }
 
-    public static Url BuildComponentUri(Uri baseUri, string branchName, string fileName)
+    internal Url BuildComponentUri(Uri baseUri, string branchName, string fileName)
     {
-        return baseUri.AppendPathSegments(branchName, fileName);
+        var pathWithBranch = baseUri.AppendPathSegment(branchName);
+#if NETSTANDARD2_0
+        var basePath = pathWithBranch.ToUri().AbsoluteUri.TrimEnd(_fileSystem.Path.DirectorySeparatorChar, _fileSystem.Path.AltDirectorySeparatorChar);
+#else
+        var basePath = _fileSystem.Path.TrimEndingDirectorySeparator(pathWithBranch.ToUri().AbsoluteUri);
+#endif
+
+
+        // We cannot use Url.Combine (cause of unwanted encoding of space character) or Path.Combine (cause of using backslash)
+        // Is this a security issue???
+        return new Url($"{basePath}/{fileName}");
     }
 }

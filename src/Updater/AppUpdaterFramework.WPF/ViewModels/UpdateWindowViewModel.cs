@@ -94,7 +94,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _serviceProvider = serviceProvider;
-        Title = "Application UpdateAsync";
+        Title = "Application Update";
         HasMaximizeButton = false;
         HasMinimizeButton = false;
         IsResizable = false;
