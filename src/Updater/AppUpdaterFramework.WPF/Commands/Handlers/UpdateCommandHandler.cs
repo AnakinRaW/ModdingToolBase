@@ -60,11 +60,12 @@ internal class UpdateCommandHandler : AsyncCommandHandlerBase<IUpdateCatalog>, I
             _logger?.LogError(e, $"Unhandled exception {e.GetType()} encountered: {e.Message}");
             updateResult = new UpdateResult
             {
-                Exception = e
+                Exception = e,
+                IsCanceled = e.IsOperationCanceledException()
             };
         }
 
-        await _resultHandler.Handle(updateResult);
+        await _resultHandler.Handle(updateResult).ConfigureAwait(false);
     }
 
     public override bool CanHandle(IUpdateCatalog? parameter)
