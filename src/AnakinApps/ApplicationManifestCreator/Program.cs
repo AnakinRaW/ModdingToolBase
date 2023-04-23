@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -54,7 +56,9 @@ internal class Program
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IHashingService>(_ => new HashingService());
         services.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
-        services.AddSingleton<IVerificationManager>(sp => new VerificationManager());
+        services.AddSingleton<IVerificationManager>(sp => new VerificationManager(sp));
+
+        services.AddUpdateFramework();
 
         services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
         services.AddSingleton<IBranchManager>(sp => sp.GetRequiredService<AppManifestCreatorBranchManager>());

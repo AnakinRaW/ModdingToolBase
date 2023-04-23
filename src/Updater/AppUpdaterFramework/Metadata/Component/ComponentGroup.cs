@@ -3,7 +3,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public class ComponentGroup : ProductComponent, IComponentGroup
+public sealed class ComponentGroup : ProductComponent, IComponentGroup
 {
     public override ComponentType Type => ComponentType.Group;
 

@@ -3,7 +3,6 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.StatusBar;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Theming;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 
@@ -20,9 +19,9 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IQueuedDialogService>(sp => new QueuedDialogService(sp));
         serviceCollection.AddSingleton<IModalWindowService>(sp => new ModalWindowService(sp));
 
-        serviceCollection.TryAddSingleton<IDialogButtonFactory>(_ => new DialogButtonFactory(true));
-        serviceCollection.TryAddSingleton<IThemeManager>(sp => new ThemeManager(sp));
-        serviceCollection.TryAddSingleton<IViewModelPresenter>(_ => new ViewModelPresenterService());
+        serviceCollection.AddSingleton<IDialogButtonFactory>(_ => new DialogButtonFactory(true));
+        serviceCollection.AddSingleton<IThemeManager>(sp => new ThemeManager(sp));
+        serviceCollection.AddSingleton<IViewModelPresenter>(_ => new ViewModelPresenterService());
 
         var statusBarService = new StatusBarService();
         serviceCollection.AddSingleton<IStatusBarService>(statusBarService);

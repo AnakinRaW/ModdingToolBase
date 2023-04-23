@@ -2,7 +2,7 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
-public class DriveSpaceData : IEquatable<DriveSpaceData>
+internal class DriveSpaceData : IEquatable<DriveSpaceData>
 {
     public long RequestedSize { get; set; }
 

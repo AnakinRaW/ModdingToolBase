@@ -9,7 +9,6 @@ using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.AppUpdaterFramework;
@@ -19,6 +18,9 @@ using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
+using AnakinRaW.CommonUtilities.Hashing;
+using AnakinRaW.CommonUtilities.Verification;
+
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -62,27 +64,23 @@ public abstract class BootstrapperBase
         serviceCollection.AddUpdateFramework();
 
         serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
+        serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
+        
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
         serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
+        serviceCollection.AddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
+        serviceCollection.AddSingleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp));
 
         serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
+        serviceCollection.AddSingleton<IDownloadManagerConfigurationProvider>(new ApplicationDownloadConfigurationProvider());
+        serviceCollection.AddSingleton<IHashingService>(_ => new HashingService());
         serviceCollection.AddSingleton<IVerificationManager>(sp =>
         {
             var vm = new VerificationManager(sp);
-            vm.RegisterVerifier("*", new HashVerifier(sp));
+            vm.AddDefaultVerifiers();
             return vm;
         });
-
-        serviceCollection.AddSingleton(CreateDownloadConfiguration());
-        serviceCollection.AddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
-
-        serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp)));
-    }
-
-    private static IDownloadManagerConfiguration CreateDownloadConfiguration()
-    {
-        return new DownloadManagerConfiguration { VerificationPolicy = VerificationPolicy.Optional };
     }
 
 

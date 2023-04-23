@@ -1,4 +1,5 @@
-﻿using AnakinRaW.AppUpdaterFramework.Commands.Factories;
+﻿using System.Linq;
+using AnakinRaW.AppUpdaterFramework.Commands.Factories;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Imaging;
 using AnakinRaW.AppUpdaterFramework.Interaction;
@@ -12,9 +13,10 @@ namespace AnakinRaW.AppUpdaterFramework;
 
 public static class LibraryInitialization
 {
-    public static void AddUpdateGui(this IServiceCollection serviceCollection, ImageKey applicationIcon = default)
+    public static void AddWpfUpdateFramework(this IServiceCollection serviceCollection, ImageKey applicationIcon = default)
     {
-        serviceCollection.AddUpdateFramework();
+        if (serviceCollection.All(x => x.ServiceType != typeof(IUpdateFrameworkAddedBarrier)))
+            serviceCollection.AddUpdateFramework();
 
         ImageLibrary.Instance.LoadCatalog(ImageCatalog.Instance);
         AppIconHolder.ApplicationIcon = applicationIcon;

@@ -89,11 +89,6 @@ public abstract class BranchManagerBase : IBranchManager
             var manifest = await ManifestLoader.LoadManifest(manifestFile, productReference, token);
             return manifest ?? throw new CatalogException("No catalog was created");
         }
-        catch (CatalogException ex)
-        {
-            _logger?.LogError(ex, ex.Message);
-            throw;
-        }
         catch (OperationCanceledException)
         {
             throw;

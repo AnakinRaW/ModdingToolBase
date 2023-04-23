@@ -35,7 +35,7 @@ internal class AppManifestCreatorBranchManager : IBranchManager
 
     public ProductBranch GetBranchFromVersion(SemVersion version)
     {
-        var name = BranchManager.GetBranchName(version, StableBranchName, out var isPrerelease);
+        var name = BranchManagerBase.GetBranchName(version, StableBranchName, out var isPrerelease);
         return new ProductBranch(name, _branchUtilities.BuildManifestUris(name), isPrerelease);
     }
 

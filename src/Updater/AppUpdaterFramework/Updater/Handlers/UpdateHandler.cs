@@ -8,7 +8,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 
-internal class UpdateHandler : IUpdateHandler
+public class UpdateHandler : IUpdateHandler
 {
     private readonly IUpdateResultHandler _resultHandler;
     private readonly ILogger? _logger;

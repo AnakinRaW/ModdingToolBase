@@ -7,7 +7,6 @@ using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,7 +34,6 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IUpdateService>(sp => new UpdateService(sp));
         serviceCollection.AddSingleton<IManifestInstallationDetector>(sp => new ManifestInstallationDetector(sp));
         serviceCollection.AddSingleton<IUpdateInteractionHandler>(sp => new DefaultUpdateInteractionHandler(sp));
-        serviceCollection.AddSingleton<IUpdateHandler>(sp => new UpdateHandler(sp));
         serviceCollection.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
 
         serviceCollection.AddSingleton<IReadonlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
@@ -49,5 +47,6 @@ public static class LibraryInitialization
             return conditionEvaluator;
         });
 
+        serviceCollection.AddSingleton<IUpdateFrameworkAddedBarrier>(_ => new UpdateFrameworkBarrier());
     }
 }

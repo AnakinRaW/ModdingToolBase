@@ -1,2 +1,0 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Metadata;
-

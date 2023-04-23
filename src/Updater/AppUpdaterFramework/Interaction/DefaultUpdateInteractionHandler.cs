@@ -8,7 +8,6 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
-
 internal class DefaultUpdateInteractionHandler : IUpdateInteractionHandler
 {
     private readonly ILogger? _logger;

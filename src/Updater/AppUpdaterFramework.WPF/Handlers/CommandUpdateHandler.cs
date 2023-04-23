@@ -9,7 +9,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-internal class CommandUpdateHandler : UpdateHandler
+public class CommandUpdateHandler : UpdateHandler
 {
     private readonly IAppDispatcher _dispatcher;
 
