@@ -11,11 +11,10 @@ using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
-using AnakinRaW.CommonUtilities.DownloadManager.Verification;
-using AnakinRaW.CommonUtilities.DownloadManager.Verification.HashVerification;
-using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using AnakinRaW.CommonUtilities.SimplePipeline.Steps;
+using AnakinRaW.CommonUtilities.Verification;
+using AnakinRaW.CommonUtilities.Verification.Hash;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Validation;
@@ -25,7 +24,7 @@ namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 internal class DownloadStep : SynchronizedStep, IComponentStep
 {
     private readonly IUpdateConfiguration _updateConfiguration;
-    private readonly DownloadRepository _downloadRepository;
+    private readonly IDownloadRepository _downloadRepository;
 
     public ProgressType Type => ProgressTypes.Download;
     public IStepProgressReporter ProgressReporter { get; }
@@ -56,7 +55,7 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
         Uri = installable.OriginInfo!.Url;
 
         _updateConfiguration = updateConfiguration;
-        _downloadRepository = serviceProvider.GetRequiredService<DownloadRepository>();
+        _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
     }
 
     public override string ToString()
@@ -166,7 +165,7 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
     private async Task DownloadAndVerifyAsync(IDownloadManager downloadManager, IFileInfo destination, CancellationToken token)
     {
         var integrityInformation = Component.OriginInfo!.IntegrityInformation;
-        var hashContext = new HashVerificationContext(integrityInformation.Hash, HashType.Sha256);
+        var hashContext = HashVerificationContext.FromHash(integrityInformation.Hash);
 
         try
         {

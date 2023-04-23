@@ -15,7 +15,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
-public abstract class BranchManager : IBranchManager
+public abstract class BranchManagerBase : IBranchManager
 {
     private readonly ILogger? _logger;
     private readonly IFileSystemService _fileSystemHelper;
@@ -25,7 +25,7 @@ public abstract class BranchManager : IBranchManager
 
     public abstract string StableBranchName { get; }
 
-    protected BranchManager(IServiceProvider serviceProvider)
+    protected BranchManagerBase(IServiceProvider serviceProvider)
     {
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();

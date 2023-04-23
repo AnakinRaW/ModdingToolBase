@@ -15,7 +15,7 @@ public class UpdateResultHandler : IUpdateResultHandler
     private readonly IRestartHandler _restartHandler;
     private readonly IUpdateResultInteractionHandler _interactionHandler;
 
-    protected UpdateResultHandler(IServiceProvider serviceProvider)
+    public UpdateResultHandler(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _interactionHandler = serviceProvider.GetRequiredService<IUpdateResultInteractionHandler>();

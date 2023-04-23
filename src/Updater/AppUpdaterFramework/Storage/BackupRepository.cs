@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal sealed class BackupRepository : FileRepository
+internal sealed class BackupRepository : FileRepository, IBackupRepository
 {
     protected override IDirectoryInfo Root { get; }
 

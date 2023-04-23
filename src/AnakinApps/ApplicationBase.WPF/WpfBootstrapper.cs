@@ -15,13 +15,13 @@ namespace AnakinRaW.ApplicationBase;
 
 public abstract class WpfBootstrapper : BootstrapperBase
 {
-    public virtual ImageKey AppIcon { get; }
+    protected virtual ImageKey AppIcon => default;
 
-    protected override void CreateCoreServicesBeforeEnvironment(IServiceCollection serviceCollection)
+    protected override void CreateCoreServices(IServiceCollection serviceCollection)
     {
-        base.CreateCoreServicesBeforeEnvironment(serviceCollection);
-        serviceCollection.AddSingleton<IAppResetHandler>(sp => new WpfAppResetHandler(sp));
-        serviceCollection.AddTransient<IUnhandledExceptionHandler>(sp => new WpfUnhandledExceptionHandler(sp));
+        base.CreateCoreServices(serviceCollection);
+        serviceCollection.Replace(ServiceDescriptor.Singleton<IAppResetHandler>(sp => new WpfAppResetHandler(sp)));
+        serviceCollection.Replace(ServiceDescriptor.Singleton<IUnhandledExceptionHandler>(sp => new WpfUnhandledExceptionHandler(sp)));
     }
 
     private protected override void CreateApplicationServices(IServiceCollection serviceCollection)

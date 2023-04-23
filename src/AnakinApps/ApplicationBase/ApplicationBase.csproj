@@ -28,7 +28,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
+		<ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
 	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
 	  <ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>

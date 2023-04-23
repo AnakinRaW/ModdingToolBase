@@ -11,11 +11,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="6.0.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="6.0.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="7.0.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="7.0.1" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="2.3.0" />
-		<PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.11" />
+		<PackageReference Include="TestableIO.System.IO.Abstractions" Version="19.2.16" />
 		<PackageReference Include="Validation" Version="2.5.51" PrivateAssets="build;compile" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
 		<PackageReference Include="System.Text.Json" Version="7.0.2" />

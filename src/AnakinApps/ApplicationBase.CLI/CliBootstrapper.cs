@@ -1,7 +1,6 @@
 ﻿using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
-using AnakinRaW.CommonUtilities.DownloadManager.Verification;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 

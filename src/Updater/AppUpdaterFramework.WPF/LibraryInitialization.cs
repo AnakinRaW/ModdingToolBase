@@ -16,15 +16,17 @@ public static class LibraryInitialization
     {
         serviceCollection.AddUpdateFramework();
 
+        ImageLibrary.Instance.LoadCatalog(ImageCatalog.Instance);
+        AppIconHolder.ApplicationIcon = applicationIcon;
+
+        // All internal
         serviceCollection.AddSingleton<IProductViewModelFactory>(sp => new ProductViewModelFactory(sp));
         serviceCollection.AddSingleton<IUpdateCommandsFactory>(sp => new UpdateCommandsFactory(sp));
+
+        // Internal implementation
         serviceCollection.AddSingleton<IUpdateResultInteractionHandler>(sp => new DialogResultInteractionHandler(sp));
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp)));
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateInteractionHandler>(sp => new DialogUpdateInteractionHandler(sp)));
-
-
-        ImageLibrary.Instance.LoadCatalog(ImageCatalog.Instance);
-        AppIconHolder.ApplicationIcon = applicationIcon;
     }
 }

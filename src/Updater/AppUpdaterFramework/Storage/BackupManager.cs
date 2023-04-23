@@ -19,7 +19,7 @@ internal class BackupManager : IBackupManager
     private readonly ConcurrentDictionary<IInstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
     private readonly IFileSystemService _fileSystemHelper;
     private readonly ILogger? _logger;
-    private readonly BackupRepository _repository;
+    private readonly IBackupRepository _repository;
     private readonly IProductService _productService;
     private readonly IHashingService _hashingService;
 
@@ -32,7 +32,7 @@ internal class BackupManager : IBackupManager
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        _repository = serviceProvider.GetRequiredService<BackupRepository>();
+        _repository = serviceProvider.GetRequiredService<IBackupRepository>();
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
     }
 

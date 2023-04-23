@@ -17,6 +17,8 @@ using AnakinRaW.ApplicationBase.Update.External;
 using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.CommonUtilities;
+using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -28,10 +30,8 @@ public abstract class BootstrapperBase
 
     protected abstract int Execute(string[] args, IServiceCollection serviceCollection);
 
-    protected virtual void CreateCoreServicesBeforeEnvironment(IServiceCollection serviceCollection) { }
+    protected virtual void CreateCoreServices(IServiceCollection serviceCollection) { }
 
-    protected virtual void CreateCoreServicesAfterEnvironment(IServiceCollection serviceCollection) { }
-    
     protected int Run(string[] args)
     {
         var serviceCollection = CreateCoreServices();
@@ -59,13 +59,30 @@ public abstract class BootstrapperBase
 
     private protected virtual void CreateApplicationServices(IServiceCollection serviceCollection)
     {
+        serviceCollection.AddUpdateFramework();
+
         serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
         serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
 
-        serviceCollection.TryAddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
+        serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
+        serviceCollection.AddSingleton<IVerificationManager>(sp =>
+        {
+            var vm = new VerificationManager(sp);
+            vm.RegisterVerifier("*", new HashVerifier(sp));
+            return vm;
+        });
+
+        serviceCollection.AddSingleton(CreateDownloadConfiguration());
+        serviceCollection.AddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
+
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp)));
+    }
+
+    private static IDownloadManagerConfiguration CreateDownloadConfiguration()
+    {
+        return new DownloadManagerConfiguration { VerificationPolicy = VerificationPolicy.Optional };
     }
 
 
@@ -111,28 +128,31 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
         serviceCollection.AddSingleton<IFileSystemService>(_ => new FileSystemService(fileSystem));
         serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
-        serviceCollection.TryAddSingleton(_ => ProcessElevation.Default);
+        serviceCollection.AddSingleton(_ => ProcessElevation.Default);
 
         serviceCollection.AddSingleton(CreateRegistry());
-
-        CreateCoreServicesBeforeEnvironment(serviceCollection);
+        serviceCollection.AddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));
 
         using var environmentServiceProvider = serviceCollection.BuildServiceProvider();
         var environment = CreateEnvironment(environmentServiceProvider);
         serviceCollection.AddSingleton(environment);
+
         
-        CreateCoreServicesAfterEnvironment(serviceCollection);
+        serviceCollection.AddSingleton<IApplicationUpdaterRegistry>(sp => new ApplicationUpdaterRegistry(environment.ApplicationRegistryPath, sp));
+        serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
+        serviceCollection.AddSingleton<IResourceExtractor>(sp => new CosturaResourceExtractor(environment.AssemblyInfo.Assembly, sp));
 
-        serviceCollection.TryAddSingleton<IApplicationUpdaterRegistry>(sp => new ApplicationUpdaterRegistry(environment.ApplicationRegistryPath, sp));
-        serviceCollection.TryAddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
-        serviceCollection.TryAddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));
+        serviceCollection.AddSingleton<IAppResetHandler>(sp => new AppResetHandler(sp));
+        serviceCollection.AddSingleton<IUnhandledExceptionHandler>(sp => new UnhandledExceptionHandler(sp));
 
-        serviceCollection.TryAddSingleton<IResourceExtractor>(sp =>
-            new CosturaResourceExtractor(environment.AssemblyInfo.Assembly, sp));
-
-        serviceCollection.TryAddSingleton<IAppResetHandler>(sp => new AppResetHandler(sp));
-        serviceCollection.TryAddTransient<IUnhandledExceptionHandler>(sp => new UnhandledExceptionHandler(sp));
+        SetupLogging(serviceCollection, fileSystem, environment);
+        CreateCoreServices(serviceCollection);
 
         return serviceCollection;
+    }
+
+    protected virtual void SetupLogging(IServiceCollection serviceCollection, IFileSystem fileSystem,
+        IApplicationEnvironment applicationEnvironment)
+    {
     }
 }

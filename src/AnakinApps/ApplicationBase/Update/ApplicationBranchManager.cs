@@ -8,7 +8,7 @@ using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-public class ApplicationBranchManager : BranchManager
+public class ApplicationBranchManager : BranchManagerBase
 {
     private readonly ApplicationBranchUtilities _branchUtilities;
 
