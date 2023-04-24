@@ -34,7 +34,9 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         if (args is null)
             throw new NotSupportedException("No updater options set.");
 
+        // TODO: CPI to CommonUtils
         var cpi = CurrentProcessInfo.Current;
+
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(args).WithCurrentData(cpi.ProcessFilePath, cpi.Id, _serviceProvider);
         _launcher.Start(updater, launchOptions);
     }

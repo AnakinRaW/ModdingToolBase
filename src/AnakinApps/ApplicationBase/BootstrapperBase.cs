@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using System.Linq;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Configuration;
@@ -40,12 +41,19 @@ public abstract class BootstrapperBase
 
         if (args.Length >= 1)
         {
-            var updaterResult = ExternalUpdaterResult.UpdaterNotRun;
             var argument = args[0];
+
+            // TODO: Do not use numbers but the actual string representation!
             if (int.TryParse(argument, out var value) && Enum.IsDefined(typeof(ExternalUpdaterResult), value))
-                updaterResult = (ExternalUpdaterResult)value;
-            var registry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
-            new ExternalUpdaterResultHandler(registry).Handle(updaterResult);
+            {
+                var updaterResult = (ExternalUpdaterResult)value;
+
+                var registry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
+                new ExternalUpdaterResultHandler(registry).Handle(updaterResult);
+
+                // Remove this argument so we can handle/parse remaining arguments.
+                args = args.Skip(1).ToArray();
+            }
         }
 
         // Since logging directory is not yet assured, we cannot run under the global exception handler.
