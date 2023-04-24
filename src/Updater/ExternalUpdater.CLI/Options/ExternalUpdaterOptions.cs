@@ -15,4 +15,7 @@ public record ExternalUpdaterOptions
 
     [Option('p', "pid", Required = false, HelpText = "The PID of the process to wait until terminated.")]
     public int? Pid { get; init; }
+
+    [Option("originalArgs", Required = false, HelpText = "The original arguments of the process that shall be restarted.")]
+    public string[] OriginalArguments { get; init; }
 }

@@ -23,21 +23,21 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
     }
 
-    public void Launch()
+    public void Launch(string[] currentArgs)
     {
         var updaterPath = _registry.UpdaterPath;
         if (string.IsNullOrEmpty(updaterPath))
             throw new NotSupportedException("No updater in registry set");
         var updater = _fileSystem.FileInfo.New(updaterPath!);
 
-        var args = _registry.UpdateCommandArgs;
-        if (args is null)
+        var updateArgs = _registry.UpdateCommandArgs;
+        if (updateArgs is null)
             throw new NotSupportedException("No updater options set.");
 
         // TODO: CPI to CommonUtils
         var cpi = CurrentProcessInfo.Current;
 
-        var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(args).WithCurrentData(cpi.ProcessFilePath, cpi.Id, _serviceProvider);
+        var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs).WithCurrentData(cpi.ProcessFilePath, cpi.Id, _serviceProvider);
         _launcher.Start(updater, launchOptions);
     }
 }

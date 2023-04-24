@@ -39,21 +39,13 @@ public abstract class BootstrapperBase
         var serviceCollection = CreateCoreServices();
         var coreServices = serviceCollection.BuildServiceProvider();
 
-        if (args.Length >= 1)
+        if (ExternalUpdaterResultOptions.TryParse(args, out var externalUpdaterOptions))
         {
-            var argument = args[0];
+            var registry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
+            new ExternalUpdaterResultHandler(registry).Handle(externalUpdaterOptions!.Result);
 
-            // TODO: Do not use numbers but the actual string representation!
-            if (int.TryParse(argument, out var value) && Enum.IsDefined(typeof(ExternalUpdaterResult), value))
-            {
-                var updaterResult = (ExternalUpdaterResult)value;
-
-                var registry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
-                new ExternalUpdaterResultHandler(registry).Handle(updaterResult);
-
-                // Remove this argument so we can handle/parse remaining arguments.
-                args = args.Skip(1).ToArray();
-            }
+            // Remove this argument so we can handle/parse remaining arguments.
+            args = ExternalUpdaterResultOptions.RemoveFromCurrentArgs(args);
         }
 
         // Since logging directory is not yet assured, we cannot run under the global exception handler.
@@ -107,7 +99,7 @@ public abstract class BootstrapperBase
             logger?.LogInformation("Update required: Running external updater...");
             try
             {
-                coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();
+                coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch(args);
                 logger?.LogInformation("External updater running. Closing application!");
                 return 0;
             }
