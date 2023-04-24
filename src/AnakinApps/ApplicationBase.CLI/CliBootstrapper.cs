@@ -1,7 +1,4 @@
-﻿using AnakinRaW.AppUpdaterFramework;
-using AnakinRaW.CommonUtilities.DownloadManager;
-using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
-using CommandLine;
+﻿using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase;
@@ -22,20 +19,4 @@ public abstract class CliBootstrapper : BootstrapperBase
     }
 
     protected abstract int ExecuteAfterUpdate(string[] args, IServiceCollection serviceCollection);
-
-    private protected override void CreateApplicationServices(IServiceCollection serviceCollection)
-    {
-        base.CreateApplicationServices(serviceCollection);
-        serviceCollection.AddUpdateFramework();
-
-        serviceCollection.AddSingleton<IDownloadManagerConfiguration>(new DownloadManagerConfiguration
-        {
-            AllowEmptyFileDownload = false,
-            DownloadRetryDelay = 3,
-            InternetClient = InternetClient.HttpClient,
-            VerificationPolicy = VerificationPolicy.Optional
-        });
-        serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
-        serviceCollection.AddSingleton<IVerificationManager>(sp => new VerificationManager(sp));
-    }
 }

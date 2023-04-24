@@ -6,7 +6,12 @@ public class ApplicationDownloadConfigurationProvider : DownloadManagerConfigura
 {
     protected override IDownloadManagerConfiguration CreateConfiguration()
     {
-        return new DownloadManagerConfiguration { VerificationPolicy = VerificationPolicy.Optional };
-
+        return new DownloadManagerConfiguration
+        {
+            AllowEmptyFileDownload = false,
+            DownloadRetryDelay = 3,
+            InternetClient = InternetClient.HttpClient,
+            VerificationPolicy = VerificationPolicy.Optional
+        };
     }
 }
