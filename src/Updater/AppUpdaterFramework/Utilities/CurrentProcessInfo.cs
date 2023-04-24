@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Vanara.PInvoke;
 
-namespace AnakinRaW.ApplicationBase.Utilities;
+namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
-internal class CurrentProcessInfo
+public class CurrentProcessInfo
 {
     public static readonly CurrentProcessInfo Current = new();
 

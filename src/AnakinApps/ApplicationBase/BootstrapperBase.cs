@@ -13,14 +13,13 @@ using Microsoft.Extensions.Logging;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.ApplicationBase.Update.External;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.Verification;
-
+using AnakinRaW.AppUpdaterFramework.Handlers;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -125,7 +124,6 @@ public abstract class BootstrapperBase
         var fileSystem = new FileSystem();
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
         serviceCollection.AddSingleton<IFileSystemService>(_ => new FileSystemService(fileSystem));
-        serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
         serviceCollection.AddSingleton(_ => ProcessElevation.Default);
 
         serviceCollection.AddSingleton(CreateRegistry());

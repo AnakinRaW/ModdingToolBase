@@ -5,7 +5,6 @@ using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Interaction;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
@@ -36,7 +35,6 @@ public abstract class WpfBootstrapper : BootstrapperBase
         serviceCollection.AddSingleton<IUpdateDialogViewModelFactory>(sp => new ApplicationUpdateInteractionFactory(sp));
 
         serviceCollection.AddSingleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp));
-        serviceCollection.AddSingleton<IRestartHandler>(sp => new UpdateRestartCommandHandler(sp));
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IModalWindowFactory>(sp => new ApplicationModalWindowFactory(sp)));
         serviceCollection.Replace(ServiceDescriptor.Singleton<IDialogFactory>(sp => new ApplicationDialogFactory(sp)));

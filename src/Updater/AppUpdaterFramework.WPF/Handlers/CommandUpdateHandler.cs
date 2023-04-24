@@ -2,8 +2,6 @@
 using System.Windows.Input;
 using System.Windows.Threading;
 using AnakinRaW.AppUpdaterFramework.Updater;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
 

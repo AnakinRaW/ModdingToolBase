@@ -1,31 +1,32 @@
-﻿using System;
-using AnakinRaW.ApplicationBase.Update.External;
+using System;
+using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Interaction;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AnakinRaW.ApplicationBase.Update;
+namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-internal class UpdateRestartCommandHandler : IRestartHandler
+internal class UpdateRestartHandler : IRestartHandler
 {
     private readonly IExternalUpdaterService _externalUpdaterService;
-    private readonly IApplicationShutdownService _shutdownService;
 
-    public UpdateRestartCommandHandler(IServiceProvider serviceProvider)
+    public UpdateRestartHandler(IServiceProvider serviceProvider)
     {
         _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
-        _shutdownService = serviceProvider.GetRequiredService<IApplicationShutdownService>();
     }
 
     public void Restart(RequiredRestartOptionsKind optionsKind)
     {
         _externalUpdaterService.Launch(CreateOptions(optionsKind));
-        _shutdownService.Shutdown(0);
+        Shutdown();
     }
 
-    private ExternalUpdaterOptions CreateOptions(RequiredRestartOptionsKind optionsKind)
+    protected virtual void Shutdown()
+    {
+        Environment.Exit(0);
+    }
+
+    protected virtual ExternalUpdaterOptions CreateOptions(RequiredRestartOptionsKind optionsKind)
     {
         return optionsKind switch
         {

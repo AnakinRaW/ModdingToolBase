@@ -3,7 +3,6 @@ using AnakinRaW.AppUpdaterFramework.Commands.Factories;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Imaging;
 using AnakinRaW.AppUpdaterFramework.Interaction;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using AnakinRaW.AppUpdaterFramework.ViewModels.Factories;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,5 +29,8 @@ public static class LibraryInitialization
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp)));
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateInteractionHandler>(sp => new DialogUpdateInteractionHandler(sp)));
+
+        // Overrides
+        serviceCollection.Replace(ServiceDescriptor.Singleton<IRestartHandler>(sp => new UpdateRestartCommandHandler(sp)));
     }
 }

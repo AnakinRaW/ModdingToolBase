@@ -1,6 +1,6 @@
 using AnakinRaW.AppUpdaterFramework.Interaction;
 
-namespace AnakinRaW.AppUpdaterFramework.Updater.Handlers;
+namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 public interface IRestartHandler
 {

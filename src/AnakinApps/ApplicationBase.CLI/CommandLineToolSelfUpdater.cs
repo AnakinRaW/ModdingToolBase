@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Utilities;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Updater;
@@ -12,15 +13,16 @@ namespace AnakinRaW.ApplicationBase;
 
 internal class CommandLineToolSelfUpdater
 {
-    private readonly CommandLineUpdaterOptions _options;
+    private readonly UpdaterCommandLineOptions _options;
     private readonly IApplicationEnvironment _appEnvironment;
     private readonly IProductService _productService;
     private readonly IResourceExtractor _resourceExtractor;
     private readonly IBranchManager _branchManager;
     private readonly IUpdateService _updateService;
+    private readonly IUpdateHandler _updateHandler;
     private readonly ILogger? _logger;
 
-    public CommandLineToolSelfUpdater(CommandLineUpdaterOptions options, IServiceProvider serviceProvider)
+    public CommandLineToolSelfUpdater(UpdaterCommandLineOptions options, IServiceProvider serviceProvider)
     {
         _options = options;
         _appEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
@@ -28,6 +30,7 @@ internal class CommandLineToolSelfUpdater
         _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
         _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
         _updateService = serviceProvider.GetRequiredService<IUpdateService>();
+        _updateHandler = serviceProvider.GetRequiredService<IUpdateHandler>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
@@ -38,7 +41,7 @@ internal class CommandLineToolSelfUpdater
 
     public async Task UpdateIfNecessaryAsync()
     {
-        if (_options.Skip)
+        if (_options.SkipUpdate)
             return;
 
         await _resourceExtractor.ExtractAsync(ExternalUpdater.ExternalUpdaterConstants.AppUpdaterModuleName,
@@ -49,7 +52,7 @@ internal class CommandLineToolSelfUpdater
         if (product.Branch is null)
             throw new InvalidOperationException("Current installation does not have a branch.");
 
-        var branchToUse = _options.Branch ?? product.Branch;
+        var branchToUse = _options.UpdateBranch ?? product.Branch;
 
         var branches = (await _branchManager.GetAvailableBranches()).ToList();
         var currentBranch = branches.FirstOrDefault(b => b.Equals(branchToUse));
@@ -59,26 +62,23 @@ internal class CommandLineToolSelfUpdater
         
         var updateRef = _productService.CreateProductReference(null, currentBranch);
 
+        IUpdateCatalog? updateCatalog = null;
         try
         {
             _logger?.LogInformation("Checking for updates...");
-            await _updateService.CheckForUpdatesAsync(updateRef);
+            updateCatalog = await _updateService.CheckForUpdatesAsync(updateRef);
         }
         catch (Exception ex)
         {
             _logger?.LogWarning(ex, $"Failed to check for updates: {ex.Message}");
         }
 
-        //if (product.UpdateCatalog is null)
-        //{
-        //    _logger?.LogInformation("Nothing to update.");
-        //    return;
-        //}
+        if (updateCatalog?.Action != UpdateCatalogAction.Update)
+        {
+            _logger?.LogInformation("Nothing to update.");
+            return;
+        }
 
-        //await UpdateAsync(product.UpdateCatalog).ConfigureAwait(false);
-    }
-
-    private async Task UpdateAsync(IUpdateCatalog updateCatalog)
-    {
+        await _updateHandler.UpdateAsync(updateCatalog).ConfigureAwait(false);
     }
 }

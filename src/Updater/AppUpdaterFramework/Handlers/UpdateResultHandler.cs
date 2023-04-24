@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.AppUpdaterFramework.Restart;
+using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
 
-namespace AnakinRaW.AppUpdaterFramework.Updater.Handlers;
+namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 public class UpdateResultHandler : IUpdateResultHandler
 {

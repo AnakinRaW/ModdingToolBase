@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-namespace AnakinRaW.AppUpdaterFramework.Updater.Handlers;
+namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 public interface IUpdateHandler
 {

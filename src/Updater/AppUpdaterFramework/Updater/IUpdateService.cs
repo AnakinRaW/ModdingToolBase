@@ -16,7 +16,7 @@ public interface IUpdateService
 
     event EventHandler UpdateCompleted;
 
-    Task CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default);
+    Task<IUpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default);
 
     Task<UpdateResult> UpdateAsync(IUpdateCatalog updateCatalog);
 }

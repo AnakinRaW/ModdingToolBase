@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Services;
-using AnakinRaW.ApplicationBase.Update.External;
+using AnakinRaW.AppUpdaterFramework.External;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Interaction;
-using AnakinRaW.AppUpdaterFramework.Updater.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase.Update;

@@ -1,7 +1,7 @@
 ﻿using System.IO.Abstractions;
 using AnakinRaW.ExternalUpdater.Options;
 
-namespace AnakinRaW.ApplicationBase.Update.External;
+namespace AnakinRaW.AppUpdaterFramework.External;
 
 public interface IExternalUpdaterService
 {

@@ -1,5 +1,7 @@
 ﻿using AnakinRaW.AppUpdaterFramework.Conditions;
+using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.FileLocking;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Installer;
 using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.AppUpdaterFramework.Metadata;
@@ -16,6 +18,8 @@ public static class LibraryInitialization
 {
     public static void AddUpdateFramework(this IServiceCollection serviceCollection)
     {
+        serviceCollection.AddSingleton<IUpdateFrameworkAddedBarrier>(_ => new UpdateFrameworkBarrier());
+
         // All internal
         serviceCollection.AddSingleton<IVariableResolver>(_ => new VariableResolver());
         serviceCollection.AddSingleton<IUpdateCatalogProvider>(sp => new UpdateCatalogProvider(sp));
@@ -39,6 +43,10 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IReadonlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
         serviceCollection.AddSingleton<IReadonlyDownloadRepository>(sp => sp.GetRequiredService<IDownloadRepository>());
         serviceCollection.AddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
+        serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
+
+        serviceCollection.AddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
+
 
         serviceCollection.AddSingleton<IConditionEvaluatorStore>(_ =>
         {
@@ -46,7 +54,5 @@ public static class LibraryInitialization
             conditionEvaluator.AddConditionEvaluator(new FileConditionEvaluator());
             return conditionEvaluator;
         });
-
-        serviceCollection.AddSingleton<IUpdateFrameworkAddedBarrier>(_ => new UpdateFrameworkBarrier());
     }
 }

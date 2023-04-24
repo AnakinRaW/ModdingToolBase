@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
+using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Validation;
 
-namespace AnakinRaW.AppUpdaterFramework.Updater.Handlers;
+namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 public class UpdateHandler : IUpdateHandler
 {

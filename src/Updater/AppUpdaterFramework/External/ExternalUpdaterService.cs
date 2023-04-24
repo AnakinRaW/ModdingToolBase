@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
+using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
 
-namespace AnakinRaW.ApplicationBase.Update.External;
+namespace AnakinRaW.AppUpdaterFramework.External;
 
 internal class ExternalUpdaterService : IExternalUpdaterService
 {
@@ -26,7 +26,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadonlyBackupManager _backupManager;
     private readonly IReadonlyDownloadRepository _downloadRepository;
-    
+
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
@@ -42,7 +42,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     public UpdateOptions CreateUpdateOptions()
     {
         var cpi = CurrentProcessInfo.Current;
-
         var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
 
         return new UpdateOptions
