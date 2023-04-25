@@ -38,6 +38,9 @@ public class ExternalUpdaterResultOptions
 
     public static string[] RemoveFromCurrentArgs(string[] currentArgs)
     {
+        if (currentArgs.Length == 0)
+            return Array.Empty<string>();
+
         if (!TryParse(currentArgs, out var parsed))
             throw new InvalidOperationException("Cannot remove non-existing args.");
 

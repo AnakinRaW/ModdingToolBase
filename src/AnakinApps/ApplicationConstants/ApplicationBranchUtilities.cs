@@ -64,7 +64,8 @@ public class ApplicationBranchUtilities
                 // Ignore and try next mirror
             }
         }
-        throw new InvalidOperationException("Unable to download");
+
+        return Array.Empty<byte>();
     }
 
     private static Url GetBranchLookupUrl(Uri baseUri)

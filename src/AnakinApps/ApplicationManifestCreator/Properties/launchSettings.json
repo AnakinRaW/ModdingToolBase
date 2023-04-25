@@ -2,7 +2,7 @@
   "profiles": {
     "ApplicationManifestCreator": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:/Test/Foc Launcher.exe\" --appDataFiles C:/Test/AnakinRaW.ExternalUpdater.exe --origin https://republicatwar.com/downloads/FocLauncher/ -o C:/Test"
+      "commandLineArgs": "-a \"C:/Test/TestTool.exe\" --appDataFiles C:/Test/AnakinRaW.ExternalUpdater.exe --origin C:/test -o C:/Test"
     }
   }
 }
