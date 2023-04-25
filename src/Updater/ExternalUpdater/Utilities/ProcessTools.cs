@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if NETFRAMEWORK
+using McMaster.Extensions.CommandLineUtils;
 using AnakinRaW.CommonUtilities;
 #endif
 
@@ -22,18 +25,43 @@ internal class ProcessTools : IProcessTools
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public void StartApplication(IFileInfo application, ExternalUpdaterResult appStartOptions, bool elevate = false)
+    public void StartApplication(
+        IFileInfo application,
+        ExternalUpdaterResultOptions appStartOptions, 
+        IReadOnlyList<string> originalArguments, 
+        bool elevate = false)
     {
         if (!application.Exists)
             throw new FileNotFoundException("The executable was not found.", application.FullName);
 
-        var startInfo = new ProcessStartInfo(application.FullName) { Arguments = ((int)appStartOptions).ToString() };
+        var startInfo = new ProcessStartInfo(application.FullName);
+
+        AddArgumentsToStartInfo(startInfo, appStartOptions, originalArguments);
+
         if (elevate)
             startInfo.Verb = "runas";
         using var process = new Process { StartInfo = startInfo };
         _logger?.LogInformation($"Starting {application}");
         process.Start();
     }
+
+
+    private void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions, IReadOnlyList<string> originalArguments)
+    {
+        var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);
+
+        var allArgs = resultArgs.Concat(originalArguments);
+
+#if NET
+        foreach (var arg in allArgs)
+        {
+            startInfo.ArgumentList.Add(arg);
+        }  
+#else
+        startInfo.Arguments = ArgumentEscaper.EscapeAndConcatenate(allArgs);
+#endif
+    }
+
 
     public async Task<bool> WaitForExitAsync(int? pid, CancellationToken token)
     {

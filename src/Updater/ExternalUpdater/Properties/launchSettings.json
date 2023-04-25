@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExternalUpdater": {
+      "commandName": "Project",
+      "commandLineArgs": "restart --originalArgs WyItLXRlc3QiLCItLXNraXBVcGRhdGUiLCItLXRlc3RQYXRoIiwiQzovVGVzdCBGaWxlLmV4ZSJd --pid 123 --startProcess c:/Windows/notepad.exe"
+    }
+  }
+}

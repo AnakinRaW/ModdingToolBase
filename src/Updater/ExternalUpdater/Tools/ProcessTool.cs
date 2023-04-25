@@ -20,13 +20,15 @@ internal abstract class ProcessTool<T> : ToolBase<T> where T : ExternalUpdaterOp
             throw new InvalidOperationException($"Application with '{Options.Pid}' was not closed");
     }
 
-    protected void StartProcess(ExternalUpdaterResult appStartOptions)
+    protected void StartProcess(ExternalUpdaterResult operationResult)
     {
         var processToStart = FileSystem.FileInfo.New(Options.AppToStart);
         if (!processToStart.Exists)
             throw new FileNotFoundException("Could not find application to restart.", processToStart.FullName);
 
         Logger?.LogInformation($"Starting application '{processToStart.FullName}'");
-        ProcessTools.StartApplication(processToStart, appStartOptions, Options.Elevate);
+
+        var options = new ExternalUpdaterResultOptions { Result = operationResult };
+        ProcessTools.StartApplication(processToStart, options, Options.OriginalArguments, Options.Elevate);
     }
 }

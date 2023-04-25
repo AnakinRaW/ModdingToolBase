@@ -37,7 +37,8 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         // TODO: CPI to CommonUtils
         var cpi = CurrentProcessInfo.Current;
 
-        var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs).WithCurrentData(cpi.ProcessFilePath, cpi.Id, _serviceProvider);
+        var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
+            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, currentArgs, _serviceProvider);
         _launcher.Start(updater, launchOptions);
     }
 }

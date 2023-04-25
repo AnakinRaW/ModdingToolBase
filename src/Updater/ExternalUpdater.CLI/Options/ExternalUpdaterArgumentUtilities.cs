@@ -32,15 +32,27 @@ public static class ExternalUpdaterArgumentUtilities
         return Parser.Default.FormatCommandLine(option, config => config.SkipDefault = true);
     }
 
-    public static ExternalUpdaterOptions WithCurrentData(this ExternalUpdaterOptions options, string appToStart, int? pid, IServiceProvider serviceProvider)
+    public static ExternalUpdaterOptions WithCurrentData(
+        this ExternalUpdaterOptions options, 
+        string appToStart, 
+        int? pid,
+        IList<string> originalArguments,
+        IServiceProvider serviceProvider)
     {
         if (options is UpdateOptions updateOptions)
         {
             if (ReplaceUpdateItemsWithCurrentApp(updateOptions, appToStart, out var updateItems, serviceProvider))
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
         }
-        return options with { AppToStart = appToStart, Pid = pid };
+        return options with { AppToStart = appToStart, Pid = pid, OriginalArgumentData = originalArguments.ToBase64JsonStringArray()};
     }
+
+    internal static string ToBase64JsonStringArray(this IList<string> arguments)
+    {
+        var json = JsonSerializer.Serialize(arguments);
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+    }
+
 
     internal static string ToPayload(this IEnumerable<UpdateInformation> updateInformation)
     {

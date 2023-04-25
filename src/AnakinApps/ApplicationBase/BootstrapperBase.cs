@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO.Abstractions;
-using System.Linq;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Configuration;
@@ -21,6 +20,7 @@ using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.Verification;
 using AnakinRaW.AppUpdaterFramework.Handlers;
+using AnakinRaW.ExternalUpdater.Options;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -93,6 +93,12 @@ public abstract class BootstrapperBase
 
         logger?.LogTrace($"Application Version: {env.AssemblyInfo.InformationalVersion}");
         logger?.LogTrace($"Raw Command line: {Environment.CommandLine}");
+
+        var d = new ExternalUpdaterOptions()
+            {
+                AppToStart = "test.exe"
+            }
+            .WithCurrentData("test.exe", 123, args, coreServices);
 
         if (updateRegistry.RequiresUpdate)
         {
