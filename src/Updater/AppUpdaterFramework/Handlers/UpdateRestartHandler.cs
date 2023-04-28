@@ -23,7 +23,7 @@ internal class UpdateRestartHandler : IRestartHandler
 
     protected virtual void Shutdown()
     {
-        Environment.Exit(0);
+        Environment.Exit(RestartConstants.RestartErrorCode);
     }
 
     protected virtual ExternalUpdaterOptions CreateOptions(RequiredRestartOptionsKind optionsKind)
