@@ -2,5 +2,5 @@
 
 internal interface IRegistryExternalUpdaterLauncher
 {
-    void Launch(string[] currentArgs);
+    void Launch();
 }

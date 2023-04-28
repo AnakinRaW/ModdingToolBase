@@ -1,5 +1,4 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
 #if NETSTANDARD2_1_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -33,25 +32,5 @@ public class ExternalUpdaterResultOptions
         });
         options = parser.ParseArguments<ExternalUpdaterResultOptions>(args).Value;
         return options is not null;
-    }
-
-
-    public static string[] RemoveFromCurrentArgs(string[] currentArgs)
-    {
-        if (currentArgs.Length == 0)
-            return Array.Empty<string>();
-
-        if (!TryParse(currentArgs, out var parsed))
-            throw new InvalidOperationException("Cannot remove non-existing args.");
-
-        var argsToRemove = Parser.Default.FormatCommandLineArgs(parsed);
-        var numToRemove = argsToRemove.Length;
-
-        var newArgs = new string[currentArgs.Length - numToRemove];
-        var splitIndex = Array.IndexOf(currentArgs, argsToRemove[0]); 
-        Array.Copy(currentArgs, 0, newArgs, 0, splitIndex);
-        Array.Copy(currentArgs, splitIndex + numToRemove, newArgs, splitIndex, currentArgs.Length - splitIndex - numToRemove);
-
-        return newArgs;
     }
 }

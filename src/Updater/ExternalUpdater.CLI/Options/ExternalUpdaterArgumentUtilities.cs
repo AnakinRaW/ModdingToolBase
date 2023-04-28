@@ -36,7 +36,6 @@ public static class ExternalUpdaterArgumentUtilities
         this ExternalUpdaterOptions options, 
         string appToStart, 
         int? pid,
-        IList<string> originalArguments,
         IServiceProvider serviceProvider)
     {
         if (options is UpdateOptions updateOptions)
@@ -44,13 +43,8 @@ public static class ExternalUpdaterArgumentUtilities
             if (ReplaceUpdateItemsWithCurrentApp(updateOptions, appToStart, out var updateItems, serviceProvider))
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
         }
-        return options with { AppToStart = appToStart, Pid = pid, OriginalArgumentData = originalArguments.ToBase64JsonStringArray()};
-    }
 
-    internal static string ToBase64JsonStringArray(this IList<string> arguments)
-    {
-        var json = JsonSerializer.Serialize(arguments);
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        return options with { AppToStart = appToStart, Pid = pid };
     }
 
 

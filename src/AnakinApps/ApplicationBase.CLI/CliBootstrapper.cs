@@ -1,25 +1,45 @@
 ﻿using System.IO.Abstractions;
+using System.Threading;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Interaction;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+#if DEBUG
 using Microsoft.Extensions.Logging.Debug;
+#endif
+
 
 namespace AnakinRaW.ApplicationBase;
 
 public abstract class CliBootstrapper : BootstrapperBase
 {
+    protected virtual bool AutomaticUpdate => false;
+
     protected sealed override int Execute(string[] args, IServiceCollection serviceCollection)
     {
-        // By default we update the application using the current branch
-        var updaterOptions = UpdaterCommandLineOptions.Default;
+        if (AutomaticUpdate)
+        {
+            //updaterOptions = new UpdateOptions
+            //{
+            //    AutomaticRestart = true
+            //};
+        }
+        else
+        {
+            var shallExit = false;
+            var parser = new Parser(settings => settings.AutoHelp = false);
+            parser.ParseArguments<UpdateOptions>(args).WithParsed(options =>
+            {
+                throw new AbandonedMutexException();
+                using var updateServiceProvider = serviceCollection.BuildServiceProvider();
+                new CommandLineToolSelfUpdater(options, updateServiceProvider).UpdateIfNecessary();
+                shallExit = true;
+            });
 
-        var parser = new Parser(settings => settings.IgnoreUnknownArguments = true);
-        parser.ParseArguments<UpdaterCommandLineOptions>(args).WithParsed(options => updaterOptions = options);
-
-        using var updateServiceProvider = serviceCollection.BuildServiceProvider();
-        new CommandLineToolSelfUpdater(updaterOptions, updateServiceProvider).UpdateIfNecessary();
+            if (shallExit)
+                return 0;
+        }
 
         return ExecuteAfterUpdate(args, serviceCollection);
     }
@@ -46,6 +66,7 @@ public abstract class CliBootstrapper : BootstrapperBase
             l.AddConsole().SetMinimumLevel(LogLevel.Trace);
             l.AddDebug().SetMinimumLevel(LogLevel.Trace);
 #endif
+            l.AddConsole().SetMinimumLevel(LogLevel.Information);
         }).Configure<LoggerFilterOptions>(o =>
         {
 #if DEBUG

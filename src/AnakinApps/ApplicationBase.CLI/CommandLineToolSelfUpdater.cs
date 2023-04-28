@@ -41,9 +41,6 @@ internal class CommandLineToolSelfUpdater
 
     public async Task UpdateIfNecessaryAsync()
     {
-        if (_options.SkipUpdate)
-            return;
-
         await _resourceExtractor.ExtractAsync(ExternalUpdater.ExternalUpdaterConstants.AppUpdaterModuleName,
             _appEnvironment.ApplicationLocalPath);
 

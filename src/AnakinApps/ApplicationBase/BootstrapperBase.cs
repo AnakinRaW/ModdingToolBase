@@ -20,7 +20,6 @@ using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.Verification;
 using AnakinRaW.AppUpdaterFramework.Handlers;
-using AnakinRaW.ExternalUpdater.Options;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -43,9 +42,6 @@ public abstract class BootstrapperBase
         {
             var registry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
             new ExternalUpdaterResultHandler(registry).Handle(externalUpdaterOptions!.Result);
-
-            // Remove this argument so we can handle/parse remaining arguments.
-            args = ExternalUpdaterResultOptions.RemoveFromCurrentArgs(args);
         }
 
         // Since logging directory is not yet assured, we cannot run under the global exception handler.
@@ -93,19 +89,13 @@ public abstract class BootstrapperBase
 
         logger?.LogTrace($"Application Version: {env.AssemblyInfo.InformationalVersion}");
         logger?.LogTrace($"Raw Command line: {Environment.CommandLine}");
-
-        var d = new ExternalUpdaterOptions()
-            {
-                AppToStart = "test.exe"
-            }
-            .WithCurrentData("test.exe", 123, args, coreServices);
-
+        
         if (updateRegistry.RequiresUpdate)
         {
             logger?.LogInformation("Update required: Running external updater...");
             try
             {
-                coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch(args);
+                coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();
                 logger?.LogInformation("External updater running. Closing application!");
                 return 0;
             }

@@ -29,6 +29,6 @@ internal abstract class ProcessTool<T> : ToolBase<T> where T : ExternalUpdaterOp
         Logger?.LogInformation($"Starting application '{processToStart.FullName}'");
 
         var options = new ExternalUpdaterResultOptions { Result = operationResult };
-        ProcessTools.StartApplication(processToStart, options, Options.OriginalArguments, Options.Elevate);
+        ProcessTools.StartApplication(processToStart, options, Options.Elevate);
     }
 }

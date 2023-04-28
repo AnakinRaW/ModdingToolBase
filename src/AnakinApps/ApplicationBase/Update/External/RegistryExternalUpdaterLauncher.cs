@@ -23,7 +23,7 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
     }
 
-    public void Launch(string[] currentArgs)
+    public void Launch()
     {
         var updaterPath = _registry.UpdaterPath;
         if (string.IsNullOrEmpty(updaterPath))
@@ -38,7 +38,7 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         var cpi = CurrentProcessInfo.Current;
 
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
-            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, currentArgs, _serviceProvider);
+            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, _serviceProvider);
         _launcher.Start(updater, launchOptions);
     }
 }

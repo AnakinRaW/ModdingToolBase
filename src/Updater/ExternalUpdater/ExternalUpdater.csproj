@@ -27,10 +27,6 @@
 		<PackageReference Include="AnakinRaW.CommonUtilities" Version="7.0.1" />
 	</ItemGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-		<PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" PrivateAssets="build;compile"/>
-	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />

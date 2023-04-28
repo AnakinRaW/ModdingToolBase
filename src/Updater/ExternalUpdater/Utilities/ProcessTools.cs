@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
@@ -10,7 +9,6 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if NETFRAMEWORK
-using McMaster.Extensions.CommandLineUtils;
 using AnakinRaW.CommonUtilities;
 #endif
 
@@ -27,8 +25,7 @@ internal class ProcessTools : IProcessTools
 
     public void StartApplication(
         IFileInfo application,
-        ExternalUpdaterResultOptions appStartOptions, 
-        IReadOnlyList<string> originalArguments, 
+        ExternalUpdaterResultOptions appStartOptions,
         bool elevate = false)
     {
         if (!application.Exists)
@@ -36,7 +33,7 @@ internal class ProcessTools : IProcessTools
 
         var startInfo = new ProcessStartInfo(application.FullName);
 
-        AddArgumentsToStartInfo(startInfo, appStartOptions, originalArguments);
+        AddArgumentsToStartInfo(startInfo, appStartOptions);
 
         if (elevate)
             startInfo.Verb = "runas";
@@ -46,19 +43,17 @@ internal class ProcessTools : IProcessTools
     }
 
 
-    private void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions, IReadOnlyList<string> originalArguments)
+    private void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions)
     {
-        var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);
-
-        var allArgs = resultArgs.Concat(originalArguments);
-
 #if NET
-        foreach (var arg in allArgs)
+        var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);
+        foreach (var arg in resultArgs)
         {
             startInfo.ArgumentList.Add(arg);
         }  
 #else
-        startInfo.Arguments = ArgumentEscaper.EscapeAndConcatenate(allArgs);
+        var resultArgs = Parser.Default.FormatCommandLine(resultOptions);
+        startInfo.Arguments = resultArgs;
 #endif
     }
 
