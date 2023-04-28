@@ -97,7 +97,7 @@ public abstract class BootstrapperBase
             {
                 coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();
                 logger?.LogInformation("External updater running. Closing application!");
-                return 0;
+                return RestartConstants.RestartErrorCode;
             }
             catch (Exception e)
             {
