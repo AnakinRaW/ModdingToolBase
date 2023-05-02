@@ -2,5 +2,5 @@ namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 public static class RestartConstants
 {
-    public const int RestartErrorCode = 3010;
+    public const int RestartRequiredCode = 3010;
 }

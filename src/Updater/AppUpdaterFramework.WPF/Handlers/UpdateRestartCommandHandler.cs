@@ -14,6 +14,6 @@ internal class UpdateRestartCommandHandler : UpdateRestartHandler
 
     protected override void Shutdown()
     {
-        _shutdownService.Shutdown(RestartConstants.RestartErrorCode);
+        _shutdownService.Shutdown(RestartConstants.RestartRequiredCode);
     }
 }

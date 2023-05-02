@@ -17,7 +17,7 @@ public abstract class WpfBootstrapper : BootstrapperBase
 {
     protected virtual ImageKey AppIcon => default;
 
-    protected override void CreateCoreServices(IServiceCollection serviceCollection)
+    private protected override void CreateCoreServices(IServiceCollection serviceCollection)
     {
         base.CreateCoreServices(serviceCollection);
         serviceCollection.Replace(ServiceDescriptor.Singleton<IAppResetHandler>(sp => new WpfAppResetHandler(sp)));

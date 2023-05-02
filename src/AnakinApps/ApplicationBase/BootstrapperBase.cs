@@ -31,7 +31,7 @@ public abstract class BootstrapperBase
 
     protected abstract int Execute(string[] args, IServiceCollection serviceCollection);
 
-    protected virtual void CreateCoreServices(IServiceCollection serviceCollection) { }
+    private protected virtual void CreateCoreServices(IServiceCollection serviceCollection) { }
 
     protected int Run(string[] args)
     {
@@ -97,7 +97,7 @@ public abstract class BootstrapperBase
             {
                 coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();
                 logger?.LogInformation("External updater running. Closing application!");
-                return RestartConstants.RestartErrorCode;
+                return RestartConstants.RestartRequiredCode;
             }
             catch (Exception e)
             {
@@ -110,6 +110,7 @@ public abstract class BootstrapperBase
 
         var exitCode = Execute(args, serviceCollection);
         logger?.LogTrace($"Exit Code: {exitCode}");
+
         return exitCode;
     }
 

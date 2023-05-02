@@ -1,9 +1,10 @@
 ﻿using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using CommandLine;
 
-namespace AnakinRaW.ApplicationBase;
+namespace AnakinRaW.ApplicationBase.Options;
 
-public abstract class UpdaterCommandLineOptions
+[Verb("update")]
+public class UpdaterCommandLineOptions
 {
     [Option("automaticRestart", Default = false, HelpText = "When true, the the application automatically restarts if necessary for the update.")]
     public bool AutomaticRestart { get; init; }
@@ -11,10 +12,8 @@ public abstract class UpdaterCommandLineOptions
     [Option("updateBranch", Default = null, HelpText = "The branch that shall be used for updating. If no branch is specified the current branch will be taken")]
     public string? UpdateBranchName { get; init; }
 
-    public ProductBranch? UpdateBranch => string.IsNullOrEmpty(UpdateBranchName) ? null :  new ProductBranch(UpdateBranchName!, false);
-}
+    [Option("skipUpdate")]
+    public bool SkipUpdate { get; set; }
 
-[Verb("update")]
-public class UpdateOptions : UpdaterCommandLineOptions
-{
+    public ProductBranch? UpdateBranch => string.IsNullOrEmpty(UpdateBranchName) ? null : new ProductBranch(UpdateBranchName!, false);
 }
