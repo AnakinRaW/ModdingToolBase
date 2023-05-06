@@ -4,5 +4,5 @@ namespace AnakinRaW.ApplicationBase.Update;
 
 internal interface IUpdateOptionsProviderService : IUpdateOptionsProvider
 {
-    void SetOptions(UpdaterCommandLineOptions options);
+    void SetOptions(IUpdaterCommandLineOptions options);
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Handlers;
+using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Updater;
@@ -33,12 +34,12 @@ internal class CommandLineToolSelfUpdater
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public int UpdateIfNecessary(UpdaterCommandLineOptions options)
+    public int UpdateIfNecessary(IUpdaterCommandLineOptions options)
     {
         return Task.Run(async () => await UpdateIfNecessaryAsync(options)).GetAwaiter().GetResult();
     }
 
-    public async Task<int> UpdateIfNecessaryAsync(UpdaterCommandLineOptions options)
+    public async Task<int> UpdateIfNecessaryAsync(IUpdaterCommandLineOptions options)
     {
         if (options.SkipUpdate)
         {
@@ -82,6 +83,14 @@ internal class CommandLineToolSelfUpdater
         }
 
         await _updateHandler.UpdateAsync(updateCatalog).ConfigureAwait(false);
+
+        var productState = _productService.GetCurrentInstance().State;
+
+        if (productState is ProductState.RestartRequired)
+            return RestartConstants.RestartRequiredCode;
+
+        if (productState is ProductState.ElevationRequired)
+            return -123;
 
         return 0;
     }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.ApplicationBase.Update;
@@ -39,11 +38,20 @@ public abstract class CliBootstrapper : BootstrapperBase
 
     protected sealed override int Execute(string[] args, IServiceCollection serviceCollection)
     {
-        var updateServices = serviceCollection.BuildServiceProvider();
-        var updateResult = HandleUpdateApplication(args, updateServices, out var exitApplication);
+        var updateOptions = GetUpdateOptionsFromCommandLine(args, out var wasExplicitUpdate);
 
-        if (exitApplication || updateResult != 0)
-            return updateResult;
+        if (updateOptions is not null)
+        {
+            var updateServices = serviceCollection.BuildServiceProvider();
+           
+            var optionsProviderService = updateServices.GetRequiredService<IUpdateOptionsProviderService>(); 
+            optionsProviderService.SetOptions(updateOptions);
+            
+            var updateResult = new CommandLineToolSelfUpdater(updateServices).UpdateIfNecessary(updateOptions);
+            
+            if (wasExplicitUpdate || updateResult != 0)
+                return updateResult;
+        }
 
         return ExecuteAfterUpdate(args, serviceCollection);
     }
@@ -69,7 +77,8 @@ public abstract class CliBootstrapper : BootstrapperBase
         });
     }
 
-    private int HandleUpdateApplication(string[] args, IServiceProvider services, out bool exitApplication)
+
+    internal IUpdaterCommandLineOptions? GetUpdateOptionsFromCommandLine(string[] args, out bool wasExplicitUpdate)
     {
         UpdaterCommandLineOptions? updateOptions = null;
         var wasUpdateCommand = false;
@@ -77,24 +86,32 @@ public abstract class CliBootstrapper : BootstrapperBase
         new Parser(settings =>
             {
                 settings.AutoHelp = false;
-            }).ParseArguments<UpdateOption>(args)
-            .WithParsed(options =>
+                settings.IgnoreUnknownArguments = false;
+                settings.GetoptMode = true;
+            })
+            // Not sure why, but apparently we need to use at least the T2 generic method. Otherwise,
+            // we might always parse ExplicitUpdateOption
+            .ParseArguments<ExplicitUpdateOption, UpdaterCommandLineOptions>(args)
+            .WithParsed<ExplicitUpdateOption>(options =>
             {
                 updateOptions = options;
                 wasUpdateCommand = true;
             }).WithNotParsed(_ =>
             {
-                if (AutomaticUpdate && updateOptions is null)
+                if (AutomaticUpdate)
                 {
                     new Parser(settings =>
                         {
                             settings.AutoHelp = false;
                             settings.IgnoreUnknownArguments = true;
                         }).ParseArguments<UpdaterCommandLineOptions>(args)
-                        .WithParsed(options => { updateOptions = options; })
+                        .WithParsed(options =>
+                        {
+                            updateOptions = options;
+                        })
                         .WithNotParsed(_ =>
                         {
-                            updateOptions = new UpdateOption
+                            updateOptions = new ExplicitUpdateOption
                             {
                                 AutomaticRestart = true
                             };
@@ -102,14 +119,7 @@ public abstract class CliBootstrapper : BootstrapperBase
                 }
             });
 
-        exitApplication = wasUpdateCommand;
-
-        if (updateOptions is null)
-            return 0;
-
-        var optionsProviderService = services.GetRequiredService<IUpdateOptionsProviderService>();
-        optionsProviderService.SetOptions(updateOptions); 
-        
-        return new CommandLineToolSelfUpdater(services).UpdateIfNecessary(updateOptions);
+        wasExplicitUpdate = wasUpdateCommand;
+        return updateOptions;
     }
 }
