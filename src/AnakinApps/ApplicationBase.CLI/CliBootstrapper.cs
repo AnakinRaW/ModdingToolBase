@@ -48,9 +48,15 @@ public abstract class CliBootstrapper : BootstrapperBase
             optionsProviderService.SetOptions(updateOptions);
             
             var updateResult = new CommandLineToolSelfUpdater(updateServices).UpdateIfNecessary(updateOptions);
-            
+
             if (wasExplicitUpdate || updateResult != 0)
+            {
+#if DEBUG
+                Console.WriteLine("Press Enter to exit.");
+                Console.ReadLine();
+#endif
                 return updateResult;
+            }
         }
 
         return ExecuteAfterUpdate(args, serviceCollection);
@@ -64,11 +70,25 @@ public abstract class CliBootstrapper : BootstrapperBase
         serviceCollection.AddLogging(l =>
         {
             l.ClearProviders();
+
+            var appVersion = applicationEnvironment.AssemblyInfo.InformationalAsSemVer();
+            
+            // ReSharper disable once RedundantAssignment
+            var logLevel = LogLevel.Information;
+
+            if (appVersion is not null && appVersion.IsPrerelease)
+                logLevel = LogLevel.Debug;
+
+            
+            var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log");
+            l.AddFile(logPath, logLevel);
+
 #if DEBUG
-            l.AddConsole().SetMinimumLevel(LogLevel.Trace);
-            l.AddDebug().SetMinimumLevel(LogLevel.Trace);
+            logLevel = LogLevel.Trace;
+            l.AddConsole().SetMinimumLevel(logLevel);
+            l.AddDebug().SetMinimumLevel(logLevel);
 #endif
-            l.AddConsole().SetMinimumLevel(LogLevel.Information);
+
         }).Configure<LoggerFilterOptions>(o =>
         {
 #if DEBUG

@@ -43,7 +43,7 @@ internal class CommandLineToolSelfUpdater
     {
         if (options.SkipUpdate)
         {
-            _logger?.LogInformation("Update skipped.");
+            _logger?.LogDebug("Update skipped.");
             return 0;
         }
 
@@ -68,21 +68,31 @@ internal class CommandLineToolSelfUpdater
         IUpdateCatalog? updateCatalog = null;
         try
         {
-            _logger?.LogInformation("Checking for updates...");
+            _logger?.LogDebug("Checking for updates...");
+            Console.WriteLine("Checking for updates...");
             updateCatalog = await _updateService.CheckForUpdatesAsync(updateRef);
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, $"Failed to check for updates: {ex.Message}");
+            _logger?.LogDebug(ex, $"Failed to check for updates: {ex.Message}");
         }
 
         if (updateCatalog?.Action != UpdateCatalogAction.Update)
         {
-            _logger?.LogInformation("Nothing to update.");
+            Console.WriteLine("Nothing to update.");
+            _logger?.LogDebug("Nothing to update.");
             return 0;
         }
 
-        await _updateHandler.UpdateAsync(updateCatalog).ConfigureAwait(false);
+        Console.WriteLine("Updating application...");
+        try
+        {
+            await _updateHandler.UpdateAsync(updateCatalog).ConfigureAwait(false);
+        }
+        finally
+        {
+            Console.WriteLine("Update completed.");
+        }
 
         var productState = _productService.GetCurrentInstance().State;
 

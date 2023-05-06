@@ -20,6 +20,24 @@ internal class CommandLineResultInteractionHandler : IUpdateResultInteractionHan
     public Task<bool> ShallRestart(RestartReason reason)
     {
         var options = _optionsProvider.GetOptions();
+
+        var reasonText = "Unknown Reason";
+        switch (reason)
+        {
+            case RestartReason.Update:
+                reasonText = "An update is required.";
+                break;
+            case RestartReason.Elevation:
+                reasonText = "The application needs to run with admin rights.";
+                break;
+            case RestartReason.FailedRestore:
+                reasonText = "An internal error occurred and the application needs to be restored.";
+                break;
+        }
+
+        var message = $"Application needs to be restarted. Reason: {reasonText}";
+
+        _logger?.LogWarning(message);
         return Task.FromResult(options.AutomaticRestart);
     }
 
