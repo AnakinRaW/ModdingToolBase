@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.ApplicationBase.Update;
@@ -44,7 +45,9 @@ public abstract class CliBootstrapper : BootstrapperBase
         if (updateOptions is not null)
         {
             var updateServices = serviceCollection.BuildServiceProvider();
-           
+
+            Task.Run(async () => await updateServices.GetRequiredService<IExternalUpdateExtractor>().ExtractAsync().ConfigureAwait(false)).Wait();
+
             var optionsProviderService = updateServices.GetRequiredService<IUpdateOptionsProviderService>(); 
             optionsProviderService.SetOptions(updateOptions);
             

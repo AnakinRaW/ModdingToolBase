@@ -58,9 +58,10 @@ public abstract class BootstrapperBase
     {
         serviceCollection.AddUpdateFramework();
 
+        serviceCollection.AddSingleton<IExternalUpdateExtractor>(sp => new ExternalUpdateExtractor(sp));
+
         serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
-        serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
-        
+
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
         serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
@@ -107,7 +108,7 @@ public abstract class BootstrapperBase
         }
 
         CreateApplicationServices(serviceCollection);
-
+        
         var exitCode = Execute(args, serviceCollection);
         logger?.LogTrace($"Exit Code: {exitCode}");
 
@@ -130,7 +131,6 @@ public abstract class BootstrapperBase
         var environment = CreateEnvironment(environmentServiceProvider);
         serviceCollection.AddSingleton(environment);
 
-        
         serviceCollection.AddSingleton<IApplicationUpdaterRegistry>(sp => new ApplicationUpdaterRegistry(environment.ApplicationRegistryPath, sp));
         serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
         serviceCollection.AddSingleton<IResourceExtractor>(sp => new CosturaResourceExtractor(environment.AssemblyInfo.Assembly, sp));
