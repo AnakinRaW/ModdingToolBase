@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
+using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Designer;
 

@@ -8,6 +8,8 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 using AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
 

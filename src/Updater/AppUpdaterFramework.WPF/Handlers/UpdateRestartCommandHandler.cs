@@ -1,4 +1,5 @@
 ﻿using System;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;

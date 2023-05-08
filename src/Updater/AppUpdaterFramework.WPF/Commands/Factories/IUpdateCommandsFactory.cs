@@ -1,4 +1,6 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Commands.Factories;
+﻿using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
+
+namespace AnakinRaW.AppUpdaterFramework.Commands.Factories;
 
 internal interface IUpdateCommandsFactory
 {

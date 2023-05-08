@@ -1,5 +1,6 @@
 ﻿using System;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 

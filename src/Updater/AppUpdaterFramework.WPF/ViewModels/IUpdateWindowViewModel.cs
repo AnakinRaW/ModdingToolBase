@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
+using AnakinRaW.CommonUtilities.Wpf.Controls;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels;
 

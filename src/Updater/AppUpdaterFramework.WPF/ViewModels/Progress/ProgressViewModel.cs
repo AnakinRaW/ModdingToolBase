@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
 
