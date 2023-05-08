@@ -1,6 +1,4 @@
-﻿using AnakinRaW.CommonUtilities.Wpf.Imaging;
-
-namespace AnakinRaW.AppUpdaterFramework.Imaging;
+﻿namespace AnakinRaW.AppUpdaterFramework.Imaging;
 
 public static class UpdaterImageKeys
 {

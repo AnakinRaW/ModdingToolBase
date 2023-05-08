@@ -1,6 +1,4 @@
-﻿using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
-
-namespace AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
+﻿namespace AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
 
 public interface IProgressBarViewModel : IViewModel
 {

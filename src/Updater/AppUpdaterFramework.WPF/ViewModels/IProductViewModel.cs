@@ -1,7 +1,4 @@
 ﻿using AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
-using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels;
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;

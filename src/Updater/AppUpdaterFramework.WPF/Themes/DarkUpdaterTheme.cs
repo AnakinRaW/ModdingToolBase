@@ -1,5 +1,4 @@
 ﻿using System;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Theming;
 
 namespace AnakinRaW.AppUpdaterFramework.Themes;
 

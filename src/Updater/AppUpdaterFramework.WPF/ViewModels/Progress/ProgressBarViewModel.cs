@@ -2,8 +2,6 @@
 using System.Windows;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
 

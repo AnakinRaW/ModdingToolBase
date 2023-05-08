@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text;
-using AnakinRaW.CommonUtilities.Wpf.Converters;
 
 namespace AnakinRaW.AppUpdaterFramework.Converters;
 

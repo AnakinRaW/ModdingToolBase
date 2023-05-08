@@ -5,9 +5,6 @@ using System.Windows.Threading;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
-using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels;

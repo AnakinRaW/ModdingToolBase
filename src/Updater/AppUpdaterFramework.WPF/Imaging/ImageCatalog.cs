@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.AppUpdaterFramework.Imaging;
 
