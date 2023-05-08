@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Options;
-using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -15,9 +14,7 @@ namespace AnakinRaW.ApplicationBase.Update;
 
 internal class CommandLineToolSelfUpdater
 {
-    private readonly IApplicationEnvironment _appEnvironment;
     private readonly IProductService _productService;
-    private readonly IResourceExtractor _resourceExtractor;
     private readonly IBranchManager _branchManager;
     private readonly IUpdateService _updateService;
     private readonly IUpdateHandler _updateHandler;
@@ -25,9 +22,7 @@ internal class CommandLineToolSelfUpdater
 
     public CommandLineToolSelfUpdater(IServiceProvider serviceProvider)
     {
-        _appEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
         _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
         _updateService = serviceProvider.GetRequiredService<IUpdateService>();
         _updateHandler = serviceProvider.GetRequiredService<IUpdateHandler>();
@@ -46,10 +41,7 @@ internal class CommandLineToolSelfUpdater
             _logger?.LogDebug("Update skipped.");
             return 0;
         }
-
-        await _resourceExtractor.ExtractAsync(ExternalUpdater.ExternalUpdaterConstants.AppUpdaterModuleName,
-            _appEnvironment.ApplicationLocalPath);
-
+        
         var product = _productService.GetCurrentInstance();
 
         if (product.Branch is null)
