@@ -33,7 +33,7 @@ internal static class Program
 
     private static async Task<int> ExecuteApplication(ExternalUpdaterOptions args)
     {
-        var services = CreateServices();
+        var services = CreateServices(args);
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
@@ -58,7 +58,7 @@ internal static class Program
         return Task.FromResult(0xA0);
     }
 
-    private static IServiceProvider CreateServices()
+    private static IServiceProvider CreateServices(ExternalUpdaterOptions options)
     {
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
@@ -88,7 +88,15 @@ internal static class Program
 
         void SetFileLogging(ILoggingBuilder builder)
         {
-            const string logPath = "extUpdate_log.txt";
+            const string logFile = "extUpdateLog.txt";
+            var logPath = logFile;
+
+            var logDir = options.LoggingDirectory;
+            if (!string.IsNullOrEmpty(logDir))
+            {
+                fileSystem.Directory.CreateDirectory(logDir!);
+                logPath = fileSystem.Path.Combine(logDir!, logPath);
+            }
             var fileLogLevel = LogLevel.Information;
 #if DEBUG
             fileLogLevel = LogLevel.Trace;

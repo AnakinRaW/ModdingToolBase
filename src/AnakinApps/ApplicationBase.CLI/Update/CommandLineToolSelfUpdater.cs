@@ -61,7 +61,7 @@ internal class CommandLineToolSelfUpdater
         var currentBranch = branches.FirstOrDefault(b => b.Equals(branchToUse));
 
         if (currentBranch is null)
-            throw new InvalidOperationException($"Could not find branch '{branches}'");
+            throw new InvalidOperationException($"Could not find branch '{branchToUse}' in branch list '{string.Join(",", branches)}'");
 
         var updateRef = _productService.CreateProductReference(null, currentBranch);
 

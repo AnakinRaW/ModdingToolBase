@@ -48,7 +48,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         {
             AppToStart = cpi.ProcessFilePath,
             Pid = cpi.Id,
-            UpdateFile = updateInformationFile
+            UpdateFile = updateInformationFile,
+            LoggingDirectory = _fileSystem.Path.GetTempPath()
         };
     }
 
@@ -59,7 +60,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         {
             AppToStart = cpi.ProcessFilePath,
             Pid = cpi.Id,
-            Elevate = elevate
+            Elevate = elevate,
+            LoggingDirectory = _fileSystem.Path.GetTempPath()
         };
     }
 

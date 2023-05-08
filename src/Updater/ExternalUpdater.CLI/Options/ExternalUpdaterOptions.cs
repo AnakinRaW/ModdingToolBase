@@ -15,4 +15,7 @@ public record ExternalUpdaterOptions
 
     [Option('p', "pid", Required = false, HelpText = "The PID of the process to wait until terminated.")]
     public int? Pid { get; init; }
+
+    [Option("loggingDir", HelpText = "The location where log files get placed.", Default = null)]
+    public string? LoggingDirectory { get; init; }
 }

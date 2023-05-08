@@ -38,7 +38,7 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         var cpi = CurrentProcessInfo.Current;
 
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
-            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, _serviceProvider);
+            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, _fileSystem.Path.GetTempPath(), _serviceProvider);
         _launcher.Start(updater, launchOptions);
     }
 }

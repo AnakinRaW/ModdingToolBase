@@ -15,11 +15,11 @@ internal sealed class UpdateTool : ProcessTool<UpdateOptions>
     {
         try
         {
-            await WaitForProcessExitAsync();
-            var updateItems = await Options.GetUpdateInformationAsync(ServiceProvider);
+            await WaitForProcessExitAsync().ConfigureAwait(false);
+            var updateItems = await Options.GetUpdateInformationAsync(ServiceProvider).ConfigureAwait(false);
             
             var updater = new Utilities.ExternalUpdater(updateItems, ServiceProvider);
-            var updateResult = updater.Run();
+            var updateResult = await Task.Run(updater.Run).ConfigureAwait(false);
             
             Logger?.LogDebug($"Updated with result: {updateResult}");
             StartProcess(updateResult);
