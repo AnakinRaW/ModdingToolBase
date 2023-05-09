@@ -123,6 +123,7 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
         serviceCollection.AddSingleton<IFileSystemService>(_ => new FileSystemService(fileSystem));
         serviceCollection.AddSingleton(_ => ProcessElevation.Default);
+        serviceCollection.AddSingleton<IPathHelperService>(_ => new PathHelperService());
 
         serviceCollection.AddSingleton(CreateRegistry());
         serviceCollection.AddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));

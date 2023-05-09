@@ -39,6 +39,11 @@ public static class ExternalUpdaterArgumentUtilities
         string? loggingDirectory,
         IServiceProvider serviceProvider)
     {
+        var pathHelper = serviceProvider.GetRequiredService<IPathHelperService>();
+        appToStart = pathHelper.NormalizePath(appToStart, PathNormalizeOptions.Full);
+        if (!string.IsNullOrEmpty(loggingDirectory))
+            loggingDirectory = pathHelper.NormalizePath(loggingDirectory!, PathNormalizeOptions.Full);
+
         if (options is UpdateOptions updateOptions)
         {
             if (ReplaceUpdateItemsWithCurrentApp(updateOptions, appToStart, out var updateItems, serviceProvider))
@@ -69,7 +74,7 @@ public static class ExternalUpdaterArgumentUtilities
         var updated = false;
         updateInformation = null;
 
-        var pathHelper = new PathHelperService(serviceProvider.GetRequiredService<IFileSystem>());
+        var pathHelper = serviceProvider.GetRequiredService<IPathHelperService>();
 
         currentAppPath = pathHelper.NormalizePath(currentAppPath, PathNormalizeOptions.Full);
         var oldAppPath = pathHelper.NormalizePath(oldOptions.AppToStart, PathNormalizeOptions.Full);

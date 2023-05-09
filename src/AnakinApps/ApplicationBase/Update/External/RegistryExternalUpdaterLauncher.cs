@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,8 +38,11 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         // TODO: CPI to CommonUtils
         var cpi = CurrentProcessInfo.Current;
 
+        var loggingPath = _serviceProvider.GetRequiredService<IPathHelperService>()
+            .NormalizePath(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.Full);
+
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
-            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, _fileSystem.Path.GetTempPath(), _serviceProvider);
+            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, loggingPath, _serviceProvider);
         _launcher.Start(updater, launchOptions);
     }
 }

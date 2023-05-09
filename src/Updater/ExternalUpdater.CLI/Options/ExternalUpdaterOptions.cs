@@ -5,7 +5,7 @@ namespace AnakinRaW.ExternalUpdater.Options;
 public record ExternalUpdaterOptions
 {
     [Option("appToStart", Required = true, HelpText = "The absolute path of the application to start.")]
-    public required string AppToStart { get; set; }
+    public required string AppToStart { get; init; }
 
     [Option("elevate", Required = false, HelpText = "The application shall be started with higher rights.")]
     public bool Elevate { get; init; }

@@ -9,6 +9,7 @@ using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
@@ -27,6 +28,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IReadonlyBackupManager _backupManager;
     private readonly IReadonlyDownloadRepository _downloadRepository;
 
+    private readonly string _normalizedTempPath;
+
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
@@ -37,6 +40,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadonlyBackupManager>();
         _downloadRepository = serviceProvider.GetRequiredService<IReadonlyDownloadRepository>();
+
+        _normalizedTempPath = serviceProvider.GetRequiredService<IPathHelperService>()
+            .NormalizePath(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.Full);
     }
 
     public UpdateOptions CreateUpdateOptions()
@@ -49,7 +55,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             AppToStart = cpi.ProcessFilePath,
             Pid = cpi.Id,
             UpdateFile = updateInformationFile,
-            LoggingDirectory = _fileSystem.Path.GetTempPath()
+            LoggingDirectory = _normalizedTempPath
         };
     }
 
@@ -61,7 +67,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             AppToStart = cpi.ProcessFilePath,
             Pid = cpi.Id,
             Elevate = elevate,
-            LoggingDirectory = _fileSystem.Path.GetTempPath()
+            LoggingDirectory = _normalizedTempPath
         };
     }
 
