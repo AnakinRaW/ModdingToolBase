@@ -45,7 +45,12 @@ public static class ExternalUpdaterArgumentUtilities
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
         }
 
-        return options with { AppToStart = appToStart, Pid = pid, LoggingDirectory = loggingDirectory};
+        return options with
+        {
+            AppToStart = appToStart, 
+            Pid = pid, 
+            LoggingDirectory = loggingDirectory
+        };
     }
 
 
