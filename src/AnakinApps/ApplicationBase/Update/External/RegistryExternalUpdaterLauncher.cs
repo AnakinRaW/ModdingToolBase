@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Services;
-using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
@@ -15,6 +15,7 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
     private readonly IApplicationUpdaterRegistry _registry;
     private readonly IExternalUpdaterLauncher _launcher;
     private readonly IFileSystem _fileSystem;
+    private readonly ICurrentProcessInfoProvider  _currentProcessInfoProvider;
 
     public RegistryExternalUpdaterLauncher(IServiceProvider serviceProvider)
     {
@@ -22,6 +23,7 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         _registry = serviceProvider.GetRequiredService<IApplicationUpdaterRegistry>();
         _launcher = serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
     }
 
     public void Launch()
@@ -35,8 +37,9 @@ internal sealed class RegistryExternalUpdaterLauncher : IRegistryExternalUpdater
         if (updateArgs is null)
             throw new NotSupportedException("No updater options set.");
 
-        // TODO: CPI to CommonUtils
-        var cpi = CurrentProcessInfo.Current;
+        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+            throw new InvalidOperationException("The current process is not running from a file");
 
         var loggingPath = _serviceProvider.GetRequiredService<IPathHelperService>()
             .NormalizePath(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.Full);

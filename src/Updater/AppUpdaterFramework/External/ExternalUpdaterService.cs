@@ -8,7 +8,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
-using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
@@ -27,6 +27,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadonlyBackupManager _backupManager;
     private readonly IReadonlyDownloadRepository _downloadRepository;
+    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
 
     private readonly string _normalizedTempPath;
 
@@ -40,6 +41,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadonlyBackupManager>();
         _downloadRepository = serviceProvider.GetRequiredService<IReadonlyDownloadRepository>();
+        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
 
         _normalizedTempPath = serviceProvider.GetRequiredService<IPathHelperService>()
             .NormalizePath(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.Full);
@@ -47,7 +49,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public UpdateOptions CreateUpdateOptions()
     {
-        var cpi = CurrentProcessInfo.Current;
+        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+            throw new InvalidOperationException("The current process is not running from a file");
         var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
 
         return new UpdateOptions
@@ -61,7 +65,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public RestartOptions CreateRestartOptions(bool elevate)
     {
-        var cpi = CurrentProcessInfo.Current;
+        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+            throw new InvalidOperationException("The current process is not running from a file");
         return new RestartOptions
         {
             AppToStart = cpi.ProcessFilePath,
