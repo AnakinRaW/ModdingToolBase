@@ -36,8 +36,11 @@ internal class Program
         }
         catch (Exception e)
         {
-            logger?.LogCritical(e, e.Message);
-            return e.HResult;
+            return await Task.Run(() =>
+            {
+                logger?.LogCritical(e, e.Message);
+                return e.HResult;
+            });
         }
     }
 
@@ -46,14 +49,17 @@ internal class Program
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
-        
+
         services.AddLogging(l =>
         {
             l.ClearProviders();
+
+            var logLevel = LogLevel.Information;
 #if DEBUG
-            l.AddConsole().SetMinimumLevel(LogLevel.Trace);
-            l.AddDebug().SetMinimumLevel(LogLevel.Trace);
+            logLevel = LogLevel.Trace;
+            l.AddDebug().SetMinimumLevel(logLevel);
 #endif
+            l.AddConsole().SetMinimumLevel(logLevel);
         }).Configure<LoggerFilterOptions>(o =>
         {
 #if DEBUG
