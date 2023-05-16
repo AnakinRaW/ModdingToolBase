@@ -11,6 +11,5 @@ internal sealed class ConsoleUnhandledExceptionHandler : UnhandledExceptionHandl
 
     protected override void HandleGlobalException(Exception e)
     {
-        Console.ReadLine();
     }
 }
