@@ -89,9 +89,9 @@ public abstract class CliBootstrapper : BootstrapperBase
 
 #if DEBUG
             logLevel = LogLevel.Trace;
-            l.AddConsole().SetMinimumLevel(logLevel);
             l.AddDebug().SetMinimumLevel(logLevel);
 #endif
+            l.AddConsole().SetMinimumLevel(logLevel);
 
         }).Configure<LoggerFilterOptions>(o =>
         {
