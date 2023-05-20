@@ -9,8 +9,8 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 #if DEBUG
-using Microsoft.Extensions.Logging.Debug;
 using System;
 #endif
 
@@ -34,7 +34,7 @@ public abstract class CliBootstrapper : BootstrapperBase
         base.CreateApplicationServices(serviceCollection);
         serviceCollection.AddSingleton<IUpdateHandler>(sp => new UpdateHandler(sp));
         serviceCollection.AddSingleton<IUpdateResultInteractionHandler>(sp => new CommandLineResultInteractionHandler(sp));
-        serviceCollection.AddSingleton<IUpdateOptionsProviderService>(sp => new UpdateOptionsProviderService());
+        serviceCollection.AddSingleton<IUpdateOptionsProviderService>(_ => new UpdateOptionsProviderService());
         serviceCollection.AddSingleton<IUpdateOptionsProvider>(sp => sp.GetRequiredService<IUpdateOptionsProviderService>());
     }
 
@@ -66,47 +66,48 @@ public abstract class CliBootstrapper : BootstrapperBase
         return ExecuteAfterUpdate(args, serviceCollection);
     }
 
-    protected override void SetupLogging(IServiceCollection serviceCollection, IFileSystem fileSystem,
+    protected override void ConfigureLogging(ILoggingBuilder loggingBuilder, IFileSystem fileSystem,
         IApplicationEnvironment applicationEnvironment)
     {
-        base.SetupLogging(serviceCollection, fileSystem, applicationEnvironment);
+        loggingBuilder.ClearProviders();
 
-        serviceCollection.AddLogging(l =>
+        var appVersion = applicationEnvironment.AssemblyInfo.InformationalAsSemVer();
+
+        // ReSharper disable once RedundantAssignment
+        var logLevel = LogLevel.Information;
+
+        if (appVersion is not null && appVersion.IsPrerelease)
         {
-            l.ClearProviders();
-
-            var appVersion = applicationEnvironment.AssemblyInfo.InformationalAsSemVer();
-            
             // ReSharper disable once RedundantAssignment
-            var logLevel = LogLevel.Information;
-
-            if (appVersion is not null && appVersion.IsPrerelease)
-                logLevel = LogLevel.Debug;
-
-            
-            var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log");
-            l.AddFile(logPath, logLevel);
+            logLevel = LogLevel.Debug;
+        }
 
 #if DEBUG
-            logLevel = LogLevel.Trace;
-            l.AddDebug().SetMinimumLevel(logLevel);
+        logLevel = LogLevel.Trace;
+        loggingBuilder.AddDebug();
 #endif
-            l.AddConsole().SetMinimumLevel(logLevel);
+        loggingBuilder.AddConsole();
 
-        }).Configure<LoggerFilterOptions>(o =>
+        var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log");
+        loggingBuilder.AddFile(logPath, logLevel, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}");
+
+        loggingBuilder.AddFilter<ConsoleLoggerProvider>((category, level) =>
         {
-#if DEBUG
-            o.AddFilter<DebugLoggerProvider>(null, LogLevel.Trace);
-#endif
+            if (level < logLevel)
+                return false;
+            if (string.IsNullOrEmpty(category)) 
+                return false;
+            return category.StartsWith(GetType().Namespace) || category.StartsWith(nameof(ApplicationBase));
         });
     }
+
 
 
     internal IUpdaterCommandLineOptions? GetUpdateOptionsFromCommandLine(string[] args, out bool wasExplicitUpdate)
     {
         UpdaterCommandLineOptions? updateOptions = null;
         var wasUpdateCommand = false;
-
+        
         new Parser(settings =>
             {
                 settings.AutoHelp = false;

@@ -139,14 +139,13 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IAppResetHandler>(sp => new AppResetHandler(sp));
         serviceCollection.AddSingleton<IUnhandledExceptionHandler>(sp => new UnhandledExceptionHandler(sp));
 
-        SetupLogging(serviceCollection, fileSystem, environment);
+        serviceCollection.AddLogging(builder => ConfigureLogging(builder, fileSystem, environment));
         CreateCoreServices(serviceCollection);
 
         return serviceCollection;
     }
 
-    protected virtual void SetupLogging(IServiceCollection serviceCollection, IFileSystem fileSystem,
-        IApplicationEnvironment applicationEnvironment)
+    protected virtual void ConfigureLogging(ILoggingBuilder loggingBuilder, IFileSystem fileSystem, IApplicationEnvironment applicationEnvironment)
     {
     }
 }
