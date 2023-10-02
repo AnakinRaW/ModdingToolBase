@@ -61,29 +61,15 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="Buttons"/>
                                             </Grid.ColumnDefinitions>
-                                            <baseControls:SystemMenu x:Name="SystemMenu" Source="{TemplateBinding Icon}"
-                                                                       VectorFill="{DynamicResource {x:Static colors:WindowColors.MainWindowActiveIconDefault}}"
-                                                                       Width="32" Height="32" Margin="12,7,0,0" Grid.Column="0" VerticalAlignment="Top">
-                                            </baseControls:SystemMenu>
+                                            <baseControls:SystemMenu x:Name="SystemMenu" Grid.Column="0" Style="{DynamicResource {x:Static baseControls:SystemMenu.StyleKey}}"/>
                                             <TextBlock Text="{TemplateBinding Window.Title}"
                                                        FontSize="{DynamicResource {x:Static fonts:EnvironmentFonts.CaptionFontSizeKey}}"
                                                        FontFamily="{DynamicResource {x:Static fonts:EnvironmentFonts.CaptionFontFamilyKey}}"
                                                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="6,7,0,4" Grid.Column="1"/>
                                             <StackPanel Orientation="Horizontal" Grid.Column="2">
-                                                <baseControls:WindowTitleBarButton x:Name="MinimizeButton" VerticalAlignment="Top"
+                                                <baseControls:WindowTitleBarButton x:Name="MinimizeButton"
                                                                                Command="{x:Static input:ViewCommands.MinimizeWindow}"
-                                                                               BorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonActiveBorder}}"
-                                                                               BorderThickness="1,0,1,1" 
-                                                                               GlyphForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonActiveGlyph}}"
-                                                                               HoverBackground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActive}}"
-                                                                               HoverBorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActiveBorder}}"
-                                                                               HoverForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActiveGlyph}}"
-                                                                               HoverBorderThickness="1,0,1,1"
-                                                                               PressedBackground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDown}}"
-                                                                               PressedBorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDownBorder}}"
-                                                                               PressedForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDownGlyph}}"
-                                                                               PressedBorderThickness="1,0,1,1"
-                                                                               Padding="0,3,0,0" Width="46" Height="32"
+                                                                               Style="{DynamicResource {x:Static baseControls:WindowTitleBarButton.StyleKey}}"
                                                                                HitTestResult="{x:Static nativeMethods:HitTestConstants.HTMINBUTTON}">
                                                     <ButtonBase.CommandParameter>
                                                         <Binding RelativeSource="{RelativeSource TemplatedParent}"/>
@@ -97,20 +83,9 @@
                                                         </Shape.Fill>
                                                     </Path>
                                                 </baseControls:WindowTitleBarButton>
-                                                <baseControls:WindowTitleBarButton x:Name="MaximizeRestoreButton" VerticalAlignment="Top"
+                                                <baseControls:WindowTitleBarButton x:Name="MaximizeRestoreButton"
                                                                                Command="{x:Static input:ViewCommands.ToggleMaximizeRestoreWindow}"
-                                                                               BorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonActiveBorder}}"
-                                                                               BorderThickness="1,0,1,1" 
-                                                                               GlyphForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonActiveGlyph}}"
-                                                                               HoverBackground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActive}}"
-                                                                               HoverBorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActiveBorder}}"
-                                                                               HoverForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActiveGlyph}}"
-                                                                               HoverBorderThickness="1,0,1,1"
-                                                                               PressedBackground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDown}}"
-                                                                               PressedBorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDownBorder}}"
-                                                                               PressedForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDownGlyph}}"
-                                                                               PressedBorderThickness="1,0,1,1"
-                                                                               Padding="0,3,0,0" Width="46" Height="32"
+                                                                               Style="{DynamicResource {x:Static baseControls:WindowTitleBarButton.StyleKey}}"
                                                                                HitTestResult="{x:Static nativeMethods:HitTestConstants.HTMAXBUTTON}">
                                                     <ButtonBase.CommandParameter>
                                                         <Binding RelativeSource="{RelativeSource TemplatedParent}"/>
@@ -125,20 +100,9 @@
                                                         </Shape.Fill>
                                                     </Path>
                                                 </baseControls:WindowTitleBarButton>
-                                                <baseControls:WindowTitleBarButton x:Name="CloseButton" VerticalAlignment="Top"
+                                                <baseControls:WindowTitleBarButton x:Name="CloseButton"
                                                                                Command="{x:Static input:ViewCommands.CloseWindow}"
-                                                                               BorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonActiveBorder}}"
-                                                                               BorderThickness="1,0,1,1" 
-                                                                               GlyphForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonActiveGlyph}}"
-                                                                               HoverBackground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActive}}"
-                                                                               HoverBorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActiveBorder}}"
-                                                                               HoverForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverActiveGlyph}}"
-                                                                               HoverBorderThickness="1,0,1,1"
-                                                                               PressedBackground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDown}}"
-                                                                               PressedBorderBrush="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDownBorder}}"
-                                                                               PressedForeground="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonDownGlyph}}"
-                                                                               PressedBorderThickness="1,0,1,1"
-                                                                               Padding="0,3,0,0" Width="46" Height="32"
+                                                                               Style="{DynamicResource {x:Static baseControls:WindowTitleBarButton.StyleKey}}"
                                                                                HitTestResult="{x:Static nativeMethods:HitTestConstants.HTCLOSE}">
                                                     <ButtonBase.CommandParameter>
                                                         <Binding RelativeSource="{RelativeSource TemplatedParent}"/>
@@ -203,36 +167,6 @@
                                     Property="TextElement.Foreground"/>
                             <Setter TargetName="SystemMenu" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowInactiveIconDefault}}" 
                                     Property="baseControls:SystemMenu.VectorFill"/>
-                            <Setter TargetName="MinimizeButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonInactiveBorder}}" 
-                                    Property="Control.BorderBrush"/>
-                            <Setter TargetName="MinimizeButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonInactiveGlyph}}" 
-                                    Property="baseControls:GlyphButton.GlyphForeground"/>
-                            <Setter TargetName="MinimizeButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactive}}" 
-                                    Property="baseControls:GlyphButton.HoverBackground"/>
-                            <Setter TargetName="MinimizeButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactiveBorder}}" 
-                                    Property="baseControls:GlyphButton.HoverBorderBrush"/>
-                            <Setter TargetName="MinimizeButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactiveGlyph}}" 
-                                    Property="baseControls:GlyphButton.HoverForeground"/>
-                            <Setter TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonInactiveBorder}}"
-                                    Property="Control.BorderBrush"/>
-                            <Setter TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonInactiveGlyph}}" 
-                                    Property="baseControls:GlyphButton.GlyphForeground"/>
-                            <Setter TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactive}}" 
-                                    Property="baseControls:GlyphButton.HoverBackground"/>
-                            <Setter TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactiveBorder}}" 
-                                    Property="baseControls:GlyphButton.HoverBorderBrush"/>
-                            <Setter TargetName="MaximizeRestoreButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactiveGlyph}}" 
-                                    Property="baseControls:GlyphButton.HoverForeground"/>
-                            <Setter TargetName="CloseButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonInactiveBorder}}" 
-                                    Property="Control.BorderBrush"/>
-                            <Setter TargetName="CloseButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonInactiveGlyph}}" 
-                                    Property="baseControls:GlyphButton.GlyphForeground"/>
-                            <Setter TargetName="CloseButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactive}}" 
-                                    Property="baseControls:GlyphButton.HoverBackground"/>
-                            <Setter TargetName="CloseButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactiveBorder}}" 
-                                    Property="baseControls:GlyphButton.HoverBorderBrush"/>
-                            <Setter TargetName="CloseButton" Value="{DynamicResource {x:Static colors:WindowColors.MainWindowButtonHoverInactiveGlyph}}"
-                                    Property="baseControls:GlyphButton.HoverForeground"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

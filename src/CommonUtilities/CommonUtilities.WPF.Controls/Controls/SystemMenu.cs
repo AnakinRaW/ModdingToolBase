@@ -14,6 +14,8 @@ namespace AnakinRaW.CommonUtilities.Wpf.Controls;
 
 public sealed class SystemMenu : Control, INonClientArea
 {
+    public static object StyleKey => "SystemMenuStyleKey";
+
     private ImageSource? _optimalImageForSize;
 
     public static readonly DependencyProperty SourceProperty =

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Shell;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Converters;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.StatusBar;
@@ -11,6 +12,7 @@ using AnakinRaW.CommonUtilities.Wpf.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Validation;
+using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Controls;
 
@@ -39,6 +41,14 @@ public class ApplicationMainWindow : ThemedWindow
         serviceProvider.GetRequiredService<StatusBarService>().StatusBarModel = viewModel.StatusBar;
         SetBindings();
         DataContextChanged += OnDataContextChanged;
+        IsVisibleChanged += OnIsVisibleChanged;
+    }
+
+    private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        if (User32.IsWindow(handle))
+            User32.ShowOwnedPopups(handle, IsVisible);
     }
 
     public override void OnApplyTemplate()

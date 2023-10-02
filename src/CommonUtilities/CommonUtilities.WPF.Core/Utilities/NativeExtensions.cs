@@ -70,6 +70,11 @@ internal static class NativeExtensions
         return (short)(value & ushort.MaxValue);
     }
 
+    internal static int LoWord(IntPtr value)
+    {
+        return IntPtr.Size == 8 ? LoWord(value.ToInt64()) : LoWord(value.ToInt32());
+    }
+
     internal static int LoWord(long value)
     {
         return (short)(value & ushort.MaxValue);

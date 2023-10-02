@@ -61,6 +61,8 @@ public class ShadowChromeWindow : WindowBase
         private set => SetValue(DwmOwnsBorderPropertyKey, value);
     }
 
+    protected WindowInteropHelper WindowHelper { get; }
+
     static ShadowChromeWindow()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ShadowChromeWindow),
@@ -69,6 +71,7 @@ public class ShadowChromeWindow : WindowBase
 
     public ShadowChromeWindow(IWindowViewModel viewModel) : base(viewModel)
     {
+        WindowHelper = new WindowInteropHelper((Window)this);
         NCButtonManager = new NonClientButtonManager(this);
     }
 
@@ -134,24 +137,15 @@ public class ShadowChromeWindow : WindowBase
         return User32.IsWindowVisible(hWnd) && !User32.IsZoomed(hWnd) && !User32.IsIconic(hWnd);
     }
 
-    protected void UpdateGlowBorder(bool activate, bool maximized)
+    protected unsafe void UpdateGlowBorder(bool activate, bool maximized)
     {
         
         if (WindowHelper.Handle == IntPtr.Zero)
             return;
         var color = activate ? ActiveGlowColor : InactiveGlowColor;
-        var colorRef = maximized ? new COLORREF() : new COLORREF(color.R, color.G, color.B);
-        IntPtr pnt = Marshal.AllocHGlobal(Marshal.SizeOf(colorRef));
-        try
-        {
-            Marshal.StructureToPtr(colorRef, pnt, false);
-            DwmOwnsBorder = DwmApi.DwmSetWindowAttribute(WindowHelper.Handle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_BORDER_COLOR,
-                pnt, sizeof(uint)).Code == 0;
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(pnt);
-        }
+        var colorRef = maximized ? new(0xFFFFFFFE) : new COLORREF(color.R, color.G, color.B);
+        DwmApi.DwmSetWindowAttribute(WindowHelper.Handle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_BORDER_COLOR,
+            new IntPtr(&colorRef), sizeof(uint));
         if (DwmOwnsBorder)
             return;
         var solidColorBrush = new SolidColorBrush(color);
@@ -167,9 +161,6 @@ public class ShadowChromeWindow : WindowBase
             case 6:
                 WmActivate(hwnd, wParam, lParam);
                 break;
-            case 12:
-            case 128:
-                return CallDefWindowProcWithoutRedraw(hwnd, msg, wParam, lParam, ref handled);
             case 71:
                 WmWindowPosChanged(hwnd, lParam);
                 break;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<Description>Fluent Design of the controls.</Description>
@@ -9,7 +9,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.CommonUtilities.Wpf</RootNamespace>
-		<AssemblyName>AnakinRaW.CommonUtilities.WPF.Controls.Fluent</AssemblyName>
+		<AssemblyName>AnakinRaW.CommonUtilities.WPF.Controls.Styles.Fluent</AssemblyName>
 		<UseWPF>true</UseWPF>
 	</PropertyGroup>
 
@@ -18,7 +18,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\CommonUtilities\CommonUtilities.WPF.Controls\CommonUtilities.WPF.Controls.csproj" />
+	  <ProjectReference Include="..\CommonUtilities.WPF.Controls\CommonUtilities.WPF.Controls.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Themes\FluentDark.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	  </Page>
 	</ItemGroup>
 
 </Project>

@@ -169,6 +169,8 @@ public class WindowBase : Window
                 OnThemeChanged();
                 handled = true;
                 break;
+            case 33:
+                return WmMouseActivate(lParam, ref handled);
             case 70:
                 WmWindowPosChanging(hwnd, lParam);
                 break;
@@ -341,6 +343,22 @@ public class WindowBase : Window
         }
         Marshal.StructureToPtr(structure, lParam, true);
         return IntPtr.Zero;
+    }
+
+    private IntPtr WmMouseActivate(IntPtr lParam, ref bool handled)
+    {
+        if (!IsActive)
+            return IntPtr.Zero;
+        switch (NativeExtensions.LoWord(lParam))
+        {
+            case 8:
+            case 9:
+            case 20:
+                handled = true;
+                return new IntPtr(2);
+            default:
+                return IntPtr.Zero;
+        }
     }
 
     private void WmSysCommand(IntPtr hWnd, IntPtr wParam, IntPtr lParam)

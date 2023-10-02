@@ -11,6 +11,8 @@ namespace AnakinRaW.CommonUtilities.Wpf.Controls;
 
 public class WindowTitleBarButton : GlyphButton
 {
+    public static object StyleKey => "WindowTitleBarButtonStyleKey";
+
     public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(nameof(CornerRadius),
         typeof(CornerRadius), typeof(WindowTitleBarButton), new FrameworkPropertyMetadata(new CornerRadius(0.0)));
 
@@ -29,7 +31,9 @@ public class WindowTitleBarButton : GlyphButton
 
     static WindowTitleBarButton()
     {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(WindowTitleBarButton), new FrameworkPropertyMetadata(typeof(WindowTitleBarButton)));
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(WindowTitleBarButton),
+            new FrameworkPropertyMetadata(typeof(WindowTitleBarButton)));
+
     }
 
     public CornerRadius CornerRadius
