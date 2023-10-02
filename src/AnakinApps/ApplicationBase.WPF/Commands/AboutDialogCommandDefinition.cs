@@ -28,6 +28,7 @@ public class AboutDialogCommandDefinition : ICommandDefinition
 
     private void OpenAboutDialog()
     {
-        _serviceProvider.GetRequiredService<IQueuedDialogService>().ShowDialog(new ApplicationAboutDialogViewModel(_serviceProvider));
+        _serviceProvider.GetRequiredService<IQueuedDialogService>()
+            .ShowDialog(new ApplicationAboutDialogViewModel(_serviceProvider));
     }
 }

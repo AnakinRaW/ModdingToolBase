@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Controls;
@@ -34,6 +35,8 @@ public abstract class ApplicationBase : Application
 
     protected abstract IApplicationViewModel CreateApplicationViewModel();
 
+    protected abstract ApplicationMainWindow CreateMainWindow(IMainWindowViewModel viewModel);
+
     protected virtual void OnApplicationStarted()
     {
     }
@@ -54,7 +57,11 @@ public abstract class ApplicationBase : Application
     {
     }
 
-    protected abstract ApplicationMainWindow CreateMainWindow(IMainWindowViewModel viewModel);
+    protected static T LoadResourceValue<T>(string xamlName)
+    {
+        return (T)LoadComponent(new Uri(Assembly.GetCallingAssembly().GetName().Name + ";component/" + xamlName,
+            UriKind.Relative));
+    }
 
     private IWindowService InitializeWindow(IMainWindowViewModel viewModel)
     {

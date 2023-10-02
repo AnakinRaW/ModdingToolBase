@@ -7,7 +7,7 @@ using Validation;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-public sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
+internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 {
     private readonly IRegistryKey _registryKey;
 

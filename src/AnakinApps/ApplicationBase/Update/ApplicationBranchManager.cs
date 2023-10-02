@@ -8,7 +8,7 @@ using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-public class ApplicationBranchManager : BranchManager
+public class ApplicationBranchManager : BranchManagerBase
 {
     private readonly ApplicationBranchUtilities _branchUtilities;
 
@@ -18,7 +18,7 @@ public class ApplicationBranchManager : BranchManager
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         var applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
-        _branchUtilities = new ApplicationBranchUtilities(applicationEnvironment.UpdateMirrors);
+        _branchUtilities = new ApplicationBranchUtilities(applicationEnvironment.UpdateMirrors, serviceProvider);
     }
 
     public override Task<IEnumerable<ProductBranch>> GetAvailableBranches()

@@ -167,7 +167,7 @@ internal sealed class UpdatePipeline : Pipeline
         }
 
         if (_restartManager.RequiredRestartType == RestartType.ApplicationElevation)
-            throw new ElevationRequireException();
+            throw new ElevationRequiredException();
 
         if (IsCancelled)
             throw new OperationCanceledException(token);

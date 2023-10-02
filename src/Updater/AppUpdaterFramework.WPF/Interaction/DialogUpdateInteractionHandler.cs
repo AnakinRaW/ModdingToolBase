@@ -9,12 +9,12 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
-internal class DialogInteractionHandler : IInteractionHandler
+internal class DialogUpdateInteractionHandler : IUpdateInteractionHandler
 {
     private readonly IQueuedDialogService _dialogService;
     private readonly IUpdateDialogViewModelFactory _viewModelFactory;
 
-    public DialogInteractionHandler(IServiceProvider serviceProvider)
+    public DialogUpdateInteractionHandler(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _dialogService = serviceProvider.GetRequiredService<IQueuedDialogService>();

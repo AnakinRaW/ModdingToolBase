@@ -11,11 +11,11 @@ namespace AnakinRaW.ExternalUpdater.Services;
 
 public class ExternalUpdaterLauncher : IExternalUpdaterLauncher
 {
-    private readonly IProcessElevation _elevation;
+    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
 
     public ExternalUpdaterLauncher(IServiceProvider serviceProvider)
     {
-        _elevation = serviceProvider.GetRequiredService<IProcessElevation>();
+        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
     }
 
     public Process Start(IFileInfo updater, ExternalUpdaterOptions options)
@@ -42,7 +42,7 @@ public class ExternalUpdaterLauncher : IExternalUpdaterLauncher
 #endif
         };
 
-        if (_elevation.IsCurrentProcessElevated)
+        if (_currentProcessInfoProvider.GetCurrentProcessInfo().IsElevated)
             externalUpdateStartInfo.Verb = "runas";
 
         externalUpdateStartInfo.Arguments = options.ToArgs();

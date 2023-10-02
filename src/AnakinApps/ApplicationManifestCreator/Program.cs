@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata;
+using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.Hashing;
+using AnakinRaW.CommonUtilities.Verification;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,8 +43,11 @@ internal class Program
         }
         catch (Exception e)
         {
-            logger?.LogCritical(e, e.Message);
-            return e.HResult;
+            return await Task.Run(() =>
+            {
+                logger?.LogCritical(e, e.Message);
+                return e.HResult;
+            });
         }
     }
 
@@ -51,20 +56,25 @@ internal class Program
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
-        services.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         services.AddSingleton<IHashingService>(_ => new HashingService());
+        services.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
+        services.AddSingleton<IVerificationManager>(sp => new VerificationManager(sp));
 
-        var bm = new AppManifestCreatorBranchManager(options);
-        services.AddSingleton<IBranchManager>(bm);
-        services.AddSingleton(bm);
+        services.AddUpdateFramework();
+
+        services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
+        services.AddSingleton<IBranchManager>(sp => sp.GetRequiredService<AppManifestCreatorBranchManager>());
 
         services.AddLogging(l =>
         {
             l.ClearProviders();
+
+            var logLevel = LogLevel.Information;
 #if DEBUG
-            l.AddConsole().SetMinimumLevel(LogLevel.Trace);
-            l.AddDebug().SetMinimumLevel(LogLevel.Trace);
+            logLevel = LogLevel.Trace;
+            l.AddDebug().SetMinimumLevel(logLevel);
 #endif
+            l.AddConsole().SetMinimumLevel(logLevel);
         }).Configure<LoggerFilterOptions>(o =>
         {
 #if DEBUG

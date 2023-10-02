@@ -5,6 +5,8 @@ using AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Designer;
 
+// ReSharper disable All 
+#pragma warning disable CS0067
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class DesignerUpdatingStateViewModel : IUpdatingStateViewModel
 {
@@ -14,5 +16,5 @@ internal class DesignerUpdatingStateViewModel : IUpdatingStateViewModel
         throw new System.NotImplementedException();
     }
 
-    public IProgressViewModel ProgressViewModel { get; }
+    public IProgressViewModel ProgressViewModel { get; } = null!;
 }

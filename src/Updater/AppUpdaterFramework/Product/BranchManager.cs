@@ -15,7 +15,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
-public abstract class BranchManager : IBranchManager
+public abstract class BranchManagerBase : IBranchManager
 {
     private readonly ILogger? _logger;
     private readonly IFileSystemService _fileSystemHelper;
@@ -25,7 +25,7 @@ public abstract class BranchManager : IBranchManager
 
     public abstract string StableBranchName { get; }
 
-    protected BranchManager(IServiceProvider serviceProvider)
+    protected BranchManagerBase(IServiceProvider serviceProvider)
     {
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
@@ -70,6 +70,8 @@ public abstract class BranchManager : IBranchManager
             try
             {
                 manifestFile = await _manifestDownloader.GetManifest(manifestLocation, token);
+                if (manifestFile.Exists && manifestFile.Length != 0)
+                    break;
             }
             catch (DownloadFailedException ex)
             {
@@ -86,11 +88,6 @@ public abstract class BranchManager : IBranchManager
             token.ThrowIfCancellationRequested();
             var manifest = await ManifestLoader.LoadManifest(manifestFile, productReference, token);
             return manifest ?? throw new CatalogException("No catalog was created");
-        }
-        catch (CatalogException ex)
-        {
-            _logger?.LogError(ex, ex.Message);
-            throw;
         }
         catch (OperationCanceledException)
         {

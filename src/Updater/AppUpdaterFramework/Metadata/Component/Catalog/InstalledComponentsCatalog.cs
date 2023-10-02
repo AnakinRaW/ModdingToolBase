@@ -4,7 +4,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
-public class InstalledComponentsCatalog : IInstalledComponentsCatalog
+internal class InstalledComponentsCatalog : IInstalledComponentsCatalog
 {
     public IProductReference Product { get; }
 

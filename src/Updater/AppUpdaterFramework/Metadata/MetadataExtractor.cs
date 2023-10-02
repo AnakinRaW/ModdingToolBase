@@ -13,7 +13,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
-public sealed class MetadataExtractor : IMetadataExtractor
+internal sealed class MetadataExtractor : IMetadataExtractor
 {
     private const HashType FileHashType = HashType.Sha256;
 

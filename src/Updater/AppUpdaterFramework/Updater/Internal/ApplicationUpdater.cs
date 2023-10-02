@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -118,8 +117,6 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
             {
                 var backupManager = _serviceProvider.GetRequiredService<IBackupManager>();
                 backupManager.RestoreAll();
-
-                throw new FileNotFoundException();
             }
             catch (Exception ex)
             {

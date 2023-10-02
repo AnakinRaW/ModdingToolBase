@@ -3,7 +3,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class FailedRestoreException : UpdateException
+internal class FailedRestoreException : Exception
 {
     public override string Message => $"Reset failed: {InnerException}";
 

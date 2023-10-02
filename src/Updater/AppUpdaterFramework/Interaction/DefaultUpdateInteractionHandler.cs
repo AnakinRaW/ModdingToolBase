@@ -8,12 +8,11 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
-
-internal class DefaultInteractionHandler : IInteractionHandler
+internal class DefaultUpdateInteractionHandler : IUpdateInteractionHandler
 {
     private readonly ILogger? _logger;
 
-    public DefaultInteractionHandler(IServiceProvider serviceProvider)
+    public DefaultUpdateInteractionHandler(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());

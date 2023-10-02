@@ -6,5 +6,5 @@ public interface ILockingProcess
 
     uint ProcessId { get; }
 
-    internal record LockingProcess(string ProcessName, uint ProcessId) : ILockingProcess;
+    internal record struct LockingProcess(string ProcessName, uint ProcessId) : ILockingProcess;
 }

@@ -10,6 +10,8 @@ using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Designer;
 
+// ReSharper disable All 
+#pragma warning disable CS0067
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class ImageDialogViewModel : IImageDialogViewModel
 {
@@ -26,8 +28,8 @@ internal class ImageDialogViewModel : IImageDialogViewModel
     public bool HasDialogFrame { get; set; }
     public bool IsCloseButtonEnabled { get; set; }
     public event EventHandler? CloseDialogRequest;
-    public string? ResultButton { get; }
-    public IList<IButtonViewModel> Buttons { get; }
+    public string? ResultButton { get; } = null;
+    public IList<IButtonViewModel> Buttons { get; } = null!;
     public IDialogAdditionalInformationViewModel? AdditionalInformation { get; }
 
     public void CloseDialog()

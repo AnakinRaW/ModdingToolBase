@@ -107,7 +107,7 @@ internal class LockedFileHandler : InteractiveHandlerBase, ILockedFileHandler
 
     private LockedFileHandlerInteractionResult PromptProcessKill(IFileInfo file, IEnumerable<ILockingProcessInfo> lockingProcesses)
     {
-        var processes = lockingProcesses.Select(x => new ILockingProcess.LockingProcess(x.Description, x.Id));
-        return InteractionHandler.HandleLockedFile(file, processes);
+        var processes = lockingProcesses.Select(x => (ILockingProcess) new ILockingProcess.LockingProcess(x.Description, x.Id));
+        return UpdateInteractionHandler.HandleLockedFile(file, processes);
     }
 }

@@ -26,13 +26,13 @@ internal class UnhandledExceptionHandler : DisposableObject, IUnhandledException
         try
         {
             e.ParseUnhandledExceptionObject(out var message);
-            var exceptionObject = e.ExceptionObject as Exception;
+            var exception = e.ExceptionObject as Exception;
             if (e.IsTerminating)
-                _logger?.LogCritical(exceptionObject, message);
+                _logger?.LogCritical(exception, message);
             else
-                _logger?.LogError(exceptionObject, message);
+                _logger?.LogError(exception, message);
 
-            HandleGlobalException(exceptionObject!);
+            HandleGlobalException(exception!);
         }
         catch
         {

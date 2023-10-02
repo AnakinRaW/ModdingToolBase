@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Windows.Input;
-using AnakinRaW.AppUpdaterFramework.Commands.Handlers;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
-using AnakinRaW.CommonUtilities.Wpf.Input;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Commands;
@@ -23,10 +23,9 @@ internal class UpdateCommand : CommandDefinition
 
     public UpdateCommand(IUpdateCatalog updateCatalog, IServiceProvider serviceProvider, bool isRepair)
     {
-        var handler = serviceProvider.GetRequiredService<IUpdateCommandHandler>();
+        var handler = serviceProvider.GetRequiredService<IUpdateHandler>();
 
-        Command = new DelegateCommand(() => handler.Command.Execute(updateCatalog),
-            () => handler.Command.CanExecute(updateCatalog));
+        Command = new AsyncRelayCommand(() => handler.UpdateAsync(updateCatalog), () => !handler.IsUpdating);
 
         UpdateCatalog = updateCatalog;
         Text = isRepair ? "Repair" : "Update";

@@ -32,15 +32,32 @@ public static class ExternalUpdaterArgumentUtilities
         return Parser.Default.FormatCommandLine(option, config => config.SkipDefault = true);
     }
 
-    public static ExternalUpdaterOptions WithCurrentData(this ExternalUpdaterOptions options, string appToStart, int? pid, IServiceProvider serviceProvider)
+    public static ExternalUpdaterOptions WithCurrentData(
+        this ExternalUpdaterOptions options, 
+        string appToStart, 
+        int? pid,
+        string? loggingDirectory,
+        IServiceProvider serviceProvider)
     {
+        var pathHelper = serviceProvider.GetRequiredService<IPathHelperService>();
+        appToStart = pathHelper.NormalizePath(appToStart, PathNormalizeOptions.Full);
+        if (!string.IsNullOrEmpty(loggingDirectory))
+            loggingDirectory = pathHelper.NormalizePath(loggingDirectory!, PathNormalizeOptions.Full);
+
         if (options is UpdateOptions updateOptions)
         {
             if (ReplaceUpdateItemsWithCurrentApp(updateOptions, appToStart, out var updateItems, serviceProvider))
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
         }
-        return options with { AppToStart = appToStart, Pid = pid };
+
+        return options with
+        {
+            AppToStart = appToStart, 
+            Pid = pid, 
+            LoggingDirectory = loggingDirectory
+        };
     }
+
 
     internal static string ToPayload(this IEnumerable<UpdateInformation> updateInformation)
     {
@@ -57,7 +74,7 @@ public static class ExternalUpdaterArgumentUtilities
         var updated = false;
         updateInformation = null;
 
-        var pathHelper = new PathHelperService(serviceProvider.GetRequiredService<IFileSystem>());
+        var pathHelper = serviceProvider.GetRequiredService<IPathHelperService>();
 
         currentAppPath = pathHelper.NormalizePath(currentAppPath, PathNormalizeOptions.Full);
         var oldAppPath = pathHelper.NormalizePath(oldOptions.AppToStart, PathNormalizeOptions.Full);

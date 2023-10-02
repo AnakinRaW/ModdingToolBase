@@ -13,25 +13,30 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
 		<PackageReference Include="Semver" Version="2.3.0" />
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="6.0.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.Registry" Version="6.0.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="6.0.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="6.0.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="6.0.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="8.1.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.Registry" Version="8.1.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="8.1.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="8.1.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="8.1.1" />
 		<PackageReference Include="Validation" Version="2.5.51" PrivateAssets="build;compile" />
-		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="3.4.14" PrivateAssets="build;compile" />
+		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="3.4.16" PrivateAssets="build;compile" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-		<PackageReference Include="envdte" Version="17.5.33428.366" />
+		<PackageReference Include="envdte" Version="17.7.37355" PrivateAssets="build;compile" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
+		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.133" />
+	</ItemGroup>
+	
 	<PropertyGroup>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	</PropertyGroup>

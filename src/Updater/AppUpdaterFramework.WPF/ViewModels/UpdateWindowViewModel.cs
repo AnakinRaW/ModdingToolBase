@@ -256,7 +256,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
                 CancellationTokenSource.CreateLinkedTokenSource(_updateWindowCancellationTokenSource.Token);
             
             var updateRef = _serviceProvider.GetRequiredService<IProductService>().CreateProductReference(null, CurrentBranch);
-            await _updateService.CheckForUpdates(updateRef, searchUpdateCancellationTokenSource.Token);
+            await _updateService.CheckForUpdatesAsync(updateRef, searchUpdateCancellationTokenSource.Token);
         }
         catch (TaskCanceledException)
         {

@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if NETFRAMEWORK
@@ -22,18 +23,40 @@ internal class ProcessTools : IProcessTools
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public void StartApplication(IFileInfo application, ExternalUpdaterResult appStartOptions, bool elevate = false)
+    public void StartApplication(
+        IFileInfo application,
+        ExternalUpdaterResultOptions appStartOptions,
+        bool elevate = false)
     {
         if (!application.Exists)
             throw new FileNotFoundException("The executable was not found.", application.FullName);
 
-        var startInfo = new ProcessStartInfo(application.FullName) { Arguments = ((int)appStartOptions).ToString() };
+        var startInfo = new ProcessStartInfo(application.FullName);
+
+        AddArgumentsToStartInfo(startInfo, appStartOptions);
+
         if (elevate)
             startInfo.Verb = "runas";
         using var process = new Process { StartInfo = startInfo };
         _logger?.LogInformation($"Starting {application}");
         process.Start();
     }
+
+
+    private void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions)
+    {
+#if NET
+        var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);
+        foreach (var arg in resultArgs)
+        {
+            startInfo.ArgumentList.Add(arg);
+        }  
+#else
+        var resultArgs = Parser.Default.FormatCommandLine(resultOptions);
+        startInfo.Arguments = resultArgs;
+#endif
+    }
+
 
     public async Task<bool> WaitForExitAsync(int? pid, CancellationToken token)
     {

@@ -19,7 +19,7 @@ internal partial class ProgressViewModel : ViewModelBase, IProgressViewModel
     {
         DownloadProgressBarViewModel = downloadProgressBar;
         InstallProgressBarViewModel = installProgressBar;
-        PropertyChangedEventManager.AddHandler(InstallProgressBarViewModel, OnProgressChanged, nameof(IProgressBarViewModel.ProgressValue));
+        PropertyChangedEventManager.AddHandler(InstallProgressBarViewModel, OnProgressChanged!, nameof(IProgressBarViewModel.ProgressValue));
     }
 
     private void OnProgressChanged(object sender, PropertyChangedEventArgs e)

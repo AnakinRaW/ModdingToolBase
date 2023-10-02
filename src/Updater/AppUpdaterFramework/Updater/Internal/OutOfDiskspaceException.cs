@@ -1,6 +1,9 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Updater;
+﻿using System;
 
-internal class OutOfDiskspaceException : UpdateException {
+namespace AnakinRaW.AppUpdaterFramework.Updater;
+
+internal class OutOfDiskspaceException : Exception
+{
     public OutOfDiskspaceException() : base(nameof(OutOfDiskspaceException)) {
     }
 

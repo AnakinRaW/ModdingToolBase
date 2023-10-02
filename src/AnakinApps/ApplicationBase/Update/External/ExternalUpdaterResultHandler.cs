@@ -29,10 +29,12 @@ public class ExternalUpdaterResultHandler
             case ExternalUpdaterResult.UpdaterNotRun:
                 break;
             case ExternalUpdaterResult.Restarted:
-                // Safeguard, since Restarted makes no sense when an update should be performed.
-                // Apparently something went wrong, so we reset the application
                 if (_registry.RequiresUpdate)
+                {
+                    // Safeguard, since Restarted makes no sense when an update should be performed.
+                    // Apparently something went wrong, so we reset the application
                     _registry.ScheduleReset();
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(result), result, null);

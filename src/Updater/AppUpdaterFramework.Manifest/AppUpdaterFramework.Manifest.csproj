@@ -11,11 +11,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="System.Text.Json" Version="7.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.133" />
 	</ItemGroup>
 
 </Project>

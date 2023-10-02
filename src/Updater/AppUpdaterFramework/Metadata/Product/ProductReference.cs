@@ -6,7 +6,7 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 public class ProductReference : IProductReference
 {
     public string Name { get; }
-    public SemVersion? Version { get; init; }
+    public SemVersion? Version { get; }
     public ProductBranch? Branch { get; }
 
     public ProductReference(string name, SemVersion? version = null, ProductBranch? branch = null)

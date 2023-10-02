@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
+using AnakinRaW.CommonUtilities;
+using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Validation;
 
-namespace AnakinRaW.ApplicationBase.Update.External;
+namespace AnakinRaW.AppUpdaterFramework.External;
 
 internal class ExternalUpdaterService : IExternalUpdaterService
 {
@@ -26,7 +27,10 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadonlyBackupManager _backupManager;
     private readonly IReadonlyDownloadRepository _downloadRepository;
-    
+    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
+
+    private readonly string _normalizedTempPath;
+
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
@@ -37,30 +41,39 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadonlyBackupManager>();
         _downloadRepository = serviceProvider.GetRequiredService<IReadonlyDownloadRepository>();
+        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
+
+        _normalizedTempPath = serviceProvider.GetRequiredService<IPathHelperService>()
+            .NormalizePath(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.Full);
     }
 
     public UpdateOptions CreateUpdateOptions()
     {
-        var cpi = CurrentProcessInfo.Current;
-
+        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+            throw new InvalidOperationException("The current process is not running from a file");
         var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
 
         return new UpdateOptions
         {
             AppToStart = cpi.ProcessFilePath,
             Pid = cpi.Id,
-            UpdateFile = updateInformationFile
+            UpdateFile = updateInformationFile,
+            LoggingDirectory = _normalizedTempPath
         };
     }
 
     public RestartOptions CreateRestartOptions(bool elevate)
     {
-        var cpi = CurrentProcessInfo.Current;
+        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+            throw new InvalidOperationException("The current process is not running from a file");
         return new RestartOptions
         {
             AppToStart = cpi.ProcessFilePath,
             Pid = cpi.Id,
-            Elevate = elevate
+            Elevate = elevate,
+            LoggingDirectory = _normalizedTempPath
         };
     }
 

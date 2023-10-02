@@ -2,7 +2,7 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
-public struct ExtractorAdditionalInformation
+public readonly struct ExtractorAdditionalInformation
 {
     public Uri? Origin { get; init; }
 

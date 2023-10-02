@@ -1,6 +1,6 @@
 ﻿namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
-public enum InstallResult
+internal enum InstallResult
 {
     Success,
     SuccessRestartRequired,

@@ -42,10 +42,10 @@ public partial class UpdateInfoBarViewModel : ViewModelBase, IUpdateInfoBarViewM
     {
         _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
         var updateService = serviceProvider.GetRequiredService<IUpdateService>();
-        updateService.CheckingForUpdatesStarted += OnCheckingUpdatesStarted;
-        updateService.CheckingForUpdatesCompleted += OnCheckingUpdatesCompleted;
-        updateService.UpdateStarted += OnUpdateStarted;
-        updateService.UpdateCompleted += OnUpdateCompleted;
+        updateService.CheckingForUpdatesStarted += OnCheckingUpdatesStarted!;
+        updateService.CheckingForUpdatesCompleted += OnCheckingUpdatesCompleted!;
+        updateService.UpdateStarted += OnUpdateStarted!;
+        updateService.UpdateCompleted += OnUpdateCompleted!;
     }
 
     private void OnUpdateCompleted(object sender, EventArgs e)

@@ -15,7 +15,7 @@ internal class UpdateCleanPipeline : Pipeline
     private readonly List<IInstallableComponent> _filesFailedToBeCleaned = new();
     private readonly ILogger? _logger;
     private readonly IBackupManager _backupManager;
-    private readonly DownloadRepository _downloadRepository;
+    private readonly IDownloadRepository _downloadRepository;
     private readonly List<IInstallableComponent> _downloadsToClean = new();
     private readonly List<IInstallableComponent> _backupsToClean = new();
 
@@ -23,7 +23,7 @@ internal class UpdateCleanPipeline : Pipeline
     { 
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
-        _downloadRepository = serviceProvider.GetRequiredService<DownloadRepository>();
+        _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
     }
 
     protected override bool PrepareCore()

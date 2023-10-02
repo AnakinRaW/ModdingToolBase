@@ -20,52 +20,41 @@ public sealed record UpdateOptions : ExternalUpdaterOptions
     [Option("updateFile", Required = false, HelpText = "JSON file where update data is stored.")]
     public string? UpdateFile { get; init; }
 
-    public async Task<IReadOnlyCollection<UpdateInformation>> GetUpdateInformationAsync(IServiceProvider serviceProvider)
+    public Task<IReadOnlyCollection<UpdateInformation>> GetUpdateInformationAsync(IServiceProvider serviceProvider)
     {
-        return _updateItems ??= await CreateUpdateInformation(serviceProvider).ConfigureAwait(false);
+        return Task.Run(() => GetUpdateInformation(serviceProvider));
     }
 
     internal IReadOnlyCollection<UpdateInformation> GetUpdateInformation(IServiceProvider serviceProvider)
     {
-        var infoTask = Task.Run(async () => await GetUpdateInformationAsync(serviceProvider));
-        infoTask.Wait();
-        return infoTask.Result;
+        return _updateItems ??= CreateUpdateInformation(serviceProvider);
     }
 
-    private async Task<IReadOnlyCollection<UpdateInformation>> CreateUpdateInformation(IServiceProvider serviceProvider)
+    private IReadOnlyCollection<UpdateInformation> CreateUpdateInformation(IServiceProvider serviceProvider)
     {
-        var information = await GetFromFile(serviceProvider);
+        var information = GetFromFile(serviceProvider);
         if (information is not null)
             return information;
-        information = await GetFromPayload();
+        information = GetFromPayload();
         return information ?? Array.Empty<UpdateInformation>();
     }
-    
-    private async Task<IReadOnlyCollection<UpdateInformation>?> GetFromFile(IServiceProvider serviceProvider)
+
+    private IReadOnlyCollection<UpdateInformation>? GetFromFile(IServiceProvider serviceProvider)
     {
         var fs = serviceProvider.GetRequiredService<IFileSystem>();
         if (string.IsNullOrEmpty(UpdateFile) || !fs.File.Exists(UpdateFile))
             return null;
-#if NETSTANDARD2_1
-        await using var fileStream = fs.FileStream.New(UpdateFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-#else
         using var fileStream = fs.FileStream.New(UpdateFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-#endif
-        return await JsonSerializer.DeserializeAsync<IReadOnlyCollection<UpdateInformation>>(fileStream, JsonSerializerOptions.Default);
+        return JsonSerializer.Deserialize<IReadOnlyCollection<UpdateInformation>>(fileStream, JsonSerializerOptions.Default);
 
     }
 
-    private async Task<IReadOnlyCollection<UpdateInformation>?> GetFromPayload()
+    private IReadOnlyCollection<UpdateInformation>? GetFromPayload()
     {
         if (string.IsNullOrEmpty(Payload))
             return null;
-
         var decoded = Convert.FromBase64String(Payload!);
-#if NETSTANDARD2_1
-        await using var ms = new MemoryStream(decoded, false);
-#else
         using var ms = new MemoryStream(decoded, false);
-#endif
-        return await JsonSerializer.DeserializeAsync<IReadOnlyCollection<UpdateInformation>>(ms, JsonSerializerOptions.Default);
+        return JsonSerializer.Deserialize<IReadOnlyCollection<UpdateInformation>>(ms, JsonSerializerOptions.Default);
     }
 }

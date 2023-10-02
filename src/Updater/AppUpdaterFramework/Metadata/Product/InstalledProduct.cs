@@ -4,7 +4,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-public sealed class InstalledProduct : IInstalledProduct
+internal sealed class InstalledProduct : IInstalledProduct
 {
     private readonly IProductReference _reference;
 

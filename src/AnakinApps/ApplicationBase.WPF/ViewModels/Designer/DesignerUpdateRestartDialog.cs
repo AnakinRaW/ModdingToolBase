@@ -9,6 +9,8 @@ using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Designer;
 
+// ReSharper disable All 
+#pragma warning disable CS0067
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class DesignerUpdateRestartDialog : IUpdateRestartDialog
 {
@@ -35,10 +37,10 @@ internal class DesignerUpdateRestartDialog : IUpdateRestartDialog
 
     public bool HasDialogFrame { get; set; }
     public bool IsCloseButtonEnabled { get; set; }
-    public string? ResultButton { get; }
-    public IList<IButtonViewModel> Buttons { get; }
-    public IDialogAdditionalInformationViewModel? AdditionalInformation { get; }
-    public ImageKey Image { get; }
+    public string? ResultButton { get; } = null!;
+    public IList<IButtonViewModel> Buttons { get; } = null!;
+    public IDialogAdditionalInformationViewModel? AdditionalInformation { get; } = null;
+    public ImageKey Image { get; } = default;
     public string Header => "Header";
     public string Message => "Restart Reason Message";
 }

@@ -6,7 +6,7 @@ namespace AnakinRaW.ExternalUpdater.Utilities;
 
 internal interface IProcessTools
 {
-    void StartApplication(IFileInfo application, ExternalUpdaterResult appStartOptions, bool elevate = false);
+    void StartApplication(IFileInfo application, ExternalUpdaterResultOptions appStartOptions, bool elevate = false);
 
     Task<bool> WaitForExitAsync(int? pid, CancellationToken token);
 }

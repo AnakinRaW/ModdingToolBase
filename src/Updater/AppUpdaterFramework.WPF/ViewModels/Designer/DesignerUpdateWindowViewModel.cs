@@ -8,6 +8,8 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Designer;
 
+// ReSharper disable All 
+#pragma warning disable CS0067
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class DesignerUpdateWindowViewModel : IUpdateWindowViewModel
 {

@@ -5,7 +5,7 @@ using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-public class UpdateCatalog : IUpdateCatalog
+internal class UpdateCatalog : IUpdateCatalog
 {
     public IInstalledProduct InstalledProduct { get; }
 

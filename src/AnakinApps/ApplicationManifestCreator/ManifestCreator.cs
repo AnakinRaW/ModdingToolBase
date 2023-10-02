@@ -63,7 +63,7 @@ internal class ManifestCreator
         return 0;
     }
 
-    private async Task WriteBranchesFile(List<ProductBranch> currentOnlineBranches, ProductBranch newBranch)
+    private async Task WriteBranchesFile(IEnumerable<ProductBranch> currentOnlineBranches, ProductBranch newBranch)
     {
         var branches = currentOnlineBranches.Select(b => b.Name).ToHashSet();
         if (!branches.Add(newBranch.Name))

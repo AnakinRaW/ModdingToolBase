@@ -4,7 +4,7 @@ using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
-public interface IInteractionHandler
+public interface IUpdateInteractionHandler
 {
     LockedFileHandlerInteractionResult HandleLockedFile(IFileInfo file, IEnumerable<ILockingProcess> lockingProcesses);
 

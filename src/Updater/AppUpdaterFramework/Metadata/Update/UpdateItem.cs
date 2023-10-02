@@ -3,7 +3,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-public sealed class UpdateItem : IUpdateItem
+internal sealed class UpdateItem : IUpdateItem
 {
     public string ComponentId { get; }
 
