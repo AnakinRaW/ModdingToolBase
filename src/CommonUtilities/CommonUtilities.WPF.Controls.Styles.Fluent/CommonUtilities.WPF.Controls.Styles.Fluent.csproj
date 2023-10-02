@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Description>Fluent Design of the controls.</Description>
+		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<Version>2.0.0</Version>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+		<RootNamespace>AnakinRaW.CommonUtilities.Wpf</RootNamespace>
+		<AssemblyName>AnakinRaW.CommonUtilities.WPF.Controls.Fluent</AssemblyName>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CommonUtilities\CommonUtilities.WPF.Controls\CommonUtilities.WPF.Controls.csproj" />
+	</ItemGroup>
+
+</Project>
