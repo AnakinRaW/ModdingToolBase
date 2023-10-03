@@ -37,6 +37,7 @@ public class ThemedContextMenu : ContextMenu
     private bool _isCommandInExecution;
     private ScrollViewer? _scrollViewer;
     private Border? _iconBorder;
+    private double _horizontalOffset = double.MinValue;
 
     public MenuShowOptions ShowOptions
     {
@@ -93,9 +94,8 @@ public class ThemedContextMenu : ContextMenu
     private bool LeftAligned => ShowOptions.HasFlag(MenuShowOptions.LeftAlign);
 
     private bool RightAligned => !LeftAligned && ShowOptions.HasFlag(MenuShowOptions.RightAlign);
-
     static ThemedContextMenu()
-    { 
+    {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ThemedContextMenu), new FrameworkPropertyMetadata(typeof(ThemedContextMenu)));
     }
 
@@ -162,12 +162,12 @@ public class ThemedContextMenu : ContextMenu
 
     protected override void OnOpened(RoutedEventArgs e)
     {
+        if (_horizontalOffset == double.MinValue)
+            _horizontalOffset = HorizontalOffset;
         if (LeftAligned && SystemParameters.MenuDropAlignment)
-            HorizontalOffset = ActualWidth;
+            HorizontalOffset = ActualWidth - _horizontalOffset;
         else if (RightAligned && !SystemParameters.MenuDropAlignment)
-            HorizontalOffset = -ActualWidth;
-        else
-            HorizontalOffset = 0.0;
+            HorizontalOffset = -ActualWidth - _horizontalOffset;
         SetupFilter();
         _scrollViewer?.ScrollToVerticalOffset(0.0);
         base.OnOpened(e);

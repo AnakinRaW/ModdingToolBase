@@ -22,6 +22,11 @@ public class StylingContextMenu : ThemedContextMenu, IHasCommandBarStyles
 
     ResourceKey IHasCommandBarStyles.SeparatorStyleKey => SeparatorStyleKey;
 
+    public StylingContextMenu()
+    {
+        SetResourceReference(StyleProperty, typeof(ThemedContextMenu));
+    }
+
     protected override DependencyObject GetContainerForItemOverride()
     {
         return new DynamicStyledMenuItem();

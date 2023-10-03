@@ -22,10 +22,6 @@ public class DynamicStyledMenuItem : ThemedMenuItem, IHasCommandBarStyles
 
     ResourceKey IHasCommandBarStyles.SeparatorStyleKey => SeparatorStyleKey;
 
-    static DynamicStyledMenuItem()
-    {
-    }
-
     protected override DependencyObject GetContainerForItemOverride()
     {
         return new DynamicStyledMenuItem();

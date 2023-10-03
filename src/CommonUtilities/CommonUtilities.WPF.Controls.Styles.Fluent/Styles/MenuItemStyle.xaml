@@ -1,0 +1,48 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:fluent="clr-namespace:AnakinRaW.CommonUtilities.Wpf">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="FluentFocusVisualStyle.xaml"/>
+        <ResourceDictionary Source="FluentPopupStyle.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <ControlTemplate x:Key="SubmenuHeaderTemplate" TargetType="{x:Type MenuItem}">
+
+    </ControlTemplate>
+
+    <Style x:Key="MenuItemStyle" TargetType="{x:Type MenuItem}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FluentFocusVisualStyle}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static fluent:FluentColors.TextFillPrimary}}"/>
+        <Setter Property="Margin" Value="{x:Static fluent:FluentConstants.ControlMarginXSmall}"/>
+        <Setter Property="MinHeight" Value="{x:Static fluent:FluentConstants.ControlMinHeightSmall}"/>
+        <Setter Property="MinWidth" Value="{x:Static fluent:FluentConstants.ControlMinWidthSmall}"/>
+        <Setter Property="Padding" Value="{x:Static fluent:FluentConstants.ControlMarginSmall}"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static fluent:FluentColors.TextFillDisabled}}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static fluent:FluentColors.SubtleFillSecondary}}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static fluent:FluentColors.SubtleFillTertiary}}"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static fluent:FluentColors.TextFillSecondary}}"/>
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static fluent:FluentColors.SubtleFillSecondary}}"/>
+            </Trigger>
+            <Trigger Property="IsSubmenuOpen" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static fluent:FluentColors.SubtleFillTertiary}}"/>
+            </Trigger>
+            <Trigger Property="Role" Value="SubmenuHeader">
+                <Setter Property="Template" Value="{StaticResource SubmenuHeaderTemplate}"/>
+            </Trigger>
+            <Trigger Property="Role" Value="SubmenuItem">
+                <Setter Property="Template" Value="{StaticResource SubmenuHeaderTemplate}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

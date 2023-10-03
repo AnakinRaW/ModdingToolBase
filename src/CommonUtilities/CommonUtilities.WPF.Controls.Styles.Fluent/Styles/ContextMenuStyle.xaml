@@ -1,0 +1,53 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Controls;assembly=AnakinRaW.CommonUtilities.WPF.Controls"
+                    xmlns:fluent="clr-namespace:AnakinRaW.CommonUtilities.Wpf"
+                    xmlns:imaging="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Imaging;assembly=AnakinRaW.CommonUtilities.WPF.Imaging"
+                    xmlns:dpi="clr-namespace:AnakinRaW.CommonUtilities.Wpf.DPI;assembly=AnakinRaW.CommonUtilities.WPF.Core"
+                    xmlns:converters="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Converters;assembly=AnakinRaW.CommonUtilities.WPF.Core"
+                    xmlns:helpers="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Helpers">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="FluentPopupStyle.xaml"/>
+        <ResourceDictionary Source="MenuItemStyle.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <converters:BrushToColorConverter x:Key="BrushToColorConverter"/>
+    <helpers:BindingProxy x:Key="ImageBackgroundColor" Data="{DynamicResource {x:Static fluent:FluentColors.SolidBackgroundFillSecondary}}" />
+
+    <Style TargetType="{x:Type controls:ThemedContextMenu}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static fluent:FluentColors.SolidBackgroundFillTertiary}}"/>
+        <Setter Property="HorizontalOffset" Value="{x:Static fluent:FluentConstants.PopupShadowOffsetInvert}"/>
+        <Setter Property="VerticalOffset" Value="{x:Static fluent:FluentConstants.PopupShadowOffsetInvert}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="imaging:ImageThemingUtilities.ImageBackgroundColor"
+                Value="{Binding Source={StaticResource ImageBackgroundColor}, Path=Data, Converter={StaticResource BrushToColorConverter}}"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource MenuItemStyle}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContextMenu}">
+                    <ContentControl x:Name="PopupContent" Style="{StaticResource FluentPopupStyle}">
+                        <controls:ThemedMenuScrollViewer x:Name="PART_ScrollViewer">
+                            <Grid RenderOptions.BitmapScalingMode="{x:Static dpi:DpiHelper.BitmapScalingMode}"
+                                  RenderOptions.ClearTypeHint="Enabled">
+                                <ItemsPresenter Grid.IsSharedSizeScope="True" KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                Margin="{x:Static fluent:FluentConstants.ControlMarginSmall}"
+                                                SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+                            </Grid>
+                        </controls:ThemedMenuScrollViewer>
+                    </ContentControl>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Placement" Value="Top">
+                <Setter Property="VerticalOffset" Value="{x:Static fluent:FluentConstants.PopupShadowOffset}"/>
+            </Trigger>
+            <DataTrigger Binding="{Binding Source={x:Static SystemParameters.MenuDropAlignment}}" Value="True">
+                <Setter Property="HorizontalOffset" Value="{x:Static fluent:FluentConstants.PopupShadowOffset}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

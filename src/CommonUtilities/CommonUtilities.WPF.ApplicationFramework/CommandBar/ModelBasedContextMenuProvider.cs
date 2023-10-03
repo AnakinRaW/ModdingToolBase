@@ -20,7 +20,7 @@ public sealed class ModelBasedContextMenuProvider : CommandBarProvider<ContextMe
     {
         if (_cache.TryGetValue(data, out var contextMenu) && contextMenu is not null)
             return contextMenu;
-        contextMenu =base.Provide(data);
+        contextMenu = base.Provide(data);
         _cache[data] = contextMenu;
         return contextMenu;
     }
