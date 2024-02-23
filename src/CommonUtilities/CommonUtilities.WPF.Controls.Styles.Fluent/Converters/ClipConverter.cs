@@ -21,7 +21,7 @@ internal class ClipConverter : MultiValueConverter<double, double, CornerRadius,
         Border.CornerRadius = cornerRadius;
         Border.InvalidateArrange();
         Border.Arrange(new Rect(0.0, 0.0, width, height));
-        Geometry borderGeometry = Border.BorderGeometry;
+        var borderGeometry = Border.BorderGeometry;
         borderGeometry?.Freeze();
         return borderGeometry;
     }

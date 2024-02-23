@@ -83,7 +83,10 @@ internal abstract class CurvedBorderBase : Border
         context.ArcTo(endPoint, new Size(radiusX, radiusY), 0.0, false, direction, true, false);
     }
 
-    protected void DrawLineTo(StreamGeometryContext context, Point endPoint) => context.LineTo(endPoint, true, false);
+    protected void DrawLineTo(StreamGeometryContext context, Point endPoint)
+    {
+        context.LineTo(endPoint, true, false);
+    }
 
     protected struct CurveInfo
     {

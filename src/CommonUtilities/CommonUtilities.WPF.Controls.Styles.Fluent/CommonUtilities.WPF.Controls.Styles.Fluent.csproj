@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+		<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.CommonUtilities.Wpf</RootNamespace>
 		<AssemblyName>AnakinRaW.CommonUtilities.WPF.Controls.Styles.Fluent</AssemblyName>
 		<UseWPF>true</UseWPF>
@@ -18,7 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\CommonUtilities.WPF.Controls\CommonUtilities.WPF.Controls.csproj" />
+	  <ProjectReference Include="..\CommonUtilities.WPF.ApplicationFramework\CommonUtilities.WPF.ApplicationFramework.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -6,7 +6,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+		<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
 		<AssemblyName>AnakinRaW.ExternalUpdater</AssemblyName>
 	</PropertyGroup>
