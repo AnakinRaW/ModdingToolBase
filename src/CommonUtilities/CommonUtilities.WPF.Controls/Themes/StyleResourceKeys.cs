@@ -7,7 +7,6 @@ namespace AnakinRaW.CommonUtilities.Wpf.Themes
         public static object UnthemedScrollBarStyleKey => "DummyUnthemedScrollBarStyleKey";
         public static object UnthemedScrollViewerStyleKey => "DummyUnthemedScrollViewerStyleKey";
 
-        public static object MenuItemStyleKey { get; } = GetResourceKey(nameof(MenuItemStyleKey));
         public static object ThemedComboBoxStyleKey { get; } = GetResourceKey(nameof(ThemedComboBoxStyleKey));
         public static object ScrollViewerStyleKey { get; } = GetResourceKey(nameof(ScrollViewerStyleKey));
         public static object ScrollBarStyleKey { get; } = GetResourceKey(nameof(ScrollBarStyleKey));

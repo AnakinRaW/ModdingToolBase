@@ -180,5 +180,8 @@
     <SolidColorBrush x:Key="{x:Static colors:CommonControlsColors.ProgressBarBackground}" Color="#734D4D4D" />
     <SolidColorBrush x:Key="{x:Static colors:CommonControlsColors.ProgressBarBorder}" Color="#734D4D4D" />
     <SolidColorBrush x:Key="{x:Static colors:CommonControlsColors.ProgressBarValue}" Color="#FF7160E8" />
+
+
+    <SolidColorBrush x:Key="{x:Static colors:CommonControlsColors.ControlFocusColor}" Color="#FFFFFFFF" />
     
 </ResourceDictionary>

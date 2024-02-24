@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:styles="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Styles"
+                    xmlns:colors="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Themes.Colors">
+    <Style x:Key="FocusVisualStyle">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border BorderBrush="{DynamicResource {x:Static colors:CommonControlsColors.ControlFocusColor}}"
+                            BorderThickness="{x:Static styles:StyleConstants.FocusVisualStrokeThickness}"
+                            CornerRadius="{x:Static styles:StyleConstants.FocusVisualCornerRadius}"
+                            Margin="{x:Static styles:StyleConstants.FocusVisualMargin}" SnapsToDevicePixels="True"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

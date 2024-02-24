@@ -1,9 +1,0 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/AnakinRaW.CommonUtilities.WPF.Controls.Styles.Fluent;component/Styles/WindowTitleBarButtonStyle.xaml"/>
-        <ResourceDictionary Source="/AnakinRaW.CommonUtilities.WPF.Controls.Styles.Fluent;component/Styles/SystemMenuStyle.xaml"/>
-        <ResourceDictionary Source="/AnakinRaW.CommonUtilities.WPF.Controls.Styles.Fluent;component/Styles/ContextMenuStyle.xaml"/>
-    </ResourceDictionary.MergedDictionaries>
-    
-</ResourceDictionary>

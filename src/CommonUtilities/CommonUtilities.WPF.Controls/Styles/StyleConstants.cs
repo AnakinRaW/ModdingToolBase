@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 
-namespace AnakinRaW.CommonUtilities.Wpf;
+namespace AnakinRaW.CommonUtilities.Wpf.Styles;
 
-internal static class FluentConstants
+internal static class StyleConstants
 {
     public const double NonClientHeight = 30.0;
 
@@ -22,6 +22,8 @@ internal static class FluentConstants
     public static readonly Thickness ControlStrokeThickness = new(1.0);
 
     public static readonly CornerRadius PopupBorderCornerRadius = new(6.0);
-
+    public static readonly CornerRadius ControlCornerRadius = new(4.0);
     public static readonly CornerRadius FocusVisualCornerRadius = new(6.0);
+
+    public static readonly GridLength TextSpacerGridColumnWidth = new(24.0);
 }

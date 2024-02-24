@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace AnakinRaW.CommonUtilities.Wpf.Helpers;
+namespace AnakinRaW.CommonUtilities.Wpf.Utilities;
 
 internal class BindingProxy : Freezable
 {

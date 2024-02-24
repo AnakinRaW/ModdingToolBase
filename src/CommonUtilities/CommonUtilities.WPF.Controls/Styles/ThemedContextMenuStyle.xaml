@@ -1,12 +1,20 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:theming="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Themes"
                     xmlns:colors="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Themes.Colors"
                     xmlns:controls="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Controls"
                     xmlns:converters="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Converters;assembly=AnakinRaW.CommonUtilities.WPF.Core"
-                    xmlns:dpi="clr-namespace:AnakinRaW.CommonUtilities.Wpf.DPI;assembly=AnakinRaW.CommonUtilities.WPF.Core">
+                    xmlns:dpi="clr-namespace:AnakinRaW.CommonUtilities.Wpf.DPI;assembly=AnakinRaW.CommonUtilities.WPF.Core"
+                    xmlns:imaging="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Imaging;assembly=AnakinRaW.CommonUtilities.WPF.Imaging"
+                    xmlns:styles="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Styles"
+                    xmlns:utilities="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Utilities"
+                    xmlns:controlConverters="clr-namespace:AnakinRaW.CommonUtilities.Wpf.Converters">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="FocusVisualStyle.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
 
     <converters:BrushToColorConverter x:Key="BrushToColorConverter"/>
+    <controlConverters:ColorToOpacityConverter x:Key="ColorToOpacityConverter"/>
 
     <GridLength x:Key="MenuItemIconWidth">24</GridLength>
     <GridLength x:Key="MenuItemNameKeyBindingSpacerWidth">36</GridLength>
@@ -14,60 +22,11 @@
     <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter"/>
     <MenuScrollingVisibilityConverter x:Key="MenuScrollingVisibilityConverter"/>
 
+    <utilities:BindingProxy x:Key="ImageBackgroundColor" Data="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuIconBackground}}" />
+
     <Geometry x:Key="DownArrowGeometry">M 0 0 L 3 3 L 6 0 Z</Geometry>
     <Geometry x:Key="UpArrowGeometry">M 0 3 L 3 0 L 6 3 Z</Geometry>
-
-    <Style x:Key="{x:Static theming:StyleResourceKeys.MenuItemStyleKey}" TargetType="{x:Type MenuItem}">
-        <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextActive}}"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Grid SnapsToDevicePixels="true" Background="Transparent" MinHeight="22">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{StaticResource MenuItemIconWidth}" SharedSizeGroup="MenuItemIconColumnGroup"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="{StaticResource MenuItemNameKeyBindingSpacerWidth}"/>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemIGTColumnGroup"/>
-                            <ColumnDefinition Width="{StaticResource MenuItemSubMenuArrowWidth}"/>
-                        </Grid.ColumnDefinitions>
-                        <Rectangle x:Name="Bg" Stroke="Transparent" Fill="Transparent" StrokeThickness="0" Grid.ColumnSpan="5"/>
-                        <ContentPresenter x:Name="Icon" Margin="2,1,4,1" Width="16" Height="16" VerticalAlignment="Center"
-                                          ContentSource="Icon" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-                        <ContentPresenter Grid.Column="1" ContentSource="Header" Margin="8,1,0,1"
-                                          VerticalAlignment="Center" RecognizesAccessKey="True"
-                                          SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-                        <TextBlock x:Name="ShortcutText" Grid.Column="3" Text="{TemplateBinding MenuItem.InputGestureText}"
-                                   Margin="2" VerticalAlignment="Center"/>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="MenuItem.Icon">
-                            <Trigger.Value>
-                                <x:NullExtension/>
-                            </Trigger.Value>
-                            <Setter TargetName="Icon" Property="UIElement.Visibility" Value="Collapsed"/>
-                        </Trigger>
-                        <Trigger Property="MenuItem.IsHighlighted" Value="true">
-                            <Setter TargetName="Bg"
-                                    Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHover}}"
-                                    Property="Shape.Fill"/>
-                            <Setter TargetName="Bg"
-                                    Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHoverBorder}}"
-                                    Property="Shape.Stroke"/>
-                            <Setter Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHoverText}}"
-                                    Property="TextElement.Foreground"/>
-                        </Trigger>
-                        <Trigger Property="UIElement.IsEnabled" Value="false">
-                            <Setter Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextInactive}}" Property="Control.Foreground"/>
-                        </Trigger>
-                        <DataTrigger Value="True"
-                                     Binding="{Binding InputGestureText, RelativeSource={RelativeSource Self}, Converter={StaticResource IsNullOrEmptyConverter}}">
-                            <Setter TargetName="ShortcutText" Property="UIElement.Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <Geometry x:Key="MenuRightArrow">F1M6.64645,4.14693C6.45118,4.3422,6.45118,4.65878,6.64645,4.85404L9.79289,8.00049 6.64645,11.1469C6.45118,11.3422 6.45118,11.6588 6.64645,11.854 6.84171,12.0493 7.15829,12.0493 7.35355,11.854L10.8536,8.35404C11.0488,8.15878,11.0488,7.8422,10.8536,7.64693L7.35355,4.14693C7.15829,3.95167,6.84171,3.95167,6.64645,4.14693z</Geometry>
 
     <Style TargetType="{x:Type controls:ThemedMenuScrollViewer}">
         <Setter Property="HorizontalScrollBarVisibility" Value="Hidden"/>
@@ -145,104 +104,162 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type controls:ThemedMenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type controls:ThemedMenuItem}">
-                    <Grid SnapsToDevicePixels="true" Background="Transparent" MinHeight="22">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="{StaticResource MenuItemIconWidth}"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="{StaticResource MenuItemNameKeyBindingSpacerWidth}"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="{StaticResource MenuItemSubMenuArrowWidth}"/>
-                        </Grid.ColumnDefinitions>
-                        <Rectangle x:Name="Bg" Stroke="Transparent" Fill="Transparent" StrokeThickness="0" Grid.ColumnSpan="5"/>
-                        <ContentPresenter x:Name="Icon" Margin="2,1,4,1" Width="16" Height="16" VerticalAlignment="Center"
-                                          ContentSource="Icon" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-                        <ContentPresenter Grid.Column="1" ContentSource="Header" Margin="8,1,0,1"
-                                          VerticalAlignment="Center" RecognizesAccessKey="True"
-                                          SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-                        <TextBlock x:Name="ShortcutText" Grid.Column="3" Text="{TemplateBinding MenuItem.InputGestureText}"
-                                   Margin="2" VerticalAlignment="Center"/>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="MenuItem.Icon">
-                            <Trigger.Value>
-                                <x:NullExtension/>
-                            </Trigger.Value>
-                            <Setter TargetName="Icon" Property="UIElement.Visibility" Value="Collapsed"/>
-                        </Trigger>
-                        <Trigger Property="MenuItem.IsHighlighted" Value="true">
-                            <Setter TargetName="Bg"
-                                    Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHover}}"
-                                    Property="Shape.Fill"/>
-                            <Setter TargetName="Bg"
-                                    Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHoverBorder}}"
-                                    Property="Shape.Stroke"/>
-                            <Setter Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHoverText}}"
-                                    Property="TextElement.Foreground"/>
-                        </Trigger>
-                        <Trigger Property="UIElement.IsEnabled" Value="false">
-                            <Setter Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextInactive}}" Property="Control.Foreground"/>
-                        </Trigger>
-                        <DataTrigger Value="True"
-                                     Binding="{Binding InputGestureText, RelativeSource={RelativeSource Self}, Converter={StaticResource IsNullOrEmptyConverter}}">
-                            <Setter TargetName="ShortcutText" Property="UIElement.Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="{x:Type controls:ThemedContextMenu}" BasedOn="{StaticResource {x:Type ContextMenu}}">
-        <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextActive}}"/>
-        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type controls:ThemedContextMenu}">
-                    <controls:SystemDropShadowChrome x:Name="Shadow" Margin="0,0,5,5" 
-                                                         Color="{DynamicResource {x:Static colors:CommandBarColors.DropShadowBackgroundColor}}">
-                        <Grid Background="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuIconBackground}}">
-                            <controls:ThemedMenuScrollViewer>
-                                <Grid RenderOptions.ClearTypeHint="Enabled" 
-                                      RenderOptions.BitmapScalingMode="{x:Static dpi:DpiHelper.BitmapScalingMode}"
-                                      Background="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuBackground}}">
-                                    <Border x:Name="PART_IconBackground" Width="28" 
-                                            Background="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuIconBackground}}" 
-                                            HorizontalAlignment="Left"/>
-                                    <ItemsPresenter KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle" 
-                                                    Margin="3" Grid.IsSharedSizeScope="true"
-                                                    SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                                </Grid>
-                            </controls:ThemedMenuScrollViewer>
-                            <Border BorderThickness="1" 
-                                    BorderBrush="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuBorder}}"/>
-                        </Grid>
-                    </controls:SystemDropShadowChrome>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="{x:Type controls:ThemedSeparator}">
+    <Style x:Key="ContextMenuPopupStyle" TargetType="{x:Type ContentControl}">
         <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Margin" Value="{x:Static styles:StyleConstants.PopupMargin}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+                    <Grid>
+                        <Border x:Name="DropShadowBorder" 
+                            Background="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuBackground}}"
+                            BorderBrush="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuBorder}}"
+                            BorderThickness="{x:Static styles:StyleConstants.ControlStrokeThickness}"
+                            CornerRadius="{x:Static styles:StyleConstants.PopupBorderCornerRadius}">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="{x:Static styles:StyleConstants.PopupShadowSize}" 
+                                              Direction="270" ShadowDepth="6"
+                                              Color="{DynamicResource {x:Static colors:CommandBarColors.DropShadowBackgroundColor}}"
+                                              Opacity="{Binding Color, RelativeSource={RelativeSource Self}, Converter={StaticResource ColorToOpacityConverter}}"/>
+                            </Border.Effect>
+                            <ContentPresenter Content="{TemplateBinding ContentControl.Content}"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <ControlTemplate x:Key="SubmenuHeaderTemplate" TargetType="{x:Type MenuItem}">
+        <Border x:Name="ControlBorder" Background="{TemplateBinding Control.Background}"
+                CornerRadius="{x:Static styles:StyleConstants.ControlCornerRadius}"
+                Padding="{TemplateBinding Control.Padding}">
+            <Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="MenuItemIconColumnGroup" 
+                                          MinWidth="{x:Static styles:StyleConstants.ControlMinWidthSmall}" Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="{x:Static styles:StyleConstants.TextSpacerGridColumnWidth}"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" BorderThickness="{x:Static styles:StyleConstants.ControlStrokeThickness}"
+                            CornerRadius="{x:Static styles:StyleConstants.ControlCornerRadius}"
+                            Padding="{x:Static styles:StyleConstants.ControlMarginXSmall}"
+                            SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}">
+                        <ContentPresenter ContentSource="Icon" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Width="16" Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"/>
+                    </Border>
+                    <ContentPresenter Grid.Column="1" Margin="2,0" MinHeight="16" 
+                                      ContentSource="Header" RecognizesAccessKey="True" 
+                                      SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" 
+                                      VerticalAlignment="Center"/>
+
+                    <Path x:Name="Arrow" Grid.Column="3" Data="{StaticResource MenuRightArrow}"
+                          Fill="{TemplateBinding TextElement.Foreground}" 
+                          HorizontalAlignment="Center" Margin="2,0, 2, 0" VerticalAlignment="Center"
+                          Width="16" Height="{Binding Width, RelativeSource={RelativeSource Self}}"/>
+                </Grid>
+                <Popup x:Name="PART_Popup" Grid.ColumnSpan="2" AllowsTransparency="True"
+                       HorizontalOffset="2.0" Placement="Right" PopupAnimation="None"
+                       IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                       Visibility="{Binding Visibility, ElementName=Arrow}">
+                    <ContentControl Style="{StaticResource ContextMenuPopupStyle}">
+                        <controls:ThemedMenuScrollViewer>
+                            <ItemsPresenter Margin="{x:Static styles:StyleConstants.ControlMarginSmall}"
+                                            Grid.IsSharedSizeScope="True" KeyboardNavigation.DirectionalNavigation="Cycle"
+                                            KeyboardNavigation.TabNavigation="Cycle"
+                                            RenderOptions.BitmapScalingMode="{x:Static dpi:DpiHelper.BitmapScalingMode}"
+                                            RenderOptions.ClearTypeHint="Enabled"
+                                            SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+                        </controls:ThemedMenuScrollViewer>
+                    </ContentControl>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Role" Value="SubmenuItem">
+                <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style TargetType="{x:Type controls:ThemedMenuItem}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisualStyle}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextActive}}"/>
+        <Setter Property="Margin" Value="{x:Static styles:StyleConstants.ControlMarginXSmall}"/>
+        <Setter Property="MinHeight" Value="{x:Static styles:StyleConstants.ControlMinHeightSmall}"/>
+        <Setter Property="MinWidth" Value="{x:Static styles:StyleConstants.ControlMinWidthSmall}"/>
+        <Setter Property="Padding" Value="{x:Static styles:StyleConstants.ControlMarginSmall}"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextInactive}}"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHover}}"/>
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuItemHover}}"/>
+            </Trigger>
+            <Trigger Property="IsSubmenuOpen" Value="True">
+                <Setter Property="Background" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuBackground}}"/>
+            </Trigger>
+            <Trigger Property="Role" Value="SubmenuHeader">
+                <Setter Property="Template" Value="{StaticResource SubmenuHeaderTemplate}"/>
+            </Trigger>
+            <Trigger Property="Role" Value="SubmenuItem">
+                <Setter Property="Template" Value="{StaticResource SubmenuHeaderTemplate}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <Style TargetType="{x:Type controls:ThemedContextMenu}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuBackground}}"/>
+        <Setter Property="HorizontalOffset" Value="{x:Static styles:StyleConstants.PopupShadowOffsetInvert}"/>
+        <Setter Property="VerticalOffset" Value="{x:Static styles:StyleConstants.PopupShadowOffsetInvert}"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="imaging:ImageThemingUtilities.ImageBackgroundColor"
+                Value="{Binding Source={StaticResource ImageBackgroundColor}, Path=Data, Converter={StaticResource BrushToColorConverter}}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource {x:Static colors:CommandBarColors.CommandBarTextActive}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContextMenu}">
+                    <ContentControl x:Name="PopupContent" Style="{StaticResource ContextMenuPopupStyle}">
+                        <controls:ThemedMenuScrollViewer x:Name="PART_ScrollViewer">
+                            <Grid RenderOptions.BitmapScalingMode="{x:Static dpi:DpiHelper.BitmapScalingMode}"
+                                  RenderOptions.ClearTypeHint="Enabled">
+                                <ItemsPresenter Grid.IsSharedSizeScope="True" KeyboardNavigation.DirectionalNavigation="Cycle"
+                                                Margin="{x:Static styles:StyleConstants.ControlMarginSmall}"
+                                                SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+                            </Grid>
+                        </controls:ThemedMenuScrollViewer>
+                    </ContentControl>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Placement" Value="Top">
+                <Setter Property="VerticalOffset" Value="{x:Static styles:StyleConstants.PopupShadowOffset}"/>
+            </Trigger>
+            <DataTrigger Binding="{Binding Source={x:Static SystemParameters.MenuDropAlignment}}" Value="True">
+                <Setter Property="HorizontalOffset" Value="{x:Static styles:StyleConstants.PopupShadowOffset}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type controls:ThemedSeparator}">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="IsEnabled" Value="False"/>
+        <Setter Property="Margin" Value="{x:Static styles:StyleConstants.ControlMarginSmall}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Grid SnapsToDevicePixels="true" Background="Transparent">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="26"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Rectangle Height="1" Margin="4,2,1,2" Grid.Column="1"
-                                   Fill="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuSeparatorBrush}}"/>
-                    </Grid>
+                    <Rectangle Fill="{DynamicResource {x:Static colors:CommandBarColors.CommandBarMenuSeparatorBrush}}" Height="1" Stretch="Fill"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
+    
 </ResourceDictionary>

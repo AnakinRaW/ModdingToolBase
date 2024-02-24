@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 using AnakinRaW.CommonUtilities.Wpf.Converters;
-using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
 using Validation;
 
@@ -36,7 +33,6 @@ public class ThemedContextMenu : ContextMenu
 
     private bool _isCommandInExecution;
     private ScrollViewer? _scrollViewer;
-    private Border? _iconBorder;
     private double _horizontalOffset = double.MinValue;
 
     public MenuShowOptions ShowOptions
@@ -94,6 +90,7 @@ public class ThemedContextMenu : ContextMenu
     private bool LeftAligned => ShowOptions.HasFlag(MenuShowOptions.LeftAlign);
 
     private bool RightAligned => !LeftAligned && ShowOptions.HasFlag(MenuShowOptions.RightAlign);
+
     static ThemedContextMenu()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ThemedContextMenu), new FrameworkPropertyMetadata(typeof(ThemedContextMenu)));
@@ -112,34 +109,6 @@ public class ThemedContextMenu : ContextMenu
     {
         base.OnApplyTemplate();
         _scrollViewer = GetTemplateChild("PART_ScrollViewer") as ScrollViewer;
-        _iconBorder = GetTemplateChild("PART_IconBackground") as Border;
-        SubscribeToBorderBackgroundChanges();
-    }
-
-    private void SubscribeToBorderBackgroundChanges()
-    {
-        UnsubscribeFromBorderBackgroundChanges();
-        if (_iconBorder == null)
-            return;
-        _iconBorder.AddPropertyChangeHandler(Border.BackgroundProperty, OnBorderBackgroundChanged!);
-        OnBorderBackgroundChanged(_iconBorder, EventArgs.Empty);
-    }
-
-    private void UnsubscribeFromBorderBackgroundChanges()
-    {
-        var border = _iconBorder;
-        border?.RemovePropertyChangeHandler(Border.BackgroundProperty, OnBorderBackgroundChanged!);
-    }
-
-    private void OnBorderBackgroundChanged(object sender, EventArgs e)
-    {
-        if (sender is not Border border)
-            return;
-        var color = (Color)BrushToColorConverter.Convert(border.Background, typeof(Color), null, CultureInfo.CurrentCulture)!;
-        if (color.A > 127)
-            SetValue(ImageThemingUtilities.ImageBackgroundColorProperty, color);
-        else
-            ClearValue(ImageThemingUtilities.ImageBackgroundColorProperty);
     }
 
     protected override DependencyObject GetContainerForItemOverride()

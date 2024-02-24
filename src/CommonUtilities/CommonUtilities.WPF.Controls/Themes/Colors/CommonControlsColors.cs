@@ -121,4 +121,6 @@ public class CommonControlsColors
     public static ComponentResourceKey ProgressBarBackground { get; } = new(typeof(CommonControlsColors), nameof(ProgressBarBackground));
     public static ComponentResourceKey ProgressBarBorder { get; } = new(typeof(CommonControlsColors), nameof(ProgressBarBorder));
     public static ComponentResourceKey ProgressBarValue { get; } = new(typeof(CommonControlsColors), nameof(ProgressBarValue));
+
+    public static ComponentResourceKey ControlFocusColor { get; } = new(typeof(CommonControlsColors), nameof(ControlFocusColor));
 }

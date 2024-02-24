@@ -1,9 +1,11 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Converters;
 
-public class ColorToOpacityConverter : ValueConverter<object, double>
+internal class ColorToOpacityConverter : ValueConverter<object, double>
 {
     protected override double Convert(object colorObj, object? parameter, CultureInfo culture)
     {
