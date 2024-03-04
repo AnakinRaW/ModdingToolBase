@@ -74,12 +74,21 @@ internal class UpdateCatalogProvider : IUpdateCatalogProvider
             var installedComponent = currentItems.FirstOrDefault(c =>
                 ProductComponentIdentityComparer.VersionIndependent.Equals(c, availableItem));
 
-            if (installedComponent is not null)
-                currentItems.Remove(installedComponent);
 
-            var action = availableItem.DetectedState == DetectionState.Present
-                ? UpdateAction.Keep
-                : UpdateAction.Update;
+            var isDowngrade = false;
+            if (installedComponent is not null)
+            {
+                currentItems.Remove(installedComponent);
+                isDowngrade = availableItem.Version?.CompareSortOrderTo(installedComponent.Version) < 0;
+            }
+                
+
+            UpdateAction action;
+            if (availableItem.DetectedState == DetectionState.Present)
+                action = UpdateAction.Keep;
+            else
+                action = !isDowngrade ? UpdateAction.Update : UpdateAction.Keep;
+               
             updateItems.Add(new UpdateItem(installedComponent, availableItem, action));
         }
 
