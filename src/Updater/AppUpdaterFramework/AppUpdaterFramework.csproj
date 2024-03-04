@@ -40,10 +40,6 @@
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.133" />
-	</ItemGroup>
 	
 	<PropertyGroup>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
