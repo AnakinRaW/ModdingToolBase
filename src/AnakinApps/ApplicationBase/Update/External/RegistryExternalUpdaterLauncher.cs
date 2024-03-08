@@ -2,7 +2,6 @@
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.CommonUtilities;
-using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
