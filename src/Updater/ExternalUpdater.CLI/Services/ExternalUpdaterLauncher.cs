@@ -5,7 +5,6 @@ using System.IO.Abstractions;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ExternalUpdater.Services;
 
@@ -15,9 +14,10 @@ public class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : IExtern
 
     public Process Start(IFileInfo updater, ExternalUpdaterOptions options)
     {
-        Requires.NotNull(updater, nameof(updater));
-        Requires.NotNull(options, nameof(options));
-
+        if (updater == null) 
+            throw new ArgumentNullException(nameof(updater));
+        if (options == null)
+            throw new ArgumentNullException(nameof(options));
         if (!updater.Exists)
             throw new FileNotFoundException("Could not find updater application", updater.FullName);
 

@@ -8,23 +8,19 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class UpdateCatalogProvider : IUpdateCatalogProvider
+internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdateCatalogProvider
 {
-    private readonly IManifestInstallationDetector _detector;
-
-    public UpdateCatalogProvider(IServiceProvider serviceProvider)
-    {
-        _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
-    }
+    private readonly IManifestInstallationDetector _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
 
     public IUpdateCatalog Create(IInstalledProduct installedProduct, IInstalledComponentsCatalog currentCatalog, IProductManifest availableCatalog)
     {
-        Requires.NotNull(currentCatalog, nameof(currentCatalog));
-        Requires.NotNull(availableCatalog, nameof(availableCatalog));
+        if (currentCatalog == null)
+            throw new ArgumentNullException(nameof(currentCatalog));
+        if (availableCatalog == null)
+            throw new ArgumentNullException(nameof(availableCatalog));
 
         if (!ProductReferenceEqualityComparer.NameOnly.Equals(currentCatalog.Product, availableCatalog.Product))
             throw new InvalidOperationException("Cannot build update catalog from different products.");

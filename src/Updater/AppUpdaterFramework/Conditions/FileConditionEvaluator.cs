@@ -6,7 +6,6 @@ using System.Linq;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
@@ -16,8 +15,10 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
 
     public bool Evaluate(IServiceProvider services, ICondition condition, IDictionary<string, string?>? properties = null)
     {
-        Requires.NotNull(services, nameof(services));
-        Requires.NotNull(condition, nameof(condition));
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        if (condition == null) 
+            throw new ArgumentNullException(nameof(condition));
         if (condition is not FileCondition fileCondition)
             throw new ArgumentException("condition is not FileCondition", nameof(condition));
 
@@ -39,8 +40,10 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         return fileCondition.Version == null || EvaluateFileVersion(filePath, fileCondition.Version);
     }
 
-    private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashType hashType, byte[] expectedHash)
+    private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashType hashType, byte[]? expectedHash)
     {
+        if (expectedHash is null)
+            return false;
         var actualHash = hashingService.GetFileHash(file, hashType);
         return actualHash.SequenceEqual(expectedHash);
     }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 
@@ -29,7 +28,8 @@ internal class ManifestDownloader : IManifestDownloader
 
     public ManifestDownloader(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _downloadManager = serviceProvider.GetService<IDownloadManager>() ?? new DownloadManager(serviceProvider);
     }

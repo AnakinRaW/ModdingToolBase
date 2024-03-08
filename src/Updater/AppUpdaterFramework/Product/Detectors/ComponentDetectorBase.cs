@@ -3,7 +3,6 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Detectors;
 
@@ -15,15 +14,16 @@ internal abstract class ComponentDetectorBase<T> : IComponentDetector where T : 
 
     protected ComponentDetectorBase(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        ServiceProvider = serviceProvider;
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
         
     public bool GetCurrentInstalledState(IInstallableComponent installableComponent, ProductVariables productVariables)
     {
-        Requires.NotNull(installableComponent, nameof(installableComponent));
-        Requires.NotNull(productVariables, nameof(productVariables));
+        if (installableComponent == null) 
+            throw new ArgumentNullException(nameof(installableComponent));
+        if (productVariables == null)
+            throw new ArgumentNullException(nameof(productVariables));
         var component = ValidateSupported(installableComponent);
         return FindCore(component, productVariables);
     }

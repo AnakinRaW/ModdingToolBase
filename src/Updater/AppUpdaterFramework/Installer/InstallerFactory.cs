@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
 
-internal class InstallerFactory : IInstallerFactory
+internal class InstallerFactory(IServiceProvider serviceProvider) : IInstallerFactory
 {
     private readonly Dictionary<ComponentType, IInstaller> _installers = new();
-    private readonly IServiceProvider _serviceProvider;
-
-    public InstallerFactory(IServiceProvider serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
     public IInstaller CreateInstaller(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null) 
+            throw new ArgumentNullException(nameof(component));
         switch (component.Type)
         {
             case ComponentType.File:

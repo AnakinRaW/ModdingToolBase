@@ -5,23 +5,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 
-public abstract class ManifestLoaderBase : IManifestLoader
+public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IManifestLoader
 {
-    protected readonly IServiceProvider ServiceProvider;
-
-    protected ManifestLoaderBase(IServiceProvider serviceProvider)
-    {
-        ServiceProvider = serviceProvider;
-    }
+    protected readonly IServiceProvider ServiceProvider = serviceProvider;
 
     public async Task<IProductManifest> LoadManifest(IFileInfo manifestFile, IProductReference productReference, CancellationToken cancellationToken = default)
     {
-        Requires.NotNull(manifestFile, nameof(manifestFile));
-        Requires.NotNull(productReference, nameof(productReference));
+        if (manifestFile == null) 
+            throw new ArgumentNullException(nameof(manifestFile));
+        if (productReference == null)
+            throw new ArgumentNullException(nameof(productReference));
         using var manifest = manifestFile.OpenRead();
         return await LoadManifestCore(manifest, productReference, cancellationToken);
     }

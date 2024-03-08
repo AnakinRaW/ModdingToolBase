@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.CommandBar.Models;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.CommandBar;
 
@@ -10,7 +9,8 @@ internal class ItemsControlFactory
 {
     public IReadOnlyList<ICommandBarControlViewModel> CreateModel(ICommandBarItemsSource itemsSource)
     {
-        Requires.NotNull(itemsSource, nameof(itemsSource));
+        if (itemsSource == null) 
+            throw new ArgumentNullException(nameof(itemsSource));
         var groups = itemsSource.Groups;
         if (!groups.Any())
             throw new InvalidOperationException("Unable to create empty menu");

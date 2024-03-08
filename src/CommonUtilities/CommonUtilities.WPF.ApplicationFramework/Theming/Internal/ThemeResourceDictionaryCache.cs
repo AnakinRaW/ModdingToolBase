@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Theming;
 
@@ -13,7 +12,8 @@ internal class ThemeResourceDictionaryCache : IThemeResourceDictionaryCache
 
     public ThemeResourceDictionaryCache(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _builder = serviceProvider.GetService<IThemeResourceDictionaryBuilder>() ?? new ThemeResourceDictionaryBuilder();
     }
 

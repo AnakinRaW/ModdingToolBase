@@ -17,7 +17,6 @@ using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.CommonUtilities.Verification;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 
 namespace AnakinRaW.ApplicationBase;
@@ -70,12 +69,6 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
         serviceCollection.AddSingleton<IDownloadManagerConfigurationProvider>(new ApplicationDownloadConfigurationProvider());
         serviceCollection.AddSingleton<IHashingService>(_ => new HashingService());
-        serviceCollection.AddSingleton<IVerificationManager>(sp =>
-        {
-            var vm = new VerificationManager(sp);
-            vm.AddDefaultVerifiers();
-            return vm;
-        });
     }
 
 

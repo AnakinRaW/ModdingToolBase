@@ -7,9 +7,9 @@ using AnakinRaW.AppUpdaterFramework.Conditions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
@@ -23,6 +23,8 @@ internal sealed class MetadataExtractor : IMetadataExtractor
 
     public MetadataExtractor(IServiceProvider serviceProvider)
     {
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
         _assemblyMetadataExtractor = serviceProvider.GetService<IAssemblyMetadataExtractor>() ?? new AssemblyMetadataExtractor(serviceProvider);
@@ -31,8 +33,9 @@ internal sealed class MetadataExtractor : IMetadataExtractor
     public IInstallableComponent ComponentFromAssembly(Assembly assembly, string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
-        Requires.NotNull(assembly, nameof(assembly));
-        Requires.NotNullOrEmpty(installLocation, nameof(installLocation));
+        if (assembly == null) 
+            throw new ArgumentNullException(nameof(assembly));
+        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
 
         var assemblyFile = assembly.Location;
         using var assemblyStream = _fileSystem.FileStream.New(assemblyFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -42,8 +45,9 @@ internal sealed class MetadataExtractor : IMetadataExtractor
     public Task<IInstallableComponent> ComponentFromFileAsync(IFileInfo file, string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
-        Requires.NotNull(file, nameof(file));
-        Requires.NotNullOrEmpty(installLocation, nameof(installLocation));
+        if (file == null)
+            throw new ArgumentNullException(nameof(file));
+        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
 
         if (!file.Exists)
             throw new FileNotFoundException("Component assembly not found.", file.FullName);
@@ -63,8 +67,9 @@ internal sealed class MetadataExtractor : IMetadataExtractor
     public IInstallableComponent ComponentFromStream(Stream stream, string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
-        Requires.NotNull(stream, nameof(stream));
-        Requires.NotNullOrEmpty(installLocation, nameof(installLocation));
+        if (stream == null) 
+            throw new ArgumentNullException(nameof(stream));
+        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
 
         var componentInformation = InformationFromStream(stream);
 
@@ -91,7 +96,8 @@ internal sealed class MetadataExtractor : IMetadataExtractor
 
     public Task<IProductReference> ProductReferenceFromFileAsync(IFileInfo file)
     {
-        Requires.NotNull(file, nameof(file));
+        if (file == null) 
+            throw new ArgumentNullException(nameof(file));
 
         if (!file.Exists)
             throw new FileNotFoundException("Component assembly not found.", file.FullName);
@@ -105,7 +111,8 @@ internal sealed class MetadataExtractor : IMetadataExtractor
 
     public IProductReference ProductReferenceFromAssembly(Assembly assembly)
     {
-        Requires.NotNull(assembly, nameof(assembly));
+        if (assembly == null) 
+            throw new ArgumentNullException(nameof(assembly));
 
         var assemblyFile = assembly.Location;
         using var assemblyStream = _fileSystem.FileStream.New(assemblyFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

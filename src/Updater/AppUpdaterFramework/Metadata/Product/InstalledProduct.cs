@@ -1,6 +1,7 @@
-﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+﻿using System;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.CommonUtilities;
 using Semver;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -24,9 +25,11 @@ internal sealed class InstalledProduct : IInstalledProduct
 
     public InstalledProduct(IProductReference reference, string installationPath, IProductManifest manifest, ProductVariables? variables, ProductState state = ProductState.Installed)
     {
-        Requires.NotNull(reference, nameof(reference));
-        Requires.NotNull(manifest, nameof(manifest));
-        Requires.NotNullOrEmpty(installationPath, nameof(installationPath));
+        if (reference == null) 
+            throw new ArgumentNullException(nameof(reference));
+        if (manifest == null) 
+            throw new ArgumentNullException(nameof(manifest));
+        ThrowHelper.ThrowIfNullOrEmpty(installationPath);
         _reference = reference;
         InstallationPath = installationPath;
         State = state;

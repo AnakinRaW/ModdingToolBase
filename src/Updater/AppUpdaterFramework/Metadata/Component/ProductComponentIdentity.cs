@@ -1,5 +1,6 @@
-﻿using Semver;
-using Validation;
+﻿using System;
+using AnakinRaW.CommonUtilities;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -10,7 +11,7 @@ public class ProductComponentIdentity : IProductComponentIdentity
 
     public ProductComponentIdentity(string id, SemVersion? version = null)
     {
-        Requires.NotNullOrEmpty(id, nameof(id));
+        ThrowHelper.ThrowIfNullOrEmpty(id);
         Id = id;
         Version = version;
     }
@@ -31,7 +32,8 @@ public class ProductComponentIdentity : IProductComponentIdentity
 
     internal static string Format(IProductComponentIdentity identity, bool excludeVersion = false)
     {
-        Requires.NotNull(identity, nameof(identity));
+        if (identity == null) 
+            throw new ArgumentNullException(nameof(identity));
         return Utilities.FormatIdentity(identity.Id, excludeVersion ? null : identity.Version, null);
     }
 }

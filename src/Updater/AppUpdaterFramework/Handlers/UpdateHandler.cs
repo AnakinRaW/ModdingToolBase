@@ -5,7 +5,6 @@ using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
@@ -19,7 +18,8 @@ public class UpdateHandler : IUpdateHandler
 
     public UpdateHandler(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _resultHandler = serviceProvider.GetRequiredService<IUpdateResultHandler>();
         _updateService = serviceProvider.GetRequiredService<IUpdateService>();

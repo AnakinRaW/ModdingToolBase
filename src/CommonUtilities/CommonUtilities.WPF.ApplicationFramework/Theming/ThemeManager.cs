@@ -2,7 +2,6 @@
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Themes;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Theming;
 
@@ -36,15 +35,17 @@ public class ThemeManager : IThemeManager
 
     public ThemeManager(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _cache = serviceProvider.GetService<IThemeResourceDictionaryCache>() ?? new ThemeResourceDictionaryCache(serviceProvider);
     }
 
     public void Initialize(System.Windows.Application application, ITheme? defaultTheme = null)
     {
+        if (application == null) 
+            throw new ArgumentNullException(nameof(application));
         if (_initialized)
             throw new InvalidOperationException("Theme manager already initialized");
-        Requires.NotNull(application, nameof(application));
         lock (this)
         {
             _application = application;

@@ -4,7 +4,6 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog.Buttons;
 using AnakinRaW.CommonUtilities.Wpf.Controls;
 using AnakinRaW.CommonUtilities.Wpf.Input;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
@@ -35,8 +34,7 @@ public abstract class DialogViewModel : ModalWindowViewModel, IDialogViewModel
 
     protected DialogViewModel(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         UnifiedButtonCommand = new DelegateCommand<IButtonViewModel>(Execute, CanExecute);
     }
 

@@ -5,22 +5,15 @@ using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
-internal class DiskSpaceCalculator : IDiskSpaceCalculator 
+internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpaceCalculator
 {
     internal const long AdditionalSizeBuffer = 20_000_000;
 
-    private readonly IFileSystem _fileSystem;
-    private readonly IUpdateConfiguration _updateConfiguration;
-
-    public DiskSpaceCalculator(IServiceProvider serviceProvider)
-    {
-        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-    }
+    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public void ThrowIfNotEnoughDiskSpaceAvailable(
         IInstallableComponent newComponent, 
@@ -28,7 +21,8 @@ internal class DiskSpaceCalculator : IDiskSpaceCalculator
         string? installPath, 
         CalculationOptions options)
     {
-        Requires.NotNull(newComponent, nameof(newComponent));
+        if (newComponent == null) 
+            throw new ArgumentNullException(nameof(newComponent));
         foreach (var diskData in GetDiskInformation(newComponent, oldComponent, installPath, options))
         {
             if (!diskData.HasEnoughDiskSpace)

@@ -11,52 +11,36 @@ using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.DownloadManager.Validation;
 using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using AnakinRaW.CommonUtilities.SimplePipeline.Steps;
-using AnakinRaW.CommonUtilities.Verification;
-using AnakinRaW.CommonUtilities.Verification.Hash;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
-internal class DownloadStep : SynchronizedStep, IComponentStep
+internal class DownloadStep(
+    IInstallableComponent installable,
+    IStepProgressReporter progressReporter,
+    IUpdateConfiguration updateConfiguration,
+    IServiceProvider serviceProvider)
+    : SynchronizedStep(serviceProvider), IComponentStep
 {
-    private readonly IUpdateConfiguration _updateConfiguration;
-    private readonly IDownloadRepository _downloadRepository;
+    private readonly IUpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
+    private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
 
     public ProgressType Type => ProgressTypes.Download;
-    public IStepProgressReporter ProgressReporter { get; }
+    public IStepProgressReporter ProgressReporter { get; } = progressReporter ?? throw new ArgumentNullException(nameof(progressReporter));
 
     public IFileInfo DownloadPath { get; private set; } = null!;
 
-    public long Size { get; }
+    public long Size { get; } = installable.DownloadSize;
 
-    public Uri Uri { get; }
+    public Uri Uri { get; } = installable.OriginInfo!.Url;
 
-    public IInstallableComponent Component { get; }
+    public IInstallableComponent Component { get; } = installable ?? throw new ArgumentNullException(nameof(installable));
 
     IProductComponent IComponentStep.Component => Component;
-
-    public DownloadStep(
-        IInstallableComponent installable,
-        IStepProgressReporter progressReporter, 
-        IUpdateConfiguration updateConfiguration,
-        IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Requires.NotNull(installable, nameof(installable));
-        Requires.NotNull(progressReporter, nameof(progressReporter));
-        Requires.NotNull(updateConfiguration, nameof(updateConfiguration));
-
-        Component = installable;
-        ProgressReporter = progressReporter;
-        Size = installable.DownloadSize;
-        Uri = installable.OriginInfo!.Url;
-
-        _updateConfiguration = updateConfiguration;
-        _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
-    }
 
     public override string ToString()
     {
@@ -79,7 +63,7 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
 
             if (lastException != null)
             {
-                var action = lastException is VerificationFailedException ? "validate download" : "download";
+                var action = lastException is DownloadValidationFailedException ? "validate download" : "download";
                 Logger?.LogError(lastException, $"Failed to {action} from '{Uri}'. {lastException.Message}");
                 throw lastException;
             }
@@ -165,8 +149,6 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
     private async Task DownloadAndVerifyAsync(IDownloadManager downloadManager, IFileInfo destination, CancellationToken token)
     {
         var integrityInformation = Component.OriginInfo!.IntegrityInformation;
-        var hashContext = HashVerificationContext.FromHash(integrityInformation.Hash);
-
         try
         {
 #if NETSTANDARD2_1
@@ -174,7 +156,8 @@ internal class DownloadStep : SynchronizedStep, IComponentStep
 #else
             using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 #endif
-            await downloadManager.DownloadAsync(Uri, file, OnProgress, hashContext, token);
+            await downloadManager.DownloadAsync(Uri, file, OnProgress,
+                new HashDownloadValidator(integrityInformation.Hash, integrityInformation.HashType, Services), token);
 
         }
         catch (OperationCanceledException)

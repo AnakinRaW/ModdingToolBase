@@ -55,7 +55,7 @@ public class ApplicationBranchUtilities
             try
             {
                 using var ms = new MemoryStream();
-                await _downloadManager.DownloadAsync(requestUri.ToUri(), ms, null);
+                await _downloadManager.DownloadAsync(requestUri.ToUri(), ms);
                 return ms.ToArray();
             }
             catch (Exception e) when (e is HttpRequestException or DownloadFailedException)

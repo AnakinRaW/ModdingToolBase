@@ -7,7 +7,6 @@ using System.Windows.Threading;
 using AnakinRaW.CommonUtilities.Wpf.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
@@ -24,7 +23,8 @@ internal class QueuedDialogService : IQueuedDialogService
 
     public QueuedDialogService(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _dialogFactory = serviceProvider.GetRequiredService<IDialogFactory>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }

@@ -6,24 +6,17 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Detectors;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 
-internal class ManifestInstallationDetector : IManifestInstallationDetector
+internal class ManifestInstallationDetector(IServiceProvider serviceProvider) : IManifestInstallationDetector
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IComponentDetectorFactory _componentDetectorFactory;
-
-    public ManifestInstallationDetector(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-        _componentDetectorFactory = serviceProvider.GetService<IComponentDetectorFactory>() ?? ComponentDetectorFactory.Default;
-    }
+    private readonly IComponentDetectorFactory _componentDetectorFactory = serviceProvider.GetService<IComponentDetectorFactory>() ?? ComponentDetectorFactory.Default;
 
     public IReadOnlyCollection<IInstallableComponent> DetectInstalledComponents(IProductManifest manifest, ProductVariables? productVariables = null)
     {
-        Requires.NotNull(manifest, nameof(manifest));
+        if (manifest == null) 
+            throw new ArgumentNullException(nameof(manifest));
         productVariables ??= new ProductVariables();
 
         var installedComponents = new HashSet<IInstallableComponent>(ProductComponentIdentityComparer.VersionIndependent);
@@ -40,7 +33,7 @@ internal class ManifestInstallationDetector : IManifestInstallationDetector
 
     private DetectionState IsInstalled(IInstallableComponent installable, ProductVariables productVariables)
     {
-        var detector = _componentDetectorFactory.GetDetector(installable.Type, _serviceProvider);
+        var detector = _componentDetectorFactory.GetDetector(installable.Type, serviceProvider);
         return detector.GetCurrentInstalledState(installable, productVariables) ? DetectionState.Present : DetectionState.Absent;
     }
 }

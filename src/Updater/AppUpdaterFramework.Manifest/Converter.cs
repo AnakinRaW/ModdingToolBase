@@ -85,10 +85,12 @@ public static class Converter
             ByteArrayToString(fileCondition.IntegrityInformation.Hash));
     }
 
-    public static string ByteArrayToString(byte[] ba)
+    public static string? ByteArrayToString(byte[]? array)
     {
-        var hex = new StringBuilder(ba.Length * 2);
-        foreach (var b in ba)
+        if (array is null)
+            return null;
+        var hex = new StringBuilder(array.Length * 2);
+        foreach (var b in array)
             hex.AppendFormat("{0:x2}", b);
         return hex.ToString();
     }

@@ -1,5 +1,5 @@
-﻿using Semver;
-using Validation;
+﻿using System;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -13,7 +13,8 @@ public abstract class ProductComponent : IProductComponent
 
     protected ProductComponent(IProductComponentIdentity identity)
     {
-        Requires.NotNull(identity, nameof(identity));
+        if (identity == null) 
+            throw new ArgumentNullException(nameof(identity));
         Id = identity.Id;
         Version = identity.Version;
     }

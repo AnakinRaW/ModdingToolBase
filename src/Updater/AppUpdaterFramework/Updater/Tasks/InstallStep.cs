@@ -15,7 +15,6 @@ using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using AnakinRaW.CommonUtilities.SimplePipeline.Steps;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
@@ -61,9 +60,8 @@ internal class InstallStep : PipelineStep, IComponentStep
         IServiceProvider serviceProvider) : 
         this(installable, UpdateAction.Update, progressReporter, updateConfiguration, productVariables, serviceProvider)
     {
-        Requires.NotNull(download, nameof(download));
         _currentComponent = currentComponent;
-        _download = download;
+        _download = download ?? throw new ArgumentNullException(nameof(download));
     }
 
     private InstallStep(
@@ -74,16 +72,12 @@ internal class InstallStep : PipelineStep, IComponentStep
         ProductVariables productVariables,
         IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        Requires.NotNull(installable, nameof(installable));
-        Requires.NotNull(progressReporter, nameof(progressReporter));
-        Requires.NotNull(updateConfiguration, nameof(updateConfiguration));
-
-        Component = installable;
-        ProgressReporter = progressReporter;
+        Component = installable ?? throw new ArgumentNullException(nameof(installable));
+        ProgressReporter = progressReporter ?? throw new ArgumentNullException(nameof(progressReporter));
 
         _variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
         _action = updateAction;
-        _updateConfiguration = updateConfiguration;
+        _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
         _productVariables = productVariables;
         _installerFactory = serviceProvider.GetRequiredService<IInstallerFactory>();
     }
@@ -117,7 +111,8 @@ internal class InstallStep : PipelineStep, IComponentStep
             {
                 case UpdateAction.Update:
                 {
-                    Assumes.NotNull(_download);
+                    if (_download is null)
+                        throw new InvalidOperationException("download step must not be null");
                     var localPath = _download.DownloadPath;
                     Result = installer.Install(Component, localPath, _productVariables, token);
                     break;

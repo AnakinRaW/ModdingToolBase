@@ -3,26 +3,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class UpdateSession : IUpdateSession
+internal class UpdateSession(IProductReference product, IApplicationUpdater updater) : IUpdateSession
 {
-    private readonly IApplicationUpdater _updater;
+    private readonly IApplicationUpdater _updater = updater ?? throw new ArgumentNullException(nameof(updater));
     private readonly CancellationTokenSource _cts = new();
 
     public event EventHandler<ComponentProgressEventArgs>? DownloadProgress;
     public event EventHandler<ComponentProgressEventArgs>? InstallProgress;
-    public IProductReference Product { get; }
-
-    public UpdateSession(IProductReference product, IApplicationUpdater updater)
-    {
-        Requires.NotNull(product, nameof(product));
-        Requires.NotNull(updater, nameof(updater));
-        Product = product;
-        _updater = updater;
-    }
+    public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
     internal async Task<UpdateResult> StartUpdate()
     {

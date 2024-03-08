@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
@@ -14,7 +13,8 @@ internal class DefaultUpdateInteractionHandler : IUpdateInteractionHandler
 
     public DefaultUpdateInteractionHandler(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 

@@ -9,28 +9,20 @@ using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
 
-internal class FileInstaller : InstallerBase
+internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IFileSystem _fileSystem;
-    private readonly ILockedFileHandler _lockedFileHandler;
-
-    public FileInstaller(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
-        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+    private readonly ILockedFileHandler _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
 
     protected override InstallResult InstallCore(IInstallableComponent component, IFileInfo source, ProductVariables variables, CancellationToken token)
     {
-        Requires.NotNull(source, nameof(source));
+        if (source == null) 
+            throw new ArgumentNullException(nameof(source));
         if (component is not SingleFileComponent singleFileComponent)
             throw new NotSupportedException($"Component must be of type {nameof(SingleFileComponent)}");
 
@@ -79,13 +71,14 @@ internal class FileInstaller : InstallerBase
 
         if (fileCreateResult != InstallOperationResult.Success)
             return fileCreateResult;
-        
-        Assumes.NotNull(destinationStream);
+
+        if (destination is null)
+            throw new InvalidOperationException("Destination stream must not be null!");
 
         using (destinationStream)
         {
             using var sourceStream = source.OpenRead();
-            sourceStream.CopyTo(destinationStream);
+            sourceStream.CopyTo(destinationStream!);
         }
         
         return InstallOperationResult.Success;

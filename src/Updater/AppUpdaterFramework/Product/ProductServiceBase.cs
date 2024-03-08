@@ -8,7 +8,6 @@ using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
@@ -28,8 +27,7 @@ public abstract class ProductServiceBase : IProductService
 
     protected ProductServiceBase(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        ServiceProvider = serviceProvider;
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();
         _restartManager.RestartRequired += OnRestartRequired!;

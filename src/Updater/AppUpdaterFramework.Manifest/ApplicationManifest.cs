@@ -117,15 +117,15 @@ public record struct InstallSize(
 public record OriginInfo(
     [property: JsonPropertyName("url")] string Url,
     [property: JsonPropertyName("size")] long? Size,
-    [property: JsonPropertyName("sha256")] string Sha256
+    [property: JsonPropertyName("sha256")] string? Sha256
 )
 {
-    public AnakinRaW.AppUpdaterFramework.Metadata.Component.OriginInfo ToOriginInfo()
+    public Metadata.Component.OriginInfo ToOriginInfo()
     {
         if (string.IsNullOrEmpty(Url))
             throw new CatalogException($"Illegal manifest: {nameof(Url)} must not be null or empty.");
 
-        return new AnakinRaW.AppUpdaterFramework.Metadata.Component.OriginInfo(new Uri(Url, UriKind.Absolute))
+        return new Metadata.Component.OriginInfo(new Uri(Url, UriKind.Absolute))
         {
             IntegrityInformation = ManifestHelpers.FromSha256(Sha256),
             Size = Size

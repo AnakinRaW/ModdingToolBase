@@ -11,7 +11,6 @@ using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
@@ -51,8 +50,9 @@ public abstract class BranchManagerBase : IBranchManager
 
     public async Task<IProductManifest> GetManifest(IProductReference productReference, CancellationToken token = default)
     {
+        if (productReference == null) 
+            throw new ArgumentNullException(nameof(productReference));
         token.ThrowIfCancellationRequested();
-        Requires.NotNull(productReference, nameof(productReference));
         if (productReference.Branch is null)
             throw new InvalidOperationException("No branch specified.");
 

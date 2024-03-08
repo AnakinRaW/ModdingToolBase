@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
-internal class CompositeConditionsEvaluator
+internal class CompositeConditionsEvaluator(IServiceProvider services)
 {
-    private readonly IServiceProvider _services;
-    private readonly IConditionEvaluatorStore _evaluatorStore;
+    private readonly IConditionEvaluatorStore _evaluatorStore = services.GetRequiredService<IConditionEvaluatorStore>();
 
 
-    public CompositeConditionsEvaluator(IServiceProvider services)
-    {
-        _services = services;
-        _evaluatorStore = services.GetRequiredService<IConditionEvaluatorStore>();
-    }
-    
     public bool EvaluateConditions(IReadOnlyList<ICondition> conditions, IDictionary<string, string?>? properties = null)
     {
-        Requires.NotNull(conditions, nameof(conditions));
-        
+        if (conditions == null) throw new ArgumentNullException(nameof(conditions));
+
         var result = false;
         var resultList = new List<(bool value, ConditionJoin join)>();
         foreach (var condition in conditions)
@@ -28,7 +20,7 @@ internal class CompositeConditionsEvaluator
             var evaluator = _evaluatorStore.GetConditionEvaluator(condition);
             if (evaluator is null)
                 throw new Exception($"Cannot find evaluator for {condition.Id} of type {condition.Type}");
-            var evaluation = evaluator.Evaluate(_services, condition, properties);
+            var evaluation = evaluator.Evaluate(services, condition, properties);
             resultList.Add((evaluation, condition.Join));
         }
 

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Text;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
@@ -188,7 +188,7 @@ internal class VariableResolver(IServiceProvider serviceProvider) : IVariableRes
 
     private static string GetProgramFilesFolder(string programFilesName)
     {
-        Requires.NotNullOrEmpty(programFilesName, nameof(programFilesName));
+        ThrowHelper.ThrowIfNullOrEmpty(programFilesName);
         if (programFilesName.Equals(ProgramFilesX64, StringComparison.OrdinalIgnoreCase))
         {
             if (Environment.Is64BitOperatingSystem)
@@ -201,7 +201,7 @@ internal class VariableResolver(IServiceProvider serviceProvider) : IVariableRes
 
     private static string GetCommonProgramFilesFolder(string commonProgramFilesName)
     {
-        Requires.NotNullOrEmpty(commonProgramFilesName, nameof(commonProgramFilesName));
+        ThrowHelper.ThrowIfNullOrEmpty(commonProgramFilesName);
         if (commonProgramFilesName.Equals(CommonProgramFilesX64, StringComparison.OrdinalIgnoreCase))
         {
             if (Environment.Is64BitOperatingSystem)
@@ -214,7 +214,7 @@ internal class VariableResolver(IServiceProvider serviceProvider) : IVariableRes
 
     private static string GetSystemFolder(string systemFolder)
     {
-        Requires.NotNullOrEmpty(systemFolder, nameof(systemFolder));
+        ThrowHelper.ThrowIfNullOrEmpty(systemFolder);
         if (systemFolder.Equals(SystemX64, StringComparison.OrdinalIgnoreCase))
         {
             if (Environment.Is64BitOperatingSystem)

@@ -13,7 +13,6 @@ using AnakinRaW.CommonUtilities.SimplePipeline;
 using AnakinRaW.CommonUtilities.SimplePipeline.Runners;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
@@ -42,11 +41,11 @@ internal sealed class UpdatePipeline : Pipeline
 
     public UpdatePipeline(IUpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(updateCatalog, nameof(updateCatalog));
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (updateCatalog == null) 
+            throw new ArgumentNullException(nameof(updateCatalog));
 
         _progressReporter = progressReporter;
-        _serviceProvider = serviceProvider;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _logger = _serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _installedProduct = updateCatalog.InstalledProduct;
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();

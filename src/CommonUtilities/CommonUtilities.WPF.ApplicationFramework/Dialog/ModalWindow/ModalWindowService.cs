@@ -7,7 +7,6 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 using AnakinRaW.CommonUtilities.Wpf.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
@@ -19,7 +18,8 @@ internal class ModalWindowService : IModalWindowService
 
     public ModalWindowService(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _windowFactory = serviceProvider.GetRequiredService<IModalWindowFactory>();
         _windowService = serviceProvider.GetRequiredService<IWindowService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());

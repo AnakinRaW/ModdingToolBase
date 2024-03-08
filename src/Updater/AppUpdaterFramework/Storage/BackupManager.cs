@@ -9,7 +9,6 @@ using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
@@ -26,8 +25,7 @@ internal class BackupManager : IBackupManager
 
     public BackupManager(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _repository = serviceProvider.GetRequiredService<IBackupRepository>();
@@ -36,7 +34,8 @@ internal class BackupManager : IBackupManager
 
     public void BackupComponent(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null)
+            throw new ArgumentNullException(nameof(component));
 
         var backupData = _backups.GetOrAdd(component, CreateBackupEntry);
 
@@ -60,7 +59,8 @@ internal class BackupManager : IBackupManager
 
     public void RestoreBackup(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null) 
+            throw new ArgumentNullException(nameof(component));
 
         if (!_backups.TryRemove(component, out var backupData))
             return;

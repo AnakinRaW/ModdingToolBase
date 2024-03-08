@@ -1,5 +1,5 @@
-﻿using System.Threading;
-using Validation;
+﻿using System;
+using System.Threading;
 
 namespace AnakinRaW.AppUpdaterFramework.Configuration;
 
@@ -10,7 +10,8 @@ public abstract class UpdateConfigurationProviderBase : IUpdateConfigurationProv
     public IUpdateConfiguration GetConfiguration()
     {
         var configuration = LazyInitializer.EnsureInitialized(ref _lazyConfiguration, CreateConfiguration);
-        Assumes.NotNull(configuration);
+        if (configuration is null)
+            throw new InvalidOperationException("Configuration must not be null");
         return configuration;
     }
 

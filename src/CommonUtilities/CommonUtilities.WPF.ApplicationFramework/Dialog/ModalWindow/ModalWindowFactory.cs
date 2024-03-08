@@ -2,7 +2,6 @@
 using System.Windows;
 using AnakinRaW.CommonUtilities.Wpf.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
@@ -12,7 +11,8 @@ public class ModalWindowFactory : IModalWindowFactory
 
     public ModalWindowFactory(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _windowService = serviceProvider.GetRequiredService<IWindowService>();
     }
 

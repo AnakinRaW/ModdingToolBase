@@ -1,29 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-internal class UpdateCatalog : IUpdateCatalog
+internal class UpdateCatalog(
+    IInstalledProduct installedProduct,
+    IProductReference updateReference,
+    IEnumerable<IUpdateItem> updateItems,
+    UpdateCatalogAction action = UpdateCatalogAction.Update)
+    : IUpdateCatalog
 {
-    public IInstalledProduct InstalledProduct { get; }
+    public IInstalledProduct InstalledProduct { get; } = installedProduct ?? throw new ArgumentNullException(nameof(installedProduct));
 
-    public IProductReference UpdateReference { get; }
+    public IProductReference UpdateReference { get; } = updateReference ?? throw new ArgumentNullException(nameof(updateReference));
 
-    public IReadOnlyCollection<IUpdateItem> UpdateItems { get; }
+    public IReadOnlyCollection<IUpdateItem> UpdateItems { get; } = updateItems.ToList();
 
-    public UpdateCatalogAction Action { get; }
-
-    public UpdateCatalog(IInstalledProduct installedProduct, IProductReference updateReference, IEnumerable<IUpdateItem> updateItems, UpdateCatalogAction action = UpdateCatalogAction.Update)
-    {
-        Requires.NotNull(installedProduct, nameof(installedProduct));
-        Requires.NotNull(updateReference, nameof(updateReference));
-        InstalledProduct = installedProduct;
-        UpdateReference = updateReference;
-        UpdateItems = updateItems.ToList();
-        Action = action;
-    }
+    public UpdateCatalogAction Action { get; } = action;
 
     internal static UpdateCatalog CreateEmpty(IInstalledProduct installedProduct, IProductReference updateReference)
     {

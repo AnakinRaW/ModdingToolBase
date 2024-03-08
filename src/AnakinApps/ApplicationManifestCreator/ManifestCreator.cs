@@ -13,7 +13,6 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.ApplicationManifestCreator;
 
@@ -30,14 +29,14 @@ internal class ManifestCreator
 
     public ManifestCreator(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(options, nameof(options));
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
         _branchManager = serviceProvider.GetRequiredService<AppManifestCreatorBranchManager>();
 
-        Options = options;
+        Options = options ?? throw new ArgumentNullException(nameof(options));
         JsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,

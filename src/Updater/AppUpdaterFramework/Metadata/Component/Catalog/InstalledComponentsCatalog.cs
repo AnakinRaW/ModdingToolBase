@@ -1,19 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
-internal class InstalledComponentsCatalog : IInstalledComponentsCatalog
+internal class InstalledComponentsCatalog(IProductReference product, IReadOnlyCollection<IInstallableComponent> items)
+    : IInstalledComponentsCatalog
 {
-    public IProductReference Product { get; }
+    public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
-    public IReadOnlyCollection<IInstallableComponent> Items { get; }
-
-    public InstalledComponentsCatalog(IProductReference product, IReadOnlyCollection<IInstallableComponent> items)
-    {
-        Requires.NotNull(product, nameof(product));
-        Product = product;
-        Items = items;
-    }
+    public IReadOnlyCollection<IInstallableComponent> Items { get; } = items;
 }
