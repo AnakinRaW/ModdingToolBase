@@ -1,7 +1,6 @@
 ﻿using System;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 
@@ -11,7 +10,8 @@ public class ApplicationAboutDialogViewModel : DialogViewModel
 
     public ApplicationAboutDialogViewModel(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
         IsResizable = false;
         HasMaximizeButton = false;
         HasMinimizeButton = false;

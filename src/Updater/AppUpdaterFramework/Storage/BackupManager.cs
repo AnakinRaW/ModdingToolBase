@@ -17,7 +17,6 @@ internal class BackupManager : IBackupManager
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<IInstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
-    private readonly IFileSystemService _fileSystemHelper;
     private readonly ILogger? _logger;
     private readonly IBackupRepository _repository;
     private readonly IProductService _productService;
@@ -30,7 +29,6 @@ internal class BackupManager : IBackupManager
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _serviceProvider = serviceProvider;
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _repository = serviceProvider.GetRequiredService<IBackupRepository>();
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
@@ -50,7 +48,7 @@ internal class BackupManager : IBackupManager
         {
             var backup = backupData.Backup;
             backup!.Directory!.Create();
-            _fileSystemHelper.CopyFileWithRetry(backupData.Destination, backup.FullName);
+            backupData.Destination.CopyWithRetry(backup.FullName);
         }
         catch (Exception)
         {
@@ -75,7 +73,7 @@ internal class BackupManager : IBackupManager
         {
             if (!destination.Exists)
                 return;
-            if (_fileSystemHelper.DeleteFileWithRetry(destination))
+            if (destination.DeleteWithRetry())
                 return;
             throw new IOException("Unable to restore the backup. Please restart your computer!");
         }
@@ -95,7 +93,7 @@ internal class BackupManager : IBackupManager
                     return;
             }
 
-            _fileSystemHelper.CopyFileWithRetry(backupData.Backup!, backupData.Destination.FullName);
+            backupData.Backup!.CopyWithRetry(backupData.Destination.FullName);
         }
         finally
         {

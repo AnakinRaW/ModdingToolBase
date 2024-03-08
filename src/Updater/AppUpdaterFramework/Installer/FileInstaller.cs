@@ -17,14 +17,14 @@ namespace AnakinRaW.AppUpdaterFramework.Installer;
 internal class FileInstaller : InstallerBase
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IFileSystemService _fileSystemHelper;
+    private readonly IFileSystem _fileSystem;
     private readonly ILockedFileHandler _lockedFileHandler;
 
     public FileInstaller(IServiceProvider serviceProvider) : base(serviceProvider)
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _serviceProvider = serviceProvider;
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
+        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
     }
 
@@ -68,7 +68,7 @@ internal class FileInstaller : InstallerBase
 
         var fileCreateResult = DoFileAction(destination, InstallAction.Remove, file =>
         {
-            destinationStream = _fileSystemHelper.CreateFileWithRetry(destination.FullName);
+            destinationStream = _fileSystem.CreateFileWithRetry(destination.FullName);
             if (destinationStream is null)
             {
                 Logger?.LogTrace($"Creation of file '{file.FullName}' failed.");
@@ -101,7 +101,7 @@ internal class FileInstaller : InstallerBase
 
         return DoFileAction(file, InstallAction.Remove, fileToDelete =>
         {
-            var deleteSuccess = _fileSystemHelper.DeleteFileWithRetry(fileToDelete, 2, 500, (ex, _) =>
+            var deleteSuccess = fileToDelete.DeleteWithRetry(2, 500, (ex, _) =>
             {
                 Logger?.LogTrace(
                     $"Error occurred while deleting file '{fileToDelete}'. Error details: {ex.Message}. Retrying after {0.5f} seconds...");

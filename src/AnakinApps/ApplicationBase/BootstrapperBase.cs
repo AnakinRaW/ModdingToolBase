@@ -121,9 +121,7 @@ public abstract class BootstrapperBase
         
         var fileSystem = new FileSystem();
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
-        serviceCollection.AddSingleton<IFileSystemService>(_ => new FileSystemService(fileSystem));
         serviceCollection.AddSingleton<ICurrentProcessInfoProvider>(_ => new CurrentProcessInfoProvider());
-        serviceCollection.AddSingleton<IPathHelperService>(_ => new PathHelperService());
 
         serviceCollection.AddSingleton(CreateRegistry());
         serviceCollection.AddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));

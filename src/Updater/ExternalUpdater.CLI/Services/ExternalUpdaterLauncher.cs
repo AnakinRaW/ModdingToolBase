@@ -9,14 +9,9 @@ using Validation;
 
 namespace AnakinRaW.ExternalUpdater.Services;
 
-public class ExternalUpdaterLauncher : IExternalUpdaterLauncher
+public class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : IExternalUpdaterLauncher
 {
-    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
-
-    public ExternalUpdaterLauncher(IServiceProvider serviceProvider)
-    {
-        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
-    }
+    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
 
     public Process Start(IFileInfo updater, ExternalUpdaterOptions options)
     {

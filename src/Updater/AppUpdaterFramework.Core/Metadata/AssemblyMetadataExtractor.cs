@@ -11,14 +11,9 @@ using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
-internal class AssemblyMetadataExtractor : IAssemblyMetadataExtractor
+internal class AssemblyMetadataExtractor(IServiceProvider serviceProvider) : IAssemblyMetadataExtractor
 {
-    private readonly IHashingService _hashingService;
-
-    public AssemblyMetadataExtractor(IServiceProvider serviceProvider)
-    {
-        _hashingService = serviceProvider.GetRequiredService<IHashingService>();
-    }
+    private readonly IHashingService _hashingService = serviceProvider.GetRequiredService<IHashingService>();
 
     public ComponentFileInformation ReadComponentInformation(Stream assemblyStream)
     {

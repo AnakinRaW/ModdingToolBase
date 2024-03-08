@@ -3,7 +3,6 @@ using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.CommonUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
@@ -15,8 +14,7 @@ internal class UnhandledExceptionHandler : DisposableObject, IUnhandledException
 
     public UnhandledExceptionHandler(IServiceProvider services)
     {
-        Requires.NotNull(services, nameof(services));
-        Services = services;
+        Services = services ?? throw new ArgumentNullException(nameof(services));
         _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
     }

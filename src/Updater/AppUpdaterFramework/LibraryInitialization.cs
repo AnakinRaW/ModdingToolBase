@@ -21,7 +21,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IUpdateFrameworkAddedBarrier>(_ => new UpdateFrameworkBarrier());
 
         // All internal
-        serviceCollection.AddSingleton<IVariableResolver>(_ => new VariableResolver());
+        serviceCollection.AddSingleton<IVariableResolver>(sp => new VariableResolver(sp));
         serviceCollection.AddSingleton<IUpdateCatalogProvider>(sp => new UpdateCatalogProvider(sp));
         serviceCollection.AddSingleton<IInstallerFactory>(sp => new InstallerFactory(sp));
         serviceCollection.AddSingleton<IDiskSpaceCalculator>(sp => new DiskSpaceCalculator(sp));

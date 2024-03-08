@@ -50,8 +50,9 @@ public class SingleFileComponent : InstallableComponent, IPhysicalInstallable
         if (_fullPath is null)
         {
             var variablesDict = variables?.ToDictionary();
-            var fileName = VariableResolver.Default.ResolveVariables(FileName, variablesDict);
-            var installPath = VariableResolver.Default.ResolveVariables(InstallPath, variablesDict);
+            var variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
+            var fileName = variableResolver.ResolveVariables(FileName, variablesDict);
+            var installPath = variableResolver.ResolveVariables(InstallPath, variablesDict);
             var fs = serviceProvider.GetRequiredService<IFileSystem>();
             _fullPath = fs.Path.Combine(installPath, fileName);
         }

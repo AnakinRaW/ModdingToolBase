@@ -15,11 +15,6 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Semver" Version="2.3.0" />
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="8.1.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.Registry" Version="8.1.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="8.1.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="8.1.1" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="8.1.1" />
 		<PackageReference Include="Validation" Version="2.5.51" PrivateAssets="build;compile" />
 		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="3.4.17" PrivateAssets="build;compile" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
@@ -37,6 +32,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\..\CommonUtilities\src\CommonUtilities.DownloadManager\src\CommonUtilities.DownloadManager.csproj" />
+		<ProjectReference Include="..\..\..\..\CommonUtilities\src\CommonUtilities.FileSystem\src\Commonutilities.FileSystem.csproj" />
+		<ProjectReference Include="..\..\..\..\CommonUtilities\src\CommonUtilities.SimplePipeline\src\CommonUtilities.SimplePipeline.csproj" />
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>

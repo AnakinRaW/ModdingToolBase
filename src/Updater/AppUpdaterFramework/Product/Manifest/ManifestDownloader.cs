@@ -13,7 +13,6 @@ namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 internal class ManifestDownloader : IManifestDownloader
 {
     private readonly IFileSystem _fileSystem;
-    private readonly IFileSystemService _fileSystemHelper;
     private readonly IDownloadManager _downloadManager;
     private string? _temporaryDownloadDirectory;
 
@@ -22,7 +21,7 @@ internal class ManifestDownloader : IManifestDownloader
         get
         {
             if (string.IsNullOrWhiteSpace(_temporaryDownloadDirectory) || !_fileSystem.Directory.Exists(_temporaryDownloadDirectory))
-                _temporaryDownloadDirectory = _fileSystemHelper.CreateTemporaryFolderInTempWithRetry(10)?.FullName ??
+                _temporaryDownloadDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10)?.FullName ??
                                               throw new IOException("Unable to create temporary directory");
             return _temporaryDownloadDirectory;
         }
@@ -32,7 +31,6 @@ internal class ManifestDownloader : IManifestDownloader
     {
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _downloadManager = serviceProvider.GetService<IDownloadManager>() ?? new DownloadManager(serviceProvider);
     }
 

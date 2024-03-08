@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Utilities;
 
@@ -22,11 +21,11 @@ public class CosturaResourceExtractor : IResourceExtractor
 
     public CosturaResourceExtractor(Assembly assembly, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(assembly, nameof(assembly));
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _appAssembly = assembly;
+        _appAssembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
         _assemblyResourceNames = assembly.GetManifestResourceNames();
     }
 

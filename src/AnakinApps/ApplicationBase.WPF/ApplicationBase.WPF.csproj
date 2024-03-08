@@ -31,6 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\..\CommonUtilities\src\CommonUtilities\src\CommonUtilities.csproj" />
 		<ProjectReference Include="..\ApplicationBase\ApplicationBase.csproj" />
 		<ProjectReference Include="..\..\Updater\AppUpdaterFramework.WPF\AppUpdaterFramework.WPF.csproj" />
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.WPF.ApplicationFramework\CommonUtilities.WPF.ApplicationFramework.csproj" />

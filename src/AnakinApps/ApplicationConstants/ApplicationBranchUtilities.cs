@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using Flurl;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -25,10 +24,10 @@ public class ApplicationBranchUtilities
 
     public ApplicationBranchUtilities(ICollection<Uri> mirrors, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(mirrors, nameof(mirrors));
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
-        Mirrors = mirrors;
+        Mirrors = mirrors ?? throw new ArgumentNullException(nameof(mirrors));
     }
 
     public async Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync()

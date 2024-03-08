@@ -5,19 +5,12 @@ using AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-public class ApplicationUpdateInteractionFactory : IUpdateDialogViewModelFactory
+public class ApplicationUpdateInteractionFactory(IServiceProvider serviceProvider) : IUpdateDialogViewModelFactory
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public ApplicationUpdateInteractionFactory(IServiceProvider serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
     public IDialogViewModel CreateErrorViewModel(string message)
     {

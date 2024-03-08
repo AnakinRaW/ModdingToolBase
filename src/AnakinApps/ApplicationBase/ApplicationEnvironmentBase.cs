@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -28,8 +27,10 @@ public abstract class ApplicationEnvironmentBase : IApplicationEnvironment
 
     protected ApplicationEnvironmentBase(Assembly assembly, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(assembly, nameof(assembly));
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (assembly == null) 
+            throw new ArgumentNullException(nameof(assembly));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         AssemblyInfo = new ApplicationAssemblyInfo(assembly);
     }

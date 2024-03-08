@@ -11,7 +11,7 @@ public class ApplicationDownloadConfigurationProvider : DownloadManagerConfigura
             AllowEmptyFileDownload = false,
             DownloadRetryDelay = 3,
             InternetClient = InternetClient.HttpClient,
-            VerificationPolicy = VerificationPolicy.Optional
+            ValidationPolicy = ValidationPolicy.Optional
         };
     }
 }

@@ -15,7 +15,6 @@ internal abstract class FileRepository : IFileRepository
     private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<IInstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
     private readonly IFileSystem _fileSystem;
-    private readonly IFileSystemService _fileSystemHelper;
     private readonly IProductService _productService;
 
     protected abstract IDirectoryInfo Root { get; }
@@ -27,7 +26,6 @@ internal abstract class FileRepository : IFileRepository
         Requires.NotNull(serviceProvider, nameof(serviceProvider));
         _serviceProvider = serviceProvider;
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
     }
 
@@ -59,7 +57,7 @@ internal abstract class FileRepository : IFileRepository
     {
         if (!_componentStore.TryRemove(component, out var file))
             return;
-        _fileSystemHelper.DeleteFileWithRetry(file);
+        file.DeleteWithRetry();
     }
 
     public void Clear()

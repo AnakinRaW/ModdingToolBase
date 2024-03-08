@@ -9,7 +9,6 @@ using AnakinRaW.CommonUtilities.Wpf.Controls;
 using AnakinRaW.CommonUtilities.Wpf.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 
@@ -34,8 +33,7 @@ public partial class UnhandledExceptionDialogViewModel : ModalWindowViewModel, I
 
     public UnhandledExceptionDialogViewModel(Exception exception, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(exception, nameof(exception));
-        Exception = exception;
+        Exception = exception ?? throw new ArgumentNullException(nameof(exception));
         HasMaximizeButton = false;
         HasMinimizeButton = false;
         IsResizable = false;

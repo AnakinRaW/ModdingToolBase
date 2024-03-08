@@ -18,7 +18,6 @@ namespace AnakinRaW.AppUpdaterFramework.Product;
 public abstract class BranchManagerBase : IBranchManager
 {
     private readonly ILogger? _logger;
-    private readonly IFileSystemService _fileSystemHelper;
     private readonly IManifestDownloader _manifestDownloader;
 
     protected readonly IManifestLoader ManifestLoader;
@@ -28,7 +27,6 @@ public abstract class BranchManagerBase : IBranchManager
     protected BranchManagerBase(IServiceProvider serviceProvider)
     {
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _manifestDownloader = serviceProvider.GetService<IManifestDownloader>() ?? new ManifestDownloader(serviceProvider);
         ManifestLoader = serviceProvider.GetRequiredService<IManifestLoader>();
     }
@@ -103,7 +101,7 @@ public abstract class BranchManagerBase : IBranchManager
         {
             try
             {
-                _fileSystemHelper.DeleteFileIfInTemp(manifestFile);
+                manifestFile.DeleteIfInTemp();
             }
             catch (Exception e)
             {

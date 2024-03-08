@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -16,7 +15,8 @@ public class ApplicationBranchManager : BranchManagerBase
 
     public ApplicationBranchManager(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
         var applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
         _branchUtilities = new ApplicationBranchUtilities(applicationEnvironment.UpdateMirrors, serviceProvider);
     }

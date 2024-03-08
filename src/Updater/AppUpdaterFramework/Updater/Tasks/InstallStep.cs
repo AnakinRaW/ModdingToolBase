@@ -27,6 +27,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     private readonly IInstallableComponent? _currentComponent;
     private readonly DownloadStep? _download;
     private readonly IInstallerFactory _installerFactory;
+    private readonly IVariableResolver _variableResolver;
 
     public IInstallableComponent Component { get; }
 
@@ -80,6 +81,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         Component = installable;
         ProgressReporter = progressReporter;
 
+        _variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
         _action = updateAction;
         _updateConfiguration = updateConfiguration;
         _productVariables = productVariables;
@@ -220,7 +222,7 @@ internal class InstallStep : PipelineStep, IComponentStep
 
         var installPath = Component is IPhysicalInstallable physicalInstallable ? physicalInstallable.InstallPath : null;
         if (!string.IsNullOrEmpty(installPath))
-            installPath = VariableResolver.Default.ResolveVariables(installPath!, _productVariables.ToDictionary());
+            installPath = _variableResolver.ResolveVariables(installPath!, _productVariables.ToDictionary());
 
         // We already downloaded it, no need to calculate again
         if (_download is not null) 
