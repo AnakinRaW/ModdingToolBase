@@ -68,7 +68,7 @@ public abstract class BootstrapperBase
 
         serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
         serviceCollection.AddSingleton<IDownloadManagerConfigurationProvider>(new ApplicationDownloadConfigurationProvider());
-        serviceCollection.AddSingleton<IHashingService>(_ => new HashingService());
+        serviceCollection.AddSingleton<IHashingService>(sp => new HashingService(sp));
     }
 
 

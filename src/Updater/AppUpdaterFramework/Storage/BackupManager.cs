@@ -87,8 +87,8 @@ internal class BackupManager : IBackupManager
         {
             if (destination.Exists)
             {
-                var backHash = _hashingService.GetFileHash(backup, HashType.Sha256);
-                var sourceHash = _hashingService.GetFileHash(destination, HashType.Sha256);
+                var backHash = _hashingService.GetHash(backup, HashTypeKey.SHA256);
+                var sourceHash = _hashingService.GetHash(destination, HashTypeKey.SHA256);
                 if (backHash.SequenceEqual(sourceHash))
                     return;
             }

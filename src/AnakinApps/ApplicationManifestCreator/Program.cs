@@ -55,7 +55,7 @@ internal class Program
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
-        services.AddSingleton<IHashingService>(_ => new HashingService());
+        services.AddSingleton<IHashingService>(sp => new HashingService(sp));
         services.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
 
         services.AddUpdateFramework();

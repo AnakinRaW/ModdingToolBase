@@ -29,7 +29,7 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         filePath = variableResolver.ResolveVariables(filePath, properties);
         if (string.IsNullOrEmpty(filePath) || !fileSystem.File.Exists(filePath))
             return false;
-        if (fileCondition.IntegrityInformation.HashType != HashType.None)
+        if (fileCondition.IntegrityInformation.HashType != HashTypeKey.None)
         {
             var hashingService = services.GetRequiredService<IHashingService>();
             if (!EvaluateFileHash(hashingService, fileSystem.FileInfo.New(filePath),
@@ -40,11 +40,11 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         return fileCondition.Version == null || EvaluateFileVersion(filePath, fileCondition.Version);
     }
 
-    private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashType hashType, byte[]? expectedHash)
+    private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashTypeKey hashType, byte[]? expectedHash)
     {
         if (expectedHash is null)
             return false;
-        var actualHash = hashingService.GetFileHash(file, hashType);
+        var actualHash = hashingService.GetHash(file, hashType);
         return actualHash.SequenceEqual(expectedHash);
     }
 

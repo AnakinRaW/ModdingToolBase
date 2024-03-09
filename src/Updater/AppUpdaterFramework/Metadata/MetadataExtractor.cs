@@ -15,7 +15,7 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
 internal sealed class MetadataExtractor : IMetadataExtractor
 {
-    private const HashType FileHashType = HashType.Sha256;
+    private static readonly HashTypeKey FileHashType = HashTypeKey.SHA256;
 
     private readonly IFileSystem _fileSystem;
     private readonly IBranchManager _branchManager;

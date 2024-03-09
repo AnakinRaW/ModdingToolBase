@@ -17,15 +17,17 @@ internal class AssemblyMetadataExtractor(IServiceProvider serviceProvider) : IAs
 
     public ComponentFileInformation ReadComponentInformation(Stream assemblyStream)
     {
-        assemblyStream.Position = 0;
+        assemblyStream.Seek(0, SeekOrigin.Begin);
         using var assembly = GetAssemblyDefinition(assemblyStream);
-        assemblyStream.Position = 0;
-
+       
         var componentId = GetComponentId(assembly);
         var name = GetComponentName(assembly);
         var fileName = assembly.MainModule.Name;
         var fileVersion = GetFileVersion(assembly);
-        var hash = _hashingService.GetStreamHash(assemblyStream, HashType.Sha256);
+
+        assemblyStream.Seek(0, SeekOrigin.Begin);
+        var hash = _hashingService.GetHash(assemblyStream, HashTypeKey.SHA256);
+
         var infoVersion = GetInformationalVersion(assembly);
 
         return new ComponentFileInformation

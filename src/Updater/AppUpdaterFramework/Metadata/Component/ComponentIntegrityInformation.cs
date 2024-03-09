@@ -2,11 +2,11 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public readonly struct ComponentIntegrityInformation(byte[]? hash, HashType hashType)
+public readonly struct ComponentIntegrityInformation(byte[]? hash, HashTypeKey hashType)
 {
-    public static readonly ComponentIntegrityInformation None = new(null, HashType.None);
+    public static readonly ComponentIntegrityInformation None = new(null, HashTypeKey.None);
 
     public byte[]? Hash { get; } = hash;
 
-    public HashType HashType { get; } = hashType;
+    public HashTypeKey HashType { get; } = hashType;
 }

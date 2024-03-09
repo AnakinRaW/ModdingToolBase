@@ -139,7 +139,7 @@ internal static class ManifestHelpers
     {
         return string.IsNullOrEmpty(hashValue)
             ? ComponentIntegrityInformation.None
-            : new ComponentIntegrityInformation(HexTools.StringToByteArray(hashValue!), HashType.Sha256);
+            : new ComponentIntegrityInformation(HexTools.StringToByteArray(hashValue!), HashTypeKey.SHA256);
     }
 
     public static SemVersion? CreateNullableSemVersion(string? version)
