@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Imaging.Utilities;
 
-internal struct HslColor
+internal struct HslColor(double hue, double saturation, double luminosity, double alpha)
 {
     private const double MinAlpha = 0.0;
     private const double MaxAlpha = 1.0;
@@ -13,10 +13,10 @@ internal struct HslColor
     private const double MaxSaturation = 1.0;
     private const double MinLuminosity = 0.0;
     private const double MaxLuminosity = 1.0;
-    private double _hue;
-    private double _saturation;
-    private double _luminosity;
-    private double _alpha;
+    private double _hue = LimitRange(hue, 0.0, MaxHue);
+    private double _saturation = LimitRange(saturation, MinLuminosity, MaxSaturation);
+    private double _luminosity = LimitRange(luminosity, MinSaturation, MaxLuminosity);
+    private double _alpha = LimitRange(alpha, MinAlpha, MaxAlpha);
 
     public double Hue
     {
@@ -45,14 +45,6 @@ internal struct HslColor
     public HslColor(double hue, double saturation, double luminosity)
         : this(hue, saturation, luminosity, 1.0)
     {
-    }
-
-    public HslColor(double hue, double saturation, double luminosity, double alpha)
-    {
-        _hue = LimitRange(hue, 0.0, MaxHue);
-        _saturation = LimitRange(saturation, MinLuminosity, MaxSaturation);
-        _luminosity = LimitRange(luminosity, MinSaturation, MaxLuminosity);
-        _alpha = LimitRange(alpha, MinAlpha, MaxAlpha);
     }
 
     public static HslColor FromColor(Color color)

@@ -4,7 +4,6 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.StatusBar;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
@@ -19,8 +18,7 @@ public abstract partial class ApplicationViewModelBase : MainWindowViewModel, IA
 
     protected ApplicationViewModelBase(IStatusBarViewModel statusBarViewModel, IServiceProvider serviceProvider) : base(statusBarViewModel)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        ServiceProvider = serviceProvider;
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 

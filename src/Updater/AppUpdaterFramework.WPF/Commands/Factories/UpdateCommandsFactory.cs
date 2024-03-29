@@ -1,18 +1,11 @@
 ﻿using System;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Commands.Factories;
 
-internal class UpdateCommandsFactory : IUpdateCommandsFactory
+internal class UpdateCommandsFactory(IServiceProvider serviceProvider) : IUpdateCommandsFactory
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public UpdateCommandsFactory(IServiceProvider serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
     public ICommandDefinition CreateRestart()
     {

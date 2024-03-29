@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using AnakinRaW.CommonUtilities.FileSystem;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -39,10 +38,10 @@ public static class ExternalUpdaterArgumentUtilities
         string? loggingDirectory,
         IServiceProvider serviceProvider)
     {
-        var pathHelper = serviceProvider.GetRequiredService<IPathHelperService>();
-        appToStart = pathHelper.NormalizePath(appToStart, PathNormalizeOptions.Full);
+        var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+        appToStart = fileSystem.Path.GetFullPath(appToStart);
         if (!string.IsNullOrEmpty(loggingDirectory))
-            loggingDirectory = pathHelper.NormalizePath(loggingDirectory!, PathNormalizeOptions.Full);
+            loggingDirectory = fileSystem.Path.GetFullPath(loggingDirectory);
 
         if (options is UpdateOptions updateOptions)
         {
@@ -74,10 +73,10 @@ public static class ExternalUpdaterArgumentUtilities
         var updated = false;
         updateInformation = null;
 
-        var pathHelper = serviceProvider.GetRequiredService<IPathHelperService>();
+        var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
 
-        currentAppPath = pathHelper.NormalizePath(currentAppPath, PathNormalizeOptions.Full);
-        var oldAppPath = pathHelper.NormalizePath(oldOptions.AppToStart, PathNormalizeOptions.Full);
+        currentAppPath = fileSystem.Path.GetFullPath(currentAppPath);
+        var oldAppPath = fileSystem.Path.GetFullPath(oldOptions.AppToStart);
 
         if (currentAppPath.Equals(oldAppPath))
             return false;

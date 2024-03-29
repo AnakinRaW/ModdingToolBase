@@ -8,21 +8,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-internal class ApplicationProductService : ProductServiceBase
+internal class ApplicationProductService(IServiceProvider serviceProvider) : ProductServiceBase(serviceProvider)
 {
-    private readonly IApplicationEnvironment _applicationEnvironment;
-    private readonly IMetadataExtractor _metadataExtractor;
+    private readonly IApplicationEnvironment _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
+    private readonly IMetadataExtractor _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
 
     private IDirectoryInfo? _installLocation;
 
     public override IDirectoryInfo InstallLocation => _installLocation ??= GetInstallLocation();
 
-
-    public ApplicationProductService(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
-        _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
-    }
 
     protected override IProductReference CreateCurrentProductReference()
     {

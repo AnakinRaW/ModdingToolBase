@@ -6,41 +6,31 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal abstract class FileRepository : IFileRepository
+internal abstract class FileRepository(IServiceProvider serviceProvider) : IFileRepository
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ConcurrentDictionary<IInstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
-    private readonly IFileSystem _fileSystem;
-    private readonly IFileSystemService _fileSystemHelper;
-    private readonly IProductService _productService;
+    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+    private readonly IProductService _productService = serviceProvider.GetRequiredService<IProductService>();
 
     protected abstract IDirectoryInfo Root { get; }
 
     protected virtual string FileExtensions => "new";
 
-    protected FileRepository(IServiceProvider serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
-        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
-        _productService = serviceProvider.GetRequiredService<IProductService>();
-    }
-
-
     public IFileInfo AddComponent(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null)
+            throw new ArgumentNullException(nameof(component));
         return _componentStore.GetOrAdd(component, CreateComponentFile);
     }
 
     public IFileInfo? GetComponent(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null) 
+            throw new ArgumentNullException(nameof(component));
         _componentStore.TryGetValue(component, out var file);
         return file;
     }
@@ -59,7 +49,7 @@ internal abstract class FileRepository : IFileRepository
     {
         if (!_componentStore.TryRemove(component, out var file))
             return;
-        _fileSystemHelper.DeleteFileWithRetry(file);
+        file.DeleteWithRetry();
     }
 
     public void Clear()
@@ -85,7 +75,8 @@ internal abstract class FileRepository : IFileRepository
 
         file.Create().Dispose();
         file.Refresh();
-        Assumes.True(file.Exists);
+        if (!file.Exists)
+            throw new InvalidOperationException();
         return file;
     }
 

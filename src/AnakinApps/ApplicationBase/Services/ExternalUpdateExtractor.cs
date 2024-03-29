@@ -6,7 +6,6 @@ using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.ExternalUpdater;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
@@ -18,7 +17,7 @@ internal class ExternalUpdateExtractor : IExternalUpdateExtractor
 
     public ExternalUpdateExtractor(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
         _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
         _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
         _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Validation;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -11,7 +11,7 @@ public sealed class ComponentGroup : ProductComponent, IComponentGroup
 
     public ComponentGroup(IProductComponentIdentity identity, IReadOnlyList<IProductComponentIdentity> components) : base(identity)
     {
-        Requires.NotNull(components, nameof(components));
+        if (identity == null) throw new ArgumentNullException(nameof(identity));
         Components = components;
     }
 }

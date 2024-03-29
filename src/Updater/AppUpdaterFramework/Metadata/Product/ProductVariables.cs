@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Validation;
+using AnakinRaW.CommonUtilities;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -11,7 +11,7 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
 {
     internal static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
     private readonly ReaderWriterLockSlim _collectionLock = new();
-    private readonly IDictionary<string, Variable> _variables;
+    private readonly IDictionary<string, Variable> _variables = new Dictionary<string, Variable>();
 
     public IEnumerable<string> Keys
     {
@@ -65,12 +65,12 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
     {
         get
         {
-            Requires.NotNullOrEmpty(name, nameof(name));
+            ThrowHelper.ThrowIfNullOrEmpty(name);
             return Get(name);
         }
         set
         {
-            Requires.NotNullOrEmpty(name, nameof(name));
+            ThrowHelper.ThrowIfNullOrEmpty(name);
             _collectionLock.EnterUpgradeableReadLock();
             try
             {
@@ -99,11 +99,6 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
         }
     }
 
-    public ProductVariables()
-    {
-        _variables = new Dictionary<string, Variable>();
-    }
-
     public static string ToVar(string value)
     {
         value = value.TrimStart('[');
@@ -113,7 +108,7 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
 
     public bool Contains(string name)
     {
-        Requires.NotNullOrEmpty(name, nameof(name));
+        ThrowHelper.ThrowIfNullOrEmpty(name);
         _collectionLock.EnterReadLock();
         try
         {
@@ -127,7 +122,7 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
 
     public string? Get(string name, string? defaultValue = null)
     {
-        Requires.NotNullOrEmpty(name, nameof(name));
+        ThrowHelper.ThrowIfNullOrEmpty(name);
         _collectionLock.EnterReadLock();
         try
         {
@@ -144,7 +139,7 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
 
     public void Add(string name, string? value)
     {
-        Requires.NotNullOrEmpty(name, nameof(name));
+        ThrowHelper.ThrowIfNullOrEmpty(name);
         _collectionLock.EnterUpgradeableReadLock();
         try
         {
@@ -202,8 +197,9 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
 
     internal void Add(string name, Func<string> initialize)
     {
-        Requires.NotNullOrEmpty(name, nameof(name));
-        Requires.NotNull(initialize, nameof(initialize));
+        if (initialize == null) 
+            throw new ArgumentNullException(nameof(initialize));
+        ThrowHelper.ThrowIfNullOrEmpty(name);
         Variable variable = new(name, initialize);
         _collectionLock.EnterWriteLock();
         try

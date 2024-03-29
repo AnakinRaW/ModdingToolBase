@@ -6,12 +6,8 @@ using UnhandledExceptionDialogViewModel = AnakinRaW.ApplicationBase.ViewModels.D
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-internal class WpfUnhandledExceptionHandler : UnhandledExceptionHandler
+internal class WpfUnhandledExceptionHandler(IServiceProvider services) : UnhandledExceptionHandler(services)
 {
-    public WpfUnhandledExceptionHandler(IServiceProvider services) : base(services)
-    {
-    }
-
     protected override void HandleGlobalException(Exception e)
     {
         if (Debugger.IsAttached)

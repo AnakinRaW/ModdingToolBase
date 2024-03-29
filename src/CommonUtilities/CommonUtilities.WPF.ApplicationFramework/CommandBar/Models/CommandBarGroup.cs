@@ -2,12 +2,7 @@
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.CommandBar.Models;
 
-internal class CommandBarGroup : ICommandBarGroup
+internal class CommandBarGroup(IReadOnlyList<ICommandBarItemDefinition> items) : ICommandBarGroup
 {
-    public IReadOnlyList<ICommandBarItemDefinition> Items { get; }
-
-    public CommandBarGroup(IReadOnlyList<ICommandBarItemDefinition> items)
-    {
-        Items = items;
-    }
+    public IReadOnlyList<ICommandBarItemDefinition> Items { get; } = items;
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Theming;
 
@@ -11,9 +10,8 @@ internal class ThemeResourceDictionary : ResourceDictionary, IEquatable<ThemeRes
 
     public ThemeResourceDictionary(ITheme theme, Collection<ResourceDictionary> resources)
     {
-        Requires.NotNull(theme, nameof(theme));
-        Requires.NotNull(resources, nameof(resources));
-        _theme = theme;
+        if (resources == null) throw new ArgumentNullException(nameof(resources));
+        _theme = theme ?? throw new ArgumentNullException(nameof(theme));
         foreach (var dictionary in resources)
             MergedDictionaries.Add(dictionary);
     }

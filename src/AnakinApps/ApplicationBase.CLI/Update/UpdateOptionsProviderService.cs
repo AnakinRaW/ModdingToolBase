@@ -1,6 +1,5 @@
 ﻿using System;
 using AnakinRaW.ApplicationBase.Options;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -17,7 +16,6 @@ internal sealed class UpdateOptionsProviderService : IUpdateOptionsProviderServi
 
     public void SetOptions(IUpdaterCommandLineOptions options)
     {
-        Requires.NotNull(options, nameof(options));
-        Options = options;
+        Options = options ?? throw new ArgumentNullException(nameof(options));
     }
 }

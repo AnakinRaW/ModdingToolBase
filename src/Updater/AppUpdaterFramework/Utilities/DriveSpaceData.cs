@@ -2,22 +2,16 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
-internal class DriveSpaceData : IEquatable<DriveSpaceData>
+internal class DriveSpaceData(long currentInstallSize, string driveName) : IEquatable<DriveSpaceData>
 {
-    public long RequestedSize { get; set; }
+    public long RequestedSize { get; set; } = currentInstallSize;
 
     public bool HasEnoughDiskSpace { get; set; }
 
     public long AvailableDiskSpace { get; set; }
 
-    public string DriveName { get; }
+    public string DriveName { get; } = driveName;
 
-
-    public DriveSpaceData(long currentInstallSize, string driveName)
-    {
-        RequestedSize = currentInstallSize;
-        DriveName = driveName;
-    }
 
     public bool Equals(DriveSpaceData? other)
     {

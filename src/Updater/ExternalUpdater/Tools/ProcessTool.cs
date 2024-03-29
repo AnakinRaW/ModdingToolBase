@@ -7,12 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ExternalUpdater.Tools;
 
-internal abstract class ProcessTool<T> : ToolBase<T> where T : ExternalUpdaterOptions
+internal abstract class ProcessTool<T>(T options, IServiceProvider serviceProvider)
+    : ToolBase<T>(options, serviceProvider)
+    where T : ExternalUpdaterOptions
 {
-    protected ProcessTool(T options, IServiceProvider serviceProvider) : base(options, serviceProvider)
-    {
-    }
-
     protected async Task WaitForProcessExitAsync()
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(Options.Timeout));

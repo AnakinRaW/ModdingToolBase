@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Validation;
+using AnakinRaW.CommonUtilities;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -18,8 +18,9 @@ public class ProductBranch : IEquatable<ProductBranch>
 
     public ProductBranch(string name, ICollection<Uri> manifestLocations, bool isPrerelease)
     {
-        Requires.NotNullOrEmpty(name, nameof(name));
-        Requires.NotNull(manifestLocations, nameof(manifestLocations));
+        if (manifestLocations == null) 
+            throw new ArgumentNullException(nameof(manifestLocations));
+        ThrowHelper.ThrowIfNullOrEmpty(name);
         Name = name;
         ManifestLocations = manifestLocations;
         IsPrerelease = isPrerelease;

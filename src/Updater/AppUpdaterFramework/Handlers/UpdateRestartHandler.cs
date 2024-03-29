@@ -6,14 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-internal class UpdateRestartHandler : IRestartHandler
+internal class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
 {
-    private readonly IExternalUpdaterService _externalUpdaterService;
-
-    public UpdateRestartHandler(IServiceProvider serviceProvider)
-    {
-        _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
-    }
+    private readonly IExternalUpdaterService _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
 
     public void Restart(RequiredRestartOptionsKind optionsKind)
     {

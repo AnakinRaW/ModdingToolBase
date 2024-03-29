@@ -2,7 +2,6 @@
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -13,7 +12,8 @@ internal class ApplicationUpdateConfigurationProvider : UpdateConfigurationProvi
 
     public ApplicationUpdateConfigurationProvider(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _launcherEnv = serviceProvider.GetRequiredService<IApplicationEnvironment>();
     }

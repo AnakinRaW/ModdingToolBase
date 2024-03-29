@@ -1,6 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Windows.Data;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Utilities;
 
@@ -8,7 +8,8 @@ internal class ItemCollectionAdapter : CollectionAdapter<object, object>
 {
     public ItemCollectionAdapter(IEnumerable source)
     {
-        Requires.NotNull(source, nameof(source));
+        if (source == null) 
+            throw new ArgumentNullException(nameof(source));
         Initialize(CollectionViewSource.GetDefaultView(source)); ;
     }
 

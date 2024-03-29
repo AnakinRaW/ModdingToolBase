@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
@@ -16,7 +15,8 @@ internal class DialogUpdateInteractionHandler : IUpdateInteractionHandler
 
     public DialogUpdateInteractionHandler(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _dialogService = serviceProvider.GetRequiredService<IQueuedDialogService>();
         _viewModelFactory = serviceProvider.GetRequiredService<IUpdateDialogViewModelFactory>();
     }

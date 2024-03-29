@@ -8,16 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-internal class AppUpdateResultHandler : UpdateResultHandler
+internal class AppUpdateResultHandler(IServiceProvider serviceProvider) : UpdateResultHandler(serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IApplicationUpdaterRegistry _updaterRegistry;
-
-    public AppUpdateResultHandler(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-        _updaterRegistry = serviceProvider.GetRequiredService<IApplicationUpdaterRegistry>();
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly IApplicationUpdaterRegistry _updaterRegistry = serviceProvider.GetRequiredService<IApplicationUpdaterRegistry>();
 
     protected override async Task HandleRestart(RestartReason reason)
     {

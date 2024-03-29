@@ -10,23 +10,21 @@ using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 
-internal class KillProcessDialogViewModel : UpdateImageDialog, IKillProcessDialogViewModel
+internal class KillProcessDialogViewModel(
+    IFileInfo lockedFile,
+    IEnumerable<ILockingProcess> lockingProcesses,
+    IServiceProvider serviceProvider)
+    : UpdateImageDialog(serviceProvider), IKillProcessDialogViewModel
 {
     internal const string KillButtonIdentifier = "kill";
 
     public string Header => $"Source '{LockedFile.Name}' is locked.";
 
-    public IFileInfo LockedFile { get; }
+    public IFileInfo LockedFile { get; } = lockedFile;
 
-    public IEnumerable<ILockingProcess> LockingProcesses { get; }
+    public IEnumerable<ILockingProcess> LockingProcesses { get; } = lockingProcesses;
 
     public override ImageKey Image => ImageKeys.SwPulp;
-
-    public KillProcessDialogViewModel(IFileInfo lockedFile, IEnumerable<ILockingProcess> lockingProcesses, IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        LockedFile = lockedFile;
-        LockingProcesses = lockingProcesses;
-    }
 
     protected override IList<IButtonViewModel> CreateButtons(IDialogButtonFactory buttonFactory)
     {

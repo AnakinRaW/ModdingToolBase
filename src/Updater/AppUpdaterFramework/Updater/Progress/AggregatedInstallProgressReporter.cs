@@ -5,20 +5,16 @@ using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Progress;
 
-internal class AggregatedInstallProgressReporter : ComponentAggregatedProgressReporter
+internal class AggregatedInstallProgressReporter(IComponentProgressReporter progressReporter)
+    : ComponentAggregatedProgressReporter(progressReporter)
 {
     private readonly object _syncLock = new();
-    private readonly HashSet<string> _visitedComponents;
+    private readonly HashSet<string> _visitedComponents = new();
 
     private long _totalProgressSize;
 
     protected override ProgressType Type => ProgressTypes.Install;
 
-    public AggregatedInstallProgressReporter(IComponentProgressReporter progressReporter) : base(progressReporter)
-    {
-        _visitedComponents = new HashSet<string>();
-    }
-    
     protected override double CalculateAggregatedProgress(IComponentStep step, double taskProgress, ref ComponentProgressInfo progressInfo)
     {
         lock (_syncLock)

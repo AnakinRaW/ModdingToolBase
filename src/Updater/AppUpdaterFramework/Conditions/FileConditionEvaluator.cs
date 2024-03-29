@@ -6,7 +6,6 @@ using System.Linq;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
@@ -16,8 +15,10 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
 
     public bool Evaluate(IServiceProvider services, ICondition condition, IDictionary<string, string?>? properties = null)
     {
-        Requires.NotNull(services, nameof(services));
-        Requires.NotNull(condition, nameof(condition));
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        if (condition == null) 
+            throw new ArgumentNullException(nameof(condition));
         if (condition is not FileCondition fileCondition)
             throw new ArgumentException("condition is not FileCondition", nameof(condition));
 
@@ -28,7 +29,7 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         filePath = variableResolver.ResolveVariables(filePath, properties);
         if (string.IsNullOrEmpty(filePath) || !fileSystem.File.Exists(filePath))
             return false;
-        if (fileCondition.IntegrityInformation.HashType != HashType.None)
+        if (fileCondition.IntegrityInformation.HashType != HashTypeKey.None)
         {
             var hashingService = services.GetRequiredService<IHashingService>();
             if (!EvaluateFileHash(hashingService, fileSystem.FileInfo.New(filePath),
@@ -39,9 +40,11 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         return fileCondition.Version == null || EvaluateFileVersion(filePath, fileCondition.Version);
     }
 
-    private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashType hashType, byte[] expectedHash)
+    private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashTypeKey hashType, byte[]? expectedHash)
     {
-        var actualHash = hashingService.GetFileHash(file, hashType);
+        if (expectedHash is null)
+            return false;
+        var actualHash = hashingService.GetHash(file, hashType);
         return actualHash.SequenceEqual(expectedHash);
     }
 

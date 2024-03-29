@@ -6,7 +6,6 @@ using System.Windows.Markup;
 using AnakinRaW.CommonUtilities.Wpf.DPI;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Utilities;
@@ -19,8 +18,10 @@ internal class MenuPopupPositionerExtension : MarkupExtension
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
+
         var service = serviceProvider.GetRequiredService<IProvideValueTarget>();
-        Assumes.Present(service);
         if (service.TargetObject is not FrameworkElement border)
             return this;
         var popup = border.FindAncestor<Popup>();

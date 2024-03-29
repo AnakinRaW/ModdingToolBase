@@ -5,18 +5,15 @@ using System.Diagnostics;
 namespace AnakinRaW.CommonUtilities.Wpf.Utilities;
 
 [DebuggerDisplay("#Entries={Count}")]
-public class WeakValueDictionary<TKey, TValue> where TValue : class where TKey : notnull
+public class WeakValueDictionary<TKey, TValue>(IEqualityComparer<TKey>? keyComparer)
+    where TValue : class
+    where TKey : notnull
 {
-    private readonly Dictionary<TKey, WeakReference?> _backingDictionary;
+    private readonly Dictionary<TKey, WeakReference?> _backingDictionary = new Dictionary<TKey, WeakReference?>(keyComparer);
     private int _capacity = 10;
 
     public WeakValueDictionary() : this(null)
     {
-    }
-
-    public WeakValueDictionary(IEqualityComparer<TKey>? keyComparer)
-    {
-        _backingDictionary = new Dictionary<TKey, WeakReference?>(keyComparer);
     }
 
     public int Count => _backingDictionary.Count;

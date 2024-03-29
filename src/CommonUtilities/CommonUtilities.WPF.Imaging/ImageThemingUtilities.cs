@@ -232,18 +232,12 @@ public static class ImageThemingUtilities
         return isTopDownBitmap ? width - 1 : width * height - 1;
     }
 
-    private struct WeakImageCacheKey : IEquatable<WeakImageCacheKey>
+    private struct WeakImageCacheKey(Color background, Color grayscaleBias, bool isEnabled)
+        : IEquatable<WeakImageCacheKey>
     {
-        private readonly Color _background;
-        private readonly Color _grayscaleBias;
-        private readonly bool _isEnabled;
-
-        public WeakImageCacheKey(Color background, Color grayscaleBias, bool isEnabled)
-        {
-            _background = background;
-            _grayscaleBias = isEnabled ? Colors.Transparent : grayscaleBias;
-            _isEnabled = isEnabled;
-        }
+        private readonly Color _background = background;
+        private readonly Color _grayscaleBias = isEnabled ? Colors.Transparent : grayscaleBias;
+        private readonly bool _isEnabled = isEnabled;
 
         public override string ToString()
         {

@@ -2,14 +2,9 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-internal readonly struct ProductUpdateInformation : IProductUpdateInformation
+internal readonly struct ProductUpdateInformation(IUpdateCatalog? updateCatalog) : IProductUpdateInformation
 {
-    public ProductUpdateInformation(IUpdateCatalog? updateCatalog)
-    {
-        UpdateCatalog = updateCatalog;
-    }
-
     public bool IsUpdateAvailable => UpdateCatalog is not null;
 
-    public IUpdateCatalog? UpdateCatalog { get; }
+    public IUpdateCatalog? UpdateCatalog { get; } = updateCatalog;
 }

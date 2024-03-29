@@ -1,25 +1,16 @@
 ﻿using System;
 using System.Windows.Input;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Input;
 
-public class DelegateCommand<T> : IDelegateCommand<T>
+public class DelegateCommand<T>(Action<T> execute, Predicate<T?>? canExecute) : IDelegateCommand<T>
 {
-    private readonly Action<T> _execute;
-    private readonly Predicate<T?>? _canExecute;
+    private readonly Action<T> _execute = execute ?? throw new ArgumentNullException(nameof(execute));
     private EventHandler? _canExecuteChanged;
 
     public DelegateCommand(Action<T?> execute)
         : this(execute, null)
     {
-    }
-
-    public DelegateCommand(Action<T> execute, Predicate<T?>? canExecute)
-    {
-        Requires.NotNull((object)execute, nameof(execute));
-        _execute = execute;
-        _canExecute = canExecute;
     }
 
     public event EventHandler? CanExecuteChanged
@@ -43,7 +34,7 @@ public class DelegateCommand<T> : IDelegateCommand<T>
 
     public bool CanExecute(T? parameter)
     {
-        return _canExecute == null || _canExecute(parameter);
+        return canExecute == null || canExecute(parameter);
     }
 
     public void Execute(T parameter)
@@ -55,7 +46,7 @@ public class DelegateCommand<T> : IDelegateCommand<T>
 
     bool ICommand.CanExecute(object? parameter)
     {
-        if (_canExecute == null)
+        if (canExecute == null)
             return true;
         if (parameter == null)
             return CanExecute(default!);

@@ -3,7 +3,6 @@ using System.IO.Abstractions;
 using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
@@ -65,7 +64,8 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 
     public ApplicationUpdaterRegistry(string basePath, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         var registry = serviceProvider.GetRequiredService<IRegistry>();
         var baseKey = registry.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
         var registryKey = baseKey.CreateSubKey(basePath);
@@ -87,8 +87,10 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 
     public void ScheduleUpdate(IFileInfo updater, ExternalUpdaterOptions options)
     {
-        Requires.NotNull(updater, nameof(updater));
-        Requires.NotNull(options, nameof(options));
+        if (updater == null)
+            throw new ArgumentNullException(nameof(updater));
+        if (options == null)
+            throw new ArgumentNullException(nameof(options));
         RequiresUpdate = true;
         UpdaterPath = updater.FullName;
         UpdateCommandArgs = options.ToArgs();

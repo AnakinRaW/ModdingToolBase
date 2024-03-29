@@ -6,15 +6,12 @@ using System.Windows;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Utilities;
 
-internal abstract class CollectionAdapter<TSource, TTarget> : ReadOnlyObservableCollection<TTarget>, IWeakEventListener
+internal abstract class CollectionAdapter<TSource, TTarget>()
+    : ReadOnlyObservableCollection<TTarget>(new SuspendableObservableCollection<TTarget>()), IWeakEventListener
 {
     private IEnumerable? _view;
 
     protected SuspendableObservableCollection<TTarget> InnerItems => (SuspendableObservableCollection<TTarget>)Items;
-
-    protected CollectionAdapter() : base(new SuspendableObservableCollection<TTarget>())
-    {
-    }
 
     protected abstract TTarget AdaptItem(TSource item);
 

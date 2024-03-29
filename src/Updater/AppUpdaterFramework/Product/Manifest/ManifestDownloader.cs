@@ -6,14 +6,12 @@ using System.Threading.Tasks;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 
 internal class ManifestDownloader : IManifestDownloader
 {
     private readonly IFileSystem _fileSystem;
-    private readonly IFileSystemService _fileSystemHelper;
     private readonly IDownloadManager _downloadManager;
     private string? _temporaryDownloadDirectory;
 
@@ -22,7 +20,7 @@ internal class ManifestDownloader : IManifestDownloader
         get
         {
             if (string.IsNullOrWhiteSpace(_temporaryDownloadDirectory) || !_fileSystem.Directory.Exists(_temporaryDownloadDirectory))
-                _temporaryDownloadDirectory = _fileSystemHelper.CreateTemporaryFolderInTempWithRetry(10)?.FullName ??
+                _temporaryDownloadDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10)?.FullName ??
                                               throw new IOException("Unable to create temporary directory");
             return _temporaryDownloadDirectory;
         }
@@ -30,9 +28,9 @@ internal class ManifestDownloader : IManifestDownloader
 
     public ManifestDownloader(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _downloadManager = serviceProvider.GetService<IDownloadManager>() ?? new DownloadManager(serviceProvider);
     }
 

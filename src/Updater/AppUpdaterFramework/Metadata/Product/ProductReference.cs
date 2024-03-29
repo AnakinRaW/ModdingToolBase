@@ -1,5 +1,5 @@
-﻿using Semver;
-using Validation;
+﻿using AnakinRaW.CommonUtilities;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -11,7 +11,7 @@ public class ProductReference : IProductReference
 
     public ProductReference(string name, SemVersion? version = null, ProductBranch? branch = null)
     {
-        Requires.NotNullOrEmpty(name, nameof(name));
+        ThrowHelper.ThrowIfNullOrEmpty(name);
         Name = name;
         Version = version;
         Branch = branch;

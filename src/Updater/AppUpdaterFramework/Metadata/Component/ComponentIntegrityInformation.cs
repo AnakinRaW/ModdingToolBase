@@ -1,21 +1,12 @@
-﻿using System;
-using AnakinRaW.CommonUtilities.Hashing;
-using Validation;
+﻿using AnakinRaW.CommonUtilities.Hashing;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public readonly struct ComponentIntegrityInformation
+public readonly struct ComponentIntegrityInformation(byte[]? hash, HashTypeKey hashType)
 {
-    public static readonly ComponentIntegrityInformation None = new(Array.Empty<byte>(), HashType.None);
+    public static readonly ComponentIntegrityInformation None = new(null, HashTypeKey.None);
 
-    public byte[] Hash { get; } = Array.Empty<byte>();
+    public byte[]? Hash { get; } = hash;
 
-    public HashType HashType { get; }
-
-    public ComponentIntegrityInformation(byte[] hash, HashType hashType)
-    {
-        Requires.NotNull(hash, nameof(hash));
-        Hash = hash;
-        HashType = hashType;
-    }
+    public HashTypeKey HashType { get; } = hashType;
 }

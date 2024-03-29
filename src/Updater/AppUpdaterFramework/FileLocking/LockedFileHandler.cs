@@ -9,27 +9,21 @@ using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.AppUpdaterFramework.FileLocking;
 
-internal class LockedFileHandler : InteractiveHandlerBase, ILockedFileHandler
+internal class LockedFileHandler(IServiceProvider serviceProvider) : InteractiveHandlerBase(serviceProvider), ILockedFileHandler
 {
-    private readonly IUpdateConfiguration _updateConfiguration;
-    private readonly ILockingProcessManagerFactory _lockingProcessManagerFactory;
-
-    public LockedFileHandler(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-        _lockingProcessManagerFactory = serviceProvider.GetRequiredService<ILockingProcessManagerFactory>();
-    }
+    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+    private readonly ILockingProcessManagerFactory _lockingProcessManagerFactory = serviceProvider.GetRequiredService<ILockingProcessManagerFactory>();
 
     public ILockedFileHandler.Result Handle(IInstallableComponent component, IFileInfo file)
     {
-        Requires.NotNull(component, nameof(component));
-        Requires.NotNull(component, nameof(component));
-        Assumes.True(file.Exists, $"Expected '{file}' to exist.");
+        if (component == null)
+            throw new ArgumentNullException(nameof(component));
+        if (!file.Exists)
+            throw new InvalidOperationException($"Expected '{file}' to exist.");
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {

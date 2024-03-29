@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Validation;
-
+﻿using System;
+using System.Collections.Generic;
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
 internal sealed class ConditionEvaluatorStore : IConditionEvaluatorStore
@@ -10,7 +9,8 @@ internal sealed class ConditionEvaluatorStore : IConditionEvaluatorStore
 
     public void AddConditionEvaluator(IConditionEvaluator evaluator)
     {
-        Requires.NotNull(evaluator, nameof(evaluator));
+        if (evaluator == null) 
+            throw new ArgumentNullException(nameof(evaluator));
         _conditionEvaluators[evaluator.Type] = evaluator;
     }
 

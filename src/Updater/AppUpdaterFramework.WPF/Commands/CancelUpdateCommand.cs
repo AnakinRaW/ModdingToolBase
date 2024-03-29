@@ -6,15 +6,10 @@ using AnakinRaW.CommonUtilities.Wpf.Input;
 
 namespace AnakinRaW.AppUpdaterFramework.Commands;
 
-internal class CancelUpdateCommand : CommandDefinition
+internal class CancelUpdateCommand(IUpdateSession updateSession) : CommandDefinition
 {
     public override ImageKey Image => default;
     public override string Text => "Cancel";
-    public override ICommand Command { get; }
+    public override ICommand Command { get; } = new DelegateCommand(updateSession.Cancel);
     public override string? Tooltip => null;
-
-    public CancelUpdateCommand(IUpdateSession updateSession)
-    {
-        Command = new DelegateCommand(updateSession.Cancel);
-    }
 }

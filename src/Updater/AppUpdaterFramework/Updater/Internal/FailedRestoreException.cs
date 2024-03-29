@@ -1,5 +1,4 @@
 ﻿using System;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
@@ -9,6 +8,7 @@ internal class FailedRestoreException : Exception
 
     public FailedRestoreException(Exception innerException) : base("Update restore failed", innerException)
     {
-        Requires.NotNull(innerException, nameof(innerException));
+        if (innerException == null) 
+            throw new ArgumentNullException(nameof(innerException));
     }
 }

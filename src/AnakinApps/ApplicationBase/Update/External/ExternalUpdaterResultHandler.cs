@@ -1,19 +1,12 @@
 ﻿using System;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.ExternalUpdater;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Update.External;
 
-public class ExternalUpdaterResultHandler
+public class ExternalUpdaterResultHandler(IApplicationUpdaterRegistry registry)
 {
-    private readonly IApplicationUpdaterRegistry _registry;
-
-    public ExternalUpdaterResultHandler(IApplicationUpdaterRegistry registry)
-    {
-        Requires.NotNull(registry, nameof(registry));
-        _registry = registry;
-    }
+    private readonly IApplicationUpdaterRegistry _registry = registry ?? throw new ArgumentNullException(nameof(registry));
 
     public void Handle(ExternalUpdaterResult result)
     {

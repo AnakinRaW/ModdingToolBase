@@ -11,24 +11,14 @@ using AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Factories;
 
-internal class ProductViewModelFactory : IProductViewModelFactory
+internal class ProductViewModelFactory(IServiceProvider serviceProvider) : IProductViewModelFactory
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IAppDispatcher _dispatcher;
-    private readonly IUpdateCommandsFactory _commandsFactory;
-    private readonly IUpdateConfiguration _updateConfiguration;
-
-    public ProductViewModelFactory(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-        _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
-        _commandsFactory = serviceProvider.GetRequiredService<IUpdateCommandsFactory>();
-        _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-    }
+    private readonly IAppDispatcher _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
+    private readonly IUpdateCommandsFactory _commandsFactory = serviceProvider.GetRequiredService<IUpdateCommandsFactory>();
+    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public IProductViewModel Create(IInstalledProduct product, IUpdateCatalog? updateCatalog)
     {
@@ -44,7 +34,7 @@ internal class ProductViewModelFactory : IProductViewModelFactory
                     ProductState.ElevationRequired => "The application needs to run with admin rights",
                     _ => "The application needs to be restarted"
                 };
-                stateViewModel = new ErrorStateViewModel(product, message, _serviceProvider);
+                stateViewModel = new ErrorStateViewModel(product, message, serviceProvider);
             }
             else
             {
@@ -54,41 +44,42 @@ internal class ProductViewModelFactory : IProductViewModelFactory
                     ProductState.ElevationRequired => _commandsFactory.CreateElevate(),
                     _ => action
                 };
-                stateViewModel = new InstalledStateViewModel(product, _serviceProvider);
+                stateViewModel = new InstalledStateViewModel(product, serviceProvider);
             }
         }
         else if (updateCatalog.Action is UpdateCatalogAction.Install or UpdateCatalogAction.Uninstall)
         {
-            stateViewModel = new ErrorStateViewModel(product, "Unable to get update information.", _serviceProvider);
+            stateViewModel = new ErrorStateViewModel(product, "Unable to get update information.", serviceProvider);
         }
         else
         {
-            stateViewModel = new UpdateAvailableStateViewModel(product, updateCatalog, _serviceProvider);
+            stateViewModel = new UpdateAvailableStateViewModel(product, updateCatalog, serviceProvider);
             var isRepair = ProductReferenceEqualityComparer.VersionAware.Equals(product, updateCatalog.UpdateReference);
-            action = new UpdateCommand(updateCatalog, _serviceProvider, isRepair);
+            action = new UpdateCommand(updateCatalog, serviceProvider, isRepair);
         }
 
-        return new ProductViewModel(product.Name, AppIconHolder.ApplicationIcon, stateViewModel, action, _serviceProvider);
+        return new ProductViewModel(product.Name, AppIconHolder.ApplicationIcon, stateViewModel, action, serviceProvider);
     }
 
     public IProductViewModel Create(IUpdateSession updateSession)
     {
-        Requires.NotNull(updateSession, nameof(updateSession));
+        if (updateSession == null)
+            throw new ArgumentNullException(nameof(updateSession));
 
         var cancelCommand = new CancelUpdateCommand(updateSession);
         var progressViewModel = CreateProgressViewModel(updateSession);
-        var updatingViewModel = new UpdatingStateViewModel(progressViewModel, _serviceProvider);
+        var updatingViewModel = new UpdatingStateViewModel(progressViewModel, serviceProvider);
 
-        return new ProductViewModel(updateSession.Product.Name, AppIconHolder.ApplicationIcon, updatingViewModel, cancelCommand, _serviceProvider);
+        return new ProductViewModel(updateSession.Product.Name, AppIconHolder.ApplicationIcon, updatingViewModel, cancelCommand, serviceProvider);
     }
 
     private IProgressViewModel CreateProgressViewModel(IUpdateSession updateSession)
     {
         return _dispatcher.Invoke(() =>
         {
-            var downloadProgressBarViewModel = new DownloadingProgressBarViewModel(updateSession, _serviceProvider);
-            var installProgressBarViewModel = new InstallingProgressBarViewModel(updateSession, _serviceProvider);
-            return new ProgressViewModel(_serviceProvider, downloadProgressBarViewModel, installProgressBarViewModel);
+            var downloadProgressBarViewModel = new DownloadingProgressBarViewModel(updateSession, serviceProvider);
+            var installProgressBarViewModel = new InstallingProgressBarViewModel(updateSession, serviceProvider);
+            return new ProgressViewModel(serviceProvider, downloadProgressBarViewModel, installProgressBarViewModel);
         });
     }
 }

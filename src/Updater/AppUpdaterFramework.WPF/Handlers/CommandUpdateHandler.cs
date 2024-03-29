@@ -4,19 +4,12 @@ using System.Windows.Threading;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-public class CommandUpdateHandler : UpdateHandler
+public class CommandUpdateHandler(IServiceProvider serviceProvider) : UpdateHandler(serviceProvider)
 {
-    private readonly IAppDispatcher _dispatcher;
-
-    public CommandUpdateHandler(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
-    }
+    private readonly IAppDispatcher _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
 
     protected override void OnUpdateCompleted(object sender, EventArgs e)
     {

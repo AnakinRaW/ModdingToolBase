@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Detectors;
 
@@ -13,7 +12,8 @@ internal class ComponentDetectorFactory : IComponentDetectorFactory
 
     public IComponentDetector GetDetector(ComponentType type, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         return type switch
         {
             ComponentType.File => GetOrCreate(type, () => new DefaultComponentDetector(serviceProvider)),
@@ -23,12 +23,12 @@ internal class ComponentDetectorFactory : IComponentDetectorFactory
 
     private IComponentDetector GetOrCreate(ComponentType type, Func<IComponentDetector> createFunc)
     {
-        Requires.NotNull(createFunc, nameof(createFunc));
+        if (createFunc == null)
+            throw new ArgumentNullException(nameof(createFunc));
         if (!_detectors.TryGetValue(type, out var detector))
         {
             detector = createFunc();
-            Assumes.NotNull(detector);
-            _detectors[type] = detector;
+            _detectors[type] = detector ?? throw new InvalidOperationException("Detector must not be null!");
         }
         return detector;
     }

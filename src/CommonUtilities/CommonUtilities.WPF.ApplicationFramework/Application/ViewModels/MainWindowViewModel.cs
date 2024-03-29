@@ -4,17 +4,12 @@ using WindowViewModel = AnakinRaW.CommonUtilities.Wpf.Controls.WindowViewModel;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
-public partial class MainWindowViewModel : WindowViewModel, IMainWindowViewModel
+public partial class MainWindowViewModel(IStatusBarViewModel statusBar) : WindowViewModel, IMainWindowViewModel
 {
     [ObservableProperty]
     private TaskBarIconProgressState _progressState;
 
-    public IStatusBarViewModel StatusBar { get; }
-
-    public MainWindowViewModel(IStatusBarViewModel statusBar)
-    {
-        StatusBar = statusBar;
-    }
+    public IStatusBarViewModel StatusBar { get; } = statusBar;
 
     public MainWindowViewModel() : this(new InvisibleStatusBarViewModel())
     {

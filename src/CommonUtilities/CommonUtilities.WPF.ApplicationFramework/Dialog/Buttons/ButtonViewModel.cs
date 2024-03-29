@@ -1,4 +1,5 @@
-﻿using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
+﻿using System;
+using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog.Buttons;
@@ -18,7 +19,10 @@ public partial class ButtonViewModel : ObservableObject, IButtonViewModel
 
     public ButtonViewModel(string id, ICommandDefinition commandDefinition)
     {
-        Validation.Requires.NotNullOrEmpty(id, nameof(id));
+        if (id is null)
+            throw new ArgumentNullException(nameof(id));
+        if (string.IsNullOrEmpty(id))
+            throw new ArgumentException("id must not be empty", nameof(id));
         Id = id;
         CommandDefinition = commandDefinition;
     }

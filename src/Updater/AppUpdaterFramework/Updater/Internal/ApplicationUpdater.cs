@@ -10,7 +10,6 @@ using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
@@ -24,10 +23,8 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
 
     public ApplicationUpdater(IUpdateCatalog updateCatalog, IServiceProvider serviceProvider)
     {
-        Requires.NotNull(updateCatalog, nameof(updateCatalog));
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _updateCatalog = updateCatalog;
-        _serviceProvider = serviceProvider;
+        _updateCatalog = updateCatalog ?? throw new ArgumentNullException(nameof(updateCatalog));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 

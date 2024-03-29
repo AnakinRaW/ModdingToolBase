@@ -1,20 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
-public class ProductManifest : IProductManifest
+public class ProductManifest(IProductReference product, IReadOnlyCollection<IProductComponent> components)
+    : IProductManifest
 {
-    public IProductReference Product { get; }
+    public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
-    public IReadOnlyCollection<IProductComponent> Items { get; }
-
-    public ProductManifest(IProductReference product, IReadOnlyCollection<IProductComponent> components)
-    {
-        Requires.NotNull(product, nameof(product));
-        Requires.NotNull(components, nameof(components));
-        Items = components;
-        Product = product;
-    }
+    public IReadOnlyCollection<IProductComponent> Items { get; } = components ?? throw new ArgumentNullException(nameof(components));
 }

@@ -9,28 +9,20 @@ using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
 
-internal class FileInstaller : InstallerBase
+internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IFileSystemService _fileSystemHelper;
-    private readonly ILockedFileHandler _lockedFileHandler;
-
-    public FileInstaller(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
-        _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+    private readonly ILockedFileHandler _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
 
     protected override InstallResult InstallCore(IInstallableComponent component, IFileInfo source, ProductVariables variables, CancellationToken token)
     {
-        Requires.NotNull(source, nameof(source));
+        if (source == null) 
+            throw new ArgumentNullException(nameof(source));
         if (component is not SingleFileComponent singleFileComponent)
             throw new NotSupportedException($"Component must be of type {nameof(SingleFileComponent)}");
 
@@ -68,7 +60,7 @@ internal class FileInstaller : InstallerBase
 
         var fileCreateResult = DoFileAction(destination, InstallAction.Remove, file =>
         {
-            destinationStream = _fileSystemHelper.CreateFileWithRetry(destination.FullName);
+            destinationStream = _fileSystem.CreateFileWithRetry(destination.FullName);
             if (destinationStream is null)
             {
                 Logger?.LogTrace($"Creation of file '{file.FullName}' failed.");
@@ -79,13 +71,14 @@ internal class FileInstaller : InstallerBase
 
         if (fileCreateResult != InstallOperationResult.Success)
             return fileCreateResult;
-        
-        Assumes.NotNull(destinationStream);
+
+        if (destination is null)
+            throw new InvalidOperationException("Destination stream must not be null!");
 
         using (destinationStream)
         {
             using var sourceStream = source.OpenRead();
-            sourceStream.CopyTo(destinationStream);
+            sourceStream.CopyTo(destinationStream!);
         }
         
         return InstallOperationResult.Success;
@@ -101,7 +94,7 @@ internal class FileInstaller : InstallerBase
 
         return DoFileAction(file, InstallAction.Remove, fileToDelete =>
         {
-            var deleteSuccess = _fileSystemHelper.DeleteFileWithRetry(fileToDelete, 2, 500, (ex, _) =>
+            var deleteSuccess = fileToDelete.DeleteWithRetry(2, 500, (ex, _) =>
             {
                 Logger?.LogTrace(
                     $"Error occurred while deleting file '{fileToDelete}'. Error details: {ex.Message}. Retrying after {0.5f} seconds...");

@@ -1,6 +1,6 @@
 ﻿using System;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using Validation;
+using AnakinRaW.CommonUtilities;
 
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
@@ -20,7 +20,7 @@ public sealed record FileCondition : ICondition
     
     public FileCondition(string filePath)
     {
-        Requires.NotNullOrEmpty(filePath, nameof(filePath));
+        ThrowHelper.ThrowIfNullOrEmpty(filePath);
         FilePath = filePath;
     }
 }

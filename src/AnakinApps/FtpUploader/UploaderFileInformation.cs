@@ -3,18 +3,14 @@ using System.IO.Abstractions;
 
 namespace AnakinRaW.FtpUploader;
 
-internal class UploaderFileInformation
+internal class UploaderFileInformation(
+    IFileInfo manifest,
+    IEnumerable<IFileInfo> applicationFiles,
+    IFileInfo? branchLookup = null)
 {
-    public IFileInfo Manifest { get; }
+    public IFileInfo Manifest { get; } = manifest;
 
-    public IEnumerable<IFileInfo> ApplicationFiles { get; }
+    public IEnumerable<IFileInfo> ApplicationFiles { get; } = applicationFiles;
 
-    public IFileInfo? BranchLookup { get; init; }
-
-    public UploaderFileInformation(IFileInfo manifest, IEnumerable<IFileInfo> applicationFiles, IFileInfo? branchLookup = null)
-    {
-        Manifest = manifest;
-        ApplicationFiles = applicationFiles;
-        BranchLookup = branchLookup;
-    }
+    public IFileInfo? BranchLookup { get; init; } = branchLookup;
 }

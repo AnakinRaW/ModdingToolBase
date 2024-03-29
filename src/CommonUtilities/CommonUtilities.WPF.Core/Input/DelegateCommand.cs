@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Windows.Input;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Input;
 
-public class DelegateCommand : IDelegateCommand
+public class DelegateCommand(Action execute, Func<bool>? canExecute) : IDelegateCommand
 {
     public event EventHandler? CanExecuteChanged
     {
@@ -20,8 +19,8 @@ public class DelegateCommand : IDelegateCommand
         }
     }
 
-    private readonly Action _execute;
-    private readonly Func<bool> _canExecute;
+    private readonly Action _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+    private readonly Func<bool> _canExecute = canExecute ?? (() => true);
     private EventHandler? _canExecuteChanged;
 
     public ICommand Command => this;
@@ -31,13 +30,6 @@ public class DelegateCommand : IDelegateCommand
     {
     }
 
-    public DelegateCommand(Action execute, Func<bool>? canExecute)
-    {
-        Requires.NotNull((object)execute, nameof(execute));
-        _execute = execute;
-        _canExecute = canExecute ?? (() => true);
-    }
-    
     public bool CanExecute()
     {
         return _canExecute();

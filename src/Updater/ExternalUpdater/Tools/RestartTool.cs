@@ -4,12 +4,9 @@ using AnakinRaW.ExternalUpdater.Options;
 
 namespace AnakinRaW.ExternalUpdater.Tools;
 
-internal sealed class RestartTool : ProcessTool<RestartOptions>
+internal sealed class RestartTool(RestartOptions options, IServiceProvider serviceProvider)
+    : ProcessTool<RestartOptions>(options, serviceProvider)
 {
-    public RestartTool(RestartOptions options, IServiceProvider serviceProvider) : base(options, serviceProvider)
-    {
-    }
-
     public override async Task<ExternalUpdaterResult> Run()
     {
         await WaitForProcessExitAsync();

@@ -3,20 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
-using Validation;
 using Vanara.PInvoke;
 namespace AnakinRaW.AppUpdaterFramework.FileLocking;
 
-internal class LockingProcessManager : ILockingProcessManager
+internal class LockingProcessManager(uint sessionId) : ILockingProcessManager
 {
-    private readonly uint _sessionId;
     private bool _isDisposed;
     private bool _registered;
-
-    public LockingProcessManager(uint sessionId)
-    {
-        _sessionId = sessionId;
-    }
 
     ~LockingProcessManager()
     {
@@ -41,7 +34,7 @@ internal class LockingProcessManager : ILockingProcessManager
         _registered = true;
         var rgProcesses = processArray?.Select(Convert).ToArray();
 
-        var result = RstrtMgr.RmRegisterResources(_sessionId, fileCount, fileNames, processCount, rgProcesses, 0, null);
+        var result = RstrtMgr.RmRegisterResources(sessionId, fileCount, fileNames, processCount, rgProcesses, 0, null);
         if (result.Failed)
             throw new Win32Exception(result.ToHRESULT().Code);
     }
@@ -50,7 +43,7 @@ internal class LockingProcessManager : ILockingProcessManager
     {
         if (!_registered)
             return;
-        var result = RstrtMgr.RmShutdown(_sessionId, RstrtMgr.RM_SHUTDOWN_TYPE.RmForceShutdown);
+        var result = RstrtMgr.RmShutdown(sessionId, RstrtMgr.RM_SHUTDOWN_TYPE.RmForceShutdown);
         if (result.Failed)
             throw new Win32Exception(result.ToHRESULT().Code);
     }
@@ -64,7 +57,7 @@ internal class LockingProcessManager : ILockingProcessManager
         var rmProcessInfoArray = (RstrtMgr.RM_PROCESS_INFO[]?)null;
         do
         {
-            result = RstrtMgr.RmGetList(_sessionId, out var pnProcInfoNeeded, ref pnProcInfo, rmProcessInfoArray, out _).ToHRESULT().Code;
+            result = RstrtMgr.RmGetList(sessionId, out var pnProcInfoNeeded, ref pnProcInfo, rmProcessInfoArray, out _).ToHRESULT().Code;
 
             switch (result)
             {
@@ -88,7 +81,7 @@ internal class LockingProcessManager : ILockingProcessManager
     {
         if (_isDisposed)
             return;
-        var result = RstrtMgr.RmEndSession(_sessionId);
+        var result = RstrtMgr.RmEndSession(sessionId);
         _isDisposed = true;
         if (result.Failed)
             throw new Win32Exception(result.ToHRESULT().Code);
@@ -96,7 +89,8 @@ internal class LockingProcessManager : ILockingProcessManager
 
     private static RstrtMgr.RM_UNIQUE_PROCESS Convert(ILockingProcessInfo process)
     {
-        Requires.NotNull(process, nameof(process));
+        if (process == null) 
+            throw new ArgumentNullException(nameof(process));
         var fileTimeUtc = process.StartTime.ToFileTimeUtc();
         var fileTime = new FILETIME
         {

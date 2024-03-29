@@ -8,23 +8,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase.Commands.Handlers;
 
-internal class ShowUpdateWindowCommandHandler : AsyncCommandHandlerBase, IShowUpdateWindowCommandHandler
+internal class ShowUpdateWindowCommandHandler(IServiceProvider serviceProvider)
+    : AsyncCommandHandlerBase, IShowUpdateWindowCommandHandler
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConnectionManager _connectionManager;
-
-    public ShowUpdateWindowCommandHandler(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-        _connectionManager = serviceProvider.GetRequiredService<IConnectionManager>();
-    }
+    private readonly IConnectionManager _connectionManager = serviceProvider.GetRequiredService<IConnectionManager>();
 
     public override async Task HandleAsync()
     {
         // Singletone instance of this view model drastically increases closing/cancellation complexity.
         // Creating a new model for each request should be good enough. 
-        var viewModel = new UpdateWindowViewModel(_serviceProvider);
-        await _serviceProvider.GetRequiredService<IModalWindowService>().ShowModal(viewModel);
+        var viewModel = new UpdateWindowViewModel(serviceProvider);
+        await serviceProvider.GetRequiredService<IModalWindowService>().ShowModal(viewModel);
     }
 
     protected override bool CanHandle()

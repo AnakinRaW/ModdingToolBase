@@ -5,7 +5,6 @@ using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
-using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,6 @@ using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.CommonUtilities.Verification;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 
 namespace AnakinRaW.ApplicationBase;
@@ -70,13 +68,7 @@ public abstract class BootstrapperBase
 
         serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
         serviceCollection.AddSingleton<IDownloadManagerConfigurationProvider>(new ApplicationDownloadConfigurationProvider());
-        serviceCollection.AddSingleton<IHashingService>(_ => new HashingService());
-        serviceCollection.AddSingleton<IVerificationManager>(sp =>
-        {
-            var vm = new VerificationManager(sp);
-            vm.AddDefaultVerifiers();
-            return vm;
-        });
+        serviceCollection.AddSingleton<IHashingService>(sp => new HashingService(sp));
     }
 
 
@@ -121,9 +113,7 @@ public abstract class BootstrapperBase
         
         var fileSystem = new FileSystem();
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
-        serviceCollection.AddSingleton<IFileSystemService>(_ => new FileSystemService(fileSystem));
         serviceCollection.AddSingleton<ICurrentProcessInfoProvider>(_ => new CurrentProcessInfoProvider());
-        serviceCollection.AddSingleton<IPathHelperService>(_ => new PathHelperService());
 
         serviceCollection.AddSingleton(CreateRegistry());
         serviceCollection.AddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));

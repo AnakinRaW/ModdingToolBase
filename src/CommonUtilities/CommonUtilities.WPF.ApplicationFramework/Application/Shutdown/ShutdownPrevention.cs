@@ -1,11 +1,6 @@
 ﻿namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 
-public sealed class ShutdownPrevention
+public sealed class ShutdownPrevention(string? reasonId)
 {
-    public string? ReasonId { get; }
-
-    public ShutdownPrevention(string? reasonId)
-    {
-        ReasonId = reasonId;
-    }
+    public string? ReasonId { get; } = reasonId;
 }

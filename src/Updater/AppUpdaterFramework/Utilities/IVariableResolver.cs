@@ -4,5 +4,9 @@ namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
 internal interface IVariableResolver
 {
-    string ResolveVariables(string value, IDictionary<string, string?>? variables);
+    public string ResolveVariables(
+        string value,
+        IDictionary<string, string?>? variables,
+        ISet<string>? variablesToIgnore = null,
+        bool recursive = false);
 }

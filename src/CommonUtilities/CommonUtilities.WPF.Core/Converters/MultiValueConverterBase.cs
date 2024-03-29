@@ -7,15 +7,8 @@ using AnakinRaW.CommonUtilities.Wpf.Utilities;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Converters;
 
-public abstract class MultiValueConverterBase<TTarget> : IMultiValueConverter
+public abstract class MultiValueConverterBase<TTarget>(Type[] genericArguments) : IMultiValueConverter
 {
-    private readonly Type[] _genericArguments;
-
-    protected MultiValueConverterBase(Type[] genericArguments)
-    {
-        _genericArguments = genericArguments;
-    }
-
     public object? Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
         return !ValidateConvertParameters(values, targetType)
@@ -33,7 +26,7 @@ public abstract class MultiValueConverterBase<TTarget> : IMultiValueConverter
 
     protected abstract object?[] ConvertBackCore(object value, Type[] targetTypes, object parameter, CultureInfo culture);
 
-    private int ExpectedSourceValueCount => _genericArguments.Length - 1;
+    private int ExpectedSourceValueCount => genericArguments.Length - 1;
 
     protected bool ValidateConvertParameters(object[] values, Type targetType)
     {
@@ -60,7 +53,7 @@ public abstract class MultiValueConverterBase<TTarget> : IMultiValueConverter
         for (var offset = 0; offset < targetTypes.Length; ++offset)
         {
             var targetType = targetTypes[offset];
-            var genericArgument = _genericArguments[offset];
+            var genericArgument = genericArguments[offset];
             if (!targetType.IsAssignableFrom(genericArgument))
                 throw this.MakeTargetAtOffsetNotExtendingTypeException(genericArgument, targetType, offset, caller);
         }

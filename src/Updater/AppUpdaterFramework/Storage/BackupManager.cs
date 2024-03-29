@@ -9,7 +9,6 @@ using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
@@ -17,7 +16,6 @@ internal class BackupManager : IBackupManager
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<IInstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
-    private readonly IFileSystemService _fileSystemHelper;
     private readonly ILogger? _logger;
     private readonly IBackupRepository _repository;
     private readonly IProductService _productService;
@@ -27,10 +25,8 @@ internal class BackupManager : IBackupManager
 
     public BackupManager(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _fileSystemHelper = serviceProvider.GetRequiredService<IFileSystemService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _repository = serviceProvider.GetRequiredService<IBackupRepository>();
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
@@ -38,7 +34,8 @@ internal class BackupManager : IBackupManager
 
     public void BackupComponent(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null)
+            throw new ArgumentNullException(nameof(component));
 
         var backupData = _backups.GetOrAdd(component, CreateBackupEntry);
 
@@ -50,7 +47,7 @@ internal class BackupManager : IBackupManager
         {
             var backup = backupData.Backup;
             backup!.Directory!.Create();
-            _fileSystemHelper.CopyFileWithRetry(backupData.Destination, backup.FullName);
+            backupData.Destination.CopyWithRetry(backup.FullName);
         }
         catch (Exception)
         {
@@ -62,7 +59,8 @@ internal class BackupManager : IBackupManager
 
     public void RestoreBackup(IInstallableComponent component)
     {
-        Requires.NotNull(component, nameof(component));
+        if (component == null) 
+            throw new ArgumentNullException(nameof(component));
 
         if (!_backups.TryRemove(component, out var backupData))
             return;
@@ -75,7 +73,7 @@ internal class BackupManager : IBackupManager
         {
             if (!destination.Exists)
                 return;
-            if (_fileSystemHelper.DeleteFileWithRetry(destination))
+            if (destination.DeleteWithRetry())
                 return;
             throw new IOException("Unable to restore the backup. Please restart your computer!");
         }
@@ -89,13 +87,13 @@ internal class BackupManager : IBackupManager
         {
             if (destination.Exists)
             {
-                var backHash = _hashingService.GetFileHash(backup, HashType.Sha256);
-                var sourceHash = _hashingService.GetFileHash(destination, HashType.Sha256);
+                var backHash = _hashingService.GetHash(backup, HashTypeKey.SHA256);
+                var sourceHash = _hashingService.GetHash(destination, HashTypeKey.SHA256);
                 if (backHash.SequenceEqual(sourceHash))
                     return;
             }
 
-            _fileSystemHelper.CopyFileWithRetry(backupData.Backup!, backupData.Destination.FullName);
+            backupData.Backup!.CopyWithRetry(backupData.Destination.FullName);
         }
         finally
         {

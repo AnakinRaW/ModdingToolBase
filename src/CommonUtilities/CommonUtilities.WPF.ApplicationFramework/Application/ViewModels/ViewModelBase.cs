@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
@@ -19,8 +18,7 @@ public abstract class ViewModelBase : ObservableObject, IViewModel, IDisposable
 
     protected ViewModelBase(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        ServiceProvider = serviceProvider;
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
 
         foreach (var property in GetType().GetProperties())

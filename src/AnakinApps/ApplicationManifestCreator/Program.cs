@@ -6,7 +6,6 @@ using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.CommonUtilities.Verification;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -56,9 +55,8 @@ internal class Program
         var services = new ServiceCollection();
         var fileSystem = new FileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
-        services.AddSingleton<IHashingService>(_ => new HashingService());
+        services.AddSingleton<IHashingService>(sp => new HashingService(sp));
         services.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
-        services.AddSingleton<IVerificationManager>(sp => new VerificationManager(sp));
 
         services.AddUpdateFramework();
 

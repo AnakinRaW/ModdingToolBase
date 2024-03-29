@@ -15,16 +15,12 @@ using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework;
 
-public class JsonManifestLoader : ManifestLoaderBase
+public class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoaderBase(serviceProvider)
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         Converters = { new JsonStringEnumConverter() }
     };
-
-    public JsonManifestLoader(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
 
     public ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream)
     {

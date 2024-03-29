@@ -1,8 +1,8 @@
-﻿using Semver;
+﻿using System;
+using Semver;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -24,8 +24,7 @@ public class ApplicationAssemblyInfo
 
     public ApplicationAssemblyInfo(Assembly assembly)
     {
-        Requires.NotNull(assembly, nameof(assembly));
-        Assembly = assembly;
+        Assembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
         InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);

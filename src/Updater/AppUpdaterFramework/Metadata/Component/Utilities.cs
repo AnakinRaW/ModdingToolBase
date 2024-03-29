@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Validation;
+﻿using System;
+using System.Text;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -7,7 +7,8 @@ internal static class Utilities
 {
     public static string FormatIdentity(string id, object? version, string? branch)
     {
-        Requires.NotNull(id, nameof(id));
+        if (id == null) 
+            throw new ArgumentNullException(nameof(id));
         var stringBuilder = new StringBuilder(id);
         if (version != null)
         {

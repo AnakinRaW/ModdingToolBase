@@ -11,7 +11,6 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 using AnakinRaW.CommonUtilities.Wpf.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Controls;
@@ -35,8 +34,7 @@ public class ApplicationMainWindow : ThemedWindow
     public ApplicationMainWindow(IMainWindowViewModel viewModel, IServiceProvider serviceProvider) : base(viewModel)
     {
         ViewModel = viewModel;
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
-        ServiceProvider = serviceProvider;
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         serviceProvider.GetRequiredService<StatusBarService>().StatusBarModel = viewModel.StatusBar;
         SetBindings();

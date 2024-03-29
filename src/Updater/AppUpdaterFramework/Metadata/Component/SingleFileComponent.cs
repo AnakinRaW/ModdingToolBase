@@ -2,8 +2,8 @@
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -28,8 +28,8 @@ public class SingleFileComponent : InstallableComponent, IPhysicalInstallable
     public SingleFileComponent(IProductComponentIdentity identity, string installPath, string fileName, OriginInfo? originInfo) 
         : base(identity, originInfo)
     {
-        Requires.NotNullOrEmpty(installPath, nameof(installPath));
-        Requires.NotNullOrEmpty(fileName, nameof(fileName));
+        ThrowHelper.ThrowIfNullOrEmpty(installPath);
+        ThrowHelper.ThrowIfNullOrEmpty(fileName);
         InstallPath = installPath;
         FileName = fileName;
     }
@@ -50,8 +50,9 @@ public class SingleFileComponent : InstallableComponent, IPhysicalInstallable
         if (_fullPath is null)
         {
             var variablesDict = variables?.ToDictionary();
-            var fileName = VariableResolver.Default.ResolveVariables(FileName, variablesDict);
-            var installPath = VariableResolver.Default.ResolveVariables(InstallPath, variablesDict);
+            var variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
+            var fileName = variableResolver.ResolveVariables(FileName, variablesDict);
+            var installPath = variableResolver.ResolveVariables(InstallPath, variablesDict);
             var fs = serviceProvider.GetRequiredService<IFileSystem>();
             _fullPath = fs.Path.Combine(installPath, fileName);
         }

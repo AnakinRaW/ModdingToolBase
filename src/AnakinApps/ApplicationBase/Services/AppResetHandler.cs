@@ -2,14 +2,12 @@
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Validation;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
 internal class AppResetHandler : IAppResetHandler
 {
     private readonly IApplicationUpdaterRegistry _registry;
-    private readonly IFileSystemService _fileSystemService;
     private readonly IApplicationEnvironment _environment;
     private readonly ILogger? _logger;
 
@@ -17,10 +15,8 @@ internal class AppResetHandler : IAppResetHandler
 
     public AppResetHandler(IServiceProvider services)
     {
-        Requires.NotNull(services, nameof(services));
-        Services = services;
+        Services = services ?? throw new ArgumentNullException(nameof(services));
         _registry = services.GetRequiredService<IApplicationUpdaterRegistry>();
-        _fileSystemService = services.GetRequiredService<IFileSystemService>();
         _environment = services.GetRequiredService<IApplicationEnvironment>();
         _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
@@ -35,7 +31,7 @@ internal class AppResetHandler : IAppResetHandler
     {
         try
         {
-            _fileSystemService.DeleteDirectoryWithRetry(_environment.ApplicationLocalDirectory);
+            _environment.ApplicationLocalDirectory.DeleteWithRetry();
             _registry.Clear();
             _environment.ApplicationLocalDirectory.Create();
 

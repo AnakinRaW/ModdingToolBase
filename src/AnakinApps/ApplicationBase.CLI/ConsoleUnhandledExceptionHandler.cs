@@ -3,12 +3,8 @@ using AnakinRaW.ApplicationBase.Services;
 
 namespace AnakinRaW.ApplicationBase;
 
-internal sealed class ConsoleUnhandledExceptionHandler : UnhandledExceptionHandler
+internal sealed class ConsoleUnhandledExceptionHandler(IServiceProvider services) : UnhandledExceptionHandler(services)
 {
-    public ConsoleUnhandledExceptionHandler(IServiceProvider services) : base(services)
-    {
-    }
-
     protected override void HandleGlobalException(Exception e)
     {
     }

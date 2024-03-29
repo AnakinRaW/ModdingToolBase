@@ -12,7 +12,6 @@ namespace AnakinRaW.ExternalUpdater.Utilities;
 internal class ExternalUpdater
 {
     private readonly ILogger? _logger;
-    private readonly IFileSystemService _fileUtilities;
 
     private readonly IFileSystem _fileSystem;
 
@@ -24,7 +23,6 @@ internal class ExternalUpdater
     public ExternalUpdater(IReadOnlyCollection<UpdateInformation> updaterItems, IServiceProvider serviceProvider)
     {
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _fileUtilities = serviceProvider.GetRequiredService<IFileSystemService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
 
 #if DEBUG
@@ -51,9 +49,9 @@ internal class ExternalUpdater
                 var fileInfo = _fileSystem.FileInfo.New(item.File);
 
                 if (string.IsNullOrEmpty(item.Destination))
-                    _fileUtilities.DeleteFileWithRetry(fileInfo);
+                    fileInfo.DeleteWithRetry();
                 else
-                    _fileUtilities.MoveFile(fileInfo, item.Destination!, true);
+                    fileInfo.MoveTo(item.Destination!, true);
             }
             return ExternalUpdaterResult.UpdateSuccess;
         }
@@ -68,9 +66,9 @@ internal class ExternalUpdater
                 {
                     _logger?.LogDebug($"Restore item: {backup}");
                     if (string.IsNullOrEmpty(backup.Value))
-                        _fileUtilities.DeleteFileWithRetry(_fileSystem.FileInfo.New(backup.Key));
+                        _fileSystem.FileInfo.New(backup.Key).DeleteWithRetry();
                     else
-                        _fileUtilities.MoveFile(_fileSystem.FileInfo.New(backup.Value!), backup.Key, true);
+                        _fileSystem.FileInfo.New(backup.Value!).MoveTo(backup.Key, true);
                 }
                 return ExternalUpdaterResult.UpdateFailedWithRestore;
             }
@@ -94,11 +92,11 @@ internal class ExternalUpdater
             {
                 var sourceFile = item.Update?.File;
                 if (!string.IsNullOrEmpty(sourceFile))
-                    _fileUtilities.DeleteFileWithRetry(_fileSystem.FileInfo.New(sourceFile!));
+                    _fileSystem.FileInfo.New(sourceFile!).DeleteWithRetry();
 
                 var backup = item.Backup?.Source;
                 if (!string.IsNullOrEmpty(backup))
-                    _fileUtilities.DeleteFileWithRetry(_fileSystem.FileInfo.New(backup!));
+                    _fileSystem.FileInfo.New(backup!).DeleteWithRetry();
             }
         }
         catch (Exception e)

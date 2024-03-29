@@ -8,7 +8,6 @@ using AnakinRaW.CommonUtilities.Wpf.DPI;
 using AnakinRaW.CommonUtilities.Wpf.Input;
 using AnakinRaW.CommonUtilities.Wpf.NativeMethods;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Controls;
@@ -102,7 +101,8 @@ public class WindowBase : Window
 
     public WindowBase(IWindowViewModel viewModel)
     {
-        Requires.NotNull(viewModel, nameof(viewModel));
+        if (viewModel == null) 
+            throw new ArgumentNullException(nameof(viewModel));
         DataContext = viewModel;
         viewModel.CloseDialogRequest += OnCloseRequested;
         ViewModel = viewModel;

@@ -4,16 +4,12 @@ using AnakinRaW.CommonUtilities.Wpf.Imaging;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 
-internal class UpdateErrorDialog : UpdateImageDialog, IUpdateErrorDialog
+internal class UpdateErrorDialog(string message, IServiceProvider serviceProvider)
+    : UpdateImageDialog(serviceProvider), IUpdateErrorDialog
 {
     public override ImageKey Image => ImageKeys.Vader;
 
     public string Header => "Error while updating!";
 
-    public string Message { get; }
-
-    public UpdateErrorDialog(string message, IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Message = message;
-    }
+    public string Message { get; } = message;
 }

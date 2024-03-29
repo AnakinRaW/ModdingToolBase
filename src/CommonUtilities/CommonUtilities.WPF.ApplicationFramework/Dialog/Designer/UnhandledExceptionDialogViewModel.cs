@@ -23,13 +23,8 @@ internal class UnhandledExceptionDialogViewModel : ModalWindowViewModel, IUnhand
     public string? HandlerName => "_Handle...";
 
 
-    private class TestException : Exception
+    private class TestException(string message, string stackTrace) : Exception(message)
     {
-        public override string StackTrace { get; }
-
-        public TestException(string message, string stackTrace) : base(message)
-        {
-            StackTrace = stackTrace;
-        }
+        public override string StackTrace { get; } = stackTrace;
     }
 }

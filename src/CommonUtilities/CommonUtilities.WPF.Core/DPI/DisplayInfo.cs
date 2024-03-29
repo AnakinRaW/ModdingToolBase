@@ -82,18 +82,12 @@ public class DisplayInfo : IComparable<DisplayInfo>, IEquatable<DisplayInfo>
         return Vector.Length > other.Vector.Length ? 1 : 0;
     }
 
-    private class PolarVector
+    private class PolarVector(Point topLeft)
     {
         public bool IsOrigin => Length == 0.0 && Angle == 0.0;
 
-        public double Angle { get; }
+        public double Angle { get; } = Math.Atan2(topLeft.Y, topLeft.X) * (180.0 / Math.PI);
 
-        public double Length { get; }
-
-        public PolarVector(Point topLeft)
-        {
-            Angle = Math.Atan2(topLeft.Y, topLeft.X) * (180.0 / Math.PI);
-            Length = new Vector(topLeft.X, topLeft.Y).Length;
-        }
+        public double Length { get; } = new Vector(topLeft.X, topLeft.Y).Length;
     }
 }

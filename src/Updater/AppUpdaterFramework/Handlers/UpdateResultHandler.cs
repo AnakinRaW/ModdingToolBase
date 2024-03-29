@@ -6,7 +6,6 @@ using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
@@ -18,7 +17,8 @@ public class UpdateResultHandler : IUpdateResultHandler
 
     public UpdateResultHandler(IServiceProvider serviceProvider)
     {
-        Requires.NotNull(serviceProvider, nameof(serviceProvider));
+        if (serviceProvider == null) 
+            throw new ArgumentNullException(nameof(serviceProvider));
         _interactionHandler = serviceProvider.GetRequiredService<IUpdateResultInteractionHandler>();
         _restartHandler = serviceProvider.GetRequiredService<IRestartHandler>();
         _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
