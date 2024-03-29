@@ -1,15 +1,8 @@
 ﻿namespace AnakinRaW.ApplicationManifestCreator;
 
-public class ProductInformation
+public class ProductInformation(string name, string version, string branch)
 {
-    public string Name { get; }
-    public string? Version { get; }
-    public string? Branch { get; }
-
-    public ProductInformation(string name, string version, string branch)
-    {
-        Name = name;
-        Version = version;
-        Branch = branch;
-    }
+    public string Name { get; } = name;
+    public string? Version { get; } = version;
+    public string? Branch { get; } = branch;
 }

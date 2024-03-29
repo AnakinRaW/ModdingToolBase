@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 using System.Text;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem;
+using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Utilities;
@@ -183,7 +184,7 @@ internal class VariableResolver(IServiceProvider serviceProvider) : IVariableRes
 
     private string AddDirSeparatorToPath(string path)
     {
-        return !string.IsNullOrEmpty(path) ? _fileSystem.Path.EnsureTrailingSeparator(path) : path;
+        return !string.IsNullOrEmpty(path) ? PathNormalizer.Normalize(path, PathNormalizeOptions.EnsureTrailingSeparator) : path;
     }
 
     private static string GetProgramFilesFolder(string programFilesName)

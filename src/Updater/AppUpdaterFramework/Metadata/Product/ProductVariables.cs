@@ -11,7 +11,7 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
 {
     internal static readonly StringComparer Comparer = StringComparer.OrdinalIgnoreCase;
     private readonly ReaderWriterLockSlim _collectionLock = new();
-    private readonly IDictionary<string, Variable> _variables;
+    private readonly IDictionary<string, Variable> _variables = new Dictionary<string, Variable>();
 
     public IEnumerable<string> Keys
     {
@@ -97,11 +97,6 @@ public sealed class ProductVariables: IReadOnlyDictionary<string, string?>
                 return;
             Add(name, value);
         }
-    }
-
-    public ProductVariables()
-    {
-        _variables = new Dictionary<string, Variable>();
     }
 
     public static string ToVar(string value)

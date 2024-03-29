@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Utilities;
 
@@ -23,7 +22,7 @@ public sealed class BackgroundDispatcher
 
     public static Dispatcher GetBackgroundDispatcher(string dispatcherName, int stackSize = 0)
     {
-        Requires.NotNullOrEmpty(dispatcherName, nameof(dispatcherName));
+        ThrowHelper.ThrowIfNullOrEmpty(dispatcherName);
         lock (SDispatchers)
         {
             foreach (var dispatcher in SDispatchers)

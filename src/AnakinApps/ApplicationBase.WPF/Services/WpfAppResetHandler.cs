@@ -5,12 +5,8 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-internal class WpfAppResetHandler : AppResetHandler
+internal class WpfAppResetHandler(IServiceProvider services) : AppResetHandler(services)
 {
-    public WpfAppResetHandler(IServiceProvider services) : base(services)
-    {
-    }
-
     protected override bool RequiresReset()
     {
         return base.RequiresReset() || Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);

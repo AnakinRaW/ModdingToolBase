@@ -615,7 +615,8 @@ public class VirtualizingTreeView : ListBox
         element.SetValue(IsContextMenuOpenPropertyKey, value);
     }
 
-    internal class TreeNode : DependencyObject, IWeakEventListener, ITreeNode, INotifyPropertyChanged
+    internal class TreeNode(VirtualizingTreeView parentTreeView, object? item)
+        : DependencyObject, IWeakEventListener, ITreeNode, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -716,11 +717,11 @@ public class VirtualizingTreeView : ListBox
 
         public bool IsCollapsing { get; private set; }
 
-        public VirtualizingTreeView ParentTreeView { get; set; }
+        public VirtualizingTreeView ParentTreeView { get; set; } = parentTreeView;
 
-        public object? Item { get; }
+        public object? Item { get; } = item;
 
-        public int Depth { get; set; }
+        public int Depth { get; set; } = -1;
 
         public bool AreChildNodesRealized { get; set; }
 
@@ -739,13 +740,6 @@ public class VirtualizingTreeView : ListBox
         }
         public TreeNode(VirtualizingTreeView parentTreeView) : this(parentTreeView, null)
         {
-        }
-
-        public TreeNode(VirtualizingTreeView parentTreeView, object? item)
-        {
-            ParentTreeView = parentTreeView;
-            Depth = -1;
-            Item = item;
         }
 
         public override string? ToString()

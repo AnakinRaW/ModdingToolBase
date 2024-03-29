@@ -2,14 +2,10 @@
 
 namespace AnakinRaW.CommonUtilities.Wpf.Controls;
 
-public class ThemedWindow : ShadowChromeWindow
+public class ThemedWindow(IWindowViewModel dataContext) : ShadowChromeWindow(dataContext)
 {
     static ThemedWindow()
     {
         DefaultStyleKeyProperty.OverrideMetadata(typeof(ThemedWindow), new FrameworkPropertyMetadata(typeof(ThemedWindow)));
-    }
-    
-    public ThemedWindow(IWindowViewModel dataContext) : base(dataContext)
-    {
     }
 }

@@ -2,23 +2,18 @@
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 
-public class UpdateAvailableStateViewModel : ViewModelBase, IUpdateAvailableStateViewModel
+public class UpdateAvailableStateViewModel(
+    IInstalledProduct installedProduct,
+    IUpdateCatalog updateCatalog,
+    IServiceProvider serviceProvider)
+    : ViewModelBase(serviceProvider), IUpdateAvailableStateViewModel
 {
-    public IUpdateCatalog UpdateCatalog { get; }
+    public IUpdateCatalog UpdateCatalog { get; } = updateCatalog ?? throw new ArgumentNullException(nameof(updateCatalog));
 
-    public string? CurrentVersion { get; }
+    public string? CurrentVersion { get; } = installedProduct.Version?.ToString();
 
-    public string? AvailableVersion { get; }
-
-    public UpdateAvailableStateViewModel(IInstalledProduct installedProduct, IUpdateCatalog updateCatalog, IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Requires.NotNull(updateCatalog, nameof(updateCatalog));
-        UpdateCatalog = updateCatalog;
-        CurrentVersion = installedProduct.Version?.ToString();
-        AvailableVersion = updateCatalog.UpdateReference.Version?.ToString();
-    }
+    public string? AvailableVersion { get; } = updateCatalog.UpdateReference.Version?.ToString();
 }

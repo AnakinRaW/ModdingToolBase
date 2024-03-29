@@ -7,7 +7,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using AnakinRaW.CommonUtilities.Wpf.Converters;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Controls;
 
@@ -71,13 +70,15 @@ public class ThemedContextMenu : ContextMenu
     
     public static bool GetIsInsideContextMenu(DependencyObject element)
     {
-        Requires.NotNull(element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         return (bool)element.GetValue(IsInsideContextMenuProperty);
     }
 
     private static void SetIsInsideContextMenu(DependencyObject element, bool value)
     {
-        Requires.NotNull(element, nameof(element));
+        if (element == null) 
+            throw new ArgumentNullException(nameof(element));
         element.SetValue(IsInsideContextMenuPropertyKey, value);
     }
 

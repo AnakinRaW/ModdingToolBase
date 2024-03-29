@@ -4,17 +4,13 @@ using AnakinRaW.CommonUtilities.Wpf.Utilities;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Converters;
 
-public class MultiValueConverter<T1, T2, TTarget> : MultiValueConverterBase<TTarget>
+public class MultiValueConverter<T1, T2, TTarget>() : MultiValueConverterBase<TTarget>(GenericArguments)
 {
     private static readonly Type[] GenericArguments = {
         typeof (T1),
         typeof (T2),
         typeof (TTarget)
     };
-
-    public MultiValueConverter() : base(GenericArguments)
-    {
-    }
 
     protected sealed override TTarget? ConvertCore(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
@@ -38,7 +34,7 @@ public class MultiValueConverter<T1, T2, TTarget> : MultiValueConverterBase<TTar
     }
 }
 
-public class MultiValueConverter<T1, T2, T3, TTarget> : MultiValueConverterBase<TTarget>
+public class MultiValueConverter<T1, T2, T3, TTarget>() : MultiValueConverterBase<TTarget>(GenericArguments)
 {
     private static readonly Type[] GenericArguments = {
         typeof (T1),
@@ -46,10 +42,6 @@ public class MultiValueConverter<T1, T2, T3, TTarget> : MultiValueConverterBase<
         typeof (T3),
         typeof (TTarget)
     };
-
-    public MultiValueConverter() : base(GenericArguments)
-    {
-    }
 
     protected sealed override TTarget? ConvertCore(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
@@ -79,7 +71,8 @@ public class MultiValueConverter<T1, T2, T3, TTarget> : MultiValueConverterBase<
     }
 }
 
-public class MultiValueConverter<T1, T2, T3, T4, T5, T6, T7, T8, T9, TTarget> : MultiValueConverterBase<TTarget>
+public class MultiValueConverter<T1, T2, T3, T4, T5, T6, T7, T8, T9, TTarget>()
+    : MultiValueConverterBase<TTarget>(GenericArguments)
 {
     private static readonly Type[] GenericArguments = {
       typeof (T1),
@@ -93,10 +86,6 @@ public class MultiValueConverter<T1, T2, T3, T4, T5, T6, T7, T8, T9, TTarget> : 
       typeof (T9),
       typeof (TTarget)
     };
-
-    public MultiValueConverter() : base(GenericArguments)
-    {
-    }
 
     protected sealed override TTarget? ConvertCore(object?[] values, Type targetType, object parameter, CultureInfo culture)
     {

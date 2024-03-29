@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Validation;
 using Vanara.PInvoke;
 using Gdi32 = Vanara.PInvoke.Gdi32;
 using User32 = Vanara.PInvoke.User32;
@@ -170,8 +169,10 @@ public static class DpiHelper
 
     private static void HookDpiChanged<T>(T element, RoutedEventHandler callback) where T : FrameworkElement
     {
-        Requires.NotNull((object)element, nameof(element));
-        Requires.NotNull((object)callback, nameof(callback));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
+        if (callback == null)
+            throw new ArgumentNullException(nameof(callback));
         if (!IsPerMonitorAwarenessEnabled)
             return;
         element.AddHandler(Image.DpiChangedEvent, callback);
@@ -239,7 +240,8 @@ public static class DpiHelper
 
     public static Point DeviceToLogicalPoint(this Visual visual, Point point)
     {
-        Requires.NotNull(visual, nameof(visual));
+        if (visual == null) 
+            throw new ArgumentNullException(nameof(visual));
         return new Point
         {
             X = visual.DeviceToLogicalUnitsX(point.X),
@@ -260,7 +262,8 @@ public static class DpiHelper
 
     public static Rect LogicalToDeviceRect(this Window window)
     {
-        Requires.NotNull(window, nameof(window));
+        if (window == null)
+            throw new ArgumentNullException(nameof(window));
         return new Rect
         {
             X = window.LogicalToDeviceUnitsX(window.Left),
@@ -286,7 +289,8 @@ public static class DpiHelper
 
     public static Size LogicalToDeviceSize(this Visual visual, Size size)
     {
-        Requires.NotNull((object)visual, nameof(visual));
+        if (visual == null)
+            throw new ArgumentNullException(nameof(visual));
         if (size == Size.Empty)
             return size;
         return new Size
@@ -356,7 +360,8 @@ public static class DpiHelper
 
     private static double GetDpi(Visual visual, bool getDpiX)
     {
-        Requires.NotNull(visual, nameof(visual));
+        if (visual == null) 
+            throw new ArgumentNullException(nameof(visual));
         double num;
         if (IsPerMonitorAwarenessEnabled)
         {
@@ -370,7 +375,8 @@ public static class DpiHelper
 
     private static double GetDpiScale(Visual visual, bool getDpiScaleX)
     {
-        Requires.NotNull(visual, nameof(visual));
+        if (visual == null)
+            throw new ArgumentNullException(nameof(visual));
         double num;
         if (IsPerMonitorAwarenessEnabled)
         {

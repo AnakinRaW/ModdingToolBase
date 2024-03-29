@@ -1,6 +1,5 @@
 ﻿using System;
 using AnakinRaW.AppUpdaterFramework.Updater;
-using Validation;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.Progress;
 
@@ -25,6 +24,7 @@ public sealed class InstallingProgressBarViewModel : ProgressBarViewModel
     public InstallingProgressBarViewModel(IUpdateSession updateSession, IServiceProvider serviceProvider) 
         : base(updateSession, nameof(IUpdateSession.InstallProgress), serviceProvider)
     {
-        Requires.NotNull(updateSession, nameof(updateSession));
+        if (updateSession == null) 
+            throw new ArgumentNullException(nameof(updateSession));
     }
 }

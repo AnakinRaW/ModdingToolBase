@@ -6,7 +6,8 @@ using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Progress;
 
-internal class AggregatedDownloadProgressReporter : ComponentAggregatedProgressReporter
+internal class AggregatedDownloadProgressReporter(IComponentProgressReporter progressReporter)
+    : ComponentAggregatedProgressReporter(progressReporter)
 {
     private const int MovingAverageCalculationWindow = 1000;
 
@@ -22,10 +23,6 @@ internal class AggregatedDownloadProgressReporter : ComponentAggregatedProgressR
     private DateTime _downloadTime = DateTime.Now;
 
     protected override ProgressType Type => ProgressTypes.Download;
-
-    public AggregatedDownloadProgressReporter(IComponentProgressReporter progressReporter) : base(progressReporter)
-    {
-    }
 
     protected override double CalculateAggregatedProgress(IComponentStep step, double taskProgress, ref ComponentProgressInfo progressInfo)
     {

@@ -10,7 +10,6 @@ using System.Windows.Media;
 using AnakinRaW.CommonUtilities.Wpf.DPI;
 using AnakinRaW.CommonUtilities.Wpf.NativeMethods;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Controls;
@@ -401,7 +400,7 @@ public class ShadowChromeWindow : WindowBase
             Focusable = false;
             Height = 0.0;
             IsHitTestVisible = false;
-            Owner = Requires.NotNull(window, nameof(window));
+            Owner = window ?? throw new ArgumentNullException(nameof(window));
             ResizeMode = ResizeMode.NoResize;
             ShowActivated = false;
             ShowInTaskbar = false;
@@ -477,13 +476,11 @@ public class ShadowChromeWindow : WindowBase
         }
     }
 
-    private class NonClientButtonManager
+    private class NonClientButtonManager(Window window)
     {
         private WindowTitleBarButton? _trackedButton;
 
-        public NonClientButtonManager(Window window) => Owner = Requires.NotNull(window, nameof(window));
-
-        private Window Owner { get; }
+        private Window Owner { get; } = window ?? throw new ArgumentNullException(nameof(window));
 
         public void ClearTrackedButton()
         {

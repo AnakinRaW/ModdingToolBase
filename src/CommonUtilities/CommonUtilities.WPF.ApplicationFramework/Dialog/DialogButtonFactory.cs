@@ -3,14 +3,9 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 
 namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
-public class DialogButtonFactory : IDialogButtonFactory
+public class DialogButtonFactory(bool themedFactory) : IDialogButtonFactory
 {
-    public bool ThemeButtons { get; }
-
-    public DialogButtonFactory(bool themedFactory)
-    {
-        ThemeButtons = themedFactory;
-    }
+    public bool ThemeButtons { get; } = themedFactory;
 
     public IButtonViewModel CreateOk(bool isDefault)
     {

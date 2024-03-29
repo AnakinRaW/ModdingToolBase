@@ -4,12 +4,8 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 
-public class InstalledStateViewModel : ViewModelBase, IInstalledStateViewModel
+public class InstalledStateViewModel(IInstalledProduct installedProduct, IServiceProvider serviceProvider)
+    : ViewModelBase(serviceProvider), IInstalledStateViewModel
 {
-    public string? Version { get; }
-
-    public InstalledStateViewModel(IInstalledProduct installedProduct, IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Version = installedProduct.Version?.ToString();
-    }
+    public string? Version { get; } = installedProduct.Version?.ToString();
 }

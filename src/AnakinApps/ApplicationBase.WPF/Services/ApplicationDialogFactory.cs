@@ -6,12 +6,8 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-internal class ApplicationDialogFactory : DialogFactory
+internal class ApplicationDialogFactory(IServiceProvider serviceProvider) : DialogFactory(serviceProvider)
 {
-    public ApplicationDialogFactory(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     protected override DialogWindow CreateDialog(IDialogViewModel viewModel)
     {
         if (viewModel is IImageDialogViewModel)

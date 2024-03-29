@@ -7,7 +7,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
 using Microsoft.Win32;
-using Validation;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.DPI;
@@ -122,10 +121,11 @@ public static class DisplayHelper
 
     public static void SetWindowRect(Window window, Int32Rect windowBounds)
     {
+        if (window == null) 
+            throw new ArgumentNullException(nameof(window));
         var hwnd = new WindowInteropHelper(window).EnsureHandle();
         if (hwnd == IntPtr.Zero)
             throw new ArgumentException(nameof(hwnd));
-        Requires.NotNull((object)window, nameof(window));
         SetWindowDpi(hwnd, window, windowBounds);
         window.Top = window.DeviceToLogicalUnitsY(windowBounds.Y);
         window.Left = window.DeviceToLogicalUnitsX(windowBounds.X);

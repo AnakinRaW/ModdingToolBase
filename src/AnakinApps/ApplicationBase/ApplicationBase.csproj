@@ -18,14 +18,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AnakinRaW.CommonUtilities.Registry" Version="10.1.2" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Flurl" Version="4.0.0" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="2.3.0" />
-		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.4.17" />
+		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.0.0" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -37,7 +38,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\..\CommonUtilities\src\CommonUtilities.Registry\src\CommonUtilities.Registry.csproj" />
 		<ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
 	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
 	  <ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />

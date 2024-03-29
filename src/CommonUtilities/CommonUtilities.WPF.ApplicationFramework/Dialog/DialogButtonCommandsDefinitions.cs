@@ -26,18 +26,11 @@ public static class DialogButtonCommandsDefinitions
         return new DialogCommand(name, image, CloseDialogCommand);
     }
 
-    private class DialogCommand : CommandDefinition
+    private class DialogCommand(string text, ImageKey image, ICommand command) : CommandDefinition
     {
-        public override string Text { get; }
-        public override ICommand Command { get; }
+        public override string Text { get; } = text;
+        public override ICommand Command { get; } = command;
 
-        public override ImageKey Image { get; }
-
-        public DialogCommand(string text, ImageKey image, ICommand command)
-        {
-            Text = text;
-            Command = command;
-            Image = image;
-        }
+        public override ImageKey Image { get; } = image;
     }
 }

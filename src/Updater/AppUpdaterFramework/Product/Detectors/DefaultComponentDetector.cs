@@ -6,12 +6,9 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Detectors;
 
-internal sealed class DefaultComponentDetector : ComponentDetectorBase<InstallableComponent>
+internal sealed class DefaultComponentDetector(IServiceProvider serviceProvider)
+    : ComponentDetectorBase<InstallableComponent>(serviceProvider)
 {
-    public DefaultComponentDetector(IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-    }
-
     protected override bool FindCore(InstallableComponent component, ProductVariables productVariables)
     {
         if (!component.DetectConditions.Any())

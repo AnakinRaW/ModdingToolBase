@@ -4,15 +4,10 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 
-public class ErrorStateViewModel : ViewModelBase, IErrorStateViewModel
+public class ErrorStateViewModel(IInstalledProduct installedProduct, string error, IServiceProvider serviceProvider)
+    : ViewModelBase(serviceProvider), IErrorStateViewModel
 {
-    public string? Version { get; }
+    public string? Version { get; } = installedProduct.Version?.ToString();
 
-    public string ErrorMessage { get; }
-
-    public ErrorStateViewModel(IInstalledProduct installedProduct, string error, IServiceProvider serviceProvider) : base(serviceProvider)
-    {
-        Version = installedProduct.Version?.ToString();
-        ErrorMessage = error;
-    }
+    public string ErrorMessage { get; } = error;
 }

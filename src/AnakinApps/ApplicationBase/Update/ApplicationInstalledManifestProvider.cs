@@ -14,20 +14,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-public class ApplicationInstalledManifestProvider : IInstalledManifestProvider
+public class ApplicationInstalledManifestProvider(IServiceProvider serviceProvider) : IInstalledManifestProvider
 {
-    private readonly IApplicationEnvironment _applicationEnvironment;
+    private readonly IApplicationEnvironment _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
 
-    protected readonly IResourceExtractor ResourceExtractor;
-    protected readonly IMetadataExtractor MetadataExtractor;
-
-    public ApplicationInstalledManifestProvider(IServiceProvider serviceProvider)
-    {
-        _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
-
-        ResourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
-        MetadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
-    }
+    protected readonly IResourceExtractor ResourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
+    protected readonly IMetadataExtractor MetadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
 
     public IProductManifest ProvideManifest(IProductReference installedProduct, ProductVariables variables)
     {
