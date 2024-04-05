@@ -78,7 +78,7 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
                 // TODO: PreChecks
                 try
                 {
-                    _logger?.LogTrace("Starting update");
+                    _logger?.LogTrace($"Updating...\r\nCatalog: {_updateCatalog}");
                     updateJob.Run(token);
                 }
                 catch (Exception e)

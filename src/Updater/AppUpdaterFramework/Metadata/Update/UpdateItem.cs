@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -43,5 +44,11 @@ internal sealed class UpdateItem : IUpdateItem
     public override int GetHashCode()
     {
         return ComponentId.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return
+            $"Component:'{ComponentId}', Action:{Action}, InstalledComponent:{InstalledComponent}, UpdateComponent:{UpdateComponent}";
     }
 }

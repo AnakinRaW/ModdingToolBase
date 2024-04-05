@@ -23,11 +23,10 @@ internal class ExternalUpdater
     public ExternalUpdater(IReadOnlyCollection<UpdateInformation> updaterItems, IServiceProvider serviceProvider)
     {
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
+        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
 
-#if DEBUG
-        _logger?.LogTrace(JsonSerializer.Serialize(updaterItems, new JsonSerializerOptions { WriteIndented = true }));
-#endif
+        _logger?.LogTrace("JSON file to process:\r\n" + JsonSerializer.Serialize(updaterItems, new JsonSerializerOptions { WriteIndented = true }));
+
         UpdaterItems = updaterItems;
 
         _backups = updaterItems.Where(x => x.Backup != null)

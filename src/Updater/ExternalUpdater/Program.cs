@@ -94,11 +94,7 @@ internal static class Program
                 fileSystem.Directory.CreateDirectory(logDir!);
                 logPath = fileSystem.Path.Combine(logDir!, logPath);
             }
-            var fileLogLevel = LogLevel.Information;
-#if DEBUG
-            fileLogLevel = LogLevel.Trace;
-#endif
-            builder.AddFile(logPath, fileLogLevel);
+            builder.AddFile(logPath, LogLevel.Trace, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}");
         }
     }
 }

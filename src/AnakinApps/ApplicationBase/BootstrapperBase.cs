@@ -85,7 +85,7 @@ public abstract class BootstrapperBase
         
         if (updateRegistry.RequiresUpdate)
         {
-            logger?.LogInformation("Update required: Running external updater...");
+            logger?.LogInformation("Registry indicating update is required: Running external updater...");
             try
             {
                 coreServices.GetRequiredService<IRegistryExternalUpdaterLauncher>().Launch();

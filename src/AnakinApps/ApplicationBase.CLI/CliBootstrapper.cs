@@ -50,7 +50,7 @@ public abstract class CliBootstrapper : BootstrapperBase
 
             var optionsProviderService = updateServices.GetRequiredService<IUpdateOptionsProviderService>(); 
             optionsProviderService.SetOptions(updateOptions);
-            
+
             var updateResult = new CommandLineToolSelfUpdater(updateServices).UpdateIfNecessary(updateOptions);
 
             if (wasExplicitUpdate || updateResult != 0)
@@ -83,13 +83,12 @@ public abstract class CliBootstrapper : BootstrapperBase
         }
 
 #if DEBUG
-        logLevel = LogLevel.Trace;
         loggingBuilder.AddDebug();
 #endif
         loggingBuilder.AddConsole();
 
         var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log-{Date}.txt");
-        loggingBuilder.AddFile(logPath, logLevel, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}");
+        loggingBuilder.AddFile(logPath, LogLevel.Trace, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}");
 
         loggingBuilder.AddFilter<ConsoleLoggerProvider>((category, level) =>
         {
