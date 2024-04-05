@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.ExternalUpdater.Options;
-using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ExternalUpdater.Tools;
 
@@ -23,9 +22,7 @@ internal abstract class ProcessTool<T>(T options, IServiceProvider serviceProvid
         var processToStart = FileSystem.FileInfo.New(Options.AppToStart);
         if (!processToStart.Exists)
             throw new FileNotFoundException("Could not find application to restart.", processToStart.FullName);
-
-        Logger?.LogInformation($"Starting application '{processToStart.FullName}'");
-
+        
         var options = new ExternalUpdaterResultOptions { Result = operationResult };
         ProcessTools.StartApplication(processToStart, options, Options.Elevate);
     }

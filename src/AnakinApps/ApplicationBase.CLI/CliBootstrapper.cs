@@ -88,7 +88,7 @@ public abstract class CliBootstrapper : BootstrapperBase
 #endif
         loggingBuilder.AddConsole();
 
-        var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log");
+        var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log-{Date}.txt");
         loggingBuilder.AddFile(logPath, logLevel, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}");
 
         loggingBuilder.AddFilter<ConsoleLoggerProvider>((category, level) =>

@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using Serilog.Core;
+
 #if NETFRAMEWORK
 using AnakinRaW.CommonUtilities;
 #endif
@@ -38,7 +42,7 @@ internal class ProcessTools : IProcessTools
         if (elevate)
             startInfo.Verb = "runas";
         using var process = new Process { StartInfo = startInfo };
-        _logger?.LogInformation($"Starting {application}");
+        _logger?.LogInformation($"Starting application '{startInfo.FileName}' with {startInfo.Arguments}");
         process.Start();
     }
 

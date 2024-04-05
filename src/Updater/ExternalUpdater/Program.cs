@@ -19,10 +19,6 @@ internal static class Program
 {
     private static async Task<int> Main(string[] args)
     {
-#if DEBUG
-        Console.WriteLine($"Raw Command line: {Environment.CommandLine}");
-#endif
-
         return await Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(args)
             .MapResult(
                 (RestartOptions opts) => ExecuteApplication(opts),
@@ -34,6 +30,9 @@ internal static class Program
     {
         var services = CreateServices(args);
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
+
+        logger?.LogTrace($"External updater started with commandline arguments: '{args.ToArgs()}'");
+
         try
         {
             var tool = new ToolFactory().Create(args, services);
