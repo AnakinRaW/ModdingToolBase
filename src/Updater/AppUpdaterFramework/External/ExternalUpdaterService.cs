@@ -9,6 +9,7 @@ using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.CommonUtilities;
+using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
@@ -40,7 +41,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _downloadRepository = serviceProvider.GetRequiredService<IReadonlyDownloadRepository>();
         _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
 
-        _tempPath = _fileSystem.Path.GetFullPath(_fileSystem.Path.GetTempPath());
+        // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator
+        // cause commandline arg parsing errors
+        _tempPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
     }
 
     public UpdateOptions CreateUpdateOptions()
@@ -138,9 +141,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     private string WriteToTempFile(IEnumerable<UpdateInformation> updateInformation)
     {
-        var tempPath = _fileSystem.Path.GetTempPath();
         var fileName = _fileSystem.Path.GetTempFileName();
-        var tempFilePath = _fileSystem.Path.Combine(tempPath, fileName);
+        var tempFilePath = _fileSystem.Path.Combine(_tempPath, fileName);
 
         using var fs = _fileSystem.FileStream.New(tempFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
         using var writer = new StreamWriter(fs);

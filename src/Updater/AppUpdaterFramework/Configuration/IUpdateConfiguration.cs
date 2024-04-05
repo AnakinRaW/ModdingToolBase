@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using AnakinRaW.CommonUtilities.FileSystem.Normalization;
+using System.IO;
 
 namespace AnakinRaW.AppUpdaterFramework.Configuration;
 
@@ -22,8 +23,8 @@ public sealed record UpdateConfiguration : IUpdateConfiguration
     internal static readonly IUpdateConfiguration Default = new UpdateConfiguration
     {
         DownloadRetryCount = 3,
-        DownloadLocation = Path.GetTempPath(),
-        BackupLocation = Path.GetTempPath(),
+        DownloadLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
+        BackupLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
         BackupPolicy = BackupPolicy.NotRequired,
     };
 

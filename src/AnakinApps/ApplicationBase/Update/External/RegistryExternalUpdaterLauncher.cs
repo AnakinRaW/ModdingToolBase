@@ -2,6 +2,7 @@
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.CommonUtilities;
+using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +32,9 @@ internal sealed class RegistryExternalUpdaterLauncher(IServiceProvider servicePr
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
 
-        var loggingPath = _fileSystem.Path.GetFullPath(_fileSystem.Path.GetTempPath());
+        // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator
+        // cause commandline arg parsing errors
+        var loggingPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
 
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
             .WithCurrentData(cpi.ProcessFilePath, cpi.Id, loggingPath, serviceProvider);
