@@ -31,8 +31,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
-        _serviceProvider = serviceProvider;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _launcher = serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();

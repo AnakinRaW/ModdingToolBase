@@ -5,7 +5,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-internal class UpdateCatalog(
+internal sealed class UpdateCatalog(
     IInstalledProduct installedProduct,
     IProductReference updateReference,
     IEnumerable<IUpdateItem> updateItems,

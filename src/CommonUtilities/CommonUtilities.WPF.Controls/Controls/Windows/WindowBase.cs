@@ -101,9 +101,7 @@ public class WindowBase : Window
 
     public WindowBase(IWindowViewModel viewModel)
     {
-        if (viewModel == null) 
-            throw new ArgumentNullException(nameof(viewModel));
-        DataContext = viewModel;
+        DataContext = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         viewModel.CloseDialogRequest += OnCloseRequested;
         ViewModel = viewModel;
         WindowHelper = new WindowInteropHelper(this);
