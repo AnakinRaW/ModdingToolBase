@@ -18,9 +18,4 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<SignAssembly Condition="'$(Configuration)' == 'Release'">True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)AnakinOSS.snk</AssemblyOriginatorKeyFile>
-	</PropertyGroup>
-
 </Project>
