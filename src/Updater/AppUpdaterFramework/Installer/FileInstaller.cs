@@ -94,7 +94,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
 
         return DoFileAction(file, InstallAction.Remove, fileToDelete =>
         {
-            var deleteSuccess = fileToDelete.DeleteWithRetry(2, 500, (ex, _) =>
+            var deleteSuccess = fileToDelete.TryDeleteWithRetry(2, 500, (ex, _) =>
             {
                 Logger?.LogTrace(
                     $"Error occurred while deleting file '{fileToDelete}'. Error details: {ex.Message}. Retrying after {0.5f} seconds...");

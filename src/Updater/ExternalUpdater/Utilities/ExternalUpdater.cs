@@ -50,7 +50,7 @@ internal class ExternalUpdater
                 if (string.IsNullOrEmpty(item.Destination))
                     fileInfo.DeleteWithRetry();
                 else
-                    fileInfo.MoveTo(item.Destination!, true);
+                    fileInfo.MoveToEx(item.Destination!, true);
             }
             return ExternalUpdaterResult.UpdateSuccess;
         }
@@ -67,7 +67,7 @@ internal class ExternalUpdater
                     if (string.IsNullOrEmpty(backup.Value))
                         _fileSystem.FileInfo.New(backup.Key).DeleteWithRetry();
                     else
-                        _fileSystem.FileInfo.New(backup.Value!).MoveTo(backup.Key, true);
+                        _fileSystem.FileInfo.New(backup.Value!).MoveToEx(backup.Key, true);
                 }
                 return ExternalUpdaterResult.UpdateFailedWithRestore;
             }

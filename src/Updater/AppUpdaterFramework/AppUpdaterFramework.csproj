@@ -11,9 +11,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="10.1.2" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="10.1.2" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="10.1.2" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="11.1.5" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="11.1.5" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="11.1.5" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />

@@ -73,7 +73,7 @@ internal class BackupManager : IBackupManager
         {
             if (!destination.Exists)
                 return;
-            if (destination.DeleteWithRetry())
+            if (destination.TryDeleteWithRetry())
                 return;
             throw new IOException("Unable to restore the backup. Please restart your computer!");
         }
