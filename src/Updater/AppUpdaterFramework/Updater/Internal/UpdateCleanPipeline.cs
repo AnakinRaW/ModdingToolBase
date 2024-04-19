@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.CommonUtilities.SimplePipeline;
@@ -26,25 +27,22 @@ internal class UpdateCleanPipeline : Pipeline
         _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
     }
 
-    protected override bool PrepareCore()
+    protected override Task<bool> PrepareCoreAsync()
     {
         _backupsToClean.Clear();
         _downloadsToClean.Clear();
 
         _backupsToClean.AddRange(_backupManager.Backups.Keys);
         _downloadsToClean.AddRange(_downloadRepository.GetComponents().Keys);
-        return true;
+        return Task.FromResult(true);
     }
 
-    protected override void RunCore(CancellationToken token)
+    protected override Task RunCoreAsync(CancellationToken token)
     {
-        token.ThrowIfCancellationRequested();
-        if (!Prepare())
-            return;
         if (!_downloadsToClean.Any() && !_backupsToClean.Any())
         {
             _logger?.LogTrace("No files to clean up");
-            return;
+            return Task.CompletedTask;
         }
 
         _filesFailedToBeCleaned.Clear();
@@ -56,11 +54,14 @@ internal class UpdateCleanPipeline : Pipeline
             GuardedClean(download, _downloadRepository.RemoveComponent);
 
 
-        if (!_filesFailedToBeCleaned.Any())
-            return;
-        _logger?.LogTrace("These components could not be deleted:");
-        foreach (var file in _filesFailedToBeCleaned)
-            _logger?.LogTrace(file.GetDisplayName());
+        if (_filesFailedToBeCleaned.Any())
+        {
+            _logger?.LogTrace("These components could not be deleted:");
+            foreach (var file in _filesFailedToBeCleaned)
+                _logger?.LogTrace(file.GetDisplayName());
+        }
+
+        return Task.CompletedTask;
     }
 
     private void GuardedClean(IInstallableComponent component,  Action<IInstallableComponent> cleanOperation)

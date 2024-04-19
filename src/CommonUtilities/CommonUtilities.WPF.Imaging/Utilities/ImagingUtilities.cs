@@ -7,7 +7,6 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Imaging.Converters;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Imaging.Utilities;
 
@@ -63,7 +62,8 @@ internal static class ImagingUtilities
 
     private static BitmapSource? LoadXamlImage(Stream stream, Size deviceSize)
     {
-        Requires.NotNull(stream, nameof(stream));
+        if (stream == null)
+            throw new ArgumentNullException(nameof(stream));
         return Application.Current.Dispatcher.Invoke(() =>
         {
             using var reader = new Baml2006Reader(stream);
@@ -84,7 +84,8 @@ internal static class ImagingUtilities
 
     private static BitmapSource? LoadXamlImage(object imageAsObject, Size deviceSize)
     {
-        Requires.NotNull(imageAsObject, nameof(imageAsObject));
+        if (imageAsObject == null)
+            throw new ArgumentNullException(nameof(imageAsObject));
         return imageAsObject switch
         {
             BitmapSource image => StretchImage(image, deviceSize),
@@ -95,7 +96,8 @@ internal static class ImagingUtilities
     
     private static BitmapSource? LoadBitmappedImage(Stream stream, Size deviceSize)
     {
-        Requires.NotNull(stream, nameof(stream));
+        if (stream == null)
+            throw new ArgumentNullException(nameof(stream));
         var bitmapDecoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.Default);
         if (bitmapDecoder is null)
             return null;

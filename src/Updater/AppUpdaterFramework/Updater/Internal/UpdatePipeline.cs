@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -74,13 +75,13 @@ internal sealed class UpdatePipeline : Pipeline
         _restartManager.RestartRequired -= OnRestartRequired;
     }
 
-    protected override bool PrepareCore()
+    protected override Task<bool> PrepareCoreAsync()
     { 
         if (_itemsToProcess.Count == 0)
         {
             var ex = new InvalidOperationException("No items to update/remove.");
             _logger?.LogError(ex, ex.Message);
-            return false;
+            return Task.FromResult(false);
         }
 
         _componentsToDownload.Clear();
@@ -113,14 +114,14 @@ internal sealed class UpdatePipeline : Pipeline
         }
 
         foreach (var d in _componentsToDownload)
-            _downloadsRunner.Queue(d);
+            _downloadsRunner.AddStep(d);
         foreach (var installsOrRemove in _installsOrRemoves)
-            _installsRunner.Queue(installsOrRemove);
+            _installsRunner.AddStep(installsOrRemove);
 
-        return true;
+        return Task.FromResult(true);
     }
 
-    protected override void RunCore(CancellationToken token)
+    protected override async Task RunCoreAsync(CancellationToken token)
     { 
         _progressReporter.Report("Starting update...", 0.0, ProgressTypes.Install, new ComponentProgressInfo());
 
@@ -141,14 +142,14 @@ internal sealed class UpdatePipeline : Pipeline
         {
             _logger?.LogTrace("Starting update job.");
             _linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-            _downloadsRunner.Run(_linkedCancellationTokenSource.Token);
+            var downloadTask = _downloadsRunner.RunAsync(_linkedCancellationTokenSource.Token);
 #if DEBUG
-            _downloadsRunner.Wait();
+            await downloadTask;
 #endif
-            _installsRunner.Run(_linkedCancellationTokenSource.Token);
+            await _installsRunner.RunAsync(_linkedCancellationTokenSource.Token);
             try
             {
-                _downloadsRunner.Wait();
+                await downloadTask;
             }
             catch
             {

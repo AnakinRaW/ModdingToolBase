@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Claims;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;

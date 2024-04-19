@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Imaging.Utilities;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Imaging;
 
@@ -42,7 +41,8 @@ public class ImageLibrary
 
     public ImageKey AddCustomImage(ImageSource inputImage, bool canTheme)
     {
-        Requires.NotNull(inputImage, nameof(inputImage));
+        if (inputImage == null) 
+            throw new ArgumentNullException(nameof(inputImage));
         try
         {
             if (!inputImage.IsFrozen)

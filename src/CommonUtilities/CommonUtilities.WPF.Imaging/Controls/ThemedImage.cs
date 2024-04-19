@@ -1,11 +1,11 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using AnakinRaW.CommonUtilities.Wpf.Converters;
 using AnakinRaW.CommonUtilities.Wpf.DPI;
 using AnakinRaW.CommonUtilities.Wpf.Imaging.Converters;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Imaging.Controls;
 
@@ -57,49 +57,57 @@ public class ThemedImage : Image
     
     public static Color? GetGrayscaleBiasColor(DependencyObject element)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         return (Color?)element.GetValue(GrayscaleBiasColorProperty);
     }
 
     public static void SetGrayscaleBiasColor(DependencyObject element, Color? value)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         element.SetValue(GrayscaleBiasColorProperty, value);
     }
 
     public static bool? GetHighContrast(DependencyObject element)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null) 
+            throw new ArgumentNullException(nameof(element));
         return (bool?)element.GetValue(HighContrastProperty);
     }
 
     public static void SetHighContrast(DependencyObject element, bool? value)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         element.SetValue(HighContrastProperty, value);
     }
 
     public static double GetDpi(DependencyObject element)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         return (double)element.GetValue(DpiProperty);
     }
 
     public static void SetDpi(DependencyObject element, double value)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         element.SetValue(DpiProperty, value);
     }
 
     public static double GetScaleFactor(DependencyObject element)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         return (double)element.GetValue(ScaleFactorProperty);
     }
 
     public static void SetScaleFactor(DependencyObject element, double value)
     {
-        Requires.NotNull((object)element, nameof(element));
+        if (element == null)
+            throw new ArgumentNullException(nameof(element));
         element.SetValue(ScaleFactorProperty, value);
     }
 

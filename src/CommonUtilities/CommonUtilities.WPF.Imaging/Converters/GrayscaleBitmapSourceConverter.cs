@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Converters;
-using Validation;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Imaging.Converters;
 
@@ -50,7 +49,8 @@ public class GrayscaleBitmapSourceConverter : ValueConverter<BitmapSource, Bitma
 
     private static unsafe BitmapSource ConvertToGrayScale(BitmapSource image, Color biasColor)
     {
-        Requires.NotNull((object)image, nameof(image));
+        if (image == null) 
+            throw new ArgumentNullException(nameof(image));
         if (image.Format != PixelFormats.Bgra32)
             throw new ArgumentException("Image is not the expected type", nameof(image));
         var stride = image.PixelWidth * BytesPerPixelBgra32;
