@@ -11,21 +11,13 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class UpdateCleanPipeline : Pipeline
+internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(serviceProvider)
 {
     private readonly List<IInstallableComponent> _filesFailedToBeCleaned = new();
-    private readonly ILogger? _logger;
-    private readonly IBackupManager _backupManager;
-    private readonly IDownloadRepository _downloadRepository;
+    private readonly IBackupManager _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
+    private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
     private readonly List<IInstallableComponent> _downloadsToClean = new();
     private readonly List<IInstallableComponent> _backupsToClean = new();
-
-    public UpdateCleanPipeline(IServiceProvider serviceProvider)
-    { 
-        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
-        _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
-    }
 
     protected override Task<bool> PrepareCoreAsync()
     {
@@ -41,7 +33,7 @@ internal class UpdateCleanPipeline : Pipeline
     {
         if (!_downloadsToClean.Any() && !_backupsToClean.Any())
         {
-            _logger?.LogTrace("No files to clean up");
+            Logger?.LogTrace("No files to clean up");
             return Task.CompletedTask;
         }
 
@@ -56,9 +48,9 @@ internal class UpdateCleanPipeline : Pipeline
 
         if (_filesFailedToBeCleaned.Any())
         {
-            _logger?.LogTrace("These components could not be deleted:");
+            Logger?.LogTrace("These components could not be deleted:");
             foreach (var file in _filesFailedToBeCleaned)
-                _logger?.LogTrace(file.GetDisplayName());
+                Logger?.LogTrace(file.GetDisplayName());
         }
 
         return Task.CompletedTask;
