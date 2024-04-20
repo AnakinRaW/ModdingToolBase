@@ -5,16 +5,10 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.CommonUtilities;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
-using Serilog.Core;
-
-#if NETFRAMEWORK
-using AnakinRaW.CommonUtilities;
-#endif
 
 namespace AnakinRaW.ExternalUpdater.Utilities;
 

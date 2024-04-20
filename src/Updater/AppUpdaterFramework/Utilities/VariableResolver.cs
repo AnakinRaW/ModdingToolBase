@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Text;
 using AnakinRaW.CommonUtilities;
-using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 using Microsoft.Extensions.DependencyInjection;
 

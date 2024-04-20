@@ -47,7 +47,7 @@ internal class DownloadStep(
         return $"Downloading component '{Component.GetUniqueId()}' form \"{Uri}\"";
     }
 
-    protected override void SynchronizedInvoke(CancellationToken token)
+    protected override void RunSynchronized(CancellationToken token)
     {
         if (token.IsCancellationRequested)
             return;

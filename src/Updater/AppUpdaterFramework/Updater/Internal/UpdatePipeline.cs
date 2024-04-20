@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -21,8 +22,6 @@ internal sealed class UpdatePipeline : Pipeline
     private CancellationTokenSource? _linkedCancellationTokenSource;
 
     private readonly IComponentProgressReporter _progressReporter;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger? _logger;
     private readonly IInstalledProduct _installedProduct;
 
     private readonly HashSet<IUpdateItem> _itemsToProcess;
@@ -39,22 +38,20 @@ internal sealed class UpdatePipeline : Pipeline
 
     private bool IsCancelled { get; set; }
 
-    public UpdatePipeline(IUpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider)
+    public UpdatePipeline(IUpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider) : base(serviceProvider)
     {
         if (updateCatalog == null) 
             throw new ArgumentNullException(nameof(updateCatalog));
 
         _progressReporter = progressReporter;
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _logger = _serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _installedProduct = updateCatalog.InstalledProduct;
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();
 
         _itemsToProcess = new HashSet<IUpdateItem>(updateCatalog.UpdateItems);
 
-        _installsRunner = new StepRunner(_serviceProvider);
+        _installsRunner = new StepRunner(ServiceProvider);
         _installProgress = new AggregatedInstallProgressReporter(progressReporter);
-        _downloadsRunner = new ParallelRunner(2, _serviceProvider);
+        _downloadsRunner = new ParallelRunner(2, ServiceProvider);
         _downloadProgress = new AggregatedDownloadProgressReporter(progressReporter);
 
         RegisterEvents();
@@ -74,19 +71,19 @@ internal sealed class UpdatePipeline : Pipeline
         _restartManager.RestartRequired -= OnRestartRequired;
     }
 
-    protected override bool PrepareCore()
+    protected override Task<bool> PrepareCoreAsync()
     { 
         if (_itemsToProcess.Count == 0)
         {
             var ex = new InvalidOperationException("No items to update/remove.");
-            _logger?.LogError(ex, ex.Message);
-            return false;
+            Logger?.LogError(ex, ex.Message);
+            return Task.FromResult(false);
         }
 
         _componentsToDownload.Clear();
         _installsOrRemoves.Clear();
 
-        var configuration = _serviceProvider.GetService<IUpdateConfigurationProvider>()?.GetConfiguration() ??
+        var configuration = ServiceProvider.GetService<IUpdateConfigurationProvider>()?.GetConfiguration() ??
                             UpdateConfiguration.Default;
 
         foreach (var updateItem in _itemsToProcess)
@@ -98,8 +95,8 @@ internal sealed class UpdatePipeline : Pipeline
                 if (updateComponent.OriginInfo is null)
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
                 
-                var downloadTask = new DownloadStep(updateComponent, _downloadProgress, configuration, _serviceProvider);
-                var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, _installProgress, configuration, _installedProduct.Variables, _serviceProvider);
+                var downloadTask = new DownloadStep(updateComponent, _downloadProgress, configuration, ServiceProvider);
+                var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, _installProgress, configuration, _installedProduct.Variables, ServiceProvider);
 
                 _installsOrRemoves.Add(installTask);
                 _componentsToDownload.Add(downloadTask);
@@ -107,20 +104,20 @@ internal sealed class UpdatePipeline : Pipeline
 
             if (updateItem.Action == UpdateAction.Delete && installedComponent != null)
             {
-                var removeTask = new InstallStep(installedComponent, _installProgress, configuration, _installedProduct.Variables, _serviceProvider);
+                var removeTask = new InstallStep(installedComponent, _installProgress, configuration, _installedProduct.Variables, ServiceProvider);
                 _installsOrRemoves.Add(removeTask);
             }
         }
 
         foreach (var d in _componentsToDownload)
-            _downloadsRunner.Queue(d);
+            _downloadsRunner.AddStep(d);
         foreach (var installsOrRemove in _installsOrRemoves)
-            _installsRunner.Queue(installsOrRemove);
+            _installsRunner.AddStep(installsOrRemove);
 
-        return true;
+        return Task.FromResult(true);
     }
 
-    protected override void RunCore(CancellationToken token)
+    protected override async Task RunCoreAsync(CancellationToken token)
     { 
         _progressReporter.Report("Starting update...", 0.0, ProgressTypes.Install, new ComponentProgressInfo());
 
@@ -139,16 +136,16 @@ internal sealed class UpdatePipeline : Pipeline
         
         try
         {
-            _logger?.LogTrace("Starting update job.");
+            Logger?.LogTrace("Starting update job.");
             _linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-            _downloadsRunner.Run(_linkedCancellationTokenSource.Token);
+            var downloadTask = _downloadsRunner.RunAsync(_linkedCancellationTokenSource.Token);
 #if DEBUG
-            _downloadsRunner.Wait();
+            await downloadTask;
 #endif
-            _installsRunner.Run(_linkedCancellationTokenSource.Token);
+            await _installsRunner.RunAsync(_linkedCancellationTokenSource.Token);
             try
             {
-                _downloadsRunner.Wait();
+                await downloadTask;
             }
             catch
             {
@@ -162,7 +159,7 @@ internal sealed class UpdatePipeline : Pipeline
                 _linkedCancellationTokenSource.Dispose();
                 _linkedCancellationTokenSource = null;
             }
-            _logger?.LogTrace("Completed update job.");
+            Logger?.LogTrace("Completed update job.");
         }
 
         if (_restartManager.RequiredRestartType == RestartType.ApplicationElevation)
@@ -202,7 +199,7 @@ internal sealed class UpdatePipeline : Pipeline
         if (_restartManager.RequiredRestartType != RestartType.ApplicationElevation)
             return;
 
-        _logger?.LogWarning("Elevation requested. Update gets cancelled");
+        Logger?.LogWarning("Elevation requested. Update gets cancelled");
         _linkedCancellationTokenSource?.Cancel();
         _restartManager.RestartRequired -= OnRestartRequired;
     }

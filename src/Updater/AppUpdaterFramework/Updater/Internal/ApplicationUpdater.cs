@@ -71,26 +71,25 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
             if (!_updateCatalog.UpdateItems.Any())
                 throw new InvalidOperationException("Nothing to update!");
 
-            await Task.Run(() =>
+
+
+            using var updateJob = new UpdatePipeline(_updateCatalog, this, _serviceProvider);
+            await updateJob.PrepareAsync().ConfigureAwait(false);
+            // TODO: PreChecks
+            try
             {
-                using var updateJob = new UpdatePipeline(_updateCatalog, this, _serviceProvider);
-                updateJob.Prepare();
-                // TODO: PreChecks
-                try
-                {
-                    _logger?.LogTrace($"Updating...\r\nCatalog: {_updateCatalog}");
-                    updateJob.Run(token);
-                }
-                catch (Exception e)
-                {
-                    _logger?.LogError(e, "Failed update: " + e.Message);
-                    throw;
-                }
-                finally
-                {
-                    _logger?.LogTrace("Completed update");
-                }
-            }, CancellationToken.None).ConfigureAwait(false);
+                _logger?.LogTrace($"Updating...\r\nCatalog: {_updateCatalog}");
+                await updateJob.RunAsync(token).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger?.LogError(e, "Failed update: " + e.Message);
+                throw;
+            }
+            finally
+            {
+                _logger?.LogTrace("Completed update");
+            }
             
             return CreateResult();
         }
@@ -133,10 +132,7 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
 
     private async Task CleanUpdateData()
     {
-        await Task.Run(() =>
-        {
-            new UpdateCleanPipeline(_serviceProvider).Run();
-        }).ConfigureAwait(false);
+        await new UpdateCleanPipeline(_serviceProvider).RunAsync().ConfigureAwait(false);
     }
 
 

@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.Imaging.Utilities;
-using Validation;
 using Color = System.Windows.Media.Color;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Imaging;
@@ -66,7 +65,8 @@ public static class ImageThemingUtilities
     public static BitmapSource GetOrCreateThemedBitmapSource(BitmapSource inputImage, Color backgroundColor,
         bool isEnabled, Color grayscaleBiasColor, bool isHighContrast, bool enhanceContrastIfNecessary)
     {
-        Requires.NotNull(inputImage, nameof(inputImage));
+        if (inputImage == null) 
+            throw new ArgumentNullException(nameof(inputImage));
         var key = new WeakImageCacheKey(backgroundColor, grayscaleBiasColor, isEnabled);
         return WeakImageCache.GetOrAdd(key, _ => new ConditionalWeakTable<BitmapSource, BitmapSource>())
             .GetValue(inputImage, innerInputImage => CreateThemedBitmapSource(innerInputImage, backgroundColor,
@@ -227,12 +227,7 @@ public static class ImageThemingUtilities
         }
     }
 
-    private static int ComputeOffsetToOptOutPixel(int width, int height, bool isTopDownBitmap)
-    {
-        return isTopDownBitmap ? width - 1 : width * height - 1;
-    }
-
-    private struct WeakImageCacheKey(Color background, Color grayscaleBias, bool isEnabled)
+    private readonly struct WeakImageCacheKey(Color background, Color grayscaleBias, bool isEnabled)
         : IEquatable<WeakImageCacheKey>
     {
         private readonly Color _background = background;
