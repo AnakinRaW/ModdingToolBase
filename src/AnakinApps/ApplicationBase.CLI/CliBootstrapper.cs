@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Services;
@@ -20,6 +21,8 @@ namespace AnakinRaW.ApplicationBase;
 public abstract class CliBootstrapper : BootstrapperBase
 {
     protected virtual bool AutomaticUpdate => false;
+
+    protected virtual IEnumerable<string>? AdditionalNamespacesToLogToConsole => null;
 
     protected abstract int ExecuteAfterUpdate(string[] args, IServiceCollection serviceCollection);
 
@@ -96,12 +99,22 @@ public abstract class CliBootstrapper : BootstrapperBase
                 return false;
             if (string.IsNullOrEmpty(category)) 
                 return false;
-            return category.StartsWith(GetType().Namespace) || category.StartsWith(nameof(ApplicationBase));
+
+            if (category.StartsWith(GetType().Namespace) || category.StartsWith(nameof(ApplicationBase)))
+                return true;
+
+            if (AdditionalNamespacesToLogToConsole is null)
+                return false;
+
+            foreach (var @namespace in AdditionalNamespacesToLogToConsole)
+            {
+                if (category.StartsWith(@namespace))
+                    return true;
+            }
+            return false;
         });
     }
-
-
-
+    
     internal IUpdaterCommandLineOptions? GetUpdateOptionsFromCommandLine(string[] args, out bool wasExplicitUpdate)
     {
         UpdaterCommandLineOptions? updateOptions = null;
