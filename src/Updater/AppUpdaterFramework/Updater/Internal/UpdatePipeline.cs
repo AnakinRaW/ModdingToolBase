@@ -19,8 +19,6 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 
 internal sealed class UpdatePipeline : Pipeline
 {
-    private CancellationTokenSource? _linkedCancellationTokenSource;
-
     private readonly IComponentProgressReporter _progressReporter;
     private readonly IInstalledProduct _installedProduct;
 
@@ -137,12 +135,11 @@ internal sealed class UpdatePipeline : Pipeline
         try
         {
             Logger?.LogTrace("Starting update job.");
-            _linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-            var downloadTask = _downloadsRunner.RunAsync(_linkedCancellationTokenSource.Token);
+            var downloadTask = _downloadsRunner.RunAsync(token);
 #if DEBUG
             await downloadTask;
 #endif
-            await _installsRunner.RunAsync(_linkedCancellationTokenSource.Token);
+            await _installsRunner.RunAsync(token);
             try
             {
                 await downloadTask;
@@ -154,11 +151,6 @@ internal sealed class UpdatePipeline : Pipeline
         }
         finally
         {
-            if (_linkedCancellationTokenSource is not null)
-            {
-                _linkedCancellationTokenSource.Dispose();
-                _linkedCancellationTokenSource = null;
-            }
             Logger?.LogTrace("Completed update job.");
         }
 
@@ -181,11 +173,11 @@ internal sealed class UpdatePipeline : Pipeline
             throw new StepFailureException(failedTasks);
     }
 
-    private void OnError(object sender, StepErrorEventArgs e)
+    protected override void OnError(object sender, StepErrorEventArgs e)
     {
-        IsCancelled |= e.Cancel;
-        if (e.Cancel && _linkedCancellationTokenSource is not null) 
-            _linkedCancellationTokenSource.Cancel();
+        base.OnError(sender, e);
+        if (e.Cancel)
+            IsCancelled = true;
     }
 
     protected override void DisposeManagedResources()
@@ -200,7 +192,7 @@ internal sealed class UpdatePipeline : Pipeline
             return;
 
         Logger?.LogWarning("Elevation requested. Update gets cancelled");
-        _linkedCancellationTokenSource?.Cancel();
+        Cancel();
         _restartManager.RestartRequired -= OnRestartRequired;
     }
 }
