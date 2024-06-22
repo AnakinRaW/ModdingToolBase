@@ -11,10 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
-using Serilog.Extensions.Logging;
-using AnakinRaW.CommonUtilities.FileSystem;
-using Serilog.Filters;
-
 using Serilog;
 using Serilog.Events;
 
