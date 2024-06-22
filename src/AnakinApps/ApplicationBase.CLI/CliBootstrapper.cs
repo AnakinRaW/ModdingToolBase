@@ -11,6 +11,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using Serilog.Extensions.Logging;
+using AnakinRaW.CommonUtilities.FileSystem;
+using Serilog.Filters;
+
+using Serilog;
+using Serilog.Events;
+
 #if DEBUG
 using System;
 #endif
@@ -90,8 +97,9 @@ public abstract class CliBootstrapper : BootstrapperBase
 #endif
         loggingBuilder.AddConsole();
 
-        var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log-{Date}.txt");
-        loggingBuilder.AddFile(logPath, LogLevel.Trace, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}");
+        var logPath = fileSystem.Path.Combine(applicationEnvironment.ApplicationLocalDirectory.FullName, "log.txt");
+
+        SetupFileLogging(loggingBuilder, logPath);
 
         loggingBuilder.AddFilter<ConsoleLoggerProvider>((category, level) =>
         {
@@ -111,10 +119,30 @@ public abstract class CliBootstrapper : BootstrapperBase
                 if (category.StartsWith(@namespace))
                     return true;
             }
+            
             return false;
         });
     }
-    
+
+    private void SetupFileLogging(ILoggingBuilder loggingBuilder, string logFilePath)
+    {
+        var logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .MinimumLevel.Verbose()
+            .Filter.ByExcluding(ExcludeFromGlobalLogging)
+            .WriteTo.RollingFile(
+                logFilePath, 
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message}{NewLine}{Exception}")
+            .CreateLogger();
+
+        loggingBuilder.AddSerilog(logger);
+    }
+
+    protected virtual bool ExcludeFromGlobalLogging(LogEvent logEvent)
+    {
+        return false;
+    }
+
     internal IUpdaterCommandLineOptions? GetUpdateOptionsFromCommandLine(string[] args, out bool wasExplicitUpdate)
     {
         UpdaterCommandLineOptions? updateOptions = null;
