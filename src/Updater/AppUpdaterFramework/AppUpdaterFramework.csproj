@@ -18,7 +18,7 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Semver" Version="2.3.0" />
-		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.0.1" PrivateAssets="build;compile" />
+		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.0.2" PrivateAssets="build;compile" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
