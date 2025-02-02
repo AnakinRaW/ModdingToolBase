@@ -6,8 +6,8 @@ using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Progress;
 
-internal class AggregatedDownloadProgressReporter(IComponentProgressReporter progressReporter)
-    : ComponentAggregatedProgressReporter(progressReporter)
+internal class AggregatedDownloadProgressReporter(IComponentProgressReporter progressReporter, IEnumerable<IComponentStep> steps) 
+    : ComponentAggregatedProgressReporter(progressReporter, steps)
 {
     private const int MovingAverageCalculationWindow = 1000;
 
@@ -24,16 +24,18 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
 
     protected override ProgressType Type => ProgressTypes.Download;
 
-    protected override double CalculateAggregatedProgress(IComponentStep step, double taskProgress, ref ComponentProgressInfo progressInfo)
+    protected override double CalculateAggregatedProgress(IComponentStep step, double progress, out ComponentProgressInfo progressInfo)
     {
         var now = DateTime.Now;
         var key = step.Component.GetUniqueId();
-        var totalTaskProgressSize = (long)(taskProgress * step.Size);
+        var totalTaskProgressSize = (long)(progress * step.Size);
 
-        if (taskProgress >= 1.0)
+        if (progress >= 1.0)
             Interlocked.Increment(ref _completedPackageCount);
 
         double currentProgress;
+
+        progressInfo = new();
 
         lock (_syncLock)
         {
@@ -61,7 +63,7 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
 
             var deltaDownloadSpeed = _completedSizeForSpeedCalculation - _previousCompletedSizeForSpeedCalculation;
             var totalMilliseconds = (now - _downloadTime).TotalMilliseconds;
-            
+
             if (totalMilliseconds > 10000.0)
             {
                 _previousCompletedSizeForSpeedCalculation = _completedSizeForSpeedCalculation;
@@ -80,7 +82,7 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
             progressInfo.TotalSize = TotalSize;
         }
 
-        if (_completedPackageCount >= TotalStepCount && taskProgress >= 1.0)
+        if (_completedPackageCount >= TotalStepCount && progress >= 1.0)
         {
             currentProgress = 1.0;
             progressInfo.DownloadSpeed = 0;

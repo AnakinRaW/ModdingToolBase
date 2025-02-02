@@ -30,11 +30,9 @@ internal sealed class UpdatePipeline : Pipeline
     private readonly List<DownloadStep> _componentsToDownload = new();
     private readonly List<InstallStep> _installsOrRemoves = new();
 
-    private readonly ParallelRunner _downloadsRunner;
-    private readonly StepRunner _installsRunner;
+    private readonly ParallelStepRunner _downloadsRunner;
+    private readonly SequentialStepRunner _installsRunner;
     private readonly IRestartManager _restartManager;
-
-    private bool IsCancelled { get; set; }
 
     public UpdatePipeline(IUpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider) : base(serviceProvider)
     {
@@ -45,12 +43,15 @@ internal sealed class UpdatePipeline : Pipeline
         _installedProduct = updateCatalog.InstalledProduct;
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();
 
-        _itemsToProcess = new HashSet<IUpdateItem>(updateCatalog.UpdateItems);
+        _itemsToProcess = [..updateCatalog.UpdateItems];
 
-        _installsRunner = new StepRunner(ServiceProvider);
-        _installProgress = new AggregatedInstallProgressReporter(progressReporter);
-        _downloadsRunner = new ParallelRunner(2, ServiceProvider);
-        _downloadProgress = new AggregatedDownloadProgressReporter(progressReporter);
+
+        // TODO: Update
+
+        _installsRunner = new SequentialStepRunner(ServiceProvider);
+        //_installProgress = new AggregatedInstallProgressReporter(progressReporter);
+        _downloadsRunner = new ParallelStepRunner(2, ServiceProvider);
+        //_downloadProgress = new AggregatedDownloadProgressReporter(progressReporter);
 
         RegisterEvents();
     }
@@ -122,15 +123,15 @@ internal sealed class UpdatePipeline : Pipeline
         var componentsToDownload = _componentsToDownload.ToList();
         var componentsToInstallOrRemove = _installsOrRemoves.ToList();
 
-        if (!componentsToDownload.Any())
-            _progressReporter.Report("_", 1.0, ProgressTypes.Download, new ComponentProgressInfo());
-        else
-            _downloadProgress.Initialize(componentsToDownload);
+        //if (!componentsToDownload.Any())
+        //    _progressReporter.Report("_", 1.0, ProgressTypes.Download, new ComponentProgressInfo());
+        //else
+        //    _downloadProgress.Initialize(componentsToDownload);
 
-        if (!componentsToInstallOrRemove.Any())
-            _progressReporter.Report("_", 1.0, ProgressTypes.Install, new ComponentProgressInfo());
-        else
-            _installProgress.Initialize(componentsToInstallOrRemove); 
+        //if (!componentsToInstallOrRemove.Any())
+        //    _progressReporter.Report("_", 1.0, ProgressTypes.Install, new ComponentProgressInfo());
+        //else
+        //    _installProgress.Initialize(componentsToInstallOrRemove); 
         
         try
         {
@@ -157,8 +158,6 @@ internal sealed class UpdatePipeline : Pipeline
         if (_restartManager.RequiredRestartType == RestartType.ApplicationElevation)
             throw new ElevationRequiredException();
 
-        if (IsCancelled)
-            throw new OperationCanceledException(token);
         token.ThrowIfCancellationRequested();
 
         var failedDownloads = componentsToDownload.Where(p =>
@@ -173,16 +172,9 @@ internal sealed class UpdatePipeline : Pipeline
             throw new StepFailureException(failedTasks);
     }
 
-    protected override void OnError(object sender, StepErrorEventArgs e)
+    protected override void DisposeResources()
     {
-        base.OnError(sender, e);
-        if (e.Cancel)
-            IsCancelled = true;
-    }
-
-    protected override void DisposeManagedResources()
-    {
-        base.DisposeManagedResources();
+        base.DisposeResources();
         UnregisterEvents();
     }
 

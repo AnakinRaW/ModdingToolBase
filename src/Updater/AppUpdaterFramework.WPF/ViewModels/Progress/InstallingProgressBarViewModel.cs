@@ -13,7 +13,7 @@ public sealed class InstallingProgressBarViewModel : ProgressBarViewModel
                 return "Starting install operation";
             return progressInformation.Progress >= 0.99
                 ? "Installing... This might take a while."
-                : $"Installing: component {progressInformation.DetailedProgress.CurrentComponent} of {progressInformation.DetailedProgress.TotalComponents}";
+                : $"Installing: component {progressInformation.ProgressInfo.CurrentComponent} of {progressInformation.ProgressInfo.TotalComponents}";
         }
     }
 

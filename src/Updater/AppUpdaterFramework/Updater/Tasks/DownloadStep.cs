@@ -177,9 +177,9 @@ internal class DownloadStep(
         }
     }
 
-    private void OnProgress(ProgressUpdateStatus status)
+    private void OnProgress(DownloadUpdate status)
     {
-        var progress = (double) status.BytesRead / Size;
+        var progress = (double)status.BytesRead / Size;
         ReportProgress(progress);
     }
 }

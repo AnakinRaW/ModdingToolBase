@@ -9,6 +9,7 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Logging;
+using Testably.Abstractions;
 #if DEBUG
 using Microsoft.Extensions.Logging.Debug;
 #endif
@@ -59,7 +60,7 @@ internal static class Program
     private static IServiceProvider CreateServices(ExternalUpdaterOptions options)
     {
         var services = new ServiceCollection();
-        var fileSystem = new FileSystem();
+        var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IProcessTools>(sp => new ProcessTools(sp));
 

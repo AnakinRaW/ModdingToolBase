@@ -15,7 +15,7 @@ namespace AnakinRaW.ApplicationManifestCreator;
 internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     : IBranchManager
 {
-    private readonly ApplicationBranchUtilities _branchUtilities = new ApplicationBranchUtilities(options.OriginRootUri, serviceProvider);
+    private readonly ApplicationBranchUtilities _branchUtilities = new(options.OriginRootUri, serviceProvider);
     public string StableBranchName => ApplicationConstants.StableBranchName;
 
     public Task<IEnumerable<ProductBranch>> GetAvailableBranches()

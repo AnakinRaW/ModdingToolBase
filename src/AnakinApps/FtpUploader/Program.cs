@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Debug;
+using Testably.Abstractions;
 
 namespace AnakinRaW.FtpUploader;
 
@@ -47,7 +48,7 @@ internal class Program
     private static IServiceProvider CreateServices(FtpUploadOptions options)
     {
         var services = new ServiceCollection();
-        var fileSystem = new FileSystem();
+        var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
 
         services.AddLogging(l =>

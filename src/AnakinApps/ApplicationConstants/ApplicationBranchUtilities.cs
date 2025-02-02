@@ -34,10 +34,10 @@ public class ApplicationBranchUtilities
     {
         var lookupUri = Mirrors.Select(GetBranchLookupUrl);
         var branchesData = await DownloadFromMirrors(lookupUri);
-        var branchNames = Encoding.UTF8.GetString(branchesData).Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        var branchNames = Encoding.UTF8.GetString(branchesData).Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries);
         
         if (!branchNames.Any())
-            return Enumerable.Empty<ProductBranch>();
+            return [];
 
         var branches = new List<ProductBranch>();
         foreach (var name in branchNames)
@@ -64,7 +64,7 @@ public class ApplicationBranchUtilities
             }
         }
 
-        return Array.Empty<byte>();
+        return [];
     }
 
     private static Url GetBranchLookupUrl(Uri baseUri)

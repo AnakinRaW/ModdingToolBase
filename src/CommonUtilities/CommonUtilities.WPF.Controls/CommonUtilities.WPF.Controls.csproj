@@ -24,10 +24,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.0" PrivateAssets="all" />
-		<PackageReference Include="Vanara.PInvoke.Shell32" Version="4.0.0" PrivateAssets="all" />
-		<PackageReference Include="Vanara.PInvoke.User32" Version="4.0.0" PrivateAssets="all" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.4" PrivateAssets="all" />
+		<PackageReference Include="Vanara.PInvoke.Shell32" Version="4.0.4" PrivateAssets="all" />
+		<PackageReference Include="Vanara.PInvoke.User32" Version="4.0.4" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>

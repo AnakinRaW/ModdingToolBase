@@ -42,7 +42,7 @@ internal class UnhandledExceptionHandler : DisposableObject, IUnhandledException
     {
     }
 
-    protected override void DisposeManagedResources()
+    protected override void DisposeResources()
     {
         AppDomain.CurrentDomain.UnhandledException -= OnUnhandledException;
     }

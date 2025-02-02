@@ -14,10 +14,9 @@ using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.ApplicationBase.Update.External;
 using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.CommonUtilities;
-using AnakinRaW.CommonUtilities.DownloadManager;
-using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.AppUpdaterFramework.Handlers;
+using Testably.Abstractions;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -66,8 +65,6 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
         serviceCollection.AddSingleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp));
 
-        serviceCollection.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
-        serviceCollection.AddSingleton<IDownloadManagerConfigurationProvider>(new ApplicationDownloadConfigurationProvider());
         serviceCollection.AddSingleton<IHashingService>(sp => new HashingService(sp));
     }
 
@@ -111,7 +108,7 @@ public abstract class BootstrapperBase
     {
         var serviceCollection = new ServiceCollection();
         
-        var fileSystem = new FileSystem();
+        var fileSystem = new RealFileSystem();
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
         serviceCollection.AddSingleton<ICurrentProcessInfoProvider>(_ => new CurrentProcessInfoProvider());
 

@@ -11,13 +11,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="12.0.25-beta" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.0.25-beta" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.0.25-beta" />
-		<PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-		<PackageReference Include="Semver" Version="2.3.0" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="12.0.91" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.0.91" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.0.91" />
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+		<PackageReference Include="Semver" Version="3.0.0" />
 		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.0.4" PrivateAssets="build;compile" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
@@ -30,12 +30,16 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-		<PackageReference Include="envdte" Version="17.11.40262" PrivateAssets="build;compile" />
+		<PackageReference Include="envdte" Version="17.12.40391" PrivateAssets="build;compile" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Nerdbank.GitVersioning" Version="3.7.115" />
 	</ItemGroup>
 	
 	<PropertyGroup>

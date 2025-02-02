@@ -47,7 +47,7 @@ internal sealed class EnumerableModificationDetector : DisposableObject, IEnumer
         ChangeSource = null;
     }
 
-    protected override void DisposeManagedResources()
+    protected override void DisposeResources()
     {
         ChangeSource = null;
     }

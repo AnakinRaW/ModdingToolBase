@@ -42,7 +42,7 @@ internal class SuspendableObservableCollection<T> : ObservableCollection<T>
             ++_collection._suspendChangesCount;
         }
 
-        protected override void DisposeManagedResources()
+        protected override void DisposeResources()
         {
             --_collection._suspendChangesCount;
             if (_collection._suspendChangesCount != 0 || !_collection._skippedNotification)

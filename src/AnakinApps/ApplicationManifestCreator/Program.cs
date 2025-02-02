@@ -9,10 +9,10 @@ using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Testably.Abstractions;
 #if DEBUG
 using Microsoft.Extensions.Logging.Debug;
 #endif
-
 
 namespace AnakinRaW.ApplicationManifestCreator;
 
@@ -53,7 +53,7 @@ internal class Program
     private static IServiceProvider CreateServices(ManifestCreatorOptions options)
     {
         var services = new ServiceCollection();
-        var fileSystem = new FileSystem();
+        var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IHashingService>(sp => new HashingService(sp));
         services.AddSingleton<IDownloadManager>(sp => new DownloadManager(sp));
