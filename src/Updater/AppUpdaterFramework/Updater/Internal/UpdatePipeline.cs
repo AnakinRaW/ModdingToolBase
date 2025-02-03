@@ -12,6 +12,7 @@ using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.SimplePipeline;
+using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using AnakinRaW.CommonUtilities.SimplePipeline.Runners;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,8 +26,8 @@ internal sealed class UpdatePipeline : Pipeline
 
     private readonly HashSet<IUpdateItem> _itemsToProcess;
 
-    private readonly ComponentAggregatedProgressReporter _installProgress;
-    private readonly ComponentAggregatedProgressReporter _downloadProgress;
+    private readonly LateInitDelegatingProgressReporter _installDelegatingProgress = new();
+    private readonly LateInitDelegatingProgressReporter _downloadDelegatingProgress = new();
 
     private readonly List<DownloadStep> _componentsToDownload = new();
     private readonly List<InstallStep> _installsOrRemoves = new();
@@ -46,12 +47,8 @@ internal sealed class UpdatePipeline : Pipeline
 
         _itemsToProcess = [..updateCatalog.UpdateItems];
 
-        // TODO: Update
-
         _installsRunner = new SequentialStepRunner(ServiceProvider);
-        //_installProgress = new AggregatedInstallProgressReporter(progressReporter);
         _downloadsRunner = new ParallelStepRunner(2, ServiceProvider);
-        //_downloadProgress = new AggregatedDownloadProgressReporter(progressReporter);
 
         RegisterEvents();
     }
@@ -68,6 +65,9 @@ internal sealed class UpdatePipeline : Pipeline
         _downloadsRunner.Error -= OnError!;
         _installsRunner.Error -= OnError!;
         _restartManager.RestartRequired -= OnRestartRequired;
+
+        foreach (var downloadStep in _componentsToDownload) 
+            downloadStep.Canceled -= DownloadCancelled;
     }
 
     protected override Task<bool> PrepareCoreAsync()
@@ -95,8 +95,9 @@ internal sealed class UpdatePipeline : Pipeline
                 if (updateComponent.OriginInfo is null)
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
                 
-                var downloadTask = new DownloadStep(updateComponent, _downloadProgress, configuration, downloadManager, ServiceProvider);
-                var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, _installProgress, configuration, _installedProduct.Variables, ServiceProvider);
+                var downloadTask = new DownloadStep(updateComponent, _downloadDelegatingProgress, configuration, downloadManager, ServiceProvider);
+                downloadTask.Canceled += DownloadCancelled;
+                var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, _installDelegatingProgress, configuration, _installedProduct.Variables, ServiceProvider);
 
                 _installsOrRemoves.Add(installTask);
                 _componentsToDownload.Add(downloadTask);
@@ -104,7 +105,7 @@ internal sealed class UpdatePipeline : Pipeline
 
             if (updateItem.Action == UpdateAction.Delete && installedComponent != null)
             {
-                var removeTask = new InstallStep(installedComponent, _installProgress, configuration, _installedProduct.Variables, ServiceProvider);
+                var removeTask = new InstallStep(installedComponent, _installDelegatingProgress, configuration, _installedProduct.Variables, ServiceProvider);
                 _installsOrRemoves.Add(removeTask);
             }
         }
@@ -117,6 +118,11 @@ internal sealed class UpdatePipeline : Pipeline
         return Task.FromResult(true);
     }
 
+    private void DownloadCancelled(object sender, EventArgs e)
+    {
+        Cancel();
+    }
+
     protected override async Task RunCoreAsync(CancellationToken token)
     { 
         _progressReporter.Report("Starting update...", 0.0, ProgressTypes.Install, new ComponentProgressInfo());
@@ -124,16 +130,22 @@ internal sealed class UpdatePipeline : Pipeline
         var componentsToDownload = _componentsToDownload.ToList();
         var componentsToInstallOrRemove = _installsOrRemoves.ToList();
 
-        //if (!componentsToDownload.Any())
-        //    _progressReporter.Report("_", 1.0, ProgressTypes.Download, new ComponentProgressInfo());
-        //else
-        //    _downloadProgress.Initialize(componentsToDownload);
+        if (!componentsToDownload.Any())
+            _progressReporter.Report("_", 1.0, ProgressTypes.Download, new ComponentProgressInfo());
+        else
+        {
+            var aggregatedDownloadProgress = new AggregatedDownloadProgressReporter(_progressReporter, componentsToDownload);
+            _downloadDelegatingProgress.Initialize(aggregatedDownloadProgress);
+        }
 
-        //if (!componentsToInstallOrRemove.Any())
-        //    _progressReporter.Report("_", 1.0, ProgressTypes.Install, new ComponentProgressInfo());
-        //else
-        //    _installProgress.Initialize(componentsToInstallOrRemove); 
-        
+        if (!componentsToInstallOrRemove.Any())
+            _progressReporter.Report("_", 1.0, ProgressTypes.Install, new ComponentProgressInfo());
+        else
+        {
+            var aggregatedDownloadProgress = new AggregatedInstallProgressReporter(_progressReporter, componentsToInstallOrRemove);
+            _installDelegatingProgress.Initialize(aggregatedDownloadProgress);
+        }
+
         try
         {
             Logger?.LogTrace("Starting update job.");
@@ -177,6 +189,8 @@ internal sealed class UpdatePipeline : Pipeline
     {
         base.DisposeResources();
         UnregisterEvents();
+        _downloadDelegatingProgress.Dispose();
+        _installDelegatingProgress.Dispose();
     }
 
     private void OnRestartRequired(object? sender, EventArgs e)
@@ -187,5 +201,26 @@ internal sealed class UpdatePipeline : Pipeline
         Logger?.LogWarning("Elevation requested. Update gets cancelled");
         Cancel();
         _restartManager.RestartRequired -= OnRestartRequired;
+    }
+}
+
+internal class LateInitDelegatingProgressReporter : IStepProgressReporter, IDisposable
+{
+    private IStepProgressReporter? _innerReporter;
+
+    public void Report(IProgressStep step, double progress)
+    {
+        if (_innerReporter is not null)
+            _innerReporter.Report(step, progress);
+    }
+
+    public void Initialize(IStepProgressReporter progressReporter)
+    {
+        _innerReporter = progressReporter;
+    }
+
+    public void Dispose()
+    {
+        _innerReporter = null;
     }
 }
