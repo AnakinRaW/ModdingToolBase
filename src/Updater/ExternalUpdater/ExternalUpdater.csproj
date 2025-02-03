@@ -6,7 +6,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+		<TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
 		<AssemblyName>AnakinRaW.ExternalUpdater</AssemblyName>
 	</PropertyGroup>
@@ -29,10 +29,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Update="Nerdbank.GitVersioning" Version="3.7.115" />
 	</ItemGroup>
 
 </Project>
