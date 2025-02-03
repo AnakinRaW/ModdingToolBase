@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase;
@@ -17,6 +18,14 @@ public abstract class ApplicationEnvironmentBase : IApplicationEnvironment
     public abstract Uri? RepositoryUrl { get; }
     public abstract ICollection<Uri> UpdateMirrors { get; }
     public abstract string ApplicationRegistryPath { get; }
+    public virtual DownloadManagerConfiguration UpdateDownloadManagerConfiguration { get; } = new()
+    {
+        AllowEmptyFileDownload = false,
+        DownloadRetryDelay = 3000,
+        InternetClient = InternetClient.HttpClient,
+        ValidationPolicy = ValidationPolicy.Optional
+    };
+
     public string ApplicationLocalPath => LazyInitializer.EnsureInitialized(ref _launcherLocalPath, BuildLocalPath)!;
     public IDirectoryInfo ApplicationLocalDirectory =>
         _localDirectory ??= _fileSystem.DirectoryInfo.New(ApplicationLocalPath);

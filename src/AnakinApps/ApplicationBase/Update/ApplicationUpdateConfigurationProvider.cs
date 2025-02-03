@@ -28,7 +28,8 @@ internal class ApplicationUpdateConfigurationProvider : UpdateConfigurationProvi
             DownloadLocation = downloadLocation,
             BackupLocation = backupsLocation,
             BackupPolicy = BackupPolicy.Required,
-            SupportsRestart = true
+            SupportsRestart = true,
+            DownloadConfiguration = _launcherEnv.UpdateDownloadManagerConfiguration
         };
     }
 }

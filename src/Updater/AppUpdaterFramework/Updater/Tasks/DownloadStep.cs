@@ -23,6 +23,7 @@ internal class DownloadStep(
     IInstallableComponent installable,
     IStepProgressReporter progressReporter,
     IUpdateConfiguration updateConfiguration,
+    IDownloadManager downloadManager,
     IServiceProvider serviceProvider)
     : SynchronizedStep(serviceProvider), IComponentStep
 {
@@ -82,7 +83,6 @@ internal class DownloadStep(
     private void DownloadAction(CancellationToken token, out Exception? lastException)
     {
         lastException = null;
-        var downloadManager = Services.GetRequiredService<IDownloadManager>();
 
         try
         {
@@ -97,7 +97,7 @@ internal class DownloadStep(
 
                 try
                 {
-                    DownloadAndVerifyAsync(downloadManager, DownloadPath, token).Wait(CancellationToken.None);
+                    DownloadAndVerifyAsync(DownloadPath, token).Wait(CancellationToken.None);
                     DownloadPath.Refresh();
                     if (!DownloadPath.Exists)
                     {
@@ -146,7 +146,7 @@ internal class DownloadStep(
         }
     }
 
-    private async Task DownloadAndVerifyAsync(IDownloadManager downloadManager, IFileInfo destination, CancellationToken token)
+    private async Task DownloadAndVerifyAsync(IFileInfo destination, CancellationToken token)
     {
         var integrityInformation = Component.OriginInfo!.IntegrityInformation;
         try

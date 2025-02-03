@@ -18,7 +18,10 @@ public class ApplicationBranchManager : BranchManagerBase
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
         var applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
-        _branchUtilities = new ApplicationBranchUtilities(applicationEnvironment.UpdateMirrors, serviceProvider);
+        _branchUtilities = new ApplicationBranchUtilities(
+            applicationEnvironment.UpdateMirrors,
+            applicationEnvironment.UpdateDownloadManagerConfiguration,
+            serviceProvider);
     }
 
     public override Task<IEnumerable<ProductBranch>> GetAvailableBranches()

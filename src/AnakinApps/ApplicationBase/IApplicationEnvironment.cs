@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -19,4 +20,6 @@ public interface IApplicationEnvironment
     ICollection<Uri> UpdateMirrors { get; }
 
     string ApplicationRegistryPath { get; }
+
+    DownloadManagerConfiguration UpdateDownloadManagerConfiguration { get; }
 }

@@ -1,5 +1,4 @@
-﻿using AnakinRaW.CommonUtilities.FileSystem.Normalization;
-using System.IO;
+﻿using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 
 namespace AnakinRaW.AppUpdaterFramework.Configuration;
 
@@ -16,27 +15,6 @@ public interface IUpdateConfiguration
     bool SupportsRestart { get; }
 
     bool ValidateInstallation { get; }
-}
 
-public sealed record UpdateConfiguration : IUpdateConfiguration
-{
-    internal static readonly IUpdateConfiguration Default = new UpdateConfiguration
-    {
-        DownloadRetryCount = 3,
-        DownloadLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
-        BackupLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
-        BackupPolicy = BackupPolicy.NotRequired,
-    };
-
-    public byte DownloadRetryCount { get; init; }
-
-    public required string DownloadLocation { get; init; }
-
-    public BackupPolicy BackupPolicy { get; init; }
-
-    public bool SupportsRestart { get; init; }
-
-    public string? BackupLocation { get; init; }
-
-    public bool ValidateInstallation { get; init; }
+    DownloadManagerConfiguration DownloadConfiguration { get; }
 }

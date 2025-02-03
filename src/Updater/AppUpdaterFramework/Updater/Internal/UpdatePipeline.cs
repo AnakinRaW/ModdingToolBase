@@ -10,6 +10,7 @@ using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.SimplePipeline;
 using AnakinRaW.CommonUtilities.SimplePipeline.Runners;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +45,6 @@ internal sealed class UpdatePipeline : Pipeline
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();
 
         _itemsToProcess = [..updateCatalog.UpdateItems];
-
 
         // TODO: Update
 
@@ -85,6 +85,7 @@ internal sealed class UpdatePipeline : Pipeline
         var configuration = ServiceProvider.GetService<IUpdateConfigurationProvider>()?.GetConfiguration() ??
                             UpdateConfiguration.Default;
 
+        var downloadManager = new DownloadManager(configuration.DownloadConfiguration, ServiceProvider);
         foreach (var updateItem in _itemsToProcess)
         {
             var installedComponent = updateItem.InstalledComponent;
@@ -94,7 +95,7 @@ internal sealed class UpdatePipeline : Pipeline
                 if (updateComponent.OriginInfo is null)
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
                 
-                var downloadTask = new DownloadStep(updateComponent, _downloadProgress, configuration, ServiceProvider);
+                var downloadTask = new DownloadStep(updateComponent, _downloadProgress, configuration, downloadManager, ServiceProvider);
                 var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, _installProgress, configuration, _installedProduct.Variables, ServiceProvider);
 
                 _installsOrRemoves.Add(installTask);

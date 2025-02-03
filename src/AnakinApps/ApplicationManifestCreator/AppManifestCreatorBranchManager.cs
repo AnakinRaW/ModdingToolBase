@@ -8,6 +8,7 @@ using AnakinRaW.ApplicationBase;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using Semver;
 
 namespace AnakinRaW.ApplicationManifestCreator;
@@ -15,7 +16,8 @@ namespace AnakinRaW.ApplicationManifestCreator;
 internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     : IBranchManager
 {
-    private readonly ApplicationBranchUtilities _branchUtilities = new(options.OriginRootUri, serviceProvider);
+    private readonly ApplicationBranchUtilities _branchUtilities = new(options.OriginRootUri, DownloadManagerConfiguration.Default, serviceProvider);
+    
     public string StableBranchName => ApplicationConstants.StableBranchName;
 
     public Task<IEnumerable<ProductBranch>> GetAvailableBranches()

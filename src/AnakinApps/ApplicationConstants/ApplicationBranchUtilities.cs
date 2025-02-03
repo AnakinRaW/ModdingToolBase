@@ -7,8 +7,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using Flurl;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -18,15 +18,18 @@ public class ApplicationBranchUtilities
 
     public ICollection<Uri> Mirrors { get; }
     
-    public ApplicationBranchUtilities(Uri appRootUri, IServiceProvider serviceProvider) : this(new List<Uri>{appRootUri}, serviceProvider)
+    public ApplicationBranchUtilities(Uri appRootUri, DownloadManagerConfiguration downloadManagerConfiguration, IServiceProvider serviceProvider) 
+        : this([appRootUri], downloadManagerConfiguration, serviceProvider)
     {
     }
 
-    public ApplicationBranchUtilities(ICollection<Uri> mirrors, IServiceProvider serviceProvider)
+    public ApplicationBranchUtilities(ICollection<Uri> mirrors, DownloadManagerConfiguration downloadManagerConfiguration, IServiceProvider serviceProvider)
     {
+        if (downloadManagerConfiguration == null) 
+            throw new ArgumentNullException(nameof(downloadManagerConfiguration));
         if (serviceProvider == null) 
             throw new ArgumentNullException(nameof(serviceProvider));
-        _downloadManager = serviceProvider.GetRequiredService<IDownloadManager>();
+        _downloadManager = new DownloadManager(downloadManagerConfiguration, serviceProvider);
         Mirrors = mirrors ?? throw new ArgumentNullException(nameof(mirrors));
     }
 

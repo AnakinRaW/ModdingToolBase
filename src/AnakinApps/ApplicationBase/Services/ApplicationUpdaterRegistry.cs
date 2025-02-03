@@ -12,31 +12,19 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 
     public bool Reset
     {
-        get
-        {
-            _registryKey.GetValueOrDefault(nameof(Reset), out var value, false);
-            return value;
-        }
+        get => _registryKey.GetValueOrDefault(nameof(Reset), false, out _);
         private set => _registryKey.SetValue(nameof(Reset), value);
     }
 
     public bool RequiresUpdate
     {
-        get
-        {
-            _registryKey.GetValueOrDefault(nameof(RequiresUpdate), out var value, false);
-            return value;
-        }
+        get => _registryKey.GetValueOrDefault(nameof(RequiresUpdate), false, out _);
         private set => _registryKey.SetValue(nameof(RequiresUpdate), value);
     }
 
     public string? UpdateCommandArgs
     {
-        get
-        {
-            _registryKey.GetValueOrDefault(nameof(UpdateCommandArgs), out var value, (string)null!);
-            return value;
-        }
+        get => _registryKey.GetValueOrDefault(nameof(UpdateCommandArgs), (string?)null, out bool _);
         private set
         {
             if (string.IsNullOrEmpty(value))
@@ -48,11 +36,7 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 
     public string? UpdaterPath
     {
-        get
-        {
-            _registryKey.GetValueOrDefault(nameof(UpdaterPath), out var value, (string)null!);
-            return value;
-        }
+        get => _registryKey.GetValueOrDefault(nameof(UpdaterPath), (string)null!, out _);
         private set
         {
             if (string.IsNullOrEmpty(value))

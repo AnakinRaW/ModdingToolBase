@@ -41,8 +41,3 @@ internal class ExternalUpdateExtractor : IExternalUpdateExtractor
         return streamVersion > installedVersion;
     }
 }
-
-internal interface IExternalUpdateExtractor
-{
-    Task ExtractAsync();
-}
