@@ -11,14 +11,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="12.0.91" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.0.91" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.0.91" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="12.1.8" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.1.8" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.1.8" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
 		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.0.5" PrivateAssets="build;compile" />
+		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.0.6" PrivateAssets="build;compile" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-		<PackageReference Include="envdte" Version="17.12.40391" PrivateAssets="build;compile" />
+		<PackageReference Include="envdte" Version="17.13.40008" PrivateAssets="build;compile" />
 	</ItemGroup>
 
 	<ItemGroup>
