@@ -181,7 +181,7 @@ internal sealed class UpdatePipeline : Pipeline
 
         var failedTasks = failedDownloads.Concat<IProgressStep>(failedInstalls).ToList();
         
-        if (failedTasks.Any() || failedInstalls.Any())
+        if (failedTasks.Count != 0 || failedInstalls.Count != 0)
             throw new StepFailureException(failedTasks);
     }
 
@@ -210,8 +210,7 @@ internal class LateInitDelegatingProgressReporter : IStepProgressReporter, IDisp
 
     public void Report(IProgressStep step, double progress)
     {
-        if (_innerReporter is not null)
-            _innerReporter.Report(step, progress);
+        _innerReporter?.Report(step, progress);
     }
 
     public void Initialize(IStepProgressReporter progressReporter)
