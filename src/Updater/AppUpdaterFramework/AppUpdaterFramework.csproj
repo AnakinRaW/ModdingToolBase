@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="12.1.8" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.1.8" />
+		<!--<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.1.8" />-->
 		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.1.8" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.3" />
@@ -34,6 +34,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\..\..\..\..\..\Projekte\CommonUtilities\src\CommonUtilities.SimplePipeline\src\CommonUtilities.SimplePipeline.csproj" />
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
 		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
