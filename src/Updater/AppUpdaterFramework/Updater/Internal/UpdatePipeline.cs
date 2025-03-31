@@ -203,23 +203,3 @@ internal sealed class UpdatePipeline : Pipeline
         _restartManager.RestartRequired -= OnRestartRequired;
     }
 }
-
-internal class LateInitDelegatingProgressReporter : IStepProgressReporter, IDisposable
-{
-    private IStepProgressReporter? _innerReporter;
-
-    public void Report(IProgressStep step, double progress)
-    {
-        _innerReporter?.Report(step, progress);
-    }
-
-    public void Initialize(IStepProgressReporter progressReporter)
-    {
-        _innerReporter = progressReporter;
-    }
-
-    public void Dispose()
-    {
-        _innerReporter = null;
-    }
-}
