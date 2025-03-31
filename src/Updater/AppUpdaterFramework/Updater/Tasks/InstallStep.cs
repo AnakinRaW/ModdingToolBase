@@ -144,7 +144,7 @@ internal class InstallStep : PipelineStep, IComponentStep
             }
 
             if (Result.IsFailure())
-                throw new StepFailureException(new[] { this });
+                throw new StepFailureException([this]);
             if (Result == InstallResult.Cancel)
                 throw new OperationCanceledException();
 

@@ -2,6 +2,4 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Progress;
 
-internal interface IComponentProgressReporter : IProgressReporter<ComponentProgressInfo>
-{
-}
+internal interface IComponentProgressReporter : IProgressReporter<ComponentProgressInfo>;

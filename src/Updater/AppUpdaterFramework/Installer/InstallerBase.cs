@@ -12,7 +12,7 @@ namespace AnakinRaW.AppUpdaterFramework.Installer;
 
 internal abstract class InstallerBase : IInstaller
 {
-    public event EventHandler<ComponentProgressEventArgs?>? Progress;
+    public event EventHandler<ComponentProgressEventArgs>? Progress;
 
     protected readonly ILogger? Logger;
 
