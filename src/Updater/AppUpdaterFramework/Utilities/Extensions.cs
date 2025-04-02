@@ -13,7 +13,7 @@ internal static class Extensions
     internal static IEnumerable<IInstallableComponent> GetInstallableComponents(this IProductCatalog<IProductComponent> catalog)
     {
         if (!catalog.Items.Any())
-            return Enumerable.Empty<IInstallableComponent>();
+            return [];
         var result = new List<IInstallableComponent>();
         foreach (var item in catalog.Items)
         {

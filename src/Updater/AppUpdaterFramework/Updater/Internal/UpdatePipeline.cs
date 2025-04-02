@@ -175,7 +175,7 @@ internal sealed class UpdatePipeline : Pipeline
 
         var failedTasks = failedDownloads.Concat<IComponentStep>(failedInstalls).ToList();
         
-        if (failedTasks.Count != 0 || failedInstalls.Count != 0)
+        if (failedTasks.Count != 0)
             throw new StepFailureException(failedTasks);
     }
 

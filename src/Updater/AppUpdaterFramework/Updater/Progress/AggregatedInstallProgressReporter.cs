@@ -20,13 +20,12 @@ internal class AggregatedInstallProgressReporter(IComponentProgressReporter prog
         lock (_syncLock)
         {
             _visitedComponents.Add(step.Component.GetUniqueId());
-            var totalTaskProgressSize = (long)(progress.Progress * step.Size);
-            _totalProgressSize += totalTaskProgressSize;
+            _totalProgressSize += (long)(progress.Progress * step.Size);
             var totalProgress = (double)_totalProgressSize / TotalSize;
             totalProgress = Math.Min(totalProgress, 1.0);
             totalProgress = totalProgress >= 1.0 ? 0.99 : totalProgress;
 
-            var progressInfo = new ComponentProgressInfo()
+            var progressInfo = new ComponentProgressInfo
             {
                 TotalComponents = TotalStepCount,
                 CurrentComponent = _visitedComponents.Count

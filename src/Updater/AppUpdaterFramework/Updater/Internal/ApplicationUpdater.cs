@@ -78,15 +78,13 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
             if (!_updateCatalog.UpdateItems.Any())
                 throw new InvalidOperationException("Nothing to update!");
 
-
-
-            using var updateJob = new UpdatePipeline(_updateCatalog, this, _serviceProvider);
-            await updateJob.PrepareAsync().ConfigureAwait(false);
+            using var updatePipeline = new UpdatePipeline(_updateCatalog, this, _serviceProvider);
+            await updatePipeline.PrepareAsync().ConfigureAwait(false);
             // TODO: PreChecks
             try
             {
                 _logger?.LogTrace($"Updating...\r\nCatalog: {_updateCatalog}");
-                await updateJob.RunAsync(token).ConfigureAwait(false);
+                await updatePipeline.RunAsync(token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
