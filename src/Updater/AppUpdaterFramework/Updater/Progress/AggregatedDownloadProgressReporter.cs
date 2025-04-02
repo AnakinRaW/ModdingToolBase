@@ -1,8 +1,8 @@
-﻿using System;
+﻿using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
+using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
-using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Progress;
 
@@ -22,21 +22,23 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
     private long _byteRate;
     private DateTime _downloadTime = DateTime.Now;
 
-    protected override ProgressType Type => ProgressTypes.Download;
-
-    protected override double CalculateAggregatedProgress(IComponentStep step, double progress, out ComponentProgressInfo progressInfo)
+    protected override ProgressEventArgs<ComponentProgressInfo> CalculateAggregatedProgress(
+        IComponentStep step, 
+        ProgressEventArgs<ComponentProgressInfo> progress)
     {
         var now = DateTime.Now;
         var key = step.Component.GetUniqueId();
-        var totalTaskProgressSize = (long)(progress * step.Size);
 
-        if (progress >= 1.0)
+        var progressValue = progress.Progress;
+        var totalTaskProgressSize = (long)(progressValue * step.Size);
+
+        if (progressValue >= 1.0)
             Interlocked.Increment(ref _completedPackageCount);
 
         double currentProgress;
 
-        progressInfo = new();
-
+        var progressInfo = new ComponentProgressInfo();
+        
         lock (_syncLock)
         {
             if (!_progressTable.ContainsKey(key))
@@ -77,12 +79,14 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
                 _byteRate = CalculateMovingAverage(currentByteRate, _byteRate, _reportTimes);
                 ++_reportTimes;
             }
+
+
             progressInfo.DownloadedSize = _completedSize;
             progressInfo.DownloadSpeed = _byteRate;
             progressInfo.TotalSize = TotalSize;
         }
 
-        if (_completedPackageCount >= TotalStepCount && progress >= 1.0)
+        if (_completedPackageCount >= TotalStepCount && progressValue >= 1.0)
         {
             currentProgress = 1.0;
             progressInfo.DownloadSpeed = 0;
@@ -90,7 +94,7 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
         else
             currentProgress *= 0.99;
 
-        return currentProgress;
+        return new ProgressEventArgs<ComponentProgressInfo>(progress.ProgressText, currentProgress, progressInfo);
     }
 
     private static long CalculateMovingAverage(long currentByteRate, long previousByteRate, int reportTimes)

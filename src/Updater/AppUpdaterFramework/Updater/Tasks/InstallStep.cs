@@ -19,7 +19,9 @@ using Microsoft.Extensions.Logging;
 namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
 internal class InstallStep : PipelineStep, IComponentStep
-{ 
+{
+    public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;
+
     private readonly IUpdateConfiguration _updateConfiguration;
     private readonly ProductVariables _productVariables;
     private readonly UpdateAction _action;
@@ -35,30 +37,26 @@ internal class InstallStep : PipelineStep, IComponentStep
     internal InstallResult Result { get; private set; } = InstallResult.Success;
 
     public ProgressType Type => ProgressTypes.Install;
-
-    public IStepProgressReporter ProgressReporter { get; }
-
+    
     public long Size => Component.InstallationSize.Total;
 
     public InstallStep(
         IInstallableComponent installable, 
-        IStepProgressReporter progressReporter, 
         IUpdateConfiguration updateConfiguration,
         ProductVariables productVariables,
         IServiceProvider serviceProvider) :
-        this(installable, UpdateAction.Delete, progressReporter, updateConfiguration, productVariables, serviceProvider)
+        this(installable, UpdateAction.Delete, updateConfiguration, productVariables, serviceProvider)
     {
     }
 
     public InstallStep(
         IInstallableComponent installable,
         IInstallableComponent? currentComponent, 
-        DownloadStep download,
-        IStepProgressReporter progressReporter, 
+        DownloadStep download, 
         IUpdateConfiguration updateConfiguration,
         ProductVariables productVariables,
         IServiceProvider serviceProvider) : 
-        this(installable, UpdateAction.Update, progressReporter, updateConfiguration, productVariables, serviceProvider)
+        this(installable, UpdateAction.Update, updateConfiguration, productVariables, serviceProvider)
     {
         _currentComponent = currentComponent;
         _download = download ?? throw new ArgumentNullException(nameof(download));
@@ -67,13 +65,11 @@ internal class InstallStep : PipelineStep, IComponentStep
     private InstallStep(
         IInstallableComponent installable, 
         UpdateAction updateAction,
-        IStepProgressReporter progressReporter, 
         IUpdateConfiguration updateConfiguration,
         ProductVariables productVariables,
         IServiceProvider serviceProvider) : base(serviceProvider)
     {
         Component = installable ?? throw new ArgumentNullException(nameof(installable));
-        ProgressReporter = progressReporter ?? throw new ArgumentNullException(nameof(progressReporter));
 
         _variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
         _action = updateAction;
@@ -233,6 +229,6 @@ internal class InstallStep : PipelineStep, IComponentStep
 
     private void OnInstallerProgress(object sender, ComponentProgressEventArgs e)
     {
-        ProgressReporter.Report(this, e.Progress);
+        Progress?.Invoke(this, e);
     }
 }

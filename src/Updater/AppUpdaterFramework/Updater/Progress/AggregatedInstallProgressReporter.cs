@@ -13,25 +13,26 @@ internal class AggregatedInstallProgressReporter(IComponentProgressReporter prog
 
     private long _totalProgressSize;
 
-    protected override ProgressType Type => ProgressTypes.Install;
-
-    protected override double CalculateAggregatedProgress(IComponentStep step, double taskProgress, out ComponentProgressInfo progressInfo)
+    protected override ProgressEventArgs<ComponentProgressInfo> CalculateAggregatedProgress(
+        IComponentStep step, 
+        ProgressEventArgs<ComponentProgressInfo> progress)
     {
         lock (_syncLock)
         {
             _visitedComponents.Add(step.Component.GetUniqueId());
-            var totalTaskProgressSize = (long)(taskProgress * step.Size);
+            var totalTaskProgressSize = (long)(progress.Progress * step.Size);
             _totalProgressSize += totalTaskProgressSize;
             var totalProgress = (double)_totalProgressSize / TotalSize;
             totalProgress = Math.Min(totalProgress, 1.0);
             totalProgress = totalProgress >= 1.0 ? 0.99 : totalProgress;
 
-            progressInfo = new()
+            var progressInfo = new ComponentProgressInfo()
             {
                 TotalComponents = TotalStepCount,
                 CurrentComponent = _visitedComponents.Count
             };
-            return totalProgress;
+
+            return new ProgressEventArgs<ComponentProgressInfo>(progress.ProgressText, totalProgress, progressInfo);
         }
     }
 }

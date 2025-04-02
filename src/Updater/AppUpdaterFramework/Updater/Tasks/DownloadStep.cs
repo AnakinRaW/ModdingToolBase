@@ -21,7 +21,6 @@ namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
 internal class DownloadStep(
     IInstallableComponent installable,
-    IStepProgressReporter progressReporter,
     IUpdateConfiguration updateConfiguration,
     IDownloadManager downloadManager,
     IServiceProvider serviceProvider)
@@ -30,8 +29,9 @@ internal class DownloadStep(
     private readonly IUpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
     private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
 
+    public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;
+
     public ProgressType Type => ProgressTypes.Download;
-    public IStepProgressReporter ProgressReporter { get; } = progressReporter ?? throw new ArgumentNullException(nameof(progressReporter));
 
     public IFileInfo DownloadPath { get; private set; } = null!;
 
@@ -77,7 +77,7 @@ internal class DownloadStep(
 
     private void ReportProgress(double progress)
     {
-        ProgressReporter.Report(this, progress);
+        Progress?.Invoke(this, new ProgressEventArgs<ComponentProgressInfo>("", progress));
     }
 
     private void DownloadAction(CancellationToken token, out Exception? lastException)
