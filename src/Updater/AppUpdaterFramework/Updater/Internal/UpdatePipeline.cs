@@ -12,7 +12,6 @@ using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.SimplePipeline;
-using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using AnakinRaW.CommonUtilities.SimplePipeline.Runners;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -25,16 +24,16 @@ internal sealed class UpdatePipeline : Pipeline
     private readonly IInstalledProduct _installedProduct;
 
     private readonly HashSet<IUpdateItem> _itemsToProcess;
-
-    private readonly LateInitDelegatingProgressReporter _installDelegatingProgress = new();
-    private readonly LateInitDelegatingProgressReporter _downloadDelegatingProgress = new();
-
+    
     private readonly List<DownloadStep> _componentsToDownload = new();
     private readonly List<InstallStep> _installsOrRemoves = new();
 
     private readonly ParallelStepRunner _downloadsRunner;
     private readonly SequentialStepRunner _installsRunner;
     private readonly IRestartManager _restartManager;
+
+    private AggregatedDownloadProgressReporter? _downloadProgress;
+    private AggregatedInstallProgressReporter? _installProgress;
 
     public UpdatePipeline(IUpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider) : base(serviceProvider)
     {
@@ -55,15 +54,15 @@ internal sealed class UpdatePipeline : Pipeline
 
     private void RegisterEvents()
     {
-        _downloadsRunner.Error += OnError!;
-        _installsRunner.Error += OnError!;
+        _downloadsRunner.Error += OnError;
+        _installsRunner.Error += OnError;
         _restartManager.RestartRequired += OnRestartRequired;
     }
 
     private void UnregisterEvents()
     {
-        _downloadsRunner.Error -= OnError!;
-        _installsRunner.Error -= OnError!;
+        _downloadsRunner.Error -= OnError;
+        _installsRunner.Error -= OnError;
         _restartManager.RestartRequired -= OnRestartRequired;
 
         foreach (var downloadStep in _componentsToDownload) 
@@ -95,9 +94,9 @@ internal sealed class UpdatePipeline : Pipeline
                 if (updateComponent.OriginInfo is null)
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
                 
-                var downloadTask = new DownloadStep(updateComponent, _downloadDelegatingProgress, configuration, downloadManager, ServiceProvider);
+                var downloadTask = new DownloadStep(updateComponent, configuration, downloadManager, ServiceProvider);
                 downloadTask.Canceled += DownloadCancelled;
-                var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, _installDelegatingProgress, configuration, _installedProduct.Variables, ServiceProvider);
+                var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, configuration, _installedProduct.Variables, ServiceProvider);
 
                 _installsOrRemoves.Add(installTask);
                 _componentsToDownload.Add(downloadTask);
@@ -105,7 +104,7 @@ internal sealed class UpdatePipeline : Pipeline
 
             if (updateItem.Action == UpdateAction.Delete && installedComponent != null)
             {
-                var removeTask = new InstallStep(installedComponent, _installDelegatingProgress, configuration, _installedProduct.Variables, ServiceProvider);
+                var removeTask = new InstallStep(installedComponent, configuration, _installedProduct.Variables, ServiceProvider);
                 _installsOrRemoves.Add(removeTask);
             }
         }
@@ -114,6 +113,11 @@ internal sealed class UpdatePipeline : Pipeline
             _downloadsRunner.AddStep(d);
         foreach (var installsOrRemove in _installsOrRemoves)
             _installsRunner.AddStep(installsOrRemove);
+
+        if (_componentsToDownload.Count > 0) 
+            _downloadProgress = new AggregatedDownloadProgressReporter(_progressReporter, _componentsToDownload);
+        if (_installsOrRemoves.Count > 0)
+            _installProgress = new AggregatedInstallProgressReporter(_progressReporter, _installsOrRemoves);
 
         return Task.FromResult(true);
     }
@@ -132,19 +136,9 @@ internal sealed class UpdatePipeline : Pipeline
 
         if (!componentsToDownload.Any())
             _progressReporter.Report("_", 1.0, ProgressTypes.Download, new ComponentProgressInfo());
-        else
-        {
-            var aggregatedDownloadProgress = new AggregatedDownloadProgressReporter(_progressReporter, componentsToDownload);
-            _downloadDelegatingProgress.Initialize(aggregatedDownloadProgress);
-        }
 
         if (!componentsToInstallOrRemove.Any())
             _progressReporter.Report("_", 1.0, ProgressTypes.Install, new ComponentProgressInfo());
-        else
-        {
-            var aggregatedDownloadProgress = new AggregatedInstallProgressReporter(_progressReporter, componentsToInstallOrRemove);
-            _installDelegatingProgress.Initialize(aggregatedDownloadProgress);
-        }
 
         try
         {
@@ -179,7 +173,7 @@ internal sealed class UpdatePipeline : Pipeline
         var failedInstalls = componentsToInstallOrRemove
             .Where(installTask => !installTask.Result.IsSuccess()).ToList();
 
-        var failedTasks = failedDownloads.Concat<IProgressStep>(failedInstalls).ToList();
+        var failedTasks = failedDownloads.Concat<IComponentStep>(failedInstalls).ToList();
         
         if (failedTasks.Count != 0 || failedInstalls.Count != 0)
             throw new StepFailureException(failedTasks);
@@ -189,8 +183,10 @@ internal sealed class UpdatePipeline : Pipeline
     {
         base.DisposeResources();
         UnregisterEvents();
-        _downloadDelegatingProgress.Dispose();
-        _installDelegatingProgress.Dispose();
+        _downloadProgress?.Dispose();
+        _installProgress?.Dispose();
+        _downloadProgress = null;
+        _installProgress = null;
     }
 
     private void OnRestartRequired(object? sender, EventArgs e)
@@ -201,25 +197,5 @@ internal sealed class UpdatePipeline : Pipeline
         Logger?.LogWarning("Elevation requested. Update gets cancelled");
         Cancel();
         _restartManager.RestartRequired -= OnRestartRequired;
-    }
-}
-
-internal class LateInitDelegatingProgressReporter : IStepProgressReporter, IDisposable
-{
-    private IStepProgressReporter? _innerReporter;
-
-    public void Report(IProgressStep step, double progress)
-    {
-        _innerReporter?.Report(step, progress);
-    }
-
-    public void Initialize(IStepProgressReporter progressReporter)
-    {
-        _innerReporter = progressReporter;
-    }
-
-    public void Dispose()
-    {
-        _innerReporter = null;
     }
 }

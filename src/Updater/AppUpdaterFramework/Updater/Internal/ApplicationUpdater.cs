@@ -15,9 +15,10 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 
 internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressReporter
 {
+    public event EventHandler<UpdateProgressEventArgs>? Progress;
+
     private readonly IUpdateCatalog _updateCatalog;
     private readonly IServiceProvider _serviceProvider;
-    public event EventHandler<ComponentProgressEventArgs>? Progress;
 
     private readonly ILogger? _logger;
 
@@ -28,9 +29,15 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public void Report(string package, double progress, ProgressType type, ComponentProgressInfo detailedProgress)
+    public void Report(string progressText, double progress, ProgressType type, ComponentProgressInfo detailedProgress)
     {
-        Progress?.Invoke(this, new ComponentProgressEventArgs(package, progress, type, detailedProgress));
+        Progress?.Invoke(this, new UpdateProgressEventArgs
+        {
+            Component = progressText,
+            DetailedProgress = detailedProgress,
+            Progress = progress,
+            Type = type
+        });
     }
 
     public async Task<UpdateResult> UpdateAsync(CancellationToken token)

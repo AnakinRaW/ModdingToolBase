@@ -124,7 +124,7 @@ internal abstract class InstallerBase : IInstaller
 
     private void OnProgress(IInstallableComponent component, double progress)
     {
-        Progress?.Invoke(this, new ComponentProgressEventArgs(component.GetDisplayName(), progress, ProgressTypes.Install));
+        Progress?.Invoke(this, new ComponentProgressEventArgs(component.GetDisplayName(), progress));
     }
 
     private void LogFailure(IProductComponent? component, InstallAction executeAction, string details)

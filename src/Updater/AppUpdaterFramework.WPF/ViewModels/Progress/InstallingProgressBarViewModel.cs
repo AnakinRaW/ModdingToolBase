@@ -13,13 +13,13 @@ public sealed class InstallingProgressBarViewModel : ProgressBarViewModel
                 return "Starting install operation";
             return progressInformation.Progress >= 0.99
                 ? "Installing... This might take a while."
-                : $"Installing: component {progressInformation.ProgressInfo.CurrentComponent} of {progressInformation.ProgressInfo.TotalComponents}";
+                : $"Installing: component {progressInformation.DetailedProgress.CurrentComponent} of {progressInformation.DetailedProgress.TotalComponents}";
         }
     }
 
     public override string? RightHeaderText => null;
 
-    public override string? FooterText => ProgressInformation?.ProgressText;
+    public override string? FooterText => ProgressInformation?.Component;
 
     public InstallingProgressBarViewModel(IUpdateSession updateSession, IServiceProvider serviceProvider) 
         : base(updateSession, nameof(IUpdateSession.InstallProgress), serviceProvider)
