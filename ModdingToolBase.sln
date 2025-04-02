@@ -43,8 +43,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FtpUploader", "src\AnakinAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationBase.CLI", "src\AnakinApps\ApplicationBase.CLI\ApplicationBase.CLI.csproj", "{84859A20-0775-4B22-BA6A-D315DD824BA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonUtilities.SimplePipeline", "..\..\..\..\..\Projekte\CommonUtilities\src\CommonUtilities.SimplePipeline\src\CommonUtilities.SimplePipeline.csproj", "{1A9C1440-A08D-A0DD-B759-92986C24F6CC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,10 +113,6 @@ Global
 		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A9C1440-A08D-A0DD-B759-92986C24F6CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A9C1440-A08D-A0DD-B759-92986C24F6CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A9C1440-A08D-A0DD-B759-92986C24F6CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A9C1440-A08D-A0DD-B759-92986C24F6CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,7 +135,6 @@ Global
 		{E35EE0D4-5517-460F-A369-42F21929FD27} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
 		{84859A20-0775-4B22-BA6A-D315DD824BA1} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
-		{1A9C1440-A08D-A0DD-B759-92986C24F6CC} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DEE17D6-FFB9-40DF-B176-62A708BABB71}
