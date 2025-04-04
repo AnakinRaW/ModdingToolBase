@@ -7,6 +7,7 @@ using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,8 +30,9 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public void Report(string progressText, double progress, ProgressType type, ComponentProgressInfo detailedProgress)
+    public void Report(double progress, string? progressText, ProgressType type, ComponentProgressInfo detailedProgress)
     {
+        ThrowHelper.ThrowIfNullOrEmpty(progressText);
         Progress?.Invoke(this, new UpdateProgressEventArgs
         {
             Component = progressText,

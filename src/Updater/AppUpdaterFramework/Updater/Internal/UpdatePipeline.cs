@@ -128,17 +128,17 @@ internal sealed class UpdatePipeline : Pipeline
     }
 
     protected override async Task RunCoreAsync(CancellationToken token)
-    { 
-        _progressReporter.Report("Starting update...", 0.0, ProgressTypes.Install, new ComponentProgressInfo());
+    {
+        _progressReporter.Report(0.0, "Starting update...", ProgressTypes.Install, new ComponentProgressInfo());
 
         var componentsToDownload = _componentsToDownload.ToList();
         var componentsToInstallOrRemove = _installsOrRemoves.ToList();
 
         if (!componentsToDownload.Any())
-            _progressReporter.Report("_", 1.0, ProgressTypes.Download, new ComponentProgressInfo());
+            _progressReporter.Report(1.0, "_", ProgressTypes.Download, new ComponentProgressInfo());
 
         if (!componentsToInstallOrRemove.Any())
-            _progressReporter.Report("_", 1.0, ProgressTypes.Install, new ComponentProgressInfo());
+            _progressReporter.Report(1.0, "_", ProgressTypes.Install, new ComponentProgressInfo());
 
         try
         {

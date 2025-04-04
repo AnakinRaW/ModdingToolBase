@@ -77,7 +77,7 @@ internal class DownloadStep(
 
     private void ReportProgress(double progress)
     {
-        Progress?.Invoke(this, new ProgressEventArgs<ComponentProgressInfo>("", progress));
+        Progress?.Invoke(this, new ProgressEventArgs<ComponentProgressInfo>(progress, "_"));
     }
 
     private void DownloadAction(CancellationToken token, out Exception? lastException)
@@ -156,7 +156,7 @@ internal class DownloadStep(
 #else
             using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 #endif
-            await downloadManager.DownloadAsync(Uri, file, OnProgress,
+            await downloadManager.DownloadAsync(Uri, file, OnProgress, null,
                 new HashDownloadValidator(integrityInformation.Hash, integrityInformation.HashType, Services), token);
 
         }

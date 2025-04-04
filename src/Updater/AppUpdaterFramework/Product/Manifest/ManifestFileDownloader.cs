@@ -31,14 +31,14 @@ public sealed class ManifestFileDownloader : DisposableObject
         _tempDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10);
     }
 
-    public async Task<IFileInfo> DownloadManifest(Uri manifestPath, CancellationToken token = default)
+    public async Task<IFileInfo> DownloadManifestAsync(Uri manifestPath, DownloadOptions? downloadOptions = null, CancellationToken token = default)
     {
         var destPath = CreateRandomFile();
 #if NETSTANDARD2_1_OR_GREATER || NET
         await
 #endif
         using var manifest = _fileSystem.FileStream.New(destPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-        await _downloadManager.DownloadAsync(manifestPath, manifest, null , null, token);
+        await _downloadManager.DownloadAsync(manifestPath, manifest, null , downloadOptions, null, token);
         return _fileSystem.FileInfo.New(destPath);
     }
 

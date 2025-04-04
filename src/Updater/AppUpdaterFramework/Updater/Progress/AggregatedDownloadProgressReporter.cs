@@ -94,7 +94,7 @@ internal class AggregatedDownloadProgressReporter(IComponentProgressReporter pro
         else
             currentProgress *= 0.99;
 
-        return new ProgressEventArgs<ComponentProgressInfo>(progress.ProgressText, currentProgress, progressInfo);
+        return new ProgressEventArgs<ComponentProgressInfo>(currentProgress, progress.ProgressText, progressInfo);
     }
 
     private static long CalculateMovingAverage(long currentByteRate, long previousByteRate, int reportTimes)

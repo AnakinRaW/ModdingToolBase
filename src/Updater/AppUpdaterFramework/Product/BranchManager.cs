@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
+using AnakinRaW.CommonUtilities.DownloadManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
@@ -63,7 +64,8 @@ public abstract class BranchManagerBase : IBranchManager
             token.ThrowIfCancellationRequested();
             try
             {
-                return await _manifestLoader.LoadManifestAsync(manifestLocation, productReference, token);
+                var downloadOption = GetDownloadOptionsForManifestDownload(manifestLocation, productReference);
+                return await _manifestLoader.LoadManifestAsync(manifestLocation, productReference, downloadOption, token);
             }
             catch (OperationCanceledException)
             {
@@ -82,4 +84,9 @@ public abstract class BranchManagerBase : IBranchManager
     }
     
     protected abstract ICollection<Uri> BuildManifestUris(string branchName);
+
+    protected virtual DownloadOptions? GetDownloadOptionsForManifestDownload(Uri manifestUri, IProductReference productReference)
+    {
+        return null;
+    }
 }

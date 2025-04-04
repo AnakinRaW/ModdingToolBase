@@ -31,7 +31,7 @@ internal class AggregatedInstallProgressReporter(IComponentProgressReporter prog
                 CurrentComponent = _visitedComponents.Count
             };
 
-            return new ProgressEventArgs<ComponentProgressInfo>(progress.ProgressText, totalProgress, progressInfo);
+            return new ProgressEventArgs<ComponentProgressInfo>(totalProgress, progress.ProgressText, progressInfo);
         }
     }
 }

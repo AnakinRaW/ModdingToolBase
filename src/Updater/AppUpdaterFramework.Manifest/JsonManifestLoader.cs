@@ -1,21 +1,22 @@
-﻿using System;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.AppUpdaterFramework.Product.Manifest;
+using AnakinRaW.CommonUtilities.DownloadManager;
+using Microsoft.Extensions.DependencyInjection;
+using Semver;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using AnakinRaW.AppUpdaterFramework.Product;
-using AnakinRaW.AppUpdaterFramework.Product.Manifest;
-using Microsoft.Extensions.DependencyInjection;
-using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework;
 
-public class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoaderBase(serviceProvider)
+public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoaderBase(serviceProvider)
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
@@ -27,11 +28,15 @@ public class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoad
         return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, token);
     }
 
-    protected override async Task<IProductManifest> LoadManifestCoreAsync(Uri manifestUri, IProductReference productReference, CancellationToken cancellationToken)
+    protected override async Task<IProductManifest> LoadManifestCoreAsync(
+        Uri manifestUri, 
+        IProductReference productReference,
+        DownloadOptions? downloadOptions,
+        CancellationToken cancellationToken = default)
     {
         using var manifestFileLoader = new ManifestFileDownloader(ServiceProvider);
 
-        var manifestFile = await manifestFileLoader.DownloadManifest(manifestUri, cancellationToken);
+        var manifestFile = await manifestFileLoader.DownloadManifestAsync(manifestUri, downloadOptions, cancellationToken);
 
         using var manifestFileStream = manifestFile.OpenRead();
 
