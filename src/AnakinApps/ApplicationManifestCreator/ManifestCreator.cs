@@ -55,7 +55,7 @@ internal class ManifestCreator
         var manifest = await CreateManifest(productReference);
         await WriteManifest(manifest);
 
-        var currentOnlineBranches = (await _branchManager.GetAvailableBranches()).ToList();
+        var currentOnlineBranches = (await _branchManager.GetAvailableBranchesAsync()).ToList();
         if (!currentOnlineBranches.Contains(branch)) 
             await WriteBranchesFile(currentOnlineBranches, branch);
 

@@ -62,7 +62,6 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
         serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
-        serviceCollection.AddSingleton<IInstalledManifestProvider>(sp => new ApplicationInstalledManifestProvider(sp));
         serviceCollection.AddSingleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp));
 
         serviceCollection.AddSingleton<IHashingService>(sp => new HashingService(sp));

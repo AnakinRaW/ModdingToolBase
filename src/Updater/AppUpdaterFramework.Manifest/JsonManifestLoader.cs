@@ -22,14 +22,20 @@ public class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoad
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream)
+    public ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream, CancellationToken token = default)
     {
-        return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, CancellationToken.None);
+        return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, token);
     }
 
-    protected override async Task<IProductManifest> LoadManifestCore(Stream manifest, IProductReference productReference, CancellationToken cancellationToken)
+    protected override async Task<IProductManifest> LoadManifestCoreAsync(Uri manifestUri, IProductReference productReference, CancellationToken cancellationToken)
     {
-        var appManifest = await JsonSerializer.DeserializeAsync<ApplicationManifest>(manifest, JsonSerializerOptions, cancellationToken);
+        using var manifestFileLoader = new ManifestFileDownloader(ServiceProvider);
+
+        var manifestFile = await manifestFileLoader.DownloadManifest(manifestUri, cancellationToken);
+
+        using var manifestFileStream = manifestFile.OpenRead();
+
+        var appManifest = await DeserializeAsync(manifestFileStream, cancellationToken);
         if (appManifest is null)
             throw new CatalogException("Serialized manifest is null");
 

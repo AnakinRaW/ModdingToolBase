@@ -65,7 +65,8 @@ public abstract class ProductServiceBase : IProductService
     }
 
     protected abstract IProductReference CreateCurrentProductReference();
-    
+
+    protected abstract IProductManifest GetManifestForInstalledProduct(IProductReference installedProduct, ProductVariables variableCollection);
 
     protected virtual void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
     {
@@ -109,7 +110,7 @@ public abstract class ProductServiceBase : IProductService
     {
         var productReference = CreateCurrentProductReference();
         var variables = AddProductVariables(productReference);
-        var manifest = ServiceProvider.GetRequiredService<IInstalledManifestProvider>().ProvideManifest(productReference, variables);
+        var manifest = GetManifestForInstalledProduct(productReference, variables);
         var state = FetchInstallState();
         return new InstalledProduct(productReference, InstallLocation.FullName, manifest, variables, state);
     }

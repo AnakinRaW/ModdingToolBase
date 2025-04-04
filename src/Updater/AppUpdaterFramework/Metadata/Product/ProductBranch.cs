@@ -4,7 +4,7 @@ using AnakinRaW.CommonUtilities;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-public class ProductBranch : IEquatable<ProductBranch>
+public sealed class ProductBranch : IEquatable<ProductBranch>
 {
     public string Name { get; }
 

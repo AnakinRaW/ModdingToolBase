@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
@@ -8,5 +8,8 @@ namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 
 public interface IManifestLoader
 {
-    Task<IProductManifest> LoadManifest(IFileInfo manifestFile, IProductReference productReference, CancellationToken cancellationToken = default);
+    Task<IProductManifest> LoadManifestAsync(
+        Uri manifestUri,
+        IProductReference productReference, 
+        CancellationToken cancellationToken = default);
 }

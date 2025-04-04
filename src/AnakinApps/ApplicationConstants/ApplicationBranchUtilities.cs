@@ -9,12 +9,15 @@ using System.Threading.Tasks;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using Flurl;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase;
 
 public class ApplicationBranchUtilities
 {
     private readonly IDownloadManager _downloadManager;
+    private readonly ILogger? _logger;
 
     public ICollection<Uri> Mirrors { get; }
     
@@ -30,6 +33,7 @@ public class ApplicationBranchUtilities
         if (serviceProvider == null) 
             throw new ArgumentNullException(nameof(serviceProvider));
         _downloadManager = new DownloadManager(downloadManagerConfiguration, serviceProvider);
+        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         Mirrors = mirrors ?? throw new ArgumentNullException(nameof(mirrors));
     }
 
@@ -64,6 +68,7 @@ public class ApplicationBranchUtilities
             catch (Exception e) when (e is HttpRequestException or DownloadFailedException)
             {
                 // Ignore and try next mirror
+                _logger?.LogWarning(e, $"Unable to download branch list from mirror '{requestUri}'");
             }
         }
 

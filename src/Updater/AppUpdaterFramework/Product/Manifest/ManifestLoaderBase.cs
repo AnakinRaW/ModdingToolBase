@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
@@ -12,17 +10,22 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
 {
     protected readonly IServiceProvider ServiceProvider = serviceProvider;
 
-    public async Task<IProductManifest> LoadManifest(IFileInfo manifestFile, IProductReference productReference, CancellationToken cancellationToken = default)
+    public Task<IProductManifest> LoadManifestAsync(
+        Uri manifestUri, 
+        IProductReference productReference,
+        CancellationToken cancellationToken = default)
     {
-        if (manifestFile == null) 
-            throw new ArgumentNullException(nameof(manifestFile));
+        if (manifestUri == null)
+            throw new ArgumentNullException(nameof(manifestUri));
         if (productReference == null)
             throw new ArgumentNullException(nameof(productReference));
-        using var manifest = manifestFile.OpenRead();
-        return await LoadManifestCore(manifest, productReference, cancellationToken);
+        return LoadManifestCoreAsync(manifestUri, productReference, cancellationToken);
     }
 
-    protected abstract Task<IProductManifest> LoadManifestCore(Stream manifest, IProductReference productReference, CancellationToken cancellationToken);
+    protected abstract Task<IProductManifest> LoadManifestCoreAsync(
+        Uri manifestUri,
+        IProductReference productReference,
+        CancellationToken cancellationToken = default);
 
     protected void ValidateCompatibleManifest(IProductReference manifestProduct, IProductReference installedProduct)
     {

@@ -83,14 +83,14 @@ internal sealed class MetadataExtractor : IMetadataExtractor
         {
             Name = componentInformation.Name,
             InstallationSize = GetSize(componentInformation.Size, additionalInformation.Drive),
-            DetectConditions = new[]
-            {
+            DetectConditions =
+            [
                 new FileCondition(filePath)
                 {
                     Version = componentInformation.FileVersion,
                     IntegrityInformation = integrityInfo
                 }
-            }
+            ]
         };
     }
 

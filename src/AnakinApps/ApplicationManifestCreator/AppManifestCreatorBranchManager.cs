@@ -20,7 +20,7 @@ internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, I
     
     public string StableBranchName => ApplicationConstants.StableBranchName;
 
-    public Task<IEnumerable<ProductBranch>> GetAvailableBranches()
+    public Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync()
     {
         return _branchUtilities.GetAvailableBranchesAsync();
     }
@@ -37,7 +37,7 @@ internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, I
         return new ProductBranch(name, _branchUtilities.BuildManifestUris(name), isPrerelease);
     }
 
-    public Task<IProductManifest> GetManifest(IProductReference branch, CancellationToken token = default)
+    public Task<IProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default)
     {
         throw new NotSupportedException();
     }

@@ -24,7 +24,7 @@ public class ApplicationBranchManager : BranchManagerBase
             serviceProvider);
     }
 
-    public override Task<IEnumerable<ProductBranch>> GetAvailableBranches()
+    public override Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync()
     {
         return _branchUtilities.GetAvailableBranchesAsync();
     }

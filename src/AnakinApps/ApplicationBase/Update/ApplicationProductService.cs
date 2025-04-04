@@ -1,10 +1,17 @@
-﻿using System;
-using System.IO;
-using System.IO.Abstractions;
+﻿using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
+using System.Threading.Tasks;
+using AnakinRaW.ExternalUpdater;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -12,15 +19,47 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
 {
     private readonly IApplicationEnvironment _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
     private readonly IMetadataExtractor _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
+    private readonly IResourceExtractor _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
 
     private IDirectoryInfo? _installLocation;
 
     public override IDirectoryInfo InstallLocation => _installLocation ??= GetInstallLocation();
 
-
     protected override IProductReference CreateCurrentProductReference()
     {
         return _metadataExtractor.ProductReferenceFromAssembly(_applicationEnvironment.AssemblyInfo.Assembly);
+    }
+
+    protected override IProductManifest GetManifestForInstalledProduct(IProductReference installedProduct, ProductVariables variableCollection)
+    {
+        var application = _applicationEnvironment.AssemblyInfo.Assembly;
+        var appComponent = _metadataExtractor.ComponentFromAssembly(
+            application,
+            ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir),
+            new ExtractorAdditionalInformation
+            {
+                OverrideFileName = ProductVariables.ToVar(ApplicationVariablesKeys.AppFileName),
+            });
+
+        var updaterAssembly = GetUpdaterAssemblyStream();
+        var updaterComponent = _metadataExtractor.ComponentFromStream(
+            updaterAssembly,
+            ProductVariables.ToVar(ApplicationVariablesKeys.AppData),
+            new ExtractorAdditionalInformation
+            {
+                Drive = ExtractorAdditionalInformation.InstallDrive.System
+            });
+
+        var installables = new List<IInstallableComponent>
+        {
+            appComponent,
+            updaterComponent
+        };
+
+        var allComponents = installables.Cast<IProductComponent>().ToList();
+        allComponents.Insert(0, CreateGroup(installedProduct, installables));
+
+        return new ProductManifest(installedProduct, allComponents);
     }
 
     protected override void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
@@ -28,7 +67,6 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
         variables.Add(ApplicationVariablesKeys.AppData, _applicationEnvironment.ApplicationLocalPath);
         variables.Add(ApplicationVariablesKeys.AppFileName, _applicationEnvironment.AssemblyInfo.ExecutableFileName);
     }
-
 
     private IDirectoryInfo GetInstallLocation()
     {
@@ -38,5 +76,20 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
         if (directory is null || !directory.Exists)
             throw new DirectoryNotFoundException("Unable to find location of current assembly.");
         return directory;
+    }
+
+    private static IComponentGroup CreateGroup(IProductReference product, IEnumerable<IInstallableComponent> componentInfos)
+    {
+        return new ComponentGroup(new ProductComponentIdentity(ApplicationConstants.AppGroupId, product.Version), componentInfos.ToList())
+        {
+            Name = product.Name
+        };
+    }
+
+    private Stream GetUpdaterAssemblyStream()
+    {
+        var task = Task.Run(async () => await _resourceExtractor.GetResourceAsync(ExternalUpdaterConstants.AppUpdaterModuleName));
+        task.Wait();
+        return task.Result;
     }
 }

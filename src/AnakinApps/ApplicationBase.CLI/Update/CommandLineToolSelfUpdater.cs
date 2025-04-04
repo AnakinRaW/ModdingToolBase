@@ -49,7 +49,7 @@ internal class CommandLineToolSelfUpdater
 
         var branchToUse = options.UpdateBranch ?? product.Branch;
 
-        var branches = (await _branchManager.GetAvailableBranches()).ToList();
+        var branches = (await _branchManager.GetAvailableBranchesAsync()).ToList();
         var currentBranch = branches.FirstOrDefault(b => b.Equals(branchToUse));
 
         if (currentBranch is null)

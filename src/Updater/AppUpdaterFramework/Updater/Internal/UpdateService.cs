@@ -58,7 +58,7 @@ internal class UpdateService : IUpdateService
                     throw new CatalogException("Product Reference does not have a branch.");
                 
                 var manifestRepo = _serviceProvider.GetRequiredService<IBranchManager>();
-                var manifest = await manifestRepo.GetManifest(productReference, _updateCheckToken.Token).ConfigureAwait(false);
+                var manifest = await manifestRepo.GetManifestAsync(productReference, _updateCheckToken.Token).ConfigureAwait(false);
 
                 var productService = _serviceProvider.GetRequiredService<IProductService>();
                 var installedComponents = productService.GetInstalledComponents();

@@ -11,9 +11,9 @@ public interface IBranchManager
 {
     string StableBranchName { get; }
 
-    Task<IEnumerable<ProductBranch>> GetAvailableBranches();
+    Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
 
     ProductBranch GetBranchFromVersion(SemVersion version);
 
-    Task<IProductManifest> GetManifest(IProductReference branch, CancellationToken token = default);
+    Task<IProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default);
 }
