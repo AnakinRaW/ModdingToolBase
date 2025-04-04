@@ -208,7 +208,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
             var hasInternet =_connectionManager.HasInternetConnection();
             if (hasInternet)
             {
-                branches = (await branchManager.GetAvailableBranches()).ToList();
+                branches = (await branchManager.GetAvailableBranchesAsync()).ToList();
                 var stableBranch = branches.FirstOrDefault(b => b.Name == branchManager.StableBranchName) ??
                                    throw new InvalidOperationException(
                                        "No stable branch found. There is something wrong the deployment. Please call the author.");
