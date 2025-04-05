@@ -82,6 +82,7 @@ public static class Converter
             ConditionType.File, 
             fileCondition.FilePath, 
             fileCondition.Version?.ToString(),
+            fileCondition.ProductVersion?.ToString(),
             ByteArrayToString(fileCondition.IntegrityInformation.Hash));
     }
 

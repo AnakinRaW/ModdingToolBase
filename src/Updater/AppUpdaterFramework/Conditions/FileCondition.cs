@@ -1,6 +1,7 @@
 ﻿using System;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.CommonUtilities;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
@@ -17,6 +18,8 @@ public sealed record FileCondition : ICondition
     public ComponentIntegrityInformation IntegrityInformation { get; init; }
 
     public Version? Version { get; init; }
+    
+    public SemVersion? ProductVersion { get; init; }
     
     public FileCondition(string filePath)
     {

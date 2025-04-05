@@ -89,6 +89,7 @@ public record DetectCondition(
     [property: JsonPropertyName("type")] ConditionType Type,
     [property: JsonPropertyName("filePath")] string FilePath,
     [property: JsonPropertyName("version")] string? Version,
+    [property: JsonPropertyName("productVersion")] string? ProductVersion,
     [property: JsonPropertyName("sha256")] string? Sha256
 )
 {
@@ -102,6 +103,7 @@ public record DetectCondition(
 
         return new FileCondition(FilePath)
         {
+            ProductVersion = ManifestHelpers.CreateNullableSemVersion(ProductVersion),
             Version = ManifestHelpers.CreateNullableVersion(Version),
             IntegrityInformation = ManifestHelpers.FromSha256(Sha256),
             Join = ConditionJoin.And
@@ -144,7 +146,7 @@ internal static class ManifestHelpers
 
     public static SemVersion? CreateNullableSemVersion(string? version)
     {
-        return string.IsNullOrEmpty(version) ? null : SemVersion.Parse(version, SemVersionStyles.Any);
+        return string.IsNullOrEmpty(version) ? null : SemVersion.Parse(version!, SemVersionStyles.Any);
     }
 
     public static Version? CreateNullableVersion(string? version)

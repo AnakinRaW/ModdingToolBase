@@ -6,6 +6,7 @@ using System.Linq;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Conditions;
 
@@ -37,7 +38,13 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
                 return false;
         }
 
-        return fileCondition.Version == null || EvaluateFileVersion(filePath, fileCondition.Version);
+        var versionInfo = GetFileVersionInfo(filePath);
+
+        if (fileCondition.ProductVersion is not null &&
+            !EvaluateProductVersion(versionInfo, fileCondition.ProductVersion))
+            return false;
+
+        return fileCondition.Version == null || EvaluateFileVersion(versionInfo, fileCondition.Version);
     }
 
     private static bool EvaluateFileHash(IHashingService hashingService, IFileInfo file, HashTypeKey hashType, byte[]? expectedHash)
@@ -48,18 +55,30 @@ internal sealed class FileConditionEvaluator : IConditionEvaluator
         return actualHash.SequenceEqual(expectedHash);
     }
 
-    private static bool EvaluateFileVersion(string filePath, Version version)
+    private FileVersionInfo? GetFileVersionInfo(string filePath)
     {
         try
-        {
-            var fileVersion = FileVersionInfo.GetVersionInfo(filePath).FileVersion;
-            if (string.IsNullOrEmpty(fileVersion))
-                return false;
-            return Version.Parse(fileVersion).Equals(version);
+        { 
+            return FileVersionInfo.GetVersionInfo(filePath);
         }
         catch (Exception)
         {
-            return false;
+            return null;
         }
+    }
+
+    private static bool EvaluateProductVersion(FileVersionInfo? versionInfo, SemVersion version)
+    {
+        if (versionInfo is null)
+            return false;
+        return SemVersion.TryParse(versionInfo.ProductVersion, SemVersionStyles.Any, out var actualVersion) &&
+               actualVersion.Equals(version);
+    }
+
+    private static bool EvaluateFileVersion(FileVersionInfo? versionInfo, Version version)
+    {
+        if (versionInfo is null)
+            return false;
+        return Version.TryParse(versionInfo.FileVersion, out var actualVersion) && actualVersion.Equals(version);
     }
 }

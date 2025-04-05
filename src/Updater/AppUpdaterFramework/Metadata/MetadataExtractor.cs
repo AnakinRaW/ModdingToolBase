@@ -87,6 +87,7 @@ internal sealed class MetadataExtractor : IMetadataExtractor
             [
                 new FileCondition(filePath)
                 {
+                    ProductVersion = componentInformation.InformationalVersion,
                     Version = componentInformation.FileVersion,
                     IntegrityInformation = integrityInfo
                 }

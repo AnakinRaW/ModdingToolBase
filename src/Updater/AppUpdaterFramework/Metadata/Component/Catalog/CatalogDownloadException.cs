@@ -2,7 +2,7 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
-internal class CatalogDownloadException : CatalogException
+internal sealed class CatalogDownloadException : CatalogException
 {
     public CatalogDownloadException(string message) : base(message)
     {
