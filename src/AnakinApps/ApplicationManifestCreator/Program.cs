@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Product;
-using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
