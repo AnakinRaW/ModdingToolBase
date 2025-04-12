@@ -11,7 +11,8 @@ public sealed class ComponentGroup : ProductComponent, IComponentGroup
 
     public ComponentGroup(IProductComponentIdentity identity, IReadOnlyList<IProductComponentIdentity> components) : base(identity)
     {
-        if (identity == null) throw new ArgumentNullException(nameof(identity));
+        if (identity == null)
+            throw new ArgumentNullException(nameof(identity));
         Components = components;
     }
 }

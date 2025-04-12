@@ -19,8 +19,9 @@ internal class AppUpdateResultHandler(IServiceProvider serviceProvider) : Update
         {
             case RestartReason.Update:
             {
-                var updateOptions = _serviceProvider.GetRequiredService<IExternalUpdaterService>().CreateUpdateOptions();
-                var updater = _serviceProvider.GetRequiredService<IExternalUpdaterService>().GetExternalUpdater();
+                var externalUpdaterService = _serviceProvider.GetRequiredService<IExternalUpdaterService>();
+                var updateOptions = externalUpdaterService.CreateUpdateOptions();
+                var updater = externalUpdaterService.GetExternalUpdater();
                 _updaterRegistry.ScheduleUpdate(updater, updateOptions);
                 break;
             }

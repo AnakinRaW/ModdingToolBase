@@ -1,4 +1,4 @@
-﻿using AnakinRaW.AppUpdaterFramework.Conditions;
+﻿using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Handlers;
@@ -18,16 +18,12 @@ public static class LibraryInitialization
 {
     public static void AddUpdateFramework(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton<IUpdateFrameworkAddedBarrier>(_ => new UpdateFrameworkBarrier());
-
         // All internal
-        serviceCollection.AddSingleton<IVariableResolver>(sp => new VariableResolver(sp));
         serviceCollection.AddSingleton<IUpdateCatalogProvider>(sp => new UpdateCatalogProvider(sp));
         serviceCollection.AddSingleton<IInstallerFactory>(sp => new InstallerFactory(sp));
         serviceCollection.AddSingleton<IDiskSpaceCalculator>(sp => new DiskSpaceCalculator(sp));
         serviceCollection.AddSingleton<IBackupManager>(sp => new BackupManager(sp));
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
-        serviceCollection.AddSingleton<ILockingProcessManagerFactory>(_ => new LockingProcessManagerFactory());
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IDownloadRepository>(sp => new DownloadRepository(sp));
         serviceCollection.AddSingleton<IBackupRepository>(sp => new BackupRepository(sp));
@@ -47,12 +43,6 @@ public static class LibraryInitialization
 
         serviceCollection.AddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
 
-
-        serviceCollection.AddSingleton<IConditionEvaluatorStore>(_ =>
-        {
-            var conditionEvaluator = new ConditionEvaluatorStore();
-            conditionEvaluator.AddConditionEvaluator(new FileConditionEvaluator());
-            return conditionEvaluator;
-        });
+        serviceCollection.AddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
     }
 }

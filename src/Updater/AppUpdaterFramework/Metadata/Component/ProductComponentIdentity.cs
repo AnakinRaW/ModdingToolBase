@@ -4,9 +4,10 @@ using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public class ProductComponentIdentity : IProductComponentIdentity
+public sealed class ProductComponentIdentity : IProductComponentIdentity
 {
     public string Id { get; }
+    
     public SemVersion? Version { get; }
 
     public ProductComponentIdentity(string id, SemVersion? version = null)
@@ -21,9 +22,15 @@ public class ProductComponentIdentity : IProductComponentIdentity
         return GetUniqueId(false);
     }
 
-    public string GetUniqueId() => GetUniqueId(false);
+    public string GetUniqueId()
+    {
+        return GetUniqueId(false);
+    }
 
-    public string GetUniqueId(bool excludeVersion) => Format(this, excludeVersion);
+    public string GetUniqueId(bool excludeVersion)
+    {
+        return Format(this, excludeVersion);
+    }
 
     public bool Equals(IProductComponentIdentity? other)
     {

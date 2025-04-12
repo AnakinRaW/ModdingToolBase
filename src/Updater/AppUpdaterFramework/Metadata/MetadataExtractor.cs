@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Conditions;
+using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -85,7 +85,7 @@ internal sealed class MetadataExtractor : IMetadataExtractor
             InstallationSize = GetSize(componentInformation.Size, additionalInformation.Drive),
             DetectConditions =
             [
-                new FileCondition(filePath)
+                new SingleFileDetectCondition(filePath)
                 {
                     ProductVersion = componentInformation.InformationalVersion,
                     Version = componentInformation.FileVersion,

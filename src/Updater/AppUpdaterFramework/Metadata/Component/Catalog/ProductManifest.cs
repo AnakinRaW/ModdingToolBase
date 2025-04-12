@@ -4,7 +4,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
-public class ProductManifest(IProductReference product, IReadOnlyCollection<IProductComponent> components)
+public sealed class ProductManifest(IProductReference product, IReadOnlyCollection<IProductComponent> components)
     : IProductManifest
 {
     public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));

@@ -1,12 +1,12 @@
-﻿using System;
-using System.IO.Abstractions;
-using System.Threading;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO.Abstractions;
+using System.Threading;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
 
@@ -23,22 +23,22 @@ internal abstract class InstallerBase : IInstaller
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public InstallResult Install(IInstallableComponent component, IFileInfo? source, ProductVariables variables, CancellationToken token = default)
+    public InstallResult Install(IInstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
     {
         return ExecuteInstallerAction(component, source, InstallAction.Install, variables, token);
     }
 
-    public InstallResult Remove(IInstallableComponent component, ProductVariables variables, CancellationToken token = default)
+    public InstallResult Remove(IInstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
     {
         return ExecuteInstallerAction(component, null, InstallAction.Remove, variables, token);
     }
 
-    protected abstract InstallResult RemoveCore(IInstallableComponent component, ProductVariables variables, CancellationToken token);
+    protected abstract InstallResult RemoveCore(IInstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token);
 
-    protected abstract InstallResult InstallCore(IInstallableComponent component, IFileInfo source, ProductVariables variables, CancellationToken token);
+    protected abstract InstallResult InstallCore(IInstallableComponent component, IFileInfo source, IReadOnlyDictionary<string, string> variables, CancellationToken token);
 
 
-    private InstallResult ExecuteInstallerAction(IInstallableComponent component, IFileInfo? source, InstallAction action, ProductVariables variables, CancellationToken token)
+    private InstallResult ExecuteInstallerAction(IInstallableComponent component, IFileInfo? source, InstallAction action, IReadOnlyDictionary<string, string> variables, CancellationToken token)
     {
         try
         {
@@ -95,7 +95,7 @@ internal abstract class InstallerBase : IInstaller
             token.ThrowIfCancellationRequested();
 
             if (retry)
-                Logger?.LogTrace("Retrying action for package '" + component.GetUniqueId() + "' per client's request.");
+                Logger?.LogTrace($"Retrying action for component '{component.GetUniqueId()}'");
 
             OnProgress(component, 0.0);
             var operationResult = action();

@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Updater;
-using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AnakinRaW.AppUpdaterFramework.Conditions;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Detection;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -10,8 +9,8 @@ public abstract class InstallableComponent(IProductComponentIdentity identity, O
 {
     public long DownloadSize => OriginInfo?.Size ?? 0;
     public OriginInfo? OriginInfo { get; } = originInfo;
-    public IReadOnlyList<ICondition> DetectConditions { get; init; } = Array.Empty<ICondition>();
+    public IReadOnlyList<IDetectionCondition> DetectConditions { get; init; } = Array.Empty<IDetectionCondition>();
     public InstallationSize InstallationSize { get; init; }
 
-    public abstract string? GetFullPath(IServiceProvider serviceProvider, ProductVariables? variables = null);
+    public abstract string? GetFullPath(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables);
 }

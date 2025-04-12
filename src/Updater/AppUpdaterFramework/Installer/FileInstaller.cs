@@ -1,14 +1,14 @@
-﻿using System;
-using System.IO;
-using System.IO.Abstractions;
-using System.Threading;
-using AnakinRaW.AppUpdaterFramework.FileLocking;
+﻿using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
+using System.Threading;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
@@ -19,22 +19,30 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
     private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
     private readonly ILockedFileHandler _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
 
-    protected override InstallResult InstallCore(IInstallableComponent component, IFileInfo source, ProductVariables variables, CancellationToken token)
+    protected override InstallResult InstallCore(
+        IInstallableComponent component, 
+        IFileInfo source,
+        IReadOnlyDictionary<string, string> variables, 
+        CancellationToken token)
     {
         if (source == null) 
             throw new ArgumentNullException(nameof(source));
+        
         if (component is not SingleFileComponent singleFileComponent)
-            throw new NotSupportedException($"Component must be of type {nameof(SingleFileComponent)}");
+            throw new ArgumentException($"Component must be of type {nameof(SingleFileComponent)}");
 
         var filePath = singleFileComponent.GetFile(_serviceProvider, variables);
 
         return ExecuteWithInteractiveRetry(component,
             () => CopyFile(filePath, source),
-            interaction => HandlerInteraction(component, filePath, interaction),
+            interaction => HandlerInteraction(filePath, interaction),
             token);
     }
 
-    protected override InstallResult RemoveCore(IInstallableComponent component, ProductVariables variables, CancellationToken token)
+    protected override InstallResult RemoveCore(
+        IInstallableComponent component,
+        IReadOnlyDictionary<string, string> variables, 
+        CancellationToken token)
     {
         if (component is not SingleFileComponent singleFileComponent)
             throw new NotSupportedException($"Component must be of type {nameof(SingleFileComponent)}");
@@ -42,7 +50,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         var filePath = singleFileComponent.GetFile(_serviceProvider, variables);
         return ExecuteWithInteractiveRetry(component,
             () => DeleteFile(filePath),
-            interaction => HandlerInteraction(component, filePath, interaction),
+            interaction => HandlerInteraction(filePath, interaction),
             token);
     }
 
@@ -128,11 +136,11 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         }
     }
 
-    private InstallerInteractionResult HandlerInteraction(IInstallableComponent component, IFileInfo file, InstallOperationResult operationResult)
+    private InstallerInteractionResult HandlerInteraction(IFileInfo file, InstallOperationResult operationResult)
     {
         return operationResult switch
         {
-            InstallOperationResult.LockedFile => HandleLockedFile(component, file),
+            InstallOperationResult.LockedFile => HandleLockedFile(file),
             InstallOperationResult.Success => new InstallerInteractionResult(InstallResult.Success),
             InstallOperationResult.Failed => new InstallerInteractionResult(InstallResult.Failure),
             InstallOperationResult.Canceled => new InstallerInteractionResult(InstallResult.Cancel),
@@ -140,11 +148,11 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         };
     }
 
-    private InstallerInteractionResult HandleLockedFile(IInstallableComponent component, IFileInfo file)
+    private InstallerInteractionResult HandleLockedFile(IFileInfo file)
     { 
         try
         {
-            var result = _lockedFileHandler.Handle(component, file);
+            var result = _lockedFileHandler.Handle(file);
 
             return result switch
             {

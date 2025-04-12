@@ -6,9 +6,13 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 public abstract class ProductComponent : IProductComponent
 {
     public string Id { get; }
+    
     public SemVersion? Version { get; }
+   
     public string? Name { get; init; }
+   
     public abstract ComponentType Type { get; }
+    
     public DetectionState DetectedState { get; set; }
 
     protected ProductComponent(IProductComponentIdentity identity)

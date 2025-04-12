@@ -3,25 +3,23 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.CommonUtilities;
 using Semver;
 
-namespace AnakinRaW.AppUpdaterFramework.Conditions;
+namespace AnakinRaW.AppUpdaterFramework.Detection;
 
-public sealed record FileCondition : ICondition
+public sealed record SingleFileDetectCondition : IDetectionCondition
 {
     public ConditionType Type => ConditionType.File;
 
-    public string Id => "FileCondition";
+    public string Id => "SingleFile";
 
     public string FilePath { get; }
-
-    public ConditionJoin Join { get; init; }
-
+    
     public ComponentIntegrityInformation IntegrityInformation { get; init; }
 
     public Version? Version { get; init; }
     
     public SemVersion? ProductVersion { get; init; }
     
-    public FileCondition(string filePath)
+    public SingleFileDetectCondition(string filePath)
     {
         ThrowHelper.ThrowIfNullOrEmpty(filePath);
         FilePath = filePath;

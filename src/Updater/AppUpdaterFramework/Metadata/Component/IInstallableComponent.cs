@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AnakinRaW.AppUpdaterFramework.Conditions;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Detection;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -11,9 +10,9 @@ public interface IInstallableComponent : IProductComponent
 
     OriginInfo? OriginInfo { get; }
 
-    IReadOnlyList<ICondition> DetectConditions { get; }
+    IReadOnlyList<IDetectionCondition> DetectConditions { get; }
 
     InstallationSize InstallationSize { get; }
 
-    string? GetFullPath(IServiceProvider serviceProvider, ProductVariables? variables = null);
+    string? GetFullPath(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables);
 }

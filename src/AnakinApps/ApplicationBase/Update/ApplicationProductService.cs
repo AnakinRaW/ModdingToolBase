@@ -11,6 +11,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
 
 namespace AnakinRaW.ApplicationBase.Update;
@@ -30,21 +31,23 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
         return _metadataExtractor.ProductReferenceFromAssembly(_applicationEnvironment.AssemblyInfo.Assembly);
     }
 
-    protected override IProductManifest GetManifestForInstalledProduct(IProductReference installedProduct, ProductVariables variableCollection)
+    protected override IProductManifest GetManifestForInstalledProduct(
+        IProductReference installedProduct,
+        IReadOnlyDictionary<string, string> productVariables)
     {
         var application = _applicationEnvironment.AssemblyInfo.Assembly;
         var appComponent = _metadataExtractor.ComponentFromAssembly(
             application,
-            ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir),
+            StringTemplateEngine.ToVariable(KnownProductVariablesKeys.InstallDir),
             new ExtractorAdditionalInformation
             {
-                OverrideFileName = ProductVariables.ToVar(ApplicationVariablesKeys.AppFileName),
+                OverrideFileName = StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppFileName),
             });
 
         var updaterAssembly = GetUpdaterAssemblyStream();
         var updaterComponent = _metadataExtractor.ComponentFromStream(
             updaterAssembly,
-            ProductVariables.ToVar(ApplicationVariablesKeys.AppData),
+            StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppData),
             new ExtractorAdditionalInformation
             {
                 Drive = ExtractorAdditionalInformation.InstallDrive.System
@@ -62,7 +65,7 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
         return new ProductManifest(installedProduct, allComponents);
     }
 
-    protected override void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
+    protected override void AddAdditionalProductVariables(IDictionary<string, string> variables, IProductReference product)
     {
         variables.Add(ApplicationVariablesKeys.AppData, _applicationEnvironment.ApplicationLocalPath);
         variables.Add(ApplicationVariablesKeys.AppFileName, _applicationEnvironment.AssemblyInfo.ExecutableFileName);

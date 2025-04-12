@@ -2,7 +2,7 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
 
-internal struct InstallerInteractionResult(InstallResult installResult, bool retry = false)
+internal readonly struct InstallerInteractionResult(InstallResult installResult, bool retry = false)
 {
     public bool Retry { get; } = retry;
 

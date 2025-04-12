@@ -10,7 +10,7 @@ namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
 internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpaceCalculator
 {
-    internal const long AdditionalSizeBuffer = 20_000_000;
+    private const long ExtraSizeMargin = 20_000_000;
 
     private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
     private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
@@ -25,17 +25,22 @@ internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpac
             throw new ArgumentNullException(nameof(newComponent));
         foreach (var diskData in GetDiskInformation(newComponent, oldComponent, installPath, options))
         {
-            if (!diskData.HasEnoughDiskSpace)
+            if (!HasEnoughSpace(diskData))
+            {
                 throw new OutOfDiskspaceException(
-                    $"There is not enough space to install “{newComponent.GetDisplayName()}”. {diskData.RequestedSize + AdditionalSizeBuffer} is required on drive {diskData.DriveName}  " +
-                    $"but you only have {diskData.AvailableDiskSpace} available.");
+                    $"There is not enough space for component '{newComponent.GetDisplayName()}'. {diskData.RequestedSize + ExtraSizeMargin} is required on drive {diskData.DriveName}  " +
+                    $"but there is only {diskData.AvailableDiskSpace} available.");
+            }
         }
     }
 
-    private IEnumerable<DriveSpaceData> GetDiskInformation(IInstallableComponent newComponent, IInstallableComponent? oldComponent, string? installPath, CalculationOptions options)
+    private IEnumerable<DriveSpaceData> GetDiskInformation(
+        IInstallableComponent newComponent, 
+        IInstallableComponent? oldComponent, 
+        string? installPath, 
+        CalculationOptions options)
     {
         var calculatedDiskSizes = new Dictionary<string, DriveSpaceData>();
-
 
         if (options.HasFlag(CalculationOptions.Download))
         {
@@ -58,30 +63,30 @@ internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpac
                 UpdateSizeInformation(oldComponent.InstallationSize.Total, backupRoot!);
         }
 
-        foreach (var sizes in calculatedDiskSizes)
-        {
-            try
-            {
-                var freeSpace = _fileSystem.DriveInfo.New(sizes.Key).AvailableFreeSpace;
-                sizes.Value.AvailableDiskSpace = freeSpace;
-                sizes.Value.HasEnoughDiskSpace = freeSpace >= sizes.Value.RequestedSize + AdditionalSizeBuffer;
-            }
-            catch
-            {
-                sizes.Value.HasEnoughDiskSpace = false;
-            }
-        }
-
         return calculatedDiskSizes.Values;
 
 
         void UpdateSizeInformation(long? actualSize, string drive) {
             if (!actualSize.HasValue)
                 return;
-            if (!calculatedDiskSizes.ContainsKey(drive))
+            if (!calculatedDiskSizes.TryGetValue(drive, out var size))
                 calculatedDiskSizes.Add(drive, new DriveSpaceData(actualSize.Value, drive));
             else
-                calculatedDiskSizes[drive].RequestedSize += actualSize.Value;
+                size.RequestedSize += actualSize.Value;
+        }
+    }
+
+    private bool HasEnoughSpace(DriveSpaceData spaceData)
+    {
+        try
+        {
+            var freeSpace = _fileSystem.DriveInfo.New(spaceData.DriveName).AvailableFreeSpace;
+            spaceData.AvailableDiskSpace = freeSpace;
+            return freeSpace >= spaceData.RequestedSize + ExtraSizeMargin;
+        }
+        catch
+        {
+            return false;
         }
     }
 

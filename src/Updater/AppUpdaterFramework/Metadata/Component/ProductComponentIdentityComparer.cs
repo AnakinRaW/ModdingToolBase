@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public class ProductComponentIdentityComparer(
+public sealed class ProductComponentIdentityComparer(
     bool excludeVersion = false,
     StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
     : IEqualityComparer<IProductComponentIdentity>
@@ -44,10 +44,10 @@ public class ProductComponentIdentityComparer(
     {
         if (obj == null)
             return 0;
-        var num = 0;
-        num ^= _comparer.GetHashCode(obj.Id);
+        var hc = new HashCode();
+        hc.Add(obj.Id, _comparer);
         if (!excludeVersion && obj.Version != null)
-            num ^= obj.Version.GetHashCode();
-        return num;
+            hc.Add(obj.Version);
+        return hc.ToHashCode();
     }
 }

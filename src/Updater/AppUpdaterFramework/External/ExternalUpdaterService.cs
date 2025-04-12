@@ -94,7 +94,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _launcher.Start(updater, options);
     }
 
-    private IEnumerable<UpdateInformation> CollectUpdateInformation()
+    private List<UpdateInformation> CollectUpdateInformation()
     {
         var pendingComponents = _pendingComponentStore.PendingComponents;
         var backups = _backupManager.Backups;

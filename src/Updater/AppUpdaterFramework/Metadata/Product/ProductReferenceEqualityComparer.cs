@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-public class ProductReferenceEqualityComparer : IEqualityComparer<IProductReference>
+public sealed class ProductReferenceEqualityComparer : IEqualityComparer<IProductReference>
 {
+    public static readonly ProductReferenceEqualityComparer Default = new(true, true);
+    public static readonly ProductReferenceEqualityComparer VersionAware = new(true, false);
+    public static readonly ProductReferenceEqualityComparer BranchAware = new(false, true);
+    public static readonly ProductReferenceEqualityComparer NameOnly = new(false, false);
+
     private readonly bool _compareVersion;
     private readonly bool _compareBranch;
-    public static ProductReferenceEqualityComparer Default = new(true, true);
-    public static ProductReferenceEqualityComparer VersionAware = new(true, false);
-    public static ProductReferenceEqualityComparer BranchAware = new(false, true);
-    public static ProductReferenceEqualityComparer NameOnly = new(false, false);
-
 
     private ProductReferenceEqualityComparer(bool compareVersion, bool compareBranch)
     {

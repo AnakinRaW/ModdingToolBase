@@ -1,9 +1,9 @@
-﻿using System;
-using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using AnakinRaW.AppUpdaterFramework.Utilities;
-using AnakinRaW.CommonUtilities;
+﻿using AnakinRaW.CommonUtilities;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Utilities;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -13,7 +13,7 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 /// <remarks>
 /// The property <see cref="IInstallableComponent.DetectConditions"/> shall not get used for installation detection.
 /// </remarks>
-public class SingleFileComponent : InstallableComponent, IPhysicalInstallable
+public sealed class SingleFileComponent : InstallableComponent, IPhysicalInstallable
 {
     public override ComponentType Type => ComponentType.File;
 
@@ -34,7 +34,7 @@ public class SingleFileComponent : InstallableComponent, IPhysicalInstallable
         FileName = fileName;
     }
 
-    internal IFileInfo GetFile(IServiceProvider serviceProvider, ProductVariables? variables = null)
+    internal IFileInfo GetFile(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables)
     {
         if (_fileInfo is null)
         {
@@ -45,14 +45,12 @@ public class SingleFileComponent : InstallableComponent, IPhysicalInstallable
         return _fileInfo;
     }
 
-    public override string GetFullPath(IServiceProvider serviceProvider, ProductVariables? variables = null)
+    public override string GetFullPath(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables)
     {
         if (_fullPath is null)
         {
-            var variablesDict = variables?.ToDictionary();
-            var variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
-            var fileName = variableResolver.ResolveVariables(FileName, variablesDict);
-            var installPath = variableResolver.ResolveVariables(InstallPath, variablesDict);
+            var fileName = StringTemplateEngine.ResolveVariables(FileName, variables);
+            var installPath = StringTemplateEngine.ResolveVariables(InstallPath, variables);
             var fs = serviceProvider.GetRequiredService<IFileSystem>();
             _fullPath = fs.Path.Combine(installPath, fileName);
         }

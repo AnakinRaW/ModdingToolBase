@@ -8,26 +8,25 @@ using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
 
-namespace AnakinRaW.AppUpdaterFramework.Conditions;
+namespace AnakinRaW.AppUpdaterFramework.Detection;
 
-internal sealed class FileConditionEvaluator : IConditionEvaluator
+internal sealed class SingleFileDetector(IServiceProvider services) : IDetector
 {
-    public ConditionType Type => ConditionType.File;
-
-    public bool Evaluate(IServiceProvider services, ICondition condition, IDictionary<string, string?>? properties = null)
+    public bool Detect(IDetectionCondition condition, IReadOnlyDictionary<string, string> variables)
     {
-        if (services == null)
-            throw new ArgumentNullException(nameof(services));
         if (condition == null) 
             throw new ArgumentNullException(nameof(condition));
-        if (condition is not FileCondition fileCondition)
+        if (variables == null) 
+            throw new ArgumentNullException(nameof(variables));
+
+        if (condition is not SingleFileDetectCondition fileCondition)
             throw new ArgumentException("condition is not FileCondition", nameof(condition));
 
         var fileSystem = services.GetRequiredService<IFileSystem>();
-        var variableResolver = services.GetRequiredService<IVariableResolver>();
+
 
         var filePath = fileCondition.FilePath;
-        filePath = variableResolver.ResolveVariables(filePath, properties);
+        filePath = StringTemplateEngine.ResolveVariables(filePath, variables);
         if (string.IsNullOrEmpty(filePath) || !fileSystem.File.Exists(filePath))
             return false;
         if (fileCondition.IntegrityInformation.HashType != HashTypeKey.None)

@@ -2,7 +2,6 @@
 using System.Linq;
 using Vanara.PInvoke;
 using Process = System.Diagnostics.Process;
-
 #if DEBUG
 using System.Runtime.InteropServices;
 using Debugger = System.Diagnostics.Debugger;
@@ -35,12 +34,12 @@ internal static class Utilities
 
     public static IEnumerable<ILockingProcessInfo> WithoutCurrentProcess(this IEnumerable<ILockingProcessInfo> processes)
     {
-        return processes.Where(x => !x.IsCurrentProcess()).ToList();
+        return processes.Where(x => !x.IsCurrentProcess());
     }
 
     public static IEnumerable<ILockingProcessInfo> WithoutStopped(this IEnumerable<ILockingProcessInfo> processes)
     {
-        return processes.Where(x => !x.IsStopped()).ToList();
+        return processes.Where(x => !x.IsStopped());
     }
 
     public static bool AllStopped(this IEnumerable<ILockingProcessInfo> processes)

@@ -31,7 +31,10 @@ public sealed class ManifestFileDownloader : DisposableObject
         _tempDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10);
     }
 
-    public async Task<IFileInfo> DownloadManifestAsync(Uri manifestPath, DownloadOptions? downloadOptions = null, CancellationToken token = default)
+    public async Task<IFileInfo> DownloadManifestAsync(
+        Uri manifestPath, 
+        DownloadOptions? downloadOptions = null, 
+        CancellationToken token = default)
     {
         var destPath = CreateRandomFile();
 #if NETSTANDARD2_1_OR_GREATER || NET

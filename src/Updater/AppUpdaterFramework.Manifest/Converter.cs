@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AnakinRaW.AppUpdaterFramework.Conditions;
+using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -74,9 +74,9 @@ public static class Converter
             fileComponent.DetectConditions.Select(ToDetectCondition).ToList());
     }
 
-    private static DetectCondition ToDetectCondition(ICondition condition)
+    private static DetectCondition ToDetectCondition(IDetectionCondition condition)
     {
-        if (condition is not FileCondition fileCondition)
+        if (condition is not SingleFileDetectCondition fileCondition)
             throw new NotSupportedException($"Condition {condition.Type} not supported");
         return new DetectCondition(
             ConditionType.File, 

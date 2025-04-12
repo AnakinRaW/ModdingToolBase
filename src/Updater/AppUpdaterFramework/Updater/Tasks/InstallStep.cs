@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Installer;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
-using AnakinRaW.AppUpdaterFramework.Product.Detectors;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater.Progress;
@@ -23,12 +23,11 @@ internal class InstallStep : PipelineStep, IComponentStep
     public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;
 
     private readonly IUpdateConfiguration _updateConfiguration;
-    private readonly ProductVariables _productVariables;
+    private readonly IReadOnlyDictionary<string, string> _productVariables;
     private readonly UpdateAction _action;
     private readonly IInstallableComponent? _currentComponent;
     private readonly DownloadStep? _download;
     private readonly IInstallerFactory _installerFactory;
-    private readonly IVariableResolver _variableResolver;
 
     public IInstallableComponent Component { get; }
 
@@ -43,7 +42,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     public InstallStep(
         IInstallableComponent installable, 
         IUpdateConfiguration updateConfiguration,
-        ProductVariables productVariables,
+        IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) :
         this(installable, UpdateAction.Delete, updateConfiguration, productVariables, serviceProvider)
     {
@@ -54,7 +53,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         IInstallableComponent? currentComponent, 
         DownloadStep download, 
         IUpdateConfiguration updateConfiguration,
-        ProductVariables productVariables,
+        IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) : 
         this(installable, UpdateAction.Update, updateConfiguration, productVariables, serviceProvider)
     {
@@ -66,12 +65,11 @@ internal class InstallStep : PipelineStep, IComponentStep
         IInstallableComponent installable, 
         UpdateAction updateAction,
         IUpdateConfiguration updateConfiguration,
-        ProductVariables productVariables,
+        IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) : base(serviceProvider)
     {
         Component = installable ?? throw new ArgumentNullException(nameof(installable));
 
-        _variableResolver = serviceProvider.GetRequiredService<IVariableResolver>();
         _action = updateAction;
         _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
         _productVariables = productVariables;
@@ -162,8 +160,8 @@ internal class InstallStep : PipelineStep, IComponentStep
 
     private InstallResult ValidateInstall()
     {
-        var detectorFactory = Services.GetService<IComponentDetectorFactory>() ?? ComponentDetectorFactory.Default;
-        var isInstalled = detectorFactory.GetDetector(Component.Type, Services).GetCurrentInstalledState(Component, _productVariables);
+        var detectorFactory = Services.GetRequiredService<IComponentInstallationDetector>();
+        var isInstalled = detectorFactory.IsInstalled(Component, _productVariables);
 
         switch (_action)
         {
@@ -213,7 +211,7 @@ internal class InstallStep : PipelineStep, IComponentStep
 
         var installPath = Component is IPhysicalInstallable physicalInstallable ? physicalInstallable.InstallPath : null;
         if (!string.IsNullOrEmpty(installPath))
-            installPath = _variableResolver.ResolveVariables(installPath!, _productVariables.ToDictionary());
+            installPath = StringTemplateEngine.ResolveVariables(installPath!, _productVariables);
 
         // We already downloaded it, no need to calculate again
         if (_download is not null) 

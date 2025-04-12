@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using AnakinRaW.AppUpdaterFramework.Conditions;
+using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -68,9 +68,9 @@ public record AppComponent(
             ? new InstallationSize(InstallSize!.Value.SystemDrive, InstallSize.Value.ProductDrive)
             : default;
 
-        IReadOnlyList<ICondition> conditions;
+        IReadOnlyList<IDetectionCondition> conditions;
         if (DetectConditions is null)
-            conditions = Array.Empty<ICondition>();
+            conditions = Array.Empty<IDetectionCondition>();
         else
             conditions = DetectConditions.Select(c => c.ToCondition()).ToList();
 
@@ -93,7 +93,7 @@ public record DetectCondition(
     [property: JsonPropertyName("sha256")] string? Sha256
 )
 {
-    public ICondition ToCondition()
+    public IDetectionCondition ToCondition()
     {
         if (Type != ConditionType.File)
             throw new NotSupportedException($"{Type} currently not supported");
@@ -101,12 +101,11 @@ public record DetectCondition(
         if (string.IsNullOrEmpty(FilePath))
             throw new CatalogException($"Illegal manifest: {nameof(FilePath)} must not be null or empty.");
 
-        return new FileCondition(FilePath)
+        return new SingleFileDetectCondition(FilePath)
         {
             ProductVersion = ManifestHelpers.CreateNullableSemVersion(ProductVersion),
             Version = ManifestHelpers.CreateNullableVersion(Version),
             IntegrityInformation = ManifestHelpers.FromSha256(Sha256),
-            Join = ConditionJoin.And
         };
     }
 }

@@ -4,5 +4,5 @@ public static class ExternalUpdaterConstants
 {
     public const string AppUpdaterModuleName = "AnakinRaW.ExternalUpdater.exe";
 
-    public const string ComponentIdentity = "ExternalUpdater";
+    public const string ComponentIdentity = "AnakinRaW.ExternalUpdater";
 }

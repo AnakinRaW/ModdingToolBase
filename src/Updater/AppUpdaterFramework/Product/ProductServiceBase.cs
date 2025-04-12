@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;
@@ -8,6 +6,10 @@ using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Semver;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO.Abstractions;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
@@ -66,9 +68,11 @@ public abstract class ProductServiceBase : IProductService
 
     protected abstract IProductReference CreateCurrentProductReference();
 
-    protected abstract IProductManifest GetManifestForInstalledProduct(IProductReference installedProduct, ProductVariables variableCollection);
+    protected abstract IProductManifest GetManifestForInstalledProduct(
+        IProductReference installedProduct, 
+        IReadOnlyDictionary<string, string> productVariables);
 
-    protected virtual void AddAdditionalProductVariables(ProductVariables variables, IProductReference product)
+    protected virtual void AddAdditionalProductVariables(IDictionary<string, string> variables, IProductReference product)
     {
     }
 
@@ -115,14 +119,28 @@ public abstract class ProductServiceBase : IProductService
         return new InstalledProduct(productReference, InstallLocation.FullName, manifest, variables, state);
     }
 
-    private ProductVariables AddProductVariables(IProductReference product)
+    private IReadOnlyDictionary<string, string> AddProductVariables(IProductReference product)
     {
-        var variables = new ProductVariables();
+        var variables = new Dictionary<string, string>();
         var installLocation = InstallLocation;
         variables.Add(KnownProductVariablesKeys.InstallDir, installLocation.FullName);
         variables.Add(KnownProductVariablesKeys.InstallDrive, installLocation.Root.FullName);
+
+        // TODO: To ProductVariables, as this is not part of a template engine
+        // We do not include Windows folder as it is not a special folder,
+        // because this library shall not by default support operating system related folders. 
+        // Custom properties can be used to support that individually.
+        //private static readonly IDictionary<string, string> SpecialFolders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        //{
+        //    [ProgramFiles] = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+        //    [ProgramFilesX64] = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+        //    [CommonProgramFiles] = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+        //    [CommonProgramFilesX64] = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
+        //    [ProgramData] = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        //};
+
         AddAdditionalProductVariables(variables, product);
-        return variables;
+        return new ReadOnlyDictionary<string, string>(variables);
     }
 
     private void OnRestartRequired(object sender, EventArgs e)

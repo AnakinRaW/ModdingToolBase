@@ -6,16 +6,18 @@ internal class DriveSpaceData(long currentInstallSize, string driveName) : IEqua
 {
     public long RequestedSize { get; set; } = currentInstallSize;
 
-    public bool HasEnoughDiskSpace { get; set; }
-
     public long AvailableDiskSpace { get; set; }
 
     public string DriveName { get; } = driveName;
 
-
     public bool Equals(DriveSpaceData? other)
     {
         return string.Equals(DriveName, other?.DriveName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as DriveSpaceData);
     }
 
     public override int GetHashCode()

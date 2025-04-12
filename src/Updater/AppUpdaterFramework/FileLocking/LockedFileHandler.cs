@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 using AnakinRaW.AppUpdaterFramework.Interaction;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Vanara.PInvoke;
@@ -16,23 +15,20 @@ namespace AnakinRaW.AppUpdaterFramework.FileLocking;
 internal class LockedFileHandler(IServiceProvider serviceProvider) : InteractiveHandlerBase(serviceProvider), ILockedFileHandler
 {
     private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-    private readonly ILockingProcessManagerFactory _lockingProcessManagerFactory = serviceProvider.GetRequiredService<ILockingProcessManagerFactory>();
 
-    public ILockedFileHandler.Result Handle(IInstallableComponent component, IFileInfo file)
+    public ILockedFileHandler.Result Handle(IFileInfo file)
     {
-        if (component == null)
-            throw new ArgumentNullException(nameof(component));
         if (!file.Exists)
             throw new InvalidOperationException($"Expected '{file}' to exist.");
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Logger?.LogWarning("Handling locked files is only supported for windows applications!");
+            Logger?.LogWarning("Handling locked files is only supported for Windows applications!");
             return ILockedFileHandler.Result.Locked;
         }
 
-        using var lockingProcessManager = _lockingProcessManagerFactory.Create();
-        lockingProcessManager.Register(new[] { file.FullName });
+        using var lockingProcessManager = WindowsLockingProcessManager.Create();
+        lockingProcessManager.Register([file.FullName]);
 
         var lockingProcesses = lockingProcessManager.GetProcesses().ToList();
 
@@ -56,7 +52,7 @@ internal class LockedFileHandler(IServiceProvider serviceProvider) : Interactive
 
         var processesWithoutSelf = lockingProcesses.WithoutCurrentProcess().WithoutDebugger().WithoutStopped().ToList();
 
-        if (processesWithoutSelf.Any())
+        if (processesWithoutSelf.Count > 0)
         {
             var interactionResult = LockedFileHandlerInteractionResult.Retry;
             do
@@ -77,7 +73,7 @@ internal class LockedFileHandler(IServiceProvider serviceProvider) : Interactive
             // Interaction indicated to kill the processes
             if (interactionResult == LockedFileHandlerInteractionResult.Kill)
             {
-                using var managerWithoutSelf = _lockingProcessManagerFactory.Create();
+                using var managerWithoutSelf = WindowsLockingProcessManager.Create();
                 managerWithoutSelf.Register(null, processesWithoutSelf);
                 managerWithoutSelf.TerminateRegisteredProcesses();
             }

@@ -11,6 +11,7 @@ using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -88,11 +89,11 @@ internal class ManifestCreator
         var application = _fileSystem.FileInfo.New(Options.ApplicationFile);
         var appComponent = await _metadataExtractor.ComponentFromFileAsync(
             application,
-            ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir),
+            StringTemplateEngine.ToVariable(KnownProductVariablesKeys.InstallDir),
             new ExtractorAdditionalInformation
             {
                 Drive = ExtractorAdditionalInformation.InstallDrive.App,
-                OverrideFileName = ProductVariables.ToVar(ApplicationVariablesKeys.AppFileName),
+                OverrideFileName = StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppFileName),
                 Origin = _branchManager.GetComponentOrigin(application, branch)
             });
 
@@ -103,13 +104,13 @@ internal class ManifestCreator
             };
         await AddToComponents(
             Options.InstallDirComponents,
-            ProductVariables.ToVar(KnownProductVariablesKeys.InstallDir),
+            StringTemplateEngine.ToVariable(KnownProductVariablesKeys.InstallDir),
             ExtractorAdditionalInformation.InstallDrive.App,
             branch,
             installables);
         await AddToComponents(
-            Options.AppDataComponents, 
-            ProductVariables.ToVar(ApplicationVariablesKeys.AppData),
+            Options.AppDataComponents,
+            StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppData),
             ExtractorAdditionalInformation.InstallDrive.System,
             branch,
             installables);
