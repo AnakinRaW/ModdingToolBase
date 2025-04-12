@@ -24,8 +24,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IProductService _productService;
     private readonly IExternalUpdaterLauncher _launcher;
     private readonly IPendingComponentStore _pendingComponentStore;
-    private readonly IReadonlyBackupManager _backupManager;
-    private readonly IReadonlyDownloadRepository _downloadRepository;
+    private readonly IReadOnlyBackupManager _backupManager;
+    private readonly IReadOnlyDownloadRepository _downloadRepository;
     private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
 
     private readonly string _tempPath;
@@ -37,8 +37,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _launcher = serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
-        _backupManager = serviceProvider.GetRequiredService<IReadonlyBackupManager>();
-        _downloadRepository = serviceProvider.GetRequiredService<IReadonlyDownloadRepository>();
+        _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
+        _downloadRepository = serviceProvider.GetRequiredService<IReadOnlyDownloadRepository>();
         _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
 
         // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator
@@ -55,7 +55,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
         return new UpdateOptions
         {
-            AppToStart = cpi.ProcessFilePath,
+            AppToStart = cpi.ProcessFilePath!,
             Pid = cpi.Id,
             UpdateFile = updateInformationFile,
             LoggingDirectory = _tempPath
@@ -69,7 +69,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             throw new InvalidOperationException("The current process is not running from a file");
         return new RestartOptions
         {
-            AppToStart = cpi.ProcessFilePath,
+            AppToStart = cpi.ProcessFilePath!,
             Pid = cpi.Id,
             Elevate = elevate,
             LoggingDirectory = _tempPath
@@ -141,7 +141,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     private string WriteToTempFile(IEnumerable<UpdateInformation> updateInformation)
     {
-        var fileName = _fileSystem.Path.GetTempFileName();
+        var fileName = _fileSystem.Path.GetRandomFileName();
         var tempFilePath = _fileSystem.Path.Combine(_tempPath, fileName);
 
         using var fs = _fileSystem.FileStream.New(tempFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);

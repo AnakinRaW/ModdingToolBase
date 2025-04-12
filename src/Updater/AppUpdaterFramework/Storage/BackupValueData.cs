@@ -3,24 +3,12 @@ using System.IO.Abstractions;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-public class BackupValueData : IEquatable<BackupValueData>
+internal sealed class BackupValueData(IFileInfo destination) : IEquatable<BackupValueData>
 {
-    public IFileInfo Destination { get; }
+    public IFileInfo Destination { get; } = destination;
 
-    public IFileInfo? Backup { get; }
-
-    public BackupValueData(IFileInfo destination)
-    {
-        Destination = destination;
-        Backup = null;
-    }
-
-    public BackupValueData(IFileInfo destination, IFileInfo backup)
-    {
-        Destination = destination;
-        Backup = backup;
-    }
-
+    public IFileInfo? Backup { get; init; }
+    
     public bool IsOriginallyMissing()
     {
         return Backup is null;

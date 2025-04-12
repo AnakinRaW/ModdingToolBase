@@ -11,14 +11,13 @@ internal sealed class DownloadRepository : FileRepository, IDownloadRepository
 
     public DownloadRepository(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         var updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
         var location = updateConfig.DownloadLocation;
         if (string.IsNullOrEmpty(location))
             throw new InvalidOperationException("download directory not specified.");
 
-        var root = fileSystem.DirectoryInfo.New(location);
+        var root = FileSystem.DirectoryInfo.New(location);
         root.Create();
 
         Root = root;

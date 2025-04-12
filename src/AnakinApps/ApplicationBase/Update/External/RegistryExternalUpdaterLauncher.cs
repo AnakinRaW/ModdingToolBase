@@ -37,7 +37,7 @@ internal sealed class RegistryExternalUpdaterLauncher(IServiceProvider servicePr
         var loggingPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
 
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
-            .WithCurrentData(cpi.ProcessFilePath, cpi.Id, loggingPath, serviceProvider);
+            .WithCurrentData(cpi.ProcessFilePath!, cpi.Id, loggingPath, serviceProvider);
         _launcher.Start(updater, launchOptions);
     }
 }

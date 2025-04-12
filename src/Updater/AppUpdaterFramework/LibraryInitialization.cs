@@ -23,10 +23,11 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IInstallerFactory>(sp => new InstallerFactory(sp));
         serviceCollection.AddSingleton<IDiskSpaceCalculator>(sp => new DiskSpaceCalculator(sp));
         serviceCollection.AddSingleton<IBackupManager>(sp => new BackupManager(sp));
+        serviceCollection.AddSingleton<IReadOnlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
+        serviceCollection.AddSingleton<IDownloadRepository>(sp => new DownloadRepository(sp));
+        serviceCollection.AddSingleton<IReadOnlyDownloadRepository>(sp => sp.GetRequiredService<IDownloadRepository>());
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
-        serviceCollection.AddSingleton<IDownloadRepository>(sp => new DownloadRepository(sp));
-        serviceCollection.AddSingleton<IBackupRepository>(sp => new BackupRepository(sp));
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
 
 
@@ -36,11 +37,8 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IUpdateInteractionHandler>(sp => new DefaultUpdateInteractionHandler(sp));
         serviceCollection.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
 
-        serviceCollection.AddSingleton<IReadonlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
-        serviceCollection.AddSingleton<IReadonlyDownloadRepository>(sp => sp.GetRequiredService<IDownloadRepository>());
         serviceCollection.AddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
         serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
-
         serviceCollection.AddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
 
         serviceCollection.AddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));

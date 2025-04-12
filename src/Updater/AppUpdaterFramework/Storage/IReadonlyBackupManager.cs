@@ -3,7 +3,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-public interface IReadonlyBackupManager
+internal interface IReadOnlyBackupManager
 {
     IDictionary<IInstallableComponent, BackupValueData> Backups { get; }
 }

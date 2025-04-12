@@ -10,7 +10,7 @@ internal abstract class ComponentAggregatedProgressReporter(
     : AggregatedProgressReporter<IComponentStep, ComponentProgressInfo>(progressReporter, steps,
         ComponentStepComparer.Default)
 {
-    protected override string GetProgressText(IComponentStep step, string progressText)
+    protected override string GetProgressText(IComponentStep step, string? progressText)
     {
         return step.Component.GetDisplayName();
     }

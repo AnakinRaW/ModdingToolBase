@@ -17,7 +17,7 @@ internal class BackupManager : IBackupManager
     private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<IInstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
     private readonly ILogger? _logger;
-    private readonly IBackupRepository _repository;
+    private readonly BackupRepository _repository;
     private readonly IProductService _productService;
     private readonly IHashingService _hashingService;
 
@@ -28,7 +28,7 @@ internal class BackupManager : IBackupManager
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        _repository = serviceProvider.GetRequiredService<IBackupRepository>();
+        _repository = new BackupRepository(serviceProvider);
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
     }
 
@@ -55,8 +55,7 @@ internal class BackupManager : IBackupManager
             throw;
         }
     }
-
-
+    
     public void RestoreBackup(IInstallableComponent component)
     {
         if (component == null) 
@@ -113,12 +112,6 @@ internal class BackupManager : IBackupManager
             RestoreBackup(component);
     }
 
-    public void RemoveBackups()
-    {
-        _repository.Clear();
-        _backups.Clear();
-    }
-
     private BackupValueData CreateBackupEntry(IInstallableComponent component)
     {
         if (component is not SingleFileComponent singleFileComponent)
@@ -137,7 +130,9 @@ internal class BackupManager : IBackupManager
             throw e;
         }
 
-        var backupFile = _repository.AddComponent(component);
-        return new BackupValueData(destination, backupFile);
+        return new BackupValueData(destination)
+        {
+            Backup = _repository.AddComponent(component)
+        };
     }
 }

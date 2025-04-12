@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal sealed class BackupRepository : FileRepository, IBackupRepository
+internal sealed class BackupRepository : FileRepository
 {
     protected override IDirectoryInfo Root { get; }
 
@@ -13,14 +13,13 @@ internal sealed class BackupRepository : FileRepository, IBackupRepository
 
     public BackupRepository(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         var updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
         var location = updateConfig.BackupLocation;
         if (string.IsNullOrEmpty(location))
             throw new InvalidOperationException("backup directory not specified.");
 
-        var root = fileSystem.DirectoryInfo.New(location!);
+        var root = FileSystem.DirectoryInfo.New(location!);
         root.Create();
 
         Root = root;

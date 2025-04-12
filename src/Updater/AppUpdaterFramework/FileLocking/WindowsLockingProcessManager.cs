@@ -78,10 +78,12 @@ internal class WindowsLockingProcessManager : IDisposable
             return [];
         int result;
         var pnProcInfo = 0U;
-        var rmProcessInfoArray = (RstrtMgr.RM_PROCESS_INFO[]?)null;
+        RstrtMgr.RM_PROCESS_INFO[]? rmProcessInfoArray = null;
         do
         {
+#pragma warning disable CS8604 // Possible null reference argument.
             result = RstrtMgr.RmGetList(_sessionId, out var pnProcInfoNeeded, ref pnProcInfo, rmProcessInfoArray, out _).ToHRESULT().Code;
+#pragma warning restore CS8604 // Possible null reference argument.
 
             switch (result)
             {

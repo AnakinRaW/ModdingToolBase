@@ -104,7 +104,7 @@ public abstract class CliBootstrapper : BootstrapperBase
             if (string.IsNullOrEmpty(category)) 
                 return false;
 
-            if (category.StartsWith(GetType().Namespace) || category.StartsWith(nameof(ApplicationBase)))
+            if (category!.StartsWith(GetType().Namespace!) || category.StartsWith(nameof(ApplicationBase)))
                 return true;
 
             if (AdditionalNamespacesToLogToConsole is null)

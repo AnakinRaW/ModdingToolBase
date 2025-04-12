@@ -29,7 +29,7 @@ public abstract partial class ProgressBarViewModel : ViewModelBase, IProgressBar
         WeakEventManager<IUpdateSession, UpdateProgressEventArgs>.AddHandler(updateSession, progressEventName, OnProgress);
     }
 
-    private void OnProgress(object sender, UpdateProgressEventArgs e)
+    private void OnProgress(object? sender, UpdateProgressEventArgs e)
     {
         ProgressInformation = e;
     }

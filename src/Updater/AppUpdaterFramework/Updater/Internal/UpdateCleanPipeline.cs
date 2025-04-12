@@ -15,9 +15,9 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
 {
     private readonly List<IInstallableComponent> _filesFailedToBeCleaned = new();
     private readonly IBackupManager _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
-    private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
     private readonly List<IInstallableComponent> _downloadsToClean = new();
     private readonly List<IInstallableComponent> _backupsToClean = new();
+    private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
 
     protected override Task<bool> PrepareCoreAsync()
     {

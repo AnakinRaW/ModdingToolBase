@@ -13,8 +13,9 @@ internal abstract class FileRepository(IServiceProvider serviceProvider) : IFile
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ConcurrentDictionary<IInstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
-    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
     private readonly IProductService _productService = serviceProvider.GetRequiredService<IProductService>();
+
+    protected readonly IFileSystem FileSystem = serviceProvider.GetRequiredService<IFileSystem>();
 
     protected abstract IDirectoryInfo Root { get; }
 
@@ -40,22 +41,11 @@ internal abstract class FileRepository(IServiceProvider serviceProvider) : IFile
         return new Dictionary<IInstallableComponent, IFileInfo>(_componentStore, ProductComponentIdentityComparer.Default);
     }
 
-    public ISet<IFileInfo> GetFiles()
-    {
-        return new HashSet<IFileInfo>(_componentStore.Values);
-    }
-
     public void RemoveComponent(IInstallableComponent component)
     {
         if (!_componentStore.TryRemove(component, out var file))
             return;
         file.DeleteWithRetry();
-    }
-
-    public void Clear()
-    {
-        foreach (var storedComponent in _componentStore.Keys) 
-            RemoveComponent(storedComponent);
     }
 
     private IFileInfo CreateComponentFile(IInstallableComponent component)
@@ -65,7 +55,7 @@ internal abstract class FileRepository(IServiceProvider serviceProvider) : IFile
         IFileInfo file = null!;
         for (var i = 0; i < 10; i++)
         {
-            file = _fileSystem.FileInfo.New(CreateRandomFilePath(namePrefix));
+            file = FileSystem.FileInfo.New(CreateRandomFilePath(namePrefix));
             if (!file.Exists)
                 break;
         }
@@ -87,17 +77,16 @@ internal abstract class FileRepository(IServiceProvider serviceProvider) : IFile
         var file = singleFileComponent.GetFile(_serviceProvider, _productService.GetCurrentInstance().Variables);
         return file.Name;
     }
-
-
+    
     private string CreateRandomFilePath(string? namePrefix)
     {
         var fileName = CreateFileName(namePrefix);
-        return _fileSystem.Path.Combine(Root.FullName, fileName);
+        return FileSystem.Path.Combine(Root.FullName, fileName);
     }
 
     private string CreateFileName(string? prefix)
     {
-        var randomFilePart = _fileSystem.Path.GetFileNameWithoutExtension(_fileSystem.Path.GetRandomFileName());
+        var randomFilePart = FileSystem.Path.GetFileNameWithoutExtension(FileSystem.Path.GetRandomFileName());
         if (string.IsNullOrEmpty(prefix) || string.IsNullOrWhiteSpace(prefix))
             return $"{randomFilePart}.{FileExtensions}";
         prefix = prefix!.TrimEnd('.');

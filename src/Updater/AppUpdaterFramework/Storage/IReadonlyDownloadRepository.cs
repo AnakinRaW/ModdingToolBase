@@ -1,3 +1,3 @@
 ﻿namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-public interface IReadonlyDownloadRepository : IReadonlyRepository;
+internal interface IReadOnlyDownloadRepository : IReadOnlyRepository;
