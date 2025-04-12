@@ -15,17 +15,16 @@ namespace AnakinRaW.AppUpdaterFramework.Product;
 
 public abstract class ProductServiceBase : IProductService
 { 
-    private bool _isInitialized;
-    private InstalledProduct? _installedProduct;
-
     private readonly object _syncLock = new();
     private readonly IRestartManager _restartManager;
 
+    private bool _isInitialized;
+    private InstalledProduct? _installedProduct;
+
+    protected readonly ILogger? Logger;
+    protected readonly IServiceProvider ServiceProvider;
+
     public abstract IDirectoryInfo InstallLocation { get; }
-
-    protected ILogger? Logger { get; }
-
-    protected IServiceProvider ServiceProvider { get; }
 
     protected ProductServiceBase(IServiceProvider serviceProvider)
     {
@@ -126,19 +125,19 @@ public abstract class ProductServiceBase : IProductService
         variables.Add(KnownProductVariablesKeys.InstallDir, installLocation.FullName);
         variables.Add(KnownProductVariablesKeys.InstallDrive, installLocation.Root.FullName);
 
-        // TODO: To ProductVariables, as this is not part of a template engine
         // We do not include Windows folder as it is not a special folder,
         // because this library shall not by default support operating system related folders. 
         // Custom properties can be used to support that individually.
-        //private static readonly IDictionary<string, string> SpecialFolders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        //{
-        //    [ProgramFiles] = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-        //    [ProgramFilesX64] = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-        //    [CommonProgramFiles] = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
-        //    [CommonProgramFilesX64] = Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
-        //    [ProgramData] = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-        //};
+        variables.Add(KnownProductVariablesKeys.ProgramFiles, Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
+        variables.Add(KnownProductVariablesKeys.CommonProgramFiles, Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86));
+        variables.Add(KnownProductVariablesKeys.ProgramData, Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
 
+        if (Environment.Is64BitOperatingSystem)
+        {
+            variables.Add(KnownProductVariablesKeys.ProgramFilesX64, Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+            variables.Add(KnownProductVariablesKeys.CommonProgramFilesX64, Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles));
+        }
+        
         AddAdditionalProductVariables(variables, product);
         return new ReadOnlyDictionary<string, string>(variables);
     }

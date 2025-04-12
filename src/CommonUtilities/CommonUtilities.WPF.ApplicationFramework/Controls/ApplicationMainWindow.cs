@@ -17,13 +17,14 @@ namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Controls;
 
 public class ApplicationMainWindow : ThemedWindow
 { 
+    private ContentControl? _statusBarHost;
+
+    protected readonly ILogger? Logger;
+
     public IServiceProvider ServiceProvider { get; }
 
     public new IMainWindowViewModel ViewModel { get; }
 
-    private ContentControl? _statusBarHost;
-
-    protected readonly ILogger? Logger;
 
     static ApplicationMainWindow()
     {

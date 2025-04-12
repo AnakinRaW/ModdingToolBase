@@ -18,15 +18,14 @@ internal class Uploader : IAsyncDisposable
     private readonly IFileSystem _fileSystem;
     private readonly ILogger? _logger;
     private readonly SftpClient _sftpClient;
-
-    public FtpUploadOptions Options { get; }
+    private readonly FtpUploadOptions _options;
 
     public Uploader(FtpUploadOptions options, IServiceProvider services)
     {
         _services = services;
         _fileSystem = services.GetRequiredService<IFileSystem>();
-        Options = options;
-        _sftpClient = new SftpClient(Options.Host, Options.Port, Options.UserName, Options.Password);
+        _options = options;
+        _sftpClient = new SftpClient(_options.Host, _options.Port, _options.UserName, _options.Password);
         _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
@@ -36,7 +35,7 @@ internal class Uploader : IAsyncDisposable
 
         var branchName = await GetBranchName(fileInformation.Manifest);
 
-        var toolBasePath = Options.BasePath;
+        var toolBasePath = _options.BasePath;
         var branchPath = Url.Combine(toolBasePath, branchName);
         
         _sftpClient.Connect();
@@ -97,7 +96,7 @@ internal class Uploader : IAsyncDisposable
 
     private UploaderFileInformation GetFileInformation()
     {
-        var sourceDirectory = _fileSystem.DirectoryInfo.New(Options.SourcePath);
+        var sourceDirectory = _fileSystem.DirectoryInfo.New(_options.SourcePath);
         
         var manifest = sourceDirectory.GetFiles(ApplicationConstants.ManifestFileName).FirstOrDefault();
         if (manifest is null)
@@ -115,7 +114,7 @@ internal class Uploader : IAsyncDisposable
     private async Task<string> GetBranchName(IFileInfo manifestFile)
     {
         await using var fileStream = manifestFile.OpenRead();
-        var manifest = await new JsonManifestLoader(_services).DeserializeAsync(fileStream);
+        var manifest = await new JsonManifestLoader(_services).DeserializeAsync(fileStream).ConfigureAwait(false);
         return manifest is null
             ? throw new InvalidOperationException("Unable to deserialize manifest")
             : manifest.Branch ?? ApplicationConstants.StableBranchName;

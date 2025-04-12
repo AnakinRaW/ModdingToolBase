@@ -60,7 +60,7 @@ public class ShadowChromeWindow : WindowBase
         private set => SetValue(DwmOwnsBorderPropertyKey, value);
     }
 
-    protected WindowInteropHelper WindowHelper { get; }
+    protected new WindowInteropHelper WindowHelper { get; }
 
     static ShadowChromeWindow()
     {
@@ -70,7 +70,7 @@ public class ShadowChromeWindow : WindowBase
 
     public ShadowChromeWindow(IWindowViewModel viewModel) : base(viewModel)
     {
-        WindowHelper = new WindowInteropHelper((Window)this);
+        WindowHelper = new WindowInteropHelper(this);
         NCButtonManager = new NonClientButtonManager(this);
     }
 

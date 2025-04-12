@@ -9,11 +9,9 @@ namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework;
 internal class ApplicationShutdownService : IApplicationShutdownService
 {
     public event EventHandler<int>? ShutdownRequested;
-
     public event EventHandler<ShutdownPrevention>? ShutdownPrevented;
 
     private readonly IList<ShutdownPreventionLock> _lockHandles = new List<ShutdownPreventionLock>();
-
     private readonly ILogger? _logger;
 
     public ApplicationShutdownService(IServiceProvider serviceProvider)

@@ -19,9 +19,8 @@ public class ImageLibrary
         Color.FromArgb(192, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
     private static readonly Lazy<ImageLibrary> LazyConstruction = new(() => new ImageLibrary());
-
+    
     private readonly HashSet<IImageCatalog> _imageCatalogs = new(new ImageCatalogEqualityComparer());
-
     private readonly Dictionary<(ImageKey, ImageAttributes), BitmapSource?> _imageCache = new();
 
     private CustomImageCatalog CustomImageCatalog { get; } = new();

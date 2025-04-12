@@ -53,7 +53,7 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
                 return updateResult;
 
             if (updateResult.Exception is not null)
-                await RestoreBackups();
+                await RestoreBackups().ConfigureAwait(false);
 
             try
             {
@@ -112,9 +112,9 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
         }
     }
 
-    private async Task RestoreBackups()
+    private Task RestoreBackups()
     {
-        await Task.Run(async () =>
+        return Task.Run(async () =>
         {
             try
             {
@@ -134,14 +134,13 @@ internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressRepor
             {
                 await CleanUpdateData();
             }
-        }).ConfigureAwait(false);
+        });
     }
 
     private async Task CleanUpdateData()
     {
         await new UpdateCleanPipeline(_serviceProvider).RunAsync().ConfigureAwait(false);
     }
-
 
     private UpdateResult CreateResult(Exception? exception = null)
     {

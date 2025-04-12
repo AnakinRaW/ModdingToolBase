@@ -20,7 +20,6 @@
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" PrivateAssets="all" />
-		<PackageReference Include="System.Memory" Version="4.6.3" PrivateAssets="all" />
 	</ItemGroup>
 	
 

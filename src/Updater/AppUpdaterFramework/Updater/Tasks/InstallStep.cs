@@ -29,7 +29,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     private readonly DownloadStep? _download;
     private readonly IInstallerFactory _installerFactory;
 
-    public IInstallableComponent Component { get; }
+    private IInstallableComponent Component { get; }
 
     IProductComponent IComponentStep.Component => Component;
 
@@ -146,7 +146,7 @@ internal class InstallStep : PipelineStep, IComponentStep
                 Result = ValidateInstall();
 
         }
-        catch (OutOfDiskspaceException e)
+        catch (OutOfDiskSpaceException e)
         {
             Logger?.LogError(e, e.Message);
             Result = InstallResult.Failure;

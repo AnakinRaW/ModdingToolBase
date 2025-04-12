@@ -14,10 +14,6 @@ internal class PendingComponentStore : IWritablePendingComponentStore
 
     public IReadOnlyCollection<PendingComponent> PendingComponents => _pendingComponents.ToList();
 
-    public PendingComponentStore()
-    {
-    }
-
     public void AddComponent(PendingComponent component)
     {
 #if NETSTANDARD2_1

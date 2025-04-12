@@ -37,9 +37,9 @@ internal class DownloadStep(
 
     public long Size { get; } = installable.DownloadSize;
 
-    public Uri Uri { get; } = installable.OriginInfo!.Url;
+    private Uri Uri { get; } = installable.OriginInfo!.Url;
 
-    public IInstallableComponent Component { get; } = installable ?? throw new ArgumentNullException(nameof(installable));
+    private IInstallableComponent Component { get; } = installable ?? throw new ArgumentNullException(nameof(installable));
 
     IProductComponent IComponentStep.Component => Component;
 

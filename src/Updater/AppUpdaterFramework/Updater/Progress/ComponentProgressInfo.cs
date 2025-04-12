@@ -2,9 +2,9 @@
 
 public struct ComponentProgressInfo
 {
-    public int CurrentComponent { get; internal set; }
+    public int CurrentComponent { get; internal init; }
 
-    public int TotalComponents { get; internal set; }
+    public int TotalComponents { get; internal init; }
 
     public long DownloadedSize { get; internal set; }
 

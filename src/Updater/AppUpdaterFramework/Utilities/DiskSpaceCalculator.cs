@@ -27,7 +27,7 @@ internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpac
         {
             if (!HasEnoughSpace(diskData))
             {
-                throw new OutOfDiskspaceException(
+                throw new OutOfDiskSpaceException(
                     $"There is not enough space for component '{newComponent.GetDisplayName()}'. {diskData.RequestedSize + ExtraSizeMargin} is required on drive {diskData.DriveName}  " +
                     $"but there is only {diskData.AvailableDiskSpace} available.");
             }

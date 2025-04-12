@@ -9,8 +9,8 @@ namespace AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 
 public abstract partial class ApplicationViewModelBase : MainWindowViewModel, IApplicationViewModel
 {
-    protected IServiceProvider ServiceProvider { get; }
-    protected ILogger? Logger { get; }
+    protected IServiceProvider ServiceProvider;
+    protected ILogger? Logger;
 
     private bool _isDisposed;
 

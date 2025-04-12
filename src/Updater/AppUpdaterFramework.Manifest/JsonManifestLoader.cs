@@ -40,7 +40,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
 
         using var manifestFileStream = manifestFile.OpenRead();
 
-        var appManifest = await DeserializeAsync(manifestFileStream, cancellationToken);
+        var appManifest = await DeserializeAsync(manifestFileStream, cancellationToken).ConfigureAwait(false);
         if (appManifest is null)
             throw new CatalogException("Serialized manifest is null");
 
