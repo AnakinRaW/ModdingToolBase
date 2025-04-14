@@ -77,7 +77,6 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
                 currentItems.Remove(installedComponent);
                 isDowngrade = availableItem.Version?.CompareSortOrderTo(installedComponent.Version) < 0;
             }
-                
 
             UpdateAction action;
             if (availableItem.DetectedState == DetectionState.Present)

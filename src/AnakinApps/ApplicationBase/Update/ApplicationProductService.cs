@@ -91,6 +91,17 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
 
     private Stream GetUpdaterAssemblyStream()
     {
+#if DEBUG
+        try
+        {
+            var fs = serviceProvider.GetRequiredService<IFileSystem>();
+            var file = fs.Path.Combine(InstallLocation.FullName, ExternalUpdaterConstants.AppUpdaterModuleName);
+            return fs.FileStream.New(file, FileMode.Open, FileAccess.Read);
+        }
+        catch (IOException)
+        {
+        }
+#endif
         var task = Task.Run(async () => await _resourceExtractor.GetResourceAsync(ExternalUpdaterConstants.AppUpdaterModuleName));
         task.Wait();
         return task.Result;

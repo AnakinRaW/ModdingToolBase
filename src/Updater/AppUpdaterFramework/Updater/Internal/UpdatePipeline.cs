@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Restart;
@@ -11,8 +13,10 @@ using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.CommonUtilities.SimplePipeline;
 using AnakinRaW.CommonUtilities.SimplePipeline.Runners;
+using EnvDTE;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -32,6 +36,8 @@ internal sealed class UpdatePipeline : Pipeline
     private readonly SequentialStepRunner _installsRunner;
     private readonly IRestartManager _restartManager;
 
+    private readonly IFileSystem _fileSystem;
+
     private AggregatedDownloadProgressReporter? _downloadProgress;
     private AggregatedInstallProgressReporter? _installProgress;
 
@@ -43,6 +49,7 @@ internal sealed class UpdatePipeline : Pipeline
         _progressReporter = progressReporter;
         _installedProduct = updateCatalog.InstalledProduct;
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();
+        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
 
         _itemsToProcess = [..updateCatalog.UpdateItems];
 
@@ -85,7 +92,37 @@ internal sealed class UpdatePipeline : Pipeline
                             UpdateConfiguration.Default;
 
         var downloadManager = new DownloadManager(configuration.DownloadConfiguration, ServiceProvider);
+
+        var installs = new List<IUpdateItem>();
+        var removes = new List<IUpdateItem>();
+
         foreach (var updateItem in _itemsToProcess)
+        {
+            if (updateItem.Action == UpdateAction.Update)
+                installs.Add(updateItem);
+            else if (updateItem.Action == UpdateAction.Delete)
+                removes.Add(updateItem);
+        }
+
+        foreach (var itemToInstall in installs)
+        {
+            if (itemToInstall.UpdateComponent is IPhysicalInstallable physicalInstallable)
+            {
+                var path = physicalInstallable.GetFullPath(ServiceProvider, _installedProduct.Variables);
+                var shallNotRemove = removes.Where(x =>
+                {
+                    if (x.InstalledComponent is not IPhysicalInstallable installed)
+                        return false;
+                    var otherPath = installed.GetFullPath(ServiceProvider, _installedProduct.Variables);
+                    return _fileSystem.Path.AreEqual(path, otherPath);
+                });
+
+                foreach (var toRemove in shallNotRemove.ToList()) 
+                    removes.Remove(toRemove);
+            }
+        }
+
+        foreach (var updateItem in installs.Concat(removes))
         {
             var installedComponent = updateItem.InstalledComponent;
             var updateComponent = updateItem.UpdateComponent;
@@ -93,7 +130,7 @@ internal sealed class UpdatePipeline : Pipeline
             {
                 if (updateComponent.OriginInfo is null)
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
-                
+
                 var downloadTask = new DownloadStep(updateComponent, configuration, downloadManager, ServiceProvider);
                 downloadTask.Canceled += DownloadCancelled;
                 var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, configuration, _installedProduct.Variables, ServiceProvider);

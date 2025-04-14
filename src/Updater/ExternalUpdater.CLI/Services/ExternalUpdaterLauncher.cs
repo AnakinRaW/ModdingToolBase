@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ExternalUpdater.Services;
 
-public class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : IExternalUpdaterLauncher
+public sealed class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : IExternalUpdaterLauncher
 {
     private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
     private readonly ILogger? _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterLauncher));
@@ -31,7 +31,6 @@ public class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : IExtern
 
     private ProcessStartInfo CreateStartInfo(string updater, ExternalUpdaterOptions options)
     {
-
         var externalUpdateStartInfo = new ProcessStartInfo(updater)
         {
 #if !DEBUG
