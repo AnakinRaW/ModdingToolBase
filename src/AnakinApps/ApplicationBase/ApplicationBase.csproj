@@ -1,20 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Description>Abstraction layer to support self-updates, resetting and global error handling for my apps.</Description>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net9.0</TargetFrameworks>
-		<Nullable>enable</Nullable>
 		<RootNamespace>AnakinRaW.ApplicationBase</RootNamespace>
 		<AssemblyName>AnakinRaW.ApplicationBase</AssemblyName>
 	</PropertyGroup>
-
+	
 	<PropertyGroup>
-		<Nullable>enable</Nullable>
-		<EnableNETAnalyzers>True</EnableNETAnalyzers>
-		<AnalysisLevel>latest</AnalysisLevel>
+		<Description>Abstraction layer to support self-updates, resetting and global error handling for my apps.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -26,7 +19,7 @@
 		<PackageReference Include="Flurl" Version="4.0.0" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.1.1" />
+		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.1.2" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

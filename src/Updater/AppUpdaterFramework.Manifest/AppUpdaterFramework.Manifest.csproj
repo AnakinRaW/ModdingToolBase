@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<Description>Provides a JSON manifest model.</Description>
-	</PropertyGroup>
-
+	
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<RootNamespace>AnakinRaW.AppUpdaterFramework</RootNamespace>
 		<AssemblyName>AnakinRaW.AppUpdaterFramework.Manifest</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Description>Provides a JSON manifest model.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

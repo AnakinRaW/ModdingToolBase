@@ -1,21 +1,9 @@
 <Project>
 
+	<Import Project="../../Directory.Build.props" />
+
 	<PropertyGroup>
-		<Copyright>Copyright © AnakinRaW 2023</Copyright>
-		<Authors>AnakinRaW</Authors>
-		<Company>Republic at War Modding Team</Company>
 		<Product>.NET Common Utilities</Product>
-		<RepositoryUrl>https://github.com/AnakinRaW/CommonUtilities</RepositoryUrl>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 	</PropertyGroup>
-
-	<PropertyGroup>
-		<LangVersion>latest</LangVersion>
-		<ImplicitUsings>disable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<EnableNETAnalyzers>True</EnableNETAnalyzers>
-		<AnalysisLevel>latest</AnalysisLevel>
-	</PropertyGroup>
-
+	
 </Project>

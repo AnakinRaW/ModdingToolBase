@@ -2,8 +2,8 @@
 using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Handlers;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Installer;
-using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;

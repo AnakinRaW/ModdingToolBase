@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AnakinRaW.AppUpdaterFramework.Interaction;
+namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 internal abstract class InteractiveHandlerBase
 {

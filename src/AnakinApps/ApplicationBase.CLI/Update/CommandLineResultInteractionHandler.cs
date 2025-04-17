@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

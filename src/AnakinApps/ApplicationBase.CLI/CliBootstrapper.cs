@@ -5,7 +5,7 @@ using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Services;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework.Handlers;
-using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

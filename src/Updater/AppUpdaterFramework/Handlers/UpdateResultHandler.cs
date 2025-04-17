@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
-using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;

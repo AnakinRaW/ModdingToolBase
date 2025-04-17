@@ -1,20 +1,9 @@
 <Project>
 
-	<PropertyGroup>
-		<Copyright>Copyright © AnakinRaW 2019-2023</Copyright>
-		<Authors>AnakinRaW</Authors>
-		<Company>Republic at War Modding Team</Company>
-		<Product>AnakinRaW Application Framework</Product>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	</PropertyGroup>
+	<Import Project="../../Directory.Build.props" />
 
 	<PropertyGroup>
-		<LangVersion>latest</LangVersion>
-		<ImplicitUsings>disable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<EnableNETAnalyzers>True</EnableNETAnalyzers>
-		<AnalysisLevel>latest</AnalysisLevel>
+		<Product>AnakinRaW Application Framework</Product>
 	</PropertyGroup>
 
 </Project>

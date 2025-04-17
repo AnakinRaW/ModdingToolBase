@@ -1,0 +1,18 @@
+﻿<Project>
+	<PropertyGroup>
+		<Copyright>Copyright © AnakinRaW 2025</Copyright>
+		<Authors>AnakinRaW</Authors>
+		<Company>Republic at War Modding Team</Company>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/AnakinRaW/ModdingToolBase</RepositoryUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>preview</LangVersion>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<EnableNETAnalyzers>True</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+	</PropertyGroup>
+</Project>

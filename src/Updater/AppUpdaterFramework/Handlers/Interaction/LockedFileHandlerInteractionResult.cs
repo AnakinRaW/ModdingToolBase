@@ -1,4 +1,4 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
+﻿namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 public enum LockedFileHandlerInteractionResult
 {

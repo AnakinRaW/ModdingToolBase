@@ -1,6 +1,7 @@
 using System;
+using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.External;
-using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,9 +10,13 @@ namespace AnakinRaW.AppUpdaterFramework.Handlers;
 internal class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
 {
     private readonly IExternalUpdaterService _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
+    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public void Restart(RequiredRestartOptionsKind optionsKind)
     {
+        if (!_updateConfiguration.SupportsRestart)
+            throw new NotSupportedException("Restarting the application is not supported.");
+
         _externalUpdaterService.Launch(CreateOptions(optionsKind));
         Shutdown();
     }

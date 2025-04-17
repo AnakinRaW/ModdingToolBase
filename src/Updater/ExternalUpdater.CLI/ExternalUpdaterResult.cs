@@ -1,8 +1,4 @@
-﻿#if NETSTANDARD2_1_OR_GREATER
-using System.Diagnostics.CodeAnalysis;
-#endif
-
-namespace AnakinRaW.ExternalUpdater;
+﻿namespace AnakinRaW.ExternalUpdater;
 
 public enum ExternalUpdaterResult
 {

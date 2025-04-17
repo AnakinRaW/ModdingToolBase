@@ -1,4 +1,4 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Interaction;
+﻿namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 public enum RestartReason
 {

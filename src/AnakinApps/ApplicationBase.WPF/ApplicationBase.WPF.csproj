@@ -1,21 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Description>Base application framework for my WPF apps.</Description>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
-		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<RootNamespace>AnakinRaW.ApplicationBase</RootNamespace>
 		<AssemblyName>AnakinRaW.ApplicationBase.WPF</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Nullable>enable</Nullable>
-		<EnableNETAnalyzers>True</EnableNETAnalyzers>
-		<AnalysisLevel>latest</AnalysisLevel>
+		<Description>Base application framework for my WPF apps.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

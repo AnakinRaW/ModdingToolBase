@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Description>Framework to udpate applications.</Description>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
 		<RootNamespace>AnakinRaW.AppUpdaterFramework</RootNamespace>
 		<AssemblyName>AnakinRaW.AppUpdaterFramework</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Description>Framework to udpate applications.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -22,7 +22,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>-->
 		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.1.1" PrivateAssets="build;compile" />
+		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.1.2" PrivateAssets="build;compile" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

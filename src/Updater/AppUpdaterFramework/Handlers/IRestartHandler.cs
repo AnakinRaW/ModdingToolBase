@@ -1,4 +1,4 @@
-using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 

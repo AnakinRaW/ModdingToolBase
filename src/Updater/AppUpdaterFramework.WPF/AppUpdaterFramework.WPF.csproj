@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<Description>Provides common dialogs and command for WPF update applications.</Description>
-	</PropertyGroup>
-
+	
 	<PropertyGroup>
 		<TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
 		<UseWPF>true</UseWPF>
 		<RootNamespace>AnakinRaW.AppUpdaterFramework</RootNamespace>
 		<AssemblyName>AnakinRaW.AppUpdaterFramework.WPF</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Description>Provides common dialogs and command for WPF update applications.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

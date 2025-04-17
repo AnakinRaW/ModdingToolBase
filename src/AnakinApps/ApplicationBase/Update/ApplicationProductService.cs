@@ -94,7 +94,7 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
 #if DEBUG
         try
         {
-            var fs = serviceProvider.GetRequiredService<IFileSystem>();
+            var fs = ServiceProvider.GetRequiredService<IFileSystem>();
             var file = fs.Path.Combine(InstallLocation.FullName, ExternalUpdaterConstants.AppUpdaterModuleName);
             return fs.FileStream.New(file, FileMode.Open, FileAccess.Read);
         }

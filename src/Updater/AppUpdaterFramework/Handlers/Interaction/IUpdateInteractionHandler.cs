@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 
-namespace AnakinRaW.AppUpdaterFramework.Interaction;
+namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 public interface IUpdateInteractionHandler
 {

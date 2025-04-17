@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AnakinRaW.AppUpdaterFramework.Interaction;
+namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 internal class DefaultUpdateInteractionHandler : IUpdateInteractionHandler
 {

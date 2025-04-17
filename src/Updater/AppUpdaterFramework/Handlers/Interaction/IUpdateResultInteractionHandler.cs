@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace AnakinRaW.AppUpdaterFramework.Interaction;
+namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 public interface IUpdateResultInteractionHandler
 {
