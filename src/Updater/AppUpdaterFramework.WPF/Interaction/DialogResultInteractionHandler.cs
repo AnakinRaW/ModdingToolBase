@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using Microsoft.Extensions.DependencyInjection;
 

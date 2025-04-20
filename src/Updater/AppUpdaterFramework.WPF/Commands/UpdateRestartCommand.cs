@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using AnakinRaW.AppUpdaterFramework.Handlers;
-using AnakinRaW.AppUpdaterFramework.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using CommunityToolkit.Mvvm.Input;
