@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -27,6 +28,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyDownloadRepository _downloadRepository;
     private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
+    private readonly IUpdateConfiguration _updateConfig;
 
     private readonly string _tempPath;
 
@@ -40,9 +42,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
         _downloadRepository = serviceProvider.GetRequiredService<IReadOnlyDownloadRepository>();
         _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
+        _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
-        // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator
-        // cause commandline arg parsing errors
+        // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator cause commandline arg parsing errors
         _tempPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
     }
 
@@ -56,6 +58,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return new UpdateOptions
         {
             AppToStart = cpi.ProcessFilePath!,
+            AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
             UpdateFile = updateInformationFile,
             LoggingDirectory = _tempPath
@@ -70,6 +73,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return new RestartOptions
         {
             AppToStart = cpi.ProcessFilePath!,
+            AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
             Elevate = elevate,
             LoggingDirectory = _tempPath
@@ -192,5 +196,12 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             Destination = destination,
             File = source
         };
+    }
+
+    private string? CreateAppStartArguments()
+    {
+        if (!_updateConfig.PassCurrentArgumentsForRestart)
+            return null;
+        return null;
     }
 }

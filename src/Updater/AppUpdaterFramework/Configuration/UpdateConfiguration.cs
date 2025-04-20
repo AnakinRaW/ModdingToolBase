@@ -28,4 +28,5 @@ public sealed record UpdateConfiguration : IUpdateConfiguration
     public bool ValidateInstallation { get; init; }
 
     public DownloadManagerConfiguration DownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
+    public bool PassCurrentArgumentsForRestart { get; init; }
 }

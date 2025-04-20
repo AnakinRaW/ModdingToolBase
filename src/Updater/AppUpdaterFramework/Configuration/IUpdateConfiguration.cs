@@ -17,4 +17,6 @@ public interface IUpdateConfiguration
     bool ValidateInstallation { get; }
 
     DownloadManagerConfiguration DownloadConfiguration { get; }
+
+    bool PassCurrentArgumentsForRestart { get; }
 }

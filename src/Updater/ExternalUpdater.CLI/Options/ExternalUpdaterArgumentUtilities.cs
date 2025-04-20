@@ -11,13 +11,11 @@ namespace AnakinRaW.ExternalUpdater.Options;
 
 public static class ExternalUpdaterArgumentUtilities
 {
-    public static ExternalUpdaterOptions FromArgs(string args)
+    public static ExternalUpdaterOptions FromArgs(IEnumerable<string> args)
     {
-        var argsSplit = args.SplitArgs();
-
         ExternalUpdaterOptions result = null!;
 
-        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(argsSplit)
+        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(args)
             .MapResult(
                 (RestartOptions opts) => result = opts,
                 (UpdateOptions opts) => result = opts, 
@@ -34,6 +32,7 @@ public static class ExternalUpdaterArgumentUtilities
     public static ExternalUpdaterOptions WithCurrentData(
         this ExternalUpdaterOptions options, 
         string appToStart, 
+        string? appToStartArgs,
         int? pid,
         string? loggingDirectory,
         IServiceProvider serviceProvider)
@@ -52,6 +51,7 @@ public static class ExternalUpdaterArgumentUtilities
         return options with
         {
             AppToStart = appToStart, 
+            AppToStartArguments = appToStartArgs,
             Pid = pid, 
             LoggingDirectory = loggingDirectory
         };
@@ -68,7 +68,11 @@ public static class ExternalUpdaterArgumentUtilities
         return JsonSerializer.Serialize(updateInformation);
     }
 
-    private static bool ReplaceUpdateItemsWithCurrentApp(UpdateOptions oldOptions, string currentAppPath, out IList<UpdateInformation>? updateInformation, IServiceProvider serviceProvider)
+    private static bool ReplaceUpdateItemsWithCurrentApp(
+        UpdateOptions oldOptions, 
+        string currentAppPath, 
+        out IList<UpdateInformation>? updateInformation, 
+        IServiceProvider serviceProvider)
     {
         var updated = false;
         updateInformation = null;

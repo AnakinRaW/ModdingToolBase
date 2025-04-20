@@ -5,10 +5,12 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.CommonUtilities;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+#if NETFRAMEWORK
+using AnakinRaW.CommonUtilities;
+#endif
 
 namespace AnakinRaW.ExternalUpdater.Utilities;
 
@@ -35,13 +37,14 @@ internal class ProcessTools : IProcessTools
 
         if (elevate)
             startInfo.Verb = "runas";
-        using var process = new Process { StartInfo = startInfo };
+        using var process = new Process();
+        process.StartInfo = startInfo;
         _logger?.LogInformation($"Starting application '{startInfo.FileName}' with {startInfo.Arguments}");
         process.Start();
     }
 
 
-    private void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions)
+    private static void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions)
     {
 #if NET
         var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);

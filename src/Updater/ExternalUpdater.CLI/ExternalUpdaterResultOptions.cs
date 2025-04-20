@@ -10,13 +10,12 @@ public class ExternalUpdaterResultOptions
 
     public static bool TryParse(
         string[] args,
-#if NETSTANDARD2_1_OR_GREATER
         [NotNullWhen(true)]
-#endif
         out ExternalUpdaterResultOptions? options)
     {
         var parser = new Parser(settings =>
         {
+            // The external updater may pass through other arguments from the application to be restarted.
             settings.IgnoreUnknownArguments = true;
         });
         options = parser.ParseArguments<ExternalUpdaterResultOptions>(args).Value;

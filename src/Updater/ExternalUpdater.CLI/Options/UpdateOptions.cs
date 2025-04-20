@@ -36,7 +36,7 @@ public sealed record UpdateOptions : ExternalUpdaterOptions
         if (information is not null)
             return information;
         information = GetFromPayload();
-        return information ?? Array.Empty<UpdateInformation>();
+        return information ?? [];
     }
 
     private IReadOnlyCollection<UpdateInformation>? GetFromFile(IServiceProvider serviceProvider)
