@@ -21,12 +21,12 @@ namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
 internal class DownloadStep(
     IInstallableComponent installable,
-    IUpdateConfiguration updateConfiguration,
+    UpdateConfiguration updateConfiguration,
     IDownloadManager downloadManager,
     IServiceProvider serviceProvider)
     : SynchronizedStep(serviceProvider), IComponentStep
 {
-    private readonly IUpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
+    private readonly UpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
     private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
 
     public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;

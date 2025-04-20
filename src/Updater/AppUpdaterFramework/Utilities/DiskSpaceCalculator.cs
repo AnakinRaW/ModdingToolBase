@@ -13,7 +13,7 @@ internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpac
     private const long ExtraSizeMargin = 20_000_000;
 
     private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+    private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public void ThrowIfNotEnoughDiskSpaceAvailable(
         IInstallableComponent newComponent, 

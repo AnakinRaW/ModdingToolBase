@@ -5,9 +5,9 @@ namespace AnakinRaW.AppUpdaterFramework.Configuration;
 
 public abstract class UpdateConfigurationProviderBase : IUpdateConfigurationProvider
 {
-    private IUpdateConfiguration _lazyConfiguration = null!;
+    private UpdateConfiguration _lazyConfiguration = null!;
 
-    public IUpdateConfiguration GetConfiguration()
+    public UpdateConfiguration GetConfiguration()
     {
         var configuration = LazyInitializer.EnsureInitialized(ref _lazyConfiguration, CreateConfiguration);
         if (configuration is null)
@@ -15,5 +15,5 @@ public abstract class UpdateConfigurationProviderBase : IUpdateConfigurationProv
         return configuration;
     }
 
-    protected abstract IUpdateConfiguration CreateConfiguration();
+    protected abstract UpdateConfiguration CreateConfiguration();
 }

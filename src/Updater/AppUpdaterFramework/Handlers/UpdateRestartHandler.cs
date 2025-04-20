@@ -10,11 +10,11 @@ namespace AnakinRaW.AppUpdaterFramework.Handlers;
 internal class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
 {
     private readonly IExternalUpdaterService _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
-    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+    private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public void Restart(RequiredRestartOptionsKind optionsKind)
     {
-        if (!_updateConfiguration.SupportsRestart)
+        if (!_updateConfiguration.RestartConfiguration.SupportsRestart)
             throw new NotSupportedException("Restarting the application is not supported.");
 
         _externalUpdaterService.Launch(CreateOptions(optionsKind));

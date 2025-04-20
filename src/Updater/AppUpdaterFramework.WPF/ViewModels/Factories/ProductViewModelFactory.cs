@@ -18,7 +18,7 @@ internal class ProductViewModelFactory(IServiceProvider serviceProvider) : IProd
 {
     private readonly IAppDispatcher _dispatcher = serviceProvider.GetRequiredService<IAppDispatcher>();
     private readonly IUpdateCommandsFactory _commandsFactory = serviceProvider.GetRequiredService<IUpdateCommandsFactory>();
-    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+    private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public IProductViewModel Create(IInstalledProduct product, IUpdateCatalog? updateCatalog)
     {
@@ -26,7 +26,7 @@ internal class ProductViewModelFactory(IServiceProvider serviceProvider) : IProd
         ICommandDefinition? action = null;
         if (updateCatalog is null || updateCatalog.Action == UpdateCatalogAction.None)
         {
-            if (product.State != ProductState.Installed && !_updateConfiguration.SupportsRestart)
+            if (product.State != ProductState.Installed && !_updateConfiguration.RestartConfiguration.SupportsRestart)
             {
                 var message = product.State switch
                 {

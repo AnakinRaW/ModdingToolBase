@@ -4,9 +4,9 @@ using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 
 namespace AnakinRaW.AppUpdaterFramework.Configuration;
 
-public sealed record UpdateConfiguration : IUpdateConfiguration
+public class UpdateConfiguration
 {
-    internal static readonly IUpdateConfiguration Default = new UpdateConfiguration
+    internal static readonly UpdateConfiguration Default = new()
     {
         DownloadRetryCount = 3,
         DownloadLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
@@ -21,12 +21,11 @@ public sealed record UpdateConfiguration : IUpdateConfiguration
 
     public BackupPolicy BackupPolicy { get; init; }
 
-    public bool SupportsRestart { get; init; }
-
     public string? BackupLocation { get; init; }
 
     public bool ValidateInstallation { get; init; }
 
     public DownloadManagerConfiguration DownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
-    public bool PassCurrentArgumentsForRestart { get; init; }
+
+    public UpdateRestartConfiguration RestartConfiguration { get; init; } = new();
 }

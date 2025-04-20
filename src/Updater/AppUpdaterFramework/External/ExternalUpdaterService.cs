@@ -28,7 +28,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyDownloadRepository _downloadRepository;
     private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
-    private readonly IUpdateConfiguration _updateConfig;
+    private readonly UpdateConfiguration _updateConfig;
 
     private readonly string _tempPath;
 
@@ -200,7 +200,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     private string? CreateAppStartArguments()
     {
-        if (!_updateConfig.PassCurrentArgumentsForRestart)
+        if (!_updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart)
             return null;
         return null;
     }

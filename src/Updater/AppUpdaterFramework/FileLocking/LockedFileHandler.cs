@@ -13,7 +13,7 @@ namespace AnakinRaW.AppUpdaterFramework.FileLocking;
 
 internal class LockedFileHandler(IServiceProvider serviceProvider) : InteractiveHandlerBase(serviceProvider), ILockedFileHandler
 {
-    private readonly IUpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+    private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public ILockedFileHandler.Result Handle(IFileInfo file)
     {
@@ -84,7 +84,7 @@ internal class LockedFileHandler(IServiceProvider serviceProvider) : Interactive
 
         if (isLockedByApplication)
         {
-            if (!_updateConfiguration.SupportsRestart)
+            if (!_updateConfiguration.RestartConfiguration.SupportsRestart)
                 return ILockedFileHandler.Result.Locked;
 
             Logger?.LogTrace($"Source '{file}' is locked by current application. Restart is required.");

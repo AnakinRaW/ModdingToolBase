@@ -11,7 +11,7 @@ namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 public class UpdateResultHandler : IUpdateResultHandler
 {
-    private readonly IUpdateConfiguration _updateConfiguration;
+    private readonly UpdateConfiguration _updateConfiguration;
     private readonly IRestartHandler _restartHandler;
     private readonly IUpdateResultInteractionHandler _interactionHandler;
 
@@ -86,6 +86,6 @@ public class UpdateResultHandler : IUpdateResultHandler
 
     private Task HandleRestartInternal(RestartReason reason)
     {
-        return !_updateConfiguration.SupportsRestart ? Task.CompletedTask : HandleRestart(reason);
+        return !_updateConfiguration.RestartConfiguration.SupportsRestart ? Task.CompletedTask : HandleRestart(reason);
     }
 }

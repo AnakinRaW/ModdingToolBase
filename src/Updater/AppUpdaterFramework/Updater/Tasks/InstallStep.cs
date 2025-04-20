@@ -22,7 +22,7 @@ internal class InstallStep : PipelineStep, IComponentStep
 {
     public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;
 
-    private readonly IUpdateConfiguration _updateConfiguration;
+    private readonly UpdateConfiguration _updateConfiguration;
     private readonly IReadOnlyDictionary<string, string> _productVariables;
     private readonly UpdateAction _action;
     private readonly IInstallableComponent? _currentComponent;
@@ -41,7 +41,7 @@ internal class InstallStep : PipelineStep, IComponentStep
 
     public InstallStep(
         IInstallableComponent installable, 
-        IUpdateConfiguration updateConfiguration,
+        UpdateConfiguration updateConfiguration,
         IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) :
         this(installable, UpdateAction.Delete, updateConfiguration, productVariables, serviceProvider)
@@ -52,7 +52,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         IInstallableComponent installable,
         IInstallableComponent? currentComponent, 
         DownloadStep download, 
-        IUpdateConfiguration updateConfiguration,
+        UpdateConfiguration updateConfiguration,
         IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) : 
         this(installable, UpdateAction.Update, updateConfiguration, productVariables, serviceProvider)
@@ -64,7 +64,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     private InstallStep(
         IInstallableComponent installable, 
         UpdateAction updateAction,
-        IUpdateConfiguration updateConfiguration,
+        UpdateConfiguration updateConfiguration,
         IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) : base(serviceProvider)
     {
