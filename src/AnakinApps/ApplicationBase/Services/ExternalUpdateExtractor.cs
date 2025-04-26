@@ -13,14 +13,15 @@ internal class ExternalUpdateExtractor : IExternalUpdateExtractor
 {
     private readonly IResourceExtractor _resourceExtractor;
     private readonly IMetadataExtractor _metadataExtractor;
-    private readonly IApplicationEnvironment _applicationEnvironment;
+    private readonly ApplicationEnvironment _applicationEnvironment;
 
     public ExternalUpdateExtractor(IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
+        if (serviceProvider == null)
+            throw new ArgumentNullException(nameof(serviceProvider));
         _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
         _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
-        _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
+        _applicationEnvironment = serviceProvider.GetRequiredService<ApplicationEnvironment>();
     }
 
     public async Task ExtractAsync()

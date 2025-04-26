@@ -2,6 +2,4 @@
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-internal interface IUnhandledExceptionHandler : IDisposable
-{
-}
+internal interface IUnhandledExceptionHandler : IDisposable;

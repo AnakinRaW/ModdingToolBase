@@ -22,7 +22,7 @@ namespace AnakinRaW.ApplicationBase;
 
 public abstract class BootstrapperBase
 {
-    protected abstract IApplicationEnvironment CreateEnvironment(IServiceProvider serviceProvider);
+    protected abstract ApplicationEnvironment CreateEnvironment(IServiceProvider serviceProvider);
 
     protected abstract IRegistry CreateRegistry();
 
@@ -35,11 +35,11 @@ public abstract class BootstrapperBase
         var serviceCollection = CreateCoreServices();
         var coreServices = serviceCollection.BuildServiceProvider();
 
-        if (ExternalUpdaterResultOptions.TryParse(args, out var externalUpdaterOptions))
-        {
-            var registry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
-            new ExternalUpdaterResultHandler(registry).Handle(externalUpdaterOptions!.Result);
-        }
+        //if (ExternalUpdaterResultOptions.TryParse(args, out var externalUpdaterOptions))
+        //{
+        //    var registry = coreServices.GetRequiredService<ApplicationUpdateRegistry>();
+        //    new ExternalUpdaterResultHandler(registry).Handle(externalUpdaterOptions!.Result);
+        //}
 
         // Since logging directory is not yet assured, we cannot run under the global exception handler.
         var resetHandler = coreServices.GetRequiredService<IAppResetHandler>();
@@ -60,7 +60,6 @@ public abstract class BootstrapperBase
         serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
 
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
-        serviceCollection.AddSingleton<IUpdateConfigurationProvider>(sp => new ApplicationUpdateConfigurationProvider(sp));
         serviceCollection.AddSingleton<IManifestLoader>(sp => new JsonManifestLoader(sp));
         serviceCollection.AddSingleton<IUpdateResultHandler>(sp => new AppUpdateResultHandler(sp));
 
@@ -72,8 +71,8 @@ public abstract class BootstrapperBase
     {
         var coreServices = serviceCollection.BuildServiceProvider();
         var logger = coreServices.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        var env = coreServices.GetRequiredService<IApplicationEnvironment>();
-        var updateRegistry = coreServices.GetRequiredService<IApplicationUpdaterRegistry>();
+        var env = coreServices.GetRequiredService<ApplicationEnvironment>();
+        var updateRegistry = coreServices.GetRequiredService<ApplicationUpdateRegistry>();
 
 
         logger?.LogTrace($"Application Version: {env.AssemblyInfo.InformationalVersion}");
@@ -91,7 +90,7 @@ public abstract class BootstrapperBase
             catch (Exception e)
             {
                 logger?.LogError(e, $"Failed to run update. Starting main application normally: {e.Message}");
-                updateRegistry.Clear();
+                updateRegistry.Reset();
             }
         }
 
@@ -109,16 +108,14 @@ public abstract class BootstrapperBase
         
         var fileSystem = new RealFileSystem();
         serviceCollection.AddSingleton<IFileSystem>(fileSystem);
-        serviceCollection.AddSingleton<ICurrentProcessInfoProvider>(_ => new CurrentProcessInfoProvider());
 
         serviceCollection.AddSingleton(CreateRegistry());
-        serviceCollection.AddSingleton<IRegistryExternalUpdaterLauncher>(sp => new RegistryExternalUpdaterLauncher(sp));
 
         using var environmentServiceProvider = serviceCollection.BuildServiceProvider();
         var environment = CreateEnvironment(environmentServiceProvider);
         serviceCollection.AddSingleton(environment);
 
-        serviceCollection.AddSingleton<IApplicationUpdaterRegistry>(sp => new ApplicationUpdaterRegistry(environment.ApplicationRegistryPath, sp));
+        serviceCollection.AddSingleton<ApplicationUpdateRegistry>(sp => new ApplicationUpdateRegistry(null, null));
         serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
         serviceCollection.AddSingleton<IResourceExtractor>(sp => new CosturaResourceExtractor(environment.AssemblyInfo.Assembly, sp));
 
@@ -131,7 +128,7 @@ public abstract class BootstrapperBase
         return serviceCollection;
     }
 
-    protected virtual void ConfigureLogging(ILoggingBuilder loggingBuilder, IFileSystem fileSystem, IApplicationEnvironment applicationEnvironment)
+    protected virtual void ConfigureLogging(ILoggingBuilder loggingBuilder, IFileSystem fileSystem, ApplicationEnvironment applicationEnvironment)
     {
     }
 }

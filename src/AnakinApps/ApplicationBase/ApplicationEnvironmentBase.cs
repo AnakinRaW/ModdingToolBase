@@ -1,46 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading;
-using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using AnakinRaW.AppUpdaterFramework.Configuration;
 
 namespace AnakinRaW.ApplicationBase;
 
-public abstract class ApplicationEnvironmentBase : IApplicationEnvironment
+
+public abstract class UpdatableApplicationEnvironment(Assembly assembly, IFileSystem fileSystem)
+    : ApplicationEnvironment(assembly, fileSystem), IUpdateConfigurationProvider
 {
-    private string? _launcherLocalPath;
-    private IDirectoryInfo? _localDirectory;
+    public abstract UpdateConfiguration UpdateConfiguration { get; }
+
+    public abstract Uri? RepositoryUrl { get; }
+
+    public abstract ICollection<Uri> UpdateMirrors { get; }
+
+    public abstract string UpdateRegistryPath { get; } 
+    
+    public UpdateConfiguration GetConfiguration()
+    {
+        return UpdateConfiguration;
+    }
+}
+
+
+public abstract class ApplicationEnvironment
+{
     private readonly IFileSystem _fileSystem;
 
     public abstract string ApplicationName { get; }
-    public abstract Uri? RepositoryUrl { get; }
-    public abstract ICollection<Uri> UpdateMirrors { get; }
-    public abstract string ApplicationRegistryPath { get; }
-    public virtual DownloadManagerConfiguration UpdateDownloadManagerConfiguration { get; } = new()
-    {
-        AllowEmptyFileDownload = false,
-        DownloadRetryDelay = 3000,
-        InternetClient = InternetClient.HttpClient,
-        ValidationPolicy = ValidationPolicy.Optional
-    };
+    
+    [field: AllowNull, MaybeNull]
+    public string ApplicationLocalPath => LazyInitializer.EnsureInitialized(ref field, BuildLocalPath)!;
 
-    public string ApplicationLocalPath => LazyInitializer.EnsureInitialized(ref _launcherLocalPath, BuildLocalPath)!;
+    [field: AllowNull, MaybeNull]
     public IDirectoryInfo ApplicationLocalDirectory =>
-        _localDirectory ??= _fileSystem.DirectoryInfo.New(ApplicationLocalPath);
+        field ??= _fileSystem.DirectoryInfo.New(ApplicationLocalPath);
 
     public ApplicationAssemblyInfo AssemblyInfo { get; }
 
     protected abstract string ApplicationLocalDirectoryName { get; }
 
-    protected ApplicationEnvironmentBase(Assembly assembly, IServiceProvider serviceProvider)
+    protected ApplicationEnvironment(Assembly assembly, IFileSystem fileSystem)
     {
         if (assembly == null) 
             throw new ArgumentNullException(nameof(assembly));
-        if (serviceProvider == null) 
-            throw new ArgumentNullException(nameof(serviceProvider));
-        _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         AssemblyInfo = new ApplicationAssemblyInfo(assembly);
     }
 

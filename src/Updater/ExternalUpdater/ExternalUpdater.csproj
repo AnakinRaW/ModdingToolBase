@@ -12,7 +12,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.3.4" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.8" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.3.8" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Costura.Fody" Version="6.0.0">
 			<PrivateAssets>all</PrivateAssets>
@@ -27,8 +28,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
-		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</ProjectReference>
 	</ItemGroup>
 
 </Project>

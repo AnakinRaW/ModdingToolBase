@@ -48,6 +48,8 @@ public static class ExternalUpdaterArgumentUtilities
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
         }
 
+        // TODO: Filter out the ExternalUpdaterRestartOptions in the AppToStartArguments
+
         return options with
         {
             AppToStart = appToStart, 

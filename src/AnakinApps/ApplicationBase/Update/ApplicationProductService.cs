@@ -18,7 +18,7 @@ namespace AnakinRaW.ApplicationBase.Update;
 
 internal class ApplicationProductService(IServiceProvider serviceProvider) : ProductServiceBase(serviceProvider)
 {
-    private readonly IApplicationEnvironment _applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
+    private readonly ApplicationEnvironment _applicationEnvironment = serviceProvider.GetRequiredService<ApplicationEnvironment>();
     private readonly IMetadataExtractor _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
     private readonly IResourceExtractor _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
 

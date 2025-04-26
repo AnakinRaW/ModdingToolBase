@@ -2,18 +2,17 @@
 using System.IO.Abstractions;
 using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.ExternalUpdater.Options;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace AnakinRaW.ApplicationBase.Services;
+namespace AnakinRaW.ApplicationBase.Update;
 
-internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
+public sealed class ApplicationUpdateRegistry : IDisposable
 {
     private readonly IRegistryKey _registryKey;
 
-    public bool Reset
+    public bool ResetApp
     {
-        get => _registryKey.GetValueOrDefault(nameof(Reset), false, out _);
-        private set => _registryKey.SetValue(nameof(Reset), value);
+        get => _registryKey.GetValueOrDefault(nameof(ResetApp), false, out _);
+        set => _registryKey.SetValue(nameof(ResetApp), value);
     }
 
     public bool RequiresUpdate
@@ -24,7 +23,7 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 
     public string? UpdateCommandArgs
     {
-        get => _registryKey.GetValueOrDefault(nameof(UpdateCommandArgs), (string?)null, out bool _);
+        get => _registryKey.GetValueOrDefault<string?>(nameof(UpdateCommandArgs), null, out _);
         private set
         {
             if (string.IsNullOrEmpty(value))
@@ -36,7 +35,7 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
 
     public string? UpdaterPath
     {
-        get => _registryKey.GetValueOrDefault(nameof(UpdaterPath), (string)null!, out _);
+        get => _registryKey.GetValueOrDefault<string?>(nameof(UpdaterPath), null, out _);
         private set
         {
             if (string.IsNullOrEmpty(value))
@@ -46,24 +45,20 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
         }
     }
 
-    public ApplicationUpdaterRegistry(string basePath, IServiceProvider serviceProvider)
+    public ApplicationUpdateRegistry(IRegistry registry, UpdatableApplicationEnvironment appEnvironment)
     {
-        if (serviceProvider == null) 
-            throw new ArgumentNullException(nameof(serviceProvider));
-        var registry = serviceProvider.GetRequiredService<IRegistry>();
+        if (registry == null) 
+            throw new ArgumentNullException(nameof(registry));
+        if (appEnvironment is null) 
+            throw new ArgumentNullException(nameof(appEnvironment));
         var baseKey = registry.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
-        var registryKey = baseKey.CreateSubKey(basePath);
+        var registryKey = baseKey.CreateSubKey(appEnvironment.UpdateRegistryPath);
         _registryKey = registryKey ?? throw new InvalidOperationException("Unable to create registry. Missing rights?");
     }
-
-    public void ScheduleReset()
+    
+    public void Reset()
     {
-        Reset = true;
-    }
-
-    public void Clear()
-    {
-        _registryKey.DeleteValue(nameof(Reset));
+        _registryKey.DeleteValue(nameof(ResetApp));
         _registryKey.DeleteValue(nameof(RequiresUpdate));
         _registryKey.DeleteValue(nameof(UpdateCommandArgs));
         _registryKey.DeleteValue(nameof(UpdaterPath));
@@ -78,5 +73,15 @@ internal sealed class ApplicationUpdaterRegistry : IApplicationUpdaterRegistry
         RequiresUpdate = true;
         UpdaterPath = updater.FullName;
         UpdateCommandArgs = options.ToArgs();
+    }
+
+    public void ScheduleReset()
+    {
+        ResetApp = true;
+    }
+
+    public void Dispose()
+    {
+        _registryKey.Dispose();
     }
 }

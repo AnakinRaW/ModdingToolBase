@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Abstractions;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -44,8 +43,8 @@ public sealed record UpdateOptions : ExternalUpdaterOptions
         var fs = serviceProvider.GetRequiredService<IFileSystem>();
         if (string.IsNullOrEmpty(UpdateFile) || !fs.File.Exists(UpdateFile))
             return null;
-        using var fileStream = fs.FileStream.New(UpdateFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-        return JsonSerializer.Deserialize<IReadOnlyCollection<UpdateInformation>>(fileStream, JsonSerializerOptions.Default);
+        var fileData = fs.File.ReadAllBytes(UpdateFile);
+        return JsonSerializer.Deserialize<IReadOnlyCollection<UpdateInformation>>(fileData, JsonSerializerOptions.Default);
 
     }
 
@@ -54,7 +53,6 @@ public sealed record UpdateOptions : ExternalUpdaterOptions
         if (string.IsNullOrEmpty(Payload))
             return null;
         var decoded = Convert.FromBase64String(Payload!);
-        using var ms = new MemoryStream(decoded, false);
-        return JsonSerializer.Deserialize<IReadOnlyCollection<UpdateInformation>>(ms, JsonSerializerOptions.Default);
+        return JsonSerializer.Deserialize<IReadOnlyCollection<UpdateInformation>>(decoded, JsonSerializerOptions.Default);
     }
 }

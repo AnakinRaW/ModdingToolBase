@@ -11,7 +11,7 @@ namespace AnakinRaW.ApplicationBase.Update;
 internal class AppUpdateResultHandler(IServiceProvider serviceProvider) : UpdateResultHandler(serviceProvider)
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
-    private readonly IApplicationUpdaterRegistry _updaterRegistry = serviceProvider.GetRequiredService<IApplicationUpdaterRegistry>();
+    private readonly ApplicationUpdateRegistry _updaterRegistry = serviceProvider.GetRequiredService<ApplicationUpdateRegistry>();
 
     protected override async Task HandleRestart(RestartReason reason)
     {

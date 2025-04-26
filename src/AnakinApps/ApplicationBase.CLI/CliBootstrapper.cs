@@ -73,7 +73,7 @@ public abstract class CliBootstrapper : BootstrapperBase
     }
 
     protected override void ConfigureLogging(ILoggingBuilder loggingBuilder, IFileSystem fileSystem,
-        IApplicationEnvironment applicationEnvironment)
+        ApplicationEnvironment applicationEnvironment)
     {
         loggingBuilder.ClearProviders();
 

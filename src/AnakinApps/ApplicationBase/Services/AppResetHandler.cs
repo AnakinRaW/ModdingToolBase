@@ -1,4 +1,5 @@
 ﻿using System;
+using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -7,8 +8,8 @@ namespace AnakinRaW.ApplicationBase.Services;
 
 internal class AppResetHandler : IAppResetHandler
 {
-    private readonly IApplicationUpdaterRegistry _registry;
-    private readonly IApplicationEnvironment _environment;
+    private readonly ApplicationUpdateRegistry _registry;
+    private readonly ApplicationEnvironment _environment;
     private readonly ILogger? _logger;
 
     protected IServiceProvider Services { get; }
@@ -16,8 +17,8 @@ internal class AppResetHandler : IAppResetHandler
     public AppResetHandler(IServiceProvider services)
     {
         Services = services ?? throw new ArgumentNullException(nameof(services));
-        _registry = services.GetRequiredService<IApplicationUpdaterRegistry>();
-        _environment = services.GetRequiredService<IApplicationEnvironment>();
+        _registry = services.GetRequiredService<ApplicationUpdateRegistry>();
+        _environment = services.GetRequiredService<ApplicationEnvironment>();
         _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
@@ -32,7 +33,7 @@ internal class AppResetHandler : IAppResetHandler
         try
         {
             _environment.ApplicationLocalDirectory.DeleteWithRetry();
-            _registry.Clear();
+            _registry.Reset();
             _environment.ApplicationLocalDirectory.Create();
 
             OnReset();
@@ -47,7 +48,7 @@ internal class AppResetHandler : IAppResetHandler
 
     protected virtual bool RequiresReset()
     {
-        return !_environment.ApplicationLocalDirectory.Exists || _registry.Reset;
+        return !_environment.ApplicationLocalDirectory.Exists;
     }
 
     protected virtual void OnReset()

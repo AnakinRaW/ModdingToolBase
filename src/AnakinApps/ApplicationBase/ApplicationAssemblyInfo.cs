@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace AnakinRaW.ApplicationBase;
 
-public class ApplicationAssemblyInfo
+public sealed class ApplicationAssemblyInfo
 {
     public Assembly Assembly { get; }
 
