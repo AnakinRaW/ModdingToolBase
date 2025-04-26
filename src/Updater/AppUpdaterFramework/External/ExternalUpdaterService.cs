@@ -27,7 +27,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyDownloadRepository _downloadRepository;
-    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
     private readonly UpdateConfiguration _updateConfig;
 
     private readonly string _tempPath;
@@ -41,7 +40,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
         _downloadRepository = serviceProvider.GetRequiredService<IReadOnlyDownloadRepository>();
-        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
         _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
         // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator cause commandline arg parsing errors
@@ -50,7 +48,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public UpdateOptions CreateUpdateOptions()
     {
-        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
         var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
@@ -67,7 +65,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public RestartOptions CreateRestartOptions(bool elevate)
     {
-        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
         return new RestartOptions
@@ -86,7 +84,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
 
         if (updater is not SingleFileComponent updaterComponent)
-            throw new NotSupportedException("External updater component not registered to current product.");
+            throw new InvalidOperationException("External updater component not registered to current product.");
 
         var filePath = updaterComponent.GetFullPath(_serviceProvider, _productService.GetCurrentInstance().Variables);
         return _fileSystem.FileInfo.New(filePath);
@@ -200,8 +198,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     private string? CreateAppStartArguments()
     {
-        if (!_updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart)
-            return null;
-        return null;
+        return _updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart ? 
+            ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThrough() : 
+            null;
     }
 }

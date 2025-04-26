@@ -5,7 +5,7 @@
 		<RootNamespace>AnakinRaW.ApplicationBase</RootNamespace>
 		<AssemblyName>AnakinRaW.ApplicationBase</AssemblyName>
 	</PropertyGroup>
-	
+
 	<PropertyGroup>
 		<Description>Abstraction layer to support self-updates, resetting and global error handling for my apps.</Description>
 	</PropertyGroup>
@@ -19,6 +19,7 @@
 		<PackageReference Include="Flurl" Version="4.0.0" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="3.0.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.1.3" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
@@ -32,9 +33,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
-	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
-	  <ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+		<!--<ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />-->
+		<ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+		<ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
 	</ItemGroup>
 
 	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />

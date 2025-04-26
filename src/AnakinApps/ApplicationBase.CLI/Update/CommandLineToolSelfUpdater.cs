@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -29,25 +28,20 @@ internal class CommandLineToolSelfUpdater
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public int UpdateIfNecessary(IUpdaterCommandLineOptions options)
+    public int UpdateIfNecessary(ProductBranch? branch = null)
     {
-        return Task.Run(async () => await UpdateIfNecessaryAsync(options)).GetAwaiter().GetResult();
+        return Task.Run(async () => await UpdateIfNecessaryAsync(branch)).GetAwaiter().GetResult();
     }
 
-    public async Task<int> UpdateIfNecessaryAsync(IUpdaterCommandLineOptions options)
+    public async Task<int> UpdateIfNecessaryAsync(ProductBranch? branch = null)
     {
-        if (options.SkipUpdate)
-        {
-            _logger?.LogDebug("Update skipped.");
-            return 0;
-        }
-        
+      
         var product = _productService.GetCurrentInstance();
 
         if (product.Branch is null)
             throw new InvalidOperationException("Current installation does not have a branch.");
 
-        var branchToUse = options.UpdateBranch ?? product.Branch;
+        var branchToUse =  branch ?? product.Branch;
 
         var branches = (await _branchManager.GetAvailableBranchesAsync()).ToList();
         var currentBranch = branches.FirstOrDefault(b => b.Equals(branchToUse));

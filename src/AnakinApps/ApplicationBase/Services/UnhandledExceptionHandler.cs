@@ -6,16 +6,15 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-internal class UnhandledExceptionHandler : DisposableObject, IUnhandledExceptionHandler
+public class UnhandledExceptionHandler : DisposableObject, IUnhandledExceptionHandler
 {
-    private readonly ILogger? _logger;
+    protected readonly ILogger? Logger;
+    protected readonly IServiceProvider Services;
 
-    protected IServiceProvider Services { get; }
-
-    public UnhandledExceptionHandler(IServiceProvider services)
+    protected UnhandledExceptionHandler(IServiceProvider services)
     {
         Services = services ?? throw new ArgumentNullException(nameof(services));
-        _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
+        Logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
     }
 
@@ -26,11 +25,10 @@ internal class UnhandledExceptionHandler : DisposableObject, IUnhandledException
             e.ParseUnhandledExceptionObject(out var message);
             var exception = e.ExceptionObject as Exception;
             if (e.IsTerminating)
-                _logger?.LogCritical(exception, message);
+                Logger?.LogCritical(exception, message);
             else
-                _logger?.LogError(exception, message);
-
-            HandleGlobalException(exception!);
+                Logger?.LogError(exception, message);
+            HandleGlobalException(exception!, e.IsTerminating);
         }
         catch
         {
@@ -38,7 +36,7 @@ internal class UnhandledExceptionHandler : DisposableObject, IUnhandledException
         }
     }
 
-    protected virtual void HandleGlobalException(Exception e)
+    protected virtual void HandleGlobalException(Exception e, bool terminating)
     {
     }
 

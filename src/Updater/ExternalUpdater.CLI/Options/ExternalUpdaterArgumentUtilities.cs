@@ -11,11 +11,13 @@ namespace AnakinRaW.ExternalUpdater.Options;
 
 public static class ExternalUpdaterArgumentUtilities
 {
-    public static ExternalUpdaterOptions FromArgs(IEnumerable<string> args)
+    public static ExternalUpdaterOptions FromArgs(string args)
     {
         ExternalUpdaterOptions result = null!;
 
-        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(args)
+        var splitArgs = args.SplitArgs();
+
+        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(splitArgs)
             .MapResult(
                 (RestartOptions opts) => result = opts,
                 (UpdateOptions opts) => result = opts, 
@@ -29,6 +31,11 @@ public static class ExternalUpdaterArgumentUtilities
         return Parser.Default.FormatCommandLine(option, config => config.SkipDefault = true);
     }
 
+    public static string GetCurrentApplicationCommandLineForPassThrough()
+    {
+        return "";
+    }
+
     public static ExternalUpdaterOptions WithCurrentData(
         this ExternalUpdaterOptions options, 
         string appToStart, 
@@ -39,16 +46,15 @@ public static class ExternalUpdaterArgumentUtilities
     {
         var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         appToStart = fileSystem.Path.GetFullPath(appToStart);
+        
         if (!string.IsNullOrEmpty(loggingDirectory))
-            loggingDirectory = fileSystem.Path.GetFullPath(loggingDirectory);
+            loggingDirectory = fileSystem.Path.GetFullPath(loggingDirectory!);
 
         if (options is UpdateOptions updateOptions)
         {
             if (ReplaceUpdateItemsWithCurrentApp(updateOptions, appToStart, out var updateItems, serviceProvider))
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
         }
-
-        // TODO: Filter out the ExternalUpdaterRestartOptions in the AppToStartArguments
 
         return options with
         {

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
+using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -21,6 +22,7 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
     private readonly ApplicationEnvironment _applicationEnvironment = serviceProvider.GetRequiredService<ApplicationEnvironment>();
     private readonly IMetadataExtractor _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
     private readonly IResourceExtractor _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
+    private readonly ILogger? _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationProductService));
 
     private IDirectoryInfo? _installLocation;
 
@@ -43,6 +45,8 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
             {
                 OverrideFileName = StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppFileName),
             });
+
+        // TODO: Only try extract updater if it referenced!
 
         var updaterAssembly = GetUpdaterAssemblyStream();
         var updaterComponent = _metadataExtractor.ComponentFromStream(
@@ -91,19 +95,27 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
 
     private Stream GetUpdaterAssemblyStream()
     {
-#if DEBUG
         try
         {
+            var task = Task.Run(async () =>
+                await _resourceExtractor.GetResourceAsync(ExternalUpdaterConstants.AppUpdaterModuleName));
+            task.Wait();
+
+            return task.Result;
+        }
+#if DEBUG
+        catch (IOException e)
+        {
+            _logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
             var fs = ServiceProvider.GetRequiredService<IFileSystem>();
             var file = fs.Path.Combine(InstallLocation.FullName, ExternalUpdaterConstants.AppUpdaterModuleName);
             return fs.FileStream.New(file, FileMode.Open, FileAccess.Read);
         }
-        catch (IOException)
-        {
-        }
 #endif
-        var task = Task.Run(async () => await _resourceExtractor.GetResourceAsync(ExternalUpdaterConstants.AppUpdaterModuleName));
-        task.Wait();
-        return task.Result;
+        catch (Exception e)
+        {
+            _logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
+            throw;
+        }
     }
 }
