@@ -4,7 +4,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal interface IReadOnlyRepository
+internal interface IReadOnlyFileRepository
 {
     IFileInfo? GetComponent(IInstallableComponent component);
 

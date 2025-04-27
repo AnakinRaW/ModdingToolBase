@@ -42,17 +42,17 @@ public sealed class SelfUpdatableAppBootstrapper : IDisposable
     private readonly UpdatableApplicationEnvironment _applicationEnvironment;
     private readonly ApplicationUpdateRegistry _updateRegistry;
 
-    public SelfUpdatableAppBootstrapper(IServiceProvider services, string? logFileDirectory = null)
+    public SelfUpdatableAppBootstrapper(
+        UpdatableApplicationEnvironment applicationEnvironment, 
+        IServiceProvider services,
+        string? logFileDirectory = null)
     {
+        _applicationEnvironment = applicationEnvironment;
         _serviceProvider = services;
         _logFileDirectory = logFileDirectory;
         _fileSystem = services.GetRequiredService<IFileSystem>();
         _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         
-        _applicationEnvironment =
-            services.GetRequiredService<ApplicationEnvironment>() as UpdatableApplicationEnvironment ??
-            throw new InvalidOperationException();
-
         var registry = services.GetRequiredService<IRegistry>();
         _updateRegistry = new ApplicationUpdateRegistry(registry, _applicationEnvironment);
     }
@@ -153,10 +153,15 @@ public abstract class SelfUpdateableAppLifecycle
 {
     private IServiceProvider _bootstrapperServices = null!;
 
+    private string? _bootstrapperLoggingDir;
+
     protected ApplicationEnvironment ApplicationEnvironment
     {
         get => LazyInitializer.EnsureInitialized(ref field, CreateAppEnvironment);
     } = null!;
+
+    protected UpdatableApplicationEnvironment? UpdatableApplicationEnvironment =>
+        ApplicationEnvironment as UpdatableApplicationEnvironment;
 
     protected IFileSystem FileSystem
     {
@@ -214,9 +219,12 @@ public abstract class SelfUpdateableAppLifecycle
     {
         _bootstrapperServices = CreateBootstrapperServices();
 
-        if (ApplicationEnvironment is UpdatableApplicationEnvironment)
+        if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
-            using var updateBootstrapper = new SelfUpdatableAppBootstrapper(_bootstrapperServices);
+            using var updateBootstrapper = new SelfUpdatableAppBootstrapper(
+                updatableApplicationEnvironment,
+                _bootstrapperServices,
+                _bootstrapperLoggingDir);
             var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
 
             if (selfUpdateResult == SelfUpdateResult.Reset)
@@ -249,13 +257,17 @@ public abstract class SelfUpdateableAppLifecycle
 #if DEBUG
                 LogEventLevel.Verbose;
 #else
-            LogEventLevel.Debug;
+                LogEventLevel.Debug;
 #endif
 
-            var tempDir = FileSystem.Path.GetTempPath();
-            var tempSubFolderName = FileSystem.Path.GetRandomFileName();
+            var fileSystem = FileSystem;
 
-            var filePath = FileSystem.Path.GetFullPath(FileSystem.Path.Combine(tempDir, tempSubFolderName, "appBootstrap.log"));
+            var tempDir = fileSystem.Path.GetTempPath();
+            var tempSubFolderName = fileSystem.Path.GetRandomFileName();
+
+            var loggingDir = _bootstrapperLoggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, tempSubFolderName));
+
+            var filePath = (FileSystem.Path.Combine(loggingDir, "appBootstrap.log"));
 
             var fileLogger = new LoggerConfiguration()
                 .WriteTo.File(filePath, rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: minLogLevel)
@@ -270,9 +282,12 @@ public static class ApplicationBaseServiceExtensions
 {
     public static IServiceCollection MakeAppUpdateable(
         this IServiceCollection serviceCollection,
-        ApplicationEnvironment applicationEnvironment,
+        UpdatableApplicationEnvironment applicationEnvironment,
         Func<IServiceProvider, IManifestLoader> manifestLoaderFactory)
     {
+        if (applicationEnvironment == null) 
+            throw new ArgumentNullException(nameof(applicationEnvironment));
+
         serviceCollection.TryAddSingleton<IHashingService>(sp => new HashingService(sp));
         serviceCollection.TryAddSingleton<IResourceExtractor>(sp =>
             new CosturaResourceExtractor(applicationEnvironment.AssemblyInfo.Assembly, sp));
@@ -281,7 +296,7 @@ public static class ApplicationBaseServiceExtensions
 
         serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
         serviceCollection.AddSingleton<IProductService>(sp => new ApplicationProductService(sp));
-        serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(sp));
+        serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(applicationEnvironment, sp));
         serviceCollection.AddSingleton(manifestLoaderFactory);
 
         return serviceCollection;

@@ -2,6 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
+using System.Threading;
+using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.FileSystem;
@@ -14,21 +17,37 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 internal class BackupManager : IBackupManager
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IFileSystem _fileSystem;
     private readonly ConcurrentDictionary<IInstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
     private readonly ILogger? _logger;
-    private readonly BackupRepository _repository;
     private readonly IProductService _productService;
     private readonly IHashingService _hashingService;
+
+    //[field: AllowNull]
+    private IFileRepository FileRepository => LazyInitializer.EnsureInitialized(ref field, CreateRepository);
 
     public IDictionary<IInstallableComponent, BackupValueData> Backups => new Dictionary<IInstallableComponent, BackupValueData>(_backups);
 
     public BackupManager(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _fileSystem = _serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        _repository = new BackupRepository(serviceProvider);
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
+    }
+
+    private FileRepository CreateRepository()
+    {
+        var config = _serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+
+        if (config.BackupPolicy == BackupPolicy.Disable)
+            throw new NotSupportedException("Backup manager should not be called when with disabled backed policy.");
+
+        if (string.IsNullOrEmpty(config.BackupLocation))
+            throw new InvalidOperationException("Backup location not specified");
+
+        return new FileRepository(config.BackupLocation!, _fileSystem, "bak");
     }
 
     public void BackupComponent(IInstallableComponent component)
@@ -95,14 +114,14 @@ internal class BackupManager : IBackupManager
         }
         finally
         {
-            _repository.RemoveComponent(component);
+            FileRepository.RemoveComponent(component);
         }
     }
 
     public void RemoveBackup(IInstallableComponent component)
     {
         _backups.TryRemove(component, out _);
-        _repository.RemoveComponent(component);
+        FileRepository.RemoveComponent(component);
     }
 
     public void RestoreAll()
@@ -117,7 +136,7 @@ internal class BackupManager : IBackupManager
             throw new NotSupportedException($"option '{nameof(component)}' must be of type '{nameof(SingleFileComponent)}'");
 
         var variables = _productService.GetCurrentInstance().Variables;
-        var destination = singleFileComponent.GetFile(_serviceProvider, variables);
+        var destination = singleFileComponent.GetFile(_fileSystem, variables);
 
         if (component.DetectedState == DetectionState.Absent)
             return new BackupValueData(destination);
@@ -131,7 +150,7 @@ internal class BackupManager : IBackupManager
 
         return new BackupValueData(destination)
         {
-            Backup = _repository.AddComponent(component)
+            Backup = FileRepository.AddComponent(component, variables)
         };
     }
 }

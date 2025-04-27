@@ -8,7 +8,6 @@ using AnakinRaW.AppUpdaterFramework.Configuration;
 
 namespace AnakinRaW.ApplicationBase;
 
-
 public abstract class UpdatableApplicationEnvironment(Assembly assembly, IFileSystem fileSystem)
     : ApplicationEnvironment(assembly, fileSystem), IUpdateConfigurationProvider
 {
@@ -26,10 +25,9 @@ public abstract class UpdatableApplicationEnvironment(Assembly assembly, IFileSy
     }
 }
 
-
 public abstract class ApplicationEnvironment
 {
-    private readonly IFileSystem _fileSystem;
+    protected readonly IFileSystem FileSystem;
 
     public abstract string ApplicationName { get; }
     
@@ -38,7 +36,7 @@ public abstract class ApplicationEnvironment
 
     [field: AllowNull, MaybeNull]
     public IDirectoryInfo ApplicationLocalDirectory =>
-        field ??= _fileSystem.DirectoryInfo.New(ApplicationLocalPath);
+        field ??= FileSystem.DirectoryInfo.New(ApplicationLocalPath);
 
     public ApplicationAssemblyInfo AssemblyInfo { get; }
 
@@ -48,13 +46,13 @@ public abstract class ApplicationEnvironment
     {
         if (assembly == null) 
             throw new ArgumentNullException(nameof(assembly));
-        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         AssemblyInfo = new ApplicationAssemblyInfo(assembly);
     }
 
     private string BuildLocalPath()
     {
         var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return _fileSystem.Path.Combine(appDataPath, ApplicationLocalDirectoryName);
+        return FileSystem.Path.Combine(appDataPath, ApplicationLocalDirectoryName);
     }
 }

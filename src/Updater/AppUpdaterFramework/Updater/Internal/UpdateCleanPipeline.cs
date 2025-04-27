@@ -17,7 +17,7 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
     private readonly IBackupManager _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
     private readonly List<IInstallableComponent> _downloadsToClean = new();
     private readonly List<IInstallableComponent> _backupsToClean = new();
-    private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
+    private readonly IFileRepository _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetRepository();
 
     protected override Task<bool> PrepareCoreAsync()
     {
@@ -25,7 +25,7 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
         _downloadsToClean.Clear();
 
         _backupsToClean.AddRange(_backupManager.Backups.Keys);
-        _downloadsToClean.AddRange(_downloadRepository.GetComponents().Keys);
+        _downloadsToClean.AddRange(_downloadFileRepository.GetComponents().Keys);
         return Task.FromResult(true);
     }
 
@@ -43,7 +43,7 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
             GuardedClean(backup, _backupManager.RemoveBackup);
 
         foreach (var download in _downloadsToClean)
-            GuardedClean(download, _downloadRepository.RemoveComponent);
+            GuardedClean(download, _downloadFileRepository.RemoveComponent);
 
 
         if (_filesFailedToBeCleaned.Any())

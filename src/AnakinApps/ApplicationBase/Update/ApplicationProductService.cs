@@ -7,6 +7,7 @@ using AnakinRaW.AppUpdaterFramework.Product;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -24,9 +25,8 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
     private readonly IResourceExtractor _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
     private readonly ILogger? _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationProductService));
 
-    private IDirectoryInfo? _installLocation;
-
-    public override IDirectoryInfo InstallLocation => _installLocation ??= GetInstallLocation();
+    [field: AllowNull, MaybeNull]
+    public override IDirectoryInfo InstallLocation => field ??= GetInstallLocation();
 
     protected override IProductReference CreateCurrentProductReference()
     {
@@ -104,12 +104,18 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
             return task.Result;
         }
 #if DEBUG
+        catch (AggregateException e)
+        {
+            if (e.GetBaseException() is not IOException)
+                throw;
+
+            _logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
+            return ExtractExternalUpdaterFromLocal();
+        }
         catch (IOException e)
         {
             _logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
-            var fs = ServiceProvider.GetRequiredService<IFileSystem>();
-            var file = fs.Path.Combine(InstallLocation.FullName, ExternalUpdaterConstants.AppUpdaterModuleName);
-            return fs.FileStream.New(file, FileMode.Open, FileAccess.Read);
+            return ExtractExternalUpdaterFromLocal();
         }
 #endif
         catch (Exception e)
@@ -117,5 +123,12 @@ internal class ApplicationProductService(IServiceProvider serviceProvider) : Pro
             _logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
             throw;
         }
+    }
+
+    private Stream ExtractExternalUpdaterFromLocal()
+    {
+        var fs = ServiceProvider.GetRequiredService<IFileSystem>();
+        var file = fs.Path.Combine(InstallLocation.FullName, ExternalUpdaterConstants.AppUpdaterModuleName);
+        return fs.FileStream.New(file, FileMode.Open, FileAccess.Read);
     }
 }

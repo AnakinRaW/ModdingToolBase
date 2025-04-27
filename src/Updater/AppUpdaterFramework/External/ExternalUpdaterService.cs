@@ -20,26 +20,24 @@ namespace AnakinRaW.AppUpdaterFramework.External;
 
 internal class ExternalUpdaterService : IExternalUpdaterService
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IProductService _productService;
     private readonly IExternalUpdaterLauncher _launcher;
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadOnlyBackupManager _backupManager;
-    private readonly IReadOnlyDownloadRepository _downloadRepository;
+    private readonly IReadOnlyFileRepository _downloadFileRepository;
     private readonly UpdateConfiguration _updateConfig;
 
     private readonly string _tempPath;
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _launcher = serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
-        _downloadRepository = serviceProvider.GetRequiredService<IReadOnlyDownloadRepository>();
+        _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetReadOnlyRepository();
         _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
         // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator cause commandline arg parsing errors
@@ -86,7 +84,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         if (updater is not SingleFileComponent updaterComponent)
             throw new InvalidOperationException("External updater component not registered to current product.");
 
-        var filePath = updaterComponent.GetFullPath(_serviceProvider, _productService.GetCurrentInstance().Variables);
+        var filePath = updaterComponent.GetFullPath(_fileSystem, _productService.GetCurrentInstance().Variables);
         return _fileSystem.FileInfo.New(filePath);
     }
 
@@ -167,7 +165,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         if (action == UpdateAction.Keep)
             throw new NotSupportedException("UpdateAction Keep is not supported");
 
-        var componentLocation = component.GetFullPath(_serviceProvider, _productService.GetCurrentInstance().Variables);
+        var componentLocation = component.GetFullPath(_fileSystem, _productService.GetCurrentInstance().Variables);
 
         string? destination;
         string source;
@@ -175,7 +173,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         switch (action)
         {
             case UpdateAction.Update:
-                source = _downloadRepository.GetComponent(component)?.FullName ??
+                source = _downloadFileRepository.GetComponent(component)?.FullName ??
                          throw new InvalidOperationException(
                              $"Unable to find source location for component: {component}");
                 destination = componentLocation;

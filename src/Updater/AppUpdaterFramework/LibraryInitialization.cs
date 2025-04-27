@@ -24,8 +24,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IDiskSpaceCalculator>(sp => new DiskSpaceCalculator(sp));
         serviceCollection.AddSingleton<IBackupManager>(sp => new BackupManager(sp));
         serviceCollection.AddSingleton<IReadOnlyBackupManager>(sp => sp.GetRequiredService<IBackupManager>());
-        serviceCollection.AddSingleton<IDownloadRepository>(sp => new DownloadRepository(sp));
-        serviceCollection.AddSingleton<IReadOnlyDownloadRepository>(sp => sp.GetRequiredService<IDownloadRepository>());
+        serviceCollection.AddSingleton<IDownloadRepositoryFactory>(sp => new DownloadRepositoryFactory(sp));
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());

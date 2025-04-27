@@ -15,7 +15,6 @@ namespace AnakinRaW.AppUpdaterFramework.Installer;
 
 internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
     private readonly ILockedFileHandler _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
 
@@ -31,7 +30,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         if (component is not SingleFileComponent singleFileComponent)
             throw new ArgumentException($"Component must be of type {nameof(SingleFileComponent)}");
 
-        var filePath = singleFileComponent.GetFile(_serviceProvider, variables);
+        var filePath = singleFileComponent.GetFile(_fileSystem, variables);
 
         return ExecuteWithInteractiveRetry(component,
             () => CopyFile(filePath, source),
@@ -47,7 +46,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         if (component is not SingleFileComponent singleFileComponent)
             throw new NotSupportedException($"Component must be of type {nameof(SingleFileComponent)}");
 
-        var filePath = singleFileComponent.GetFile(_serviceProvider, variables);
+        var filePath = singleFileComponent.GetFile(_fileSystem, variables);
         return ExecuteWithInteractiveRetry(component,
             () => DeleteFile(filePath),
             interaction => HandlerInteraction(filePath, interaction),

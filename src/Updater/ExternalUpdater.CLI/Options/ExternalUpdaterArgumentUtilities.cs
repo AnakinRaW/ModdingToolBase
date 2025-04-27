@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,13 @@ public static class ExternalUpdaterArgumentUtilities
 
     public static string GetCurrentApplicationCommandLineForPassThrough()
     {
+        var currentCommandLineArgs = Environment.GetCommandLineArgs();
+
+        // If command args are empty or only contain the executable name (which is always at index 0), there is nothing to return. 
+        if (currentCommandLineArgs.Length <= 1)
+            return string.Empty;
+
+
         return "";
     }
 
