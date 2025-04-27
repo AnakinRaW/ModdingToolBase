@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Collections.Generic;
+using CommandLine;
 
 namespace AnakinRaW.ExternalUpdater.Options;
 

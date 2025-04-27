@@ -5,13 +5,14 @@ namespace AnakinRaW.ExternalUpdater;
 
 public class ExternalUpdaterResultOptions
 {
-    [Option("externalUpdaterResult", Default = ExternalUpdaterResult.UpdaterNotRun, Required = false)]
+    public const string RawOptionString = $"--{OptionLongName}";
+
+    public const string OptionLongName = "externalUpdaterResult";
+
+    [Option(OptionLongName, Default = ExternalUpdaterResult.UpdaterNotRun, Required = false)]
     public ExternalUpdaterResult Result { get; init; }
 
-    public static bool TryParse(
-        string[] args,
-        [NotNullWhen(true)]
-        out ExternalUpdaterResultOptions? options)
+    public static bool TryParse(string[] args, [NotNullWhen(true)] out ExternalUpdaterResultOptions? options)
     {
         var parser = new Parser(settings =>
         {

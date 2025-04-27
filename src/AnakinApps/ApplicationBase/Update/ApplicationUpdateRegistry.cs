@@ -72,7 +72,12 @@ public sealed class ApplicationUpdateRegistry : IDisposable
             throw new ArgumentNullException(nameof(options));
         RequiresUpdate = true;
         UpdaterPath = updater.FullName;
-        UpdateCommandArgs = options.ToArgs();
+
+        // We don't want to store the current arguments in the registry, as they are only relevant for immediate restart.
+        // Adding them for delayed updates might cause usability and security issues.
+        var optionsWithoutCurrentArgs = options with { AppToStartArguments = null };
+
+        UpdateCommandArgs = optionsWithoutCurrentArgs.ToArgs();
     }
 
     public void ScheduleReset()

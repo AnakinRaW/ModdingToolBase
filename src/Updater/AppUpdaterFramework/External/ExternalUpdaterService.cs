@@ -194,7 +194,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         };
     }
 
-    private string? CreateAppStartArguments()
+    private IReadOnlyList<string>? CreateAppStartArguments()
     {
         return _updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart ? 
             ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThrough() : 

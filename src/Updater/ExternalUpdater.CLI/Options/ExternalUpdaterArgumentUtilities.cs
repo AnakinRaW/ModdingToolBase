@@ -14,14 +14,18 @@ public static class ExternalUpdaterArgumentUtilities
 {
     public static ExternalUpdaterOptions FromArgs(string args)
     {
-        ExternalUpdaterOptions result = null!;
-
         var splitArgs = args.SplitArgs();
+        return FromArgs(splitArgs);
+    }
 
-        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(splitArgs)
+    public static ExternalUpdaterOptions FromArgs(IReadOnlyList<string> args)
+    {
+        ExternalUpdaterOptions result = null!;
+        
+        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(args)
             .MapResult(
                 (RestartOptions opts) => result = opts,
-                (UpdateOptions opts) => result = opts, 
+                (UpdateOptions opts) => result = opts,
                 errors => throw new ArgumentException($"The provided args cannot be parsed: {errors.FirstOrDefault()}"));
 
         return result;
@@ -29,24 +33,58 @@ public static class ExternalUpdaterArgumentUtilities
 
     public static string ToArgs(this ExternalUpdaterOptions option)
     {
-        return Parser.Default.FormatCommandLine(option, config => config.SkipDefault = true);
+        return Parser.Default.FormatCommandLine(option, config =>
+        {
+            config.SkipDefault = true;
+        });
     }
 
-    public static string GetCurrentApplicationCommandLineForPassThrough()
+    public static string? GetCurrentApplicationCommandLineForPassThrough()
     {
         var currentCommandLineArgs = Environment.GetCommandLineArgs();
 
         // If command args are empty or only contain the executable name (which is always at index 0), there is nothing to return. 
         if (currentCommandLineArgs.Length <= 1)
-            return string.Empty;
+            return null;
+
+        Process.Start()
+
+        // If the current command line args do not contain the ExternalUpdaterResultOptions, we can return all args after the executable name.
+        if (!ExternalUpdaterResultOptions.TryParse(currentCommandLineArgs, out _))
+            return new List<string>(currentCommandLineArgs.Skip(1));
 
 
-        return "";
+        var args = new List<string>(currentCommandLineArgs.Length - 1);
+
+        var externalResultExpected = false;
+        for (var i = 1; i < currentCommandLineArgs.Length; i++)
+        {
+            var arg = currentCommandLineArgs[i];
+
+            if (externalResultExpected)
+            {
+                Debug.Assert(Enum.TryParse(arg, out ExternalUpdaterResult _));
+                externalResultExpected = false;
+                continue;
+            }
+
+            if (arg.Equals(ExternalUpdaterResultOptions.RawOptionString))
+            {
+                externalResultExpected = true;
+                continue;
+            }
+
+            args.Add(arg);
+        }
+
+        //return [];
+
+        return args;
     }
 
     public static ExternalUpdaterOptions WithCurrentData(
         this ExternalUpdaterOptions options, 
-        string appToStart, 
+        string appToStart,
         string? appToStartArgs,
         int? pid,
         string? loggingDirectory,

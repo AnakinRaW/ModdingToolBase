@@ -46,7 +46,7 @@ internal static class Program
             logger?.LogCritical(e, e.Message);
 #if DEBUG
             Console.WriteLine("Press enter to close!");
-            Console.ReadKey();
+            Console.ReadLine();
 #endif
             return e.HResult;
         }
@@ -54,6 +54,10 @@ internal static class Program
 
     private static Task<int> ErrorArgs(IEnumerable<Error> arg)
     {
+#if DEBUG
+        Console.WriteLine("Press enter to close!");
+        Console.ReadLine();
+#endif
         return Task.FromResult(0xA0);
     }
 
