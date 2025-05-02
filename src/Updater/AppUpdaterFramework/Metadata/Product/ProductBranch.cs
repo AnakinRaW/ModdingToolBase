@@ -6,24 +6,24 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 public sealed class ProductBranch : IEquatable<ProductBranch>
 {
+    public static readonly IEqualityComparer<string> BranchNamEqualityComparer = StringComparer.OrdinalIgnoreCase;
+
     public string Name { get; }
 
     public ICollection<Uri> ManifestLocations { get; }
 
-    public bool IsPrerelease { get; }
+    public bool IsDefault { get; }
 
-    public ProductBranch(string name, bool isPrerelease) : this(name, Array.Empty<Uri>(), isPrerelease)
+    public ProductBranch(string name, bool isDefault) : this(name, [], isDefault)
     {
     }
 
-    public ProductBranch(string name, ICollection<Uri> manifestLocations, bool isPrerelease)
+    public ProductBranch(string name, ICollection<Uri> manifestLocations, bool isDefault)
     {
-        if (manifestLocations == null) 
-            throw new ArgumentNullException(nameof(manifestLocations));
         ThrowHelper.ThrowIfNullOrEmpty(name);
         Name = name;
-        ManifestLocations = manifestLocations;
-        IsPrerelease = isPrerelease;
+        ManifestLocations = manifestLocations ?? throw new ArgumentNullException(nameof(manifestLocations));
+        IsDefault = isDefault;
         ValidateManifestUris();
     }
 
@@ -34,22 +34,25 @@ public sealed class ProductBranch : IEquatable<ProductBranch>
 
     public bool Equals(ProductBranch? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Name == other.Name;
+        if (other is null)
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+        return BranchNamEqualityComparer.Equals(Name, other.Name);
     }
 
     public override bool Equals(object? obj)
     {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((ProductBranch)obj);
+        if (ReferenceEquals(null, obj)) 
+            return false;
+        if (ReferenceEquals(this, obj)) 
+            return true;
+        return obj is ProductBranch other && Equals(other);
     }
 
     public override int GetHashCode()
     {
-        return Name.GetHashCode();
+        return BranchNamEqualityComparer.GetHashCode(Name);
     }
 
     private void ValidateManifestUris()

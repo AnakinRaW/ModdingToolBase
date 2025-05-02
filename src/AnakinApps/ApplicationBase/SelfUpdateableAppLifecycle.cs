@@ -89,6 +89,9 @@ public abstract class SelfUpdateableAppLifecycle
     {
         _bootstrapperServices = CreateBootstrapperServices();
 
+        var logger = _bootstrapperServices.GetService<ILoggerFactory>()?.CreateLogger(GetType());
+        logger?.LogTrace($"Application started with raw arguments: '{args}'");
+
         if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
             using var updateBootstrapper = new SelfUpdatableAppBootstrapper(

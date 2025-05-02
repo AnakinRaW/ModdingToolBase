@@ -57,10 +57,10 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
             version = SemVersion.Parse(applicationManifest.Version, SemVersionStyles.Any);
 
         ProductBranch? branch = null;
-        if (version is not null && applicationManifest.Branch is not null)
+        if (applicationManifest.Branch is not null)
         {
             var branchManager = ServiceProvider.GetRequiredService<IBranchManager>();
-            branch = branchManager.GetBranchFromVersion(version);
+            branch = branchManager.GetBranchFromName(applicationManifest.Branch);
         }
         return new ProductReference(applicationManifest.Name, version, branch);
     }

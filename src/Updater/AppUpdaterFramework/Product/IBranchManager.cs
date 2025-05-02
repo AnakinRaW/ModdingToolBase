@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
@@ -11,9 +10,9 @@ public interface IBranchManager
 {
     string StableBranchName { get; }
 
-    Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
+    ProductBranch GetBranchFromName(string branchName);
 
-    ProductBranch GetBranchFromVersion(SemVersion version);
+    Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
 
     Task<IProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default);
 }

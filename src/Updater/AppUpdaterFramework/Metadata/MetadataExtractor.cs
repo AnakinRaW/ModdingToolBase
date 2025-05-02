@@ -125,10 +125,7 @@ internal sealed class MetadataExtractor : IMetadataExtractor
     public IProductReference ProductReferenceFromStream(Stream assemblyStream)
     {
         var productInfo = _assemblyMetadataExtractor.ReadProductInformation(assemblyStream);
-        ProductBranch? branch = null;
-        if (productInfo.Version is not null)
-            branch = _branchManager.GetBranchFromVersion(productInfo.Version);
-        return new ProductReference(productInfo.ProductName, productInfo.Version, branch);
+        return new ProductReference(productInfo.ProductName, productInfo.Version);
     }
 
     private OriginInfo? CreateOriginInfo(Uri? origin, ComponentIntegrityInformation integrityInformation, long? size = null)
