@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
 using AnakinRaW.ApplicationBase.Imaging;
-using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog.Buttons;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;

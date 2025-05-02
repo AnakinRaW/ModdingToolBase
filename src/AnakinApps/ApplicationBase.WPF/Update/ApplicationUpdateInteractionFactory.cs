@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.ViewModels.Dialogs;
-using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 

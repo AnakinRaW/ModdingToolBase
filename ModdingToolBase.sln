@@ -35,7 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.WPF.Core", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.WPF.Imaging", "src\CommonUtilities\CommonUtilities.WPF.Imaging\CommonUtilities.WPF.Imaging.csproj", "{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ApplicationConstants", "src\AnakinApps\ApplicationConstants\ApplicationConstants.shproj", "{B297A13A-8E3A-436C-BA97-8B5F57827FFE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ApplicationBase.Shared", "src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.shproj", "{B297A13A-8E3A-436C-BA97-8B5F57827FFE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppUpdaterFramework.Core", "src\Updater\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj", "{E35EE0D4-5517-460F-A369-42F21929FD27}"
 EndProject
@@ -140,9 +140,8 @@ Global
 		SolutionGuid = {2DEE17D6-FFB9-40DF-B176-62A708BABB71}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{96907c99-deab-4c71-bdf9-28c900460659}*SharedItemsImports = 5
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{9bf0bdf9-2120-4b70-a2ec-48418f81cd26}*SharedItemsImports = 5
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{b297a13a-8e3a-436c-ba97-8b5f57827ffe}*SharedItemsImports = 13
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{cf2a0a06-f0bd-40ea-953c-717da03c7e89}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.projitems*{96907c99-deab-4c71-bdf9-28c900460659}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.projitems*{9bf0bdf9-2120-4b70-a2ec-48418f81cd26}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.projitems*{cf2a0a06-f0bd-40ea-953c-717da03c7e89}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
