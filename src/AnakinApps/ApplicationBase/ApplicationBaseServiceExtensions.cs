@@ -2,10 +2,10 @@
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -23,15 +23,13 @@ public static class ApplicationBaseServiceExtensions
             throw new ArgumentNullException(nameof(applicationEnvironment));
 
         serviceCollection.TryAddSingleton<IHashingService>(sp => new HashingService(sp));
-
-        serviceCollection.AddUpdateFramework();
+        serviceCollection.AddSingleton<IUpdateResultHandler>(sp => new ApplicationUpdateResultHandler(applicationEnvironment, sp));
 
         serviceCollection.AddSingleton(productServiceFactory);
         serviceCollection.AddSingleton(manifestLoaderFactory);
         serviceCollection.AddSingleton<IBranchManager>(sp => new ApplicationBranchManager(applicationEnvironment, sp));
 
-        if (applicationEnvironment.UpdateConfiguration.RestartConfiguration.SupportsRestart) 
-            serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
+        serviceCollection.AddUpdateFramework();
 
         return serviceCollection;
     }

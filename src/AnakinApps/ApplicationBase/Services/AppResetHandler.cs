@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Services;
 
-internal class AppResetHandler : IAppResetHandler
+internal class AppResetHandler
 {
     private readonly ApplicationUpdateRegistry _registry;
     private readonly ApplicationEnvironment _environment;

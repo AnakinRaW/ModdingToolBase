@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Environment;
-using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 using AnakinRaW.CommonUtilities.Registry;
@@ -12,9 +11,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace AnakinRaW.ApplicationBase;
+namespace AnakinRaW.ApplicationBase.Update;
 
-public sealed class SelfUpdatableAppBootstrapper : IDisposable
+internal sealed class SelfUpdateRestartHandler : IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly string? _logFileDirectory;
@@ -23,7 +22,7 @@ public sealed class SelfUpdatableAppBootstrapper : IDisposable
     private readonly UpdatableApplicationEnvironment _applicationEnvironment;
     private readonly ApplicationUpdateRegistry _updateRegistry;
 
-    public SelfUpdatableAppBootstrapper(
+    public SelfUpdateRestartHandler(
         UpdatableApplicationEnvironment applicationEnvironment, 
         IServiceProvider services,
         string? logFileDirectory = null)

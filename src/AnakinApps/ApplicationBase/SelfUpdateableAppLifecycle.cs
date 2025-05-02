@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Environment;
+using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
@@ -94,7 +95,7 @@ public abstract class SelfUpdateableAppLifecycle
 
         if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
-            using var updateBootstrapper = new SelfUpdatableAppBootstrapper(
+            using var updateBootstrapper = new SelfUpdateRestartHandler(
                 updatableApplicationEnvironment,
                 _bootstrapperServices,
                 _bootstrapperLoggingDir);

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Utilities;
 
-public class CosturaResourceExtractor
+internal sealed class CosturaResourceExtractor
 {
     private readonly ILogger? _logger;
     private readonly IFileSystem _fileSystem;

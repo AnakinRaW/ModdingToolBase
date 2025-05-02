@@ -1,4 +1,4 @@
-﻿namespace AnakinRaW.ApplicationBase;
+﻿namespace AnakinRaW.ApplicationBase.Update;
 
 public enum SelfUpdateResult
 {

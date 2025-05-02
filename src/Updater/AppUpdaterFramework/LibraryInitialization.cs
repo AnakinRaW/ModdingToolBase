@@ -1,5 +1,4 @@
-﻿using AnakinRaW.AppUpdaterFramework.Configuration;
-using AnakinRaW.AppUpdaterFramework.Detection;
+﻿using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Handlers;
@@ -11,7 +10,9 @@ using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AnakinRaW.AppUpdaterFramework;
 
@@ -42,5 +43,9 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
 
         serviceCollection.AddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
+
+        // Add default implementation
+        serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new UpdateResultHandler(sp));
+        serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
     }
 }
