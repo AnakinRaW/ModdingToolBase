@@ -49,8 +49,8 @@ public class ApplicationBranchUtilities
         var branches = new List<ProductBranch>();
         foreach (var name in branchNames)
         {
-            var isPrerelease = !name.Equals(ApplicationConstants.StableBranchName, StringComparison.InvariantCultureIgnoreCase);
-            branches.Add(new ProductBranch(name, BuildManifestUris(name), isPrerelease));
+            var isDefault = ProductBranch.BranchNamEqualityComparer.Equals(name, ApplicationConstants.StableBranchName);
+            branches.Add(new ProductBranch(name, BuildManifestUris(name), isDefault));
         }
         return branches;
     }
