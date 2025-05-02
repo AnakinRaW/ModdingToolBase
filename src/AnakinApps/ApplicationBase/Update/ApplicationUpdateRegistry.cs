@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.CommonUtilities.Registry;
 using AnakinRaW.ExternalUpdater.Options;
 

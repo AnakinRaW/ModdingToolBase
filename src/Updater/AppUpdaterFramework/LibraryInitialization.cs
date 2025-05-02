@@ -1,4 +1,5 @@
-﻿using AnakinRaW.AppUpdaterFramework.Detection;
+﻿using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Handlers;

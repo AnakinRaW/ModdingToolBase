@@ -4,5 +4,5 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 public interface IComponentGroup : IProductComponent
 {
-    IReadOnlyList<IProductComponentIdentity> Components { get; } 
+    IReadOnlyCollection<IProductComponentIdentity> Components { get; } 
 }

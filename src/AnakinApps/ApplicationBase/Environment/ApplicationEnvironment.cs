@@ -1,29 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading;
-using AnakinRaW.AppUpdaterFramework.Configuration;
 
-namespace AnakinRaW.ApplicationBase;
-
-public abstract class UpdatableApplicationEnvironment(Assembly assembly, IFileSystem fileSystem)
-    : ApplicationEnvironment(assembly, fileSystem), IUpdateConfigurationProvider
-{
-    public abstract UpdateConfiguration UpdateConfiguration { get; }
-
-    public abstract Uri? RepositoryUrl { get; }
-
-    public abstract ICollection<Uri> UpdateMirrors { get; }
-
-    public abstract string UpdateRegistryPath { get; } 
-    
-    public UpdateConfiguration GetConfiguration()
-    {
-        return UpdateConfiguration;
-    }
-}
+namespace AnakinRaW.ApplicationBase.Environment;
 
 public abstract class ApplicationEnvironment
 {
@@ -52,7 +33,7 @@ public abstract class ApplicationEnvironment
 
     private string BuildLocalPath()
     {
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appDataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
         return FileSystem.Path.Combine(appDataPath, ApplicationLocalDirectoryName);
     }
 }

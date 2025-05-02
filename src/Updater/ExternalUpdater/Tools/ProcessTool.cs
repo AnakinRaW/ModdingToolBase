@@ -24,6 +24,6 @@ internal abstract class ProcessTool<T>(T options, IServiceProvider serviceProvid
             throw new FileNotFoundException("Could not find application to restart.", processToStart.FullName);
         
         var options = new ExternalUpdaterResultOptions { Result = operationResult };
-        ProcessTools.StartApplication(processToStart, options, Options.Elevate);
+        ProcessTools.StartApplication(processToStart, options, Options.AppToStartArguments, Options.Elevate);
     }
 }

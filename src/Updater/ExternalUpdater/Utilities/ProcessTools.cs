@@ -9,6 +9,7 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 #if NETFRAMEWORK
+using System.Text;
 using AnakinRaW.CommonUtilities;
 #endif
 
@@ -26,14 +27,18 @@ internal class ProcessTools : IProcessTools
     public void StartApplication(
         IFileInfo application,
         ExternalUpdaterResultOptions appStartOptions,
-        bool elevate = false)
+        string? passThroughArgs,
+        bool elevate)
     {
         if (!application.Exists)
             throw new FileNotFoundException("The executable was not found.", application.FullName);
 
-        var startInfo = new ProcessStartInfo(application.FullName);
+        var startInfo = new ProcessStartInfo(application.FullName)
+        {
+            UseShellExecute = true,
+        };
 
-        AddArgumentsToStartInfo(startInfo, appStartOptions);
+        AddArgumentsToStartInfo(startInfo, appStartOptions, passThroughArgs);
 
         if (elevate)
             startInfo.Verb = "runas";
@@ -44,17 +49,33 @@ internal class ProcessTools : IProcessTools
     }
 
 
-    private static void AddArgumentsToStartInfo(ProcessStartInfo startInfo, ExternalUpdaterResultOptions resultOptions)
+    private static void AddArgumentsToStartInfo(
+        ProcessStartInfo startInfo, 
+        ExternalUpdaterResultOptions resultOptions,
+        string? passThroughArguments)
     {
 #if NET
         var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);
-        foreach (var arg in resultArgs)
-        {
-            startInfo.ArgumentList.Add(arg);
-        }  
+        
+        string[]? passThroughArgList = !string.IsNullOrEmpty(passThroughArguments)
+            // We don't use keepQuote=true here, because starting a process with ArgumentList already handles escaping.
+            ? passThroughArguments.SplitArgs() 
+            : [];
+
+        foreach (var arg in resultArgs.Concat(passThroughArgList)) 
+            startInfo.ArgumentList.Add(arg);  
 #else
-        var resultArgs = Parser.Default.FormatCommandLine(resultOptions);
-        startInfo.Arguments = resultArgs;
+        var sb = new StringBuilder();
+
+        sb.Append(Parser.Default.FormatCommandLine(resultOptions));
+
+        if (!string.IsNullOrEmpty(passThroughArguments))
+        {
+            sb.Append(' ');
+            sb.Append(passThroughArguments);
+        }
+
+        startInfo.Arguments = sb.ToString();
 #endif
     }
 

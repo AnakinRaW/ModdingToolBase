@@ -32,9 +32,10 @@ public sealed class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : 
     {
         var externalUpdateStartInfo = new ProcessStartInfo(updater)
         {
+            UseShellExecute = true,
 #if !DEBUG
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = true,
+            WindowStyle = ProcessWindowStyle.Hidden,
 #endif
         };
 

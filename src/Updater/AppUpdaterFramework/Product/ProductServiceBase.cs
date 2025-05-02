@@ -125,9 +125,9 @@ public abstract class ProductServiceBase : IProductService
         variables.Add(KnownProductVariablesKeys.InstallDir, installLocation.FullName);
         variables.Add(KnownProductVariablesKeys.InstallDrive, installLocation.Root.FullName);
 
-        // We do not include Windows folder as it is not a special folder,
+        // We do not include Windows folder as a special folder,
         // because this library shall not by default support operating system related folders. 
-        // Custom properties can be used to support that individually.
+        // Application classes can use AddAdditionalProductVariables() to support that if required.
         variables.Add(KnownProductVariablesKeys.ProgramFiles, Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
         variables.Add(KnownProductVariablesKeys.CommonProgramFiles, Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86));
         variables.Add(KnownProductVariablesKeys.ProgramData, Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));

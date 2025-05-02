@@ -2,6 +2,7 @@
 using System.IO;
 using System;
 using System.Threading.Tasks;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.ExternalUpdater;
@@ -21,13 +22,12 @@ internal class ExternalUpdateExtractor : IExternalUpdateExtractor
             throw new ArgumentNullException(nameof(serviceProvider));
         _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
         _resourceExtractor = serviceProvider.GetRequiredService<IResourceExtractor>();
-        _applicationEnvironment = serviceProvider.GetRequiredService<ApplicationEnvironment>();
     }
 
     public async Task ExtractAsync()
     {
         await _resourceExtractor.ExtractAsync(
-            ExternalUpdaterConstants.AppUpdaterModuleName,
+            ExternalUpdaterConstants.GetAssemblyFileName(),
             _applicationEnvironment.ApplicationLocalPath, 
             ShouldOverwriteUpdater);
     }

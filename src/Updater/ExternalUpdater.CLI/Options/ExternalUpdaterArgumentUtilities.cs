@@ -1,12 +1,13 @@
-﻿using System;
+﻿using CommandLine;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
-using CommandLine;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ExternalUpdater.Options;
 
@@ -39,24 +40,26 @@ public static class ExternalUpdaterArgumentUtilities
         });
     }
 
+    internal static string QuoteArgs(string input)
+    {
+        return $"\"{input}\"";
+    }
+
+    [DllImport("kernel32", CharSet = CharSet.Unicode)]
+    static extern IntPtr GetCommandLineW();
+
     public static string? GetCurrentApplicationCommandLineForPassThrough()
     {
-        var currentCommandLineArgs = Environment.GetCommandLineArgs();
+        var currentCommandLineArgs = Environment.CommandLine.SplitArgs(true);
 
         // If command args are empty or only contain the executable name (which is always at index 0), there is nothing to return. 
         if (currentCommandLineArgs.Length <= 1)
             return null;
 
-        Process.Start()
-
-        // If the current command line args do not contain the ExternalUpdaterResultOptions, we can return all args after the executable name.
-        if (!ExternalUpdaterResultOptions.TryParse(currentCommandLineArgs, out _))
-            return new List<string>(currentCommandLineArgs.Skip(1));
-
-
-        var args = new List<string>(currentCommandLineArgs.Length - 1);
-
         var externalResultExpected = false;
+        var actualArgs = new List<string>(currentCommandLineArgs.Length - 1);
+
+        // Starting from index 1, because we don't want to include the executable itself. 
         for (var i = 1; i < currentCommandLineArgs.Length; i++)
         {
             var arg = currentCommandLineArgs[i];
@@ -68,18 +71,22 @@ public static class ExternalUpdaterArgumentUtilities
                 continue;
             }
 
+            if (string.IsNullOrEmpty(arg))
+                continue;
+
             if (arg.Equals(ExternalUpdaterResultOptions.RawOptionString))
             {
                 externalResultExpected = true;
                 continue;
             }
 
-            args.Add(arg);
+            actualArgs.Add(arg);
         }
 
-        //return [];
+        if (actualArgs.Count == 0)
+            return null;
 
-        return args;
+        return string.Join(" ", actualArgs);
     }
 
     public static ExternalUpdaterOptions WithCurrentData(

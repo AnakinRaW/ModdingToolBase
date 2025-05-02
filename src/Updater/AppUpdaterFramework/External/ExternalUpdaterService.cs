@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using AnakinRaW.AppUpdaterFramework.Configuration;
+﻿using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -15,14 +10,20 @@ using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
+using IServiceProvider = System.IServiceProvider;
 
 namespace AnakinRaW.AppUpdaterFramework.External;
 
 internal class ExternalUpdaterService : IExternalUpdaterService
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IProductService _productService;
-    private readonly IExternalUpdaterLauncher _launcher;
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyFileRepository _downloadFileRepository;
@@ -32,9 +33,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
+        _serviceProvider = serviceProvider;
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _launcher = serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
         _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetReadOnlyRepository();
@@ -57,7 +58,10 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
             UpdateFile = updateInformationFile,
-            LoggingDirectory = _tempPath
+            LoggingDirectory = _tempPath,
+#if DEBUG
+            Timeout = 90,
+#endif
         };
     }
 
@@ -66,13 +70,17 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
+
         return new RestartOptions
         {
             AppToStart = cpi.ProcessFilePath!,
             AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
             Elevate = elevate,
-            LoggingDirectory = _tempPath
+            LoggingDirectory = _tempPath,
+#if DEBUG
+            Timeout = 90,
+#endif
         };
     }
 
@@ -91,7 +99,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     public void Launch(ExternalUpdaterOptions options)
     {
         var updater = GetExternalUpdater();
-        _launcher.Start(updater, options);
+        var launcher = _serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
+        using var _ = launcher.Start(updater, options);
     }
 
     private List<UpdateInformation> CollectUpdateInformation()
@@ -194,7 +203,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         };
     }
 
-    private IReadOnlyList<string>? CreateAppStartArguments()
+    private string? CreateAppStartArguments()
     {
         return _updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart ? 
             ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThrough() : 

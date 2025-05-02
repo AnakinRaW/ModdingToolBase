@@ -1,10 +1,10 @@
 ﻿using System;
-using Semver;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Semver;
 
-namespace AnakinRaW.ApplicationBase;
+namespace AnakinRaW.ApplicationBase.Environment;
 
 public sealed class ApplicationAssemblyInfo
 {

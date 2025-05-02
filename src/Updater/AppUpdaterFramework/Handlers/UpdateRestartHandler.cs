@@ -7,7 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-internal class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
+
+// TODO: Make Shutdown event
+internal sealed class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
 {
     private readonly IExternalUpdaterService _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
     private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
@@ -17,16 +19,17 @@ internal class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestart
         if (!_updateConfiguration.RestartConfiguration.SupportsRestart)
             throw new NotSupportedException("Restarting the application is not supported.");
 
-        _externalUpdaterService.Launch(CreateOptions(optionsKind));
+        var restartOptions = CreateOptions(optionsKind);
+        _externalUpdaterService.Launch(restartOptions);
         Shutdown();
     }
 
-    protected virtual void Shutdown()
+    private void Shutdown()
     {
         Environment.Exit(RestartConstants.RestartRequiredCode);
     }
 
-    protected virtual ExternalUpdaterOptions CreateOptions(RequiredRestartOptionsKind optionsKind)
+    private ExternalUpdaterOptions CreateOptions(RequiredRestartOptionsKind optionsKind)
     {
         return optionsKind switch
         {
