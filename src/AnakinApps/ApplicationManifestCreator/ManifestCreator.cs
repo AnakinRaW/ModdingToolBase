@@ -69,7 +69,7 @@ internal class ManifestCreator
         if (!branches.Add(newBranch.Name))
             return;
 
-        var outputFilePath = _fileSystem.Path.Combine(Options.OuputPath, ApplicationConstants.BranchLookupFileName);
+        var outputFilePath = _fileSystem.Path.Combine(Options.OutputPath, ApplicationConstants.BranchLookupFileName);
         var outputFile = _fileSystem.FileInfo.New(outputFilePath);
         outputFile.Directory?.Create();
 
@@ -157,7 +157,7 @@ internal class ManifestCreator
         if (manifest == null)
             throw new ArgumentNullException(nameof(manifest));
 
-        var outputFilePath = _fileSystem.Path.Combine(Options.OuputPath, ApplicationConstants.ManifestFileName);
+        var outputFilePath = _fileSystem.Path.Combine(Options.OutputPath, ApplicationConstants.ManifestFileName);
         var outputFile = _fileSystem.FileInfo.New(outputFilePath);
         outputFile.Directory?.Create();
 
