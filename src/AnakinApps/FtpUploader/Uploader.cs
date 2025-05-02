@@ -117,7 +117,7 @@ internal class Uploader : IAsyncDisposable
         var manifest = await new JsonManifestLoader(_services).DeserializeAsync(fileStream).ConfigureAwait(false);
         return manifest is null
             ? throw new InvalidOperationException("Unable to deserialize manifest")
-            : manifest.Branch ?? ApplicationConstants.StableBranchName;
+            : manifest.Branch ?? throw new InvalidOperationException("Manifest should contain branch name");
     }
 
     public ValueTask DisposeAsync()

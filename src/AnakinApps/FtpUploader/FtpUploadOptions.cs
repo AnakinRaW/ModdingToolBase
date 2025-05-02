@@ -13,7 +13,7 @@ internal class FtpUploadOptions
     [Option('u', "user", Required = true, HelpText = "The user name to login to the SFTP instance.")]
     public required string UserName { get; init; }
 
-    [Option('p', "password", Required = false, HelpText = "The password to authenticate the user.")]
+    [Option('p', "password", Required = false, HelpText = "The password to authenticate the SFTP user.")]
     public required string Password { get; init; } = string.Empty;
 
     [Option("base", Required = true, HelpText = "The base path where file shall get uploaded too.")]
