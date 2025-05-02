@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net48</TargetFrameworks>
+		<TargetFrameworks>net481</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
 		
 		<!-- Changing this affects ExternalUpdaterConstants.cs also! -->

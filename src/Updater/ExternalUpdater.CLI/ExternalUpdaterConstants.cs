@@ -4,7 +4,7 @@ public static class ExternalUpdaterConstants
 {
     public const string ComponentIdentity = "AnakinRaW.ExternalUpdater";
     
-    public static string GetAssemblyFileName()
+    public static string GetExecutableFileName()
     {
         return $"{ComponentIdentity}.exe";
     }

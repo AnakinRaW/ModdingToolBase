@@ -45,7 +45,7 @@ public abstract class SelfUpdateableAppLifecycle
     public async Task<int> StartAsync(string[] args)
     {
         StartInternal(args);
-        var appServices = CreateAppServices();
+        var appServices = CreateAppServices(); 
         // ConfigureAwait cannot be set to false here, because WPF apps might expect the context of the main thread.
         return await RunAppAsync(args, appServices);
     }
@@ -79,6 +79,12 @@ public abstract class SelfUpdateableAppLifecycle
     {
     }
 
+    protected virtual void InitializeApp()
+    {
+        if (!FileSystem.Directory.Exists(ApplicationEnvironment.ApplicationLocalPath)) 
+            ApplicationEnvironment.ApplicationLocalDirectory.Create();
+    }
+
     private void StartInternal(string[] args)
     {
         _bootstrapperServices = CreateBootstrapperServices();
@@ -96,6 +102,9 @@ public abstract class SelfUpdateableAppLifecycle
             if (selfUpdateResult == SelfUpdateResult.RestartRequired)
                 System.Environment.Exit(RestartConstants.RestartRequiredCode);
         }
+
+        // Initialization of the app must happen after completing the self-update process.
+        InitializeApp();
     }
 
     private IServiceProvider CreateBootstrapperServices()

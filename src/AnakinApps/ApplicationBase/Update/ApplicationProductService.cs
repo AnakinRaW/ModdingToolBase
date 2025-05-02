@@ -7,14 +7,13 @@ using AnakinRaW.AppUpdaterFramework.Product;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
-using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
-using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -78,7 +77,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
 
         if (ApplicationEnvironment is UpdatableApplicationEnvironment { UpdateConfiguration.RestartConfiguration.SupportsRestart: true })
         {
-            var updaterComponent = CreateExternalUpdaterComponent();
+            var updaterComponent = CreateExternalUpdaterComponent(productVariables);
             installedComponents.Add(updaterComponent);
         }
 
@@ -94,68 +93,70 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
         return new ProductManifest(installedProduct, productComponents);
     }
 
-    private IInstallableComponent CreateExternalUpdaterComponent()
+    private IInstallableComponent CreateExternalUpdaterComponent(IReadOnlyDictionary<string, string> productVariables)
     {
-        using var updaterAssemblyStream = GetUpdaterAssemblyStream(out var overwriteLocation);
+        var installDirectory = GetExternalUpdaterInstallLocation(productVariables, out var nextToApp);
 
-        var installLocation = overwriteLocation ?? StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppData);
+        using var updaterStream = GetUpdaterAssemblyStream(installDirectory, nextToApp);
 
-        if (overwriteLocation is null)
-        {
-            //ExtractAssemblyToLocation(
-            //    updaterAssemblyStream, 
-            //    StringTemplateEngine.ResolveVariables(ApplicationVariablesKeys.AppData, productVariables));
-        }
+        updaterStream.Seek(0, SeekOrigin.Begin);
 
-        updaterAssemblyStream.Seek(0, SeekOrigin.Begin);
+        var componentInstallLocation =
+            StringTemplateEngine.ToVariable(nextToApp
+                ? KnownProductVariablesKeys.InstallDir
+                : ApplicationVariablesKeys.AppData);
 
         return _metadataExtractor.ComponentFromStream(
-            updaterAssemblyStream,
-            installLocation,
+            updaterStream,
+            componentInstallLocation,
             new ExtractorAdditionalInformation
             {
-                Drive = overwriteLocation is null
-                    ? ExtractorAdditionalInformation.InstallDrive.System
-                    : ExtractorAdditionalInformation.InstallDrive.App
+                Drive = nextToApp
+                    ? ExtractorAdditionalInformation.InstallDrive.App
+                    : ExtractorAdditionalInformation.InstallDrive.System
             });
     }
 
-    private Stream GetUpdaterAssemblyStream(out string? overwriteLocation)
+    private Stream GetUpdaterAssemblyStream(string installDirectory, bool nextToApp)
     {
-        overwriteLocation = null;
-        try
-        {
-            var task = Task.Run(async () => await _resourceExtractor.GetResourceAsync(ExternalUpdaterConstants.GetAssemblyFileName()));
-            task.Wait();
-            return task.Result;
-        }
-#if DEBUG
-        catch (AggregateException e)
-        {
-            if (e.GetBaseException() is not IOException)
-                throw;
+        var resourceName = ExternalUpdaterConstants.GetExecutableFileName();
 
-            Logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
-            return ExternalUpdaterStreamFromLocal(out overwriteLocation);
-        }
-        catch (IOException e)
+        if (!nextToApp) 
+            _resourceExtractor.Extract(resourceName, installDirectory, ShouldOverwriteUpdater);
+
+        var filePath = FileSystem.Path.Combine(installDirectory, resourceName);
+        return FileSystem.FileStream.New(filePath, FileMode.Open, FileAccess.Read);
+
+        bool ShouldOverwriteUpdater(string file, Stream assemblyStream)
         {
-            Logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
-            return ExternalUpdaterStreamFromLocal(out overwriteLocation);
-        }
-#endif
-        catch (Exception e)
-        {
-            Logger?.LogWarning(e, $"Unable to extract ExternalUpdater from embedded resources: {e.Message}");
-            throw;
+            if (!Version.TryParse(FileVersionInfo.GetVersionInfo(file).FileVersion, out var installedVersion))
+                return true;
+            var streamVersion = _metadataExtractor.InformationFromStream(assemblyStream).FileVersion;
+            if (streamVersion is null)
+                return true;
+            return streamVersion > installedVersion;
         }
     }
 
-    private Stream ExternalUpdaterStreamFromLocal(out string location)
+    private string GetExternalUpdaterInstallLocation(IReadOnlyDictionary<string, string> productVariables, out bool nextToApp)
     {
-        var fs = ServiceProvider.GetRequiredService<IFileSystem>();
-        var file = fs.Path.Combine(InstallLocation.FullName, ExternalUpdaterConstants.GetAssemblyFileName());
-        location = fs.Path.GetDirectoryName(file)!;
-        return fs.FileStream.New(file, FileMode.Open, FileAccess.Read);
+        var externalUpdaterFileName = ExternalUpdaterConstants.GetExecutableFileName();
+
+        if (_resourceExtractor.Contains(externalUpdaterFileName))
+        {
+            nextToApp = false;
+            var appDataPath = StringTemplateEngine.ResolveVariables(StringTemplateEngine.ToVariable(ApplicationVariablesKeys.AppData), productVariables);
+            return appDataPath;
+        }
+#if DEBUG
+        var localFilePath = FileSystem.Path.Combine(InstallLocation.FullName, externalUpdaterFileName);
+        if (FileSystem.File.Exists(localFilePath))
+        {
+            nextToApp = true;
+            return InstallLocation.FullName;
+        }
+#endif
+        throw new InvalidOperationException(
+            $"The application does not reference {ExternalUpdaterConstants.ComponentIdentity}.");
     }
 }

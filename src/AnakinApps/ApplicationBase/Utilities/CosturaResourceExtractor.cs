@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.IO.Compression;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Utilities;
 
-public class CosturaResourceExtractor : IResourceExtractor
+public class CosturaResourceExtractor
 {
     private readonly ILogger? _logger;
     private readonly IFileSystem _fileSystem;
@@ -29,6 +29,39 @@ public class CosturaResourceExtractor : IResourceExtractor
         _assemblyResourceNames = assembly.GetManifestResourceNames();
     }
 
+    public bool Contains(string resourceName)
+    {
+        return TryGetResourceName(resourceName, out _, out _);
+    }
+
+    public bool TryGetResourceName(string resourceName, [NotNullWhen(true)] out string? actualResourceName, out bool compressed)
+    {
+        var nameStart = $"costura.{resourceName.ToLowerInvariant()}";
+        foreach (var resource in _assemblyResourceNames)
+        {
+            if (resource.StartsWith(nameStart))
+            {
+                compressed = resource.EndsWith(".compressed");
+                actualResourceName = resource;
+                return true;
+            }
+        }
+
+        actualResourceName = null;
+        compressed = false;
+        return false;
+    }
+
+    public void Extract(string resourceName, string fileDirectory, Func<string, Stream, bool> shouldOverwrite)
+    {
+        ExtractAsync(resourceName, fileDirectory, shouldOverwrite).GetAwaiter().GetResult();
+    }
+
+    public void Extract(string resourceName, string fileDirectory)
+    {
+        Extract(resourceName, fileDirectory, (_, _) => true);
+    }
+
     public async Task ExtractAsync(string resourceName, string fileDirectory)
     {
         await ExtractAsync(resourceName, fileDirectory, (_, _) => true);
@@ -36,46 +69,27 @@ public class CosturaResourceExtractor : IResourceExtractor
 
     public async Task ExtractAsync(string resourceName, string fileDirectory, Func<string, Stream, bool> shouldOverwrite)
     {
-        foreach (var rn in _assemblyResourceNames)
-        {
-            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(rn, resourceName, CompareOptions.IgnoreCase) < 0)
-                continue;
-            var compressed = rn.EndsWith(".compressed");
-            using var assemblyStream = await GetResourceStream(rn, compressed);
-            await ExtractAsync(assemblyStream, resourceName, fileDirectory, shouldOverwrite);
-        }
+        using var assemblyStream = await GetResourceStreamAsync(resourceName);
+        await ExtractAsync(assemblyStream, resourceName, fileDirectory, shouldOverwrite);
     }
 
-    public async Task<Stream> GetResourceAsync(string assemblyName)
+    public async ValueTask<Stream> GetResourceStreamAsync(string resourceName)
     {
-        foreach (var resourceName in _assemblyResourceNames)
-        {
-            if (CultureInfo.InvariantCulture.CompareInfo.IndexOf(resourceName, assemblyName, CompareOptions.IgnoreCase) < 0)
-                continue;
-            var compressed = resourceName.EndsWith(".compressed");
-            return await GetResourceStream(resourceName, compressed);
-        }
+        if (!TryGetResourceName(resourceName, out var actualResourceName, out var compressed))
+            throw new IOException($"Could not find embedded resource '{resourceName}'");
 
-        throw new IOException($"Could not find embedded resource '{assemblyName}'");
-    }
-
-    private async Task<Stream> GetResourceStream(string resourceName, bool compressed)
-    {
-        using var assemblyResourceStream = _appAssembly.GetManifestResourceStream(resourceName);
+        var assemblyResourceStream = _appAssembly.GetManifestResourceStream(actualResourceName);
         if (assemblyResourceStream is null)
             throw new InvalidOperationException($"Assembly stream for '{resourceName}' was null!");
 
-        Stream assemblyStream;
-        if (compressed)
-            assemblyStream = await DecompressAsync(assemblyResourceStream);
-        else
-        {
-            assemblyStream = new MemoryStream();
-            await assemblyResourceStream.CopyToAsync(assemblyStream);
-        }
+        if (!compressed) 
+            return assemblyResourceStream;
 
-        assemblyStream.Position = 0;
-        return assemblyStream;
+        var decompressedStream = new MemoryStream();
+        using (var deflateStream = new DeflateStream(assemblyResourceStream, CompressionMode.Decompress))
+            await deflateStream.CopyToAsync(decompressedStream);
+        decompressedStream.Position = 0;
+        return decompressedStream;
     }
 
     private async Task ExtractAsync(Stream resourceStream, string assemblyName, string fileDirectory, Func<string, Stream, bool> shouldOverwrite)
@@ -90,27 +104,15 @@ public class CosturaResourceExtractor : IResourceExtractor
                 return;
 
             _logger?.LogDebug($"Writing file: '{filePath}'");
-            await WriteToFileAsync(resourceStream, filePath);
+
+            resourceStream.Position = 0;
+
+            using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            await resourceStream.CopyToAsync(fs);
         }
         catch (Exception ex)
         {
             throw new IOException("Error writing necessary files to disk!", ex);
         }
-    }
-
-    private static async Task WriteToFileAsync(Stream assemblyStream, string filePath)
-    {
-        assemblyStream.Position = 0;
-        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-        await assemblyStream.CopyToAsync(fs);
-    }
-
-    private static async Task<MemoryStream> DecompressAsync(Stream stream)
-    {
-        stream.Position = 0;
-        using var decompressionStream = new DeflateStream(stream, CompressionMode.Decompress);
-        var memoryStream = new MemoryStream();
-        await decompressionStream.CopyToAsync(memoryStream);
-        return memoryStream;
     }
 }

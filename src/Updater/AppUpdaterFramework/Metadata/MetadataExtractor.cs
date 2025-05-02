@@ -64,7 +64,9 @@ internal sealed class MetadataExtractor : IMetadataExtractor
         return _assemblyMetadataExtractor.ReadComponentInformation(stream);
     }
 
-    public IInstallableComponent ComponentFromStream(Stream stream, string installLocation,
+    public IInstallableComponent ComponentFromStream(
+        Stream stream, 
+        string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
         if (stream == null) 
