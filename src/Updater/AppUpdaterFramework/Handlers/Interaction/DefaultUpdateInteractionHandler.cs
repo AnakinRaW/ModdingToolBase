@@ -6,14 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
-internal class DefaultUpdateInteractionHandler : IUpdateInteractionHandler
+internal class DefaultLockedFileInteractionHandler : ILockedFileInteractionHandler
 {
     private readonly ILogger? _logger;
 
-    public DefaultUpdateInteractionHandler(IServiceProvider serviceProvider)
+    public DefaultLockedFileInteractionHandler(IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null) 
-            throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 

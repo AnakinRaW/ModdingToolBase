@@ -80,9 +80,9 @@ public class ApplicationBranchUtilities
         return baseUri.AppendPathSegment(ApplicationConstants.BranchLookupFileName);
     }
 
-    public ICollection<Uri> BuildManifestUris(string branchName)
+    public IEnumerable<Uri> BuildManifestUris(string branchName)
     {
-        return Mirrors.Select(mirrorUri => mirrorUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri()).ToList();
+        return Mirrors.Select(mirrorUri => mirrorUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri());
     }
 
     internal static Url BuildComponentUri(Uri baseUri, string branchName, string fileName)

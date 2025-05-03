@@ -1,15 +1,12 @@
 using System;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.External;
-using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-
-// TODO: Make Shutdown event
-internal sealed class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
+public class UpdateRestartHandler(IServiceProvider serviceProvider) : IRestartHandler
 {
     private readonly IExternalUpdaterService _externalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
     private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
@@ -24,7 +21,7 @@ internal sealed class UpdateRestartHandler(IServiceProvider serviceProvider) : I
         Shutdown();
     }
 
-    private void Shutdown()
+    protected virtual void Shutdown()
     {
         Environment.Exit(RestartConstants.RestartRequiredCode);
     }

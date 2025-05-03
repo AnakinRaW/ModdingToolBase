@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AnakinRaW.CommonUtilities;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
@@ -18,11 +19,13 @@ public sealed class ProductBranch : IEquatable<ProductBranch>
     {
     }
 
-    public ProductBranch(string name, ICollection<Uri> manifestLocations, bool isDefault)
+    public ProductBranch(string name, IEnumerable<Uri> manifestLocations, bool isDefault)
     {
         ThrowHelper.ThrowIfNullOrEmpty(name);
+        if (manifestLocations == null)
+            throw new ArgumentNullException(nameof(manifestLocations));
         Name = name;
-        ManifestLocations = manifestLocations ?? throw new ArgumentNullException(nameof(manifestLocations));
+        ManifestLocations = manifestLocations.ToList();
         IsDefault = isDefault;
         ValidateManifestUris();
     }

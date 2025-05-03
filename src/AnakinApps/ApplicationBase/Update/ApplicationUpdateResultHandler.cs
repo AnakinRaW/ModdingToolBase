@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Handlers;
-using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Registry;
 using Microsoft.Extensions.DependencyInjection;
 

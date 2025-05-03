@@ -29,7 +29,7 @@ public class ApplicationBranchManager : BranchManagerBase
         return _branchUtilities.GetAvailableBranchesAsync();
     }
 
-    protected override ICollection<Uri> BuildManifestUris(string branchName)
+    protected override IEnumerable<Uri> BuildManifestLocations(string branchName)
     {
         return _branchUtilities.BuildManifestUris(branchName);
     }

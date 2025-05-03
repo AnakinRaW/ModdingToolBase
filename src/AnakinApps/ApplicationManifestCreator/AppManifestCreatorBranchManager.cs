@@ -24,7 +24,7 @@ internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, I
     {
         ThrowHelper.ThrowIfNullOrEmpty(branchName);
         var isDefault = ProductBranch.BranchNamEqualityComparer.Equals(branchName, StableBranchName);
-        return new ProductBranch(branchName, isDefault);
+        return new ProductBranch(branchName, _branchUtilities.BuildManifestUris(branchName), isDefault);
     }
 
     public Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync()

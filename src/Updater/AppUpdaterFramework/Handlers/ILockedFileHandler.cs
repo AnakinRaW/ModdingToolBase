@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions;
 
-namespace AnakinRaW.AppUpdaterFramework.FileLocking;
+namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 internal interface ILockedFileHandler
 {

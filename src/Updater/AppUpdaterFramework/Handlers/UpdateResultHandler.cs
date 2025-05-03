@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-// TODO: Consume shutdown event and make protected virtual method
 public class UpdateResultHandler : IUpdateResultHandler
 {
     private readonly UpdateConfiguration _updateConfiguration;
@@ -52,8 +51,8 @@ public class UpdateResultHandler : IUpdateResultHandler
         }
 
         await ShowError(result);
-    }
-
+    } 
+    
     protected virtual Task HandleSuccess()
     {
         return Task.CompletedTask;

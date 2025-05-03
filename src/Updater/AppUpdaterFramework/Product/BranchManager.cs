@@ -29,7 +29,8 @@ public abstract class BranchManagerBase : IBranchManager
     {
         ThrowHelper.ThrowIfNullOrEmpty(branchName);
         var isDefault = ProductBranch.BranchNamEqualityComparer.Equals(branchName, StableBranchName);
-        return new ProductBranch(branchName, isDefault);
+        var manifestLocations = BuildManifestLocations(branchName);
+        return new ProductBranch(branchName, manifestLocations, isDefault);
     }
 
     public abstract Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
@@ -45,7 +46,6 @@ public abstract class BranchManagerBase : IBranchManager
         var branch = productReference.Branch;
         
         Exception? lastException = null;
-
 
         if (branch.ManifestLocations.Count == 0)
             throw new CatalogDownloadException("No location to an update manifest specified.");
@@ -73,8 +73,8 @@ public abstract class BranchManagerBase : IBranchManager
         _logger?.LogError(lastException, message);
         throw new CatalogDownloadException("Could not download branch manifest from all sources.", lastException!);
     }
-    
-    protected abstract ICollection<Uri> BuildManifestUris(string branchName);
+
+    protected abstract IEnumerable<Uri> BuildManifestLocations(string branchName);
 
     protected virtual DownloadOptions? GetDownloadOptionsForManifestDownload(Uri manifestUri, IProductReference productReference)
     {

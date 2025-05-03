@@ -31,21 +31,20 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
 
+        // Default implementations
+        serviceCollection.TryAddSingleton<IUpdateService>(sp => new UpdateService(sp));
+        serviceCollection.TryAddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
+        serviceCollection.TryAddSingleton<IManifestInstallationDetector>(sp => new ManifestInstallationDetector(sp));
+        serviceCollection.TryAddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
+        serviceCollection.TryAddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
+        serviceCollection.TryAddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
+        serviceCollection.TryAddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
 
-        // Internal implementation
-        serviceCollection.AddSingleton<IUpdateService>(sp => new UpdateService(sp));
-        serviceCollection.AddSingleton<IManifestInstallationDetector>(sp => new ManifestInstallationDetector(sp));
-        serviceCollection.AddSingleton<IUpdateInteractionHandler>(sp => new DefaultUpdateInteractionHandler(sp));
-        serviceCollection.AddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
-
-        serviceCollection.AddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
-        serviceCollection.AddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
-        serviceCollection.AddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
-
-        serviceCollection.AddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
-
-        // Add default implementation
+        serviceCollection.TryAddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
+        serviceCollection.TryAddSingleton<ILockedFileInteractionHandler>(sp => new DefaultLockedFileInteractionHandler(sp));
+        serviceCollection.TryAddSingleton<IUpdateResultInteractionHandler>(sp => new DefaultUpdateResultInteractionHandler(sp));
         serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new UpdateResultHandler(sp));
-        serviceCollection.AddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
+        serviceCollection.TryAddSingleton<IUpdateHandler>(sp => new UpdateHandler(sp));
+        serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new UpdateResultHandler(sp));
     }
 }

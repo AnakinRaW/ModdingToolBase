@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
@@ -16,6 +18,8 @@ public class UpdateHandler : IUpdateHandler
 
     public bool IsUpdating { get; private set; }
 
+    public bool IsCheckingForUpdate { get; private set; }
+
     public UpdateHandler(IServiceProvider serviceProvider)
     {
         if (serviceProvider == null) 
@@ -26,7 +30,16 @@ public class UpdateHandler : IUpdateHandler
 
         _updateService.UpdateStarted += OnUpdateStarted;
         _updateService.UpdateCompleted += OnUpdateCompleted;
+        _updateService.CheckingForUpdatesStarted += OnCheckingForUpdate;
+        _updateService.CheckingForUpdatesCompleted += OnCheckingComplete;
     }
+
+    public async Task<UpdateCheckResult> CheckForUpdateAsync(IProductReference productReference, CancellationToken token = default)
+    {
+        var updateCatalog = await _updateService.CheckForUpdatesAsync(productReference, token).ConfigureAwait(false);
+        return new UpdateCheckResult(updateCatalog);
+    }
+
 
     public async Task UpdateAsync(IUpdateCatalog parameter)
     {
@@ -46,6 +59,16 @@ public class UpdateHandler : IUpdateHandler
         }
 
         await _resultHandler.Handle(updateResult).ConfigureAwait(false);
+    }
+
+    private void OnCheckingComplete(object sender, IUpdateCatalog? e)
+    {
+        IsCheckingForUpdate = false;
+    }
+
+    protected virtual void OnCheckingForUpdate(object sender, EventArgs e)
+    {
+        IsCheckingForUpdate = true;
     }
 
     protected virtual void OnUpdateCompleted(object sender, EventArgs e)

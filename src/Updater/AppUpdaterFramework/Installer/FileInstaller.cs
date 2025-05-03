@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Threading;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;

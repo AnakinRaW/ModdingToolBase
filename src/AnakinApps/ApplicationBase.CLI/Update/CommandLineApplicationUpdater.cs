@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
-internal class CommandLineToolSelfUpdater
+internal class CommandLineApplicationUpdater
 {
     private readonly IProductService _productService;
     private readonly IBranchManager _branchManager;
@@ -19,7 +19,7 @@ internal class CommandLineToolSelfUpdater
     private readonly IUpdateHandler _updateHandler;
     private readonly ILogger? _logger;
 
-    public CommandLineToolSelfUpdater(IServiceProvider serviceProvider)
+    public CommandLineApplicationUpdater(IServiceProvider serviceProvider)
     {
         _productService = serviceProvider.GetRequiredService<IProductService>();
         _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
@@ -28,14 +28,8 @@ internal class CommandLineToolSelfUpdater
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public int UpdateIfNecessary(ProductBranch? branch = null)
-    {
-        return Task.Run(async () => await UpdateIfNecessaryAsync(branch)).GetAwaiter().GetResult();
-    }
-
     public async Task<int> UpdateIfNecessaryAsync(ProductBranch? branch = null)
     {
-      
         var product = _productService.GetCurrentInstance();
 
         if (product.Branch is null)
