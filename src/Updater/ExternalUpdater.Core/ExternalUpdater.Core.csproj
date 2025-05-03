@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
-		<AssemblyName>AnakinRaW.ExternalUpdater.CLI</AssemblyName>
+		<AssemblyName>AnakinRaW.ExternalUpdater.Core</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Description>API for the external updater tool.</Description>
+		<Description>Allows interaction of the external updater tool without referecing the application directly.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>

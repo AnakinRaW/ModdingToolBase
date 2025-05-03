@@ -22,7 +22,7 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>-->
 		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.1.3" PrivateAssets="build;compile"/>
+		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.1.3" PrivateAssets="build;compile" />
 		<PackageReference Include="IsExternalInit" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -39,7 +39,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj" />
-		<ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+		<ProjectReference Include="..\ExternalUpdater.Core\ExternalUpdater.Core.csproj" />
 	</ItemGroup>
 	
 	<PropertyGroup>

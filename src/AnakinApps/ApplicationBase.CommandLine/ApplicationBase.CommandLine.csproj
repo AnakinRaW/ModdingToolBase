@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ApplicationBase</RootNamespace>
-		<AssemblyName>AnakinRaW.ApplicationBase.CLI</AssemblyName>
+		<AssemblyName>AnakinRaW.ApplicationBase.CommandLine</AssemblyName>
 	</PropertyGroup>
 	
 	<PropertyGroup>

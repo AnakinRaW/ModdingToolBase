@@ -35,7 +35,7 @@
 	<ItemGroup>
 		<!--<ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />-->
 		<ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
-		<ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+		<ProjectReference Include="..\..\Updater\ExternalUpdater.Core\ExternalUpdater.Core.csproj" />
 	</ItemGroup>
 
 	<Import Project="..\ApplicationBase.Shared\ApplicationBase.Shared.projitems" Label="Shared" />
