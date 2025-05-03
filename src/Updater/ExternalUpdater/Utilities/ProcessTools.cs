@@ -62,18 +62,18 @@ internal class ProcessTools : IProcessTools
             ? passThroughArguments.SplitArgs() 
             : [];
 
-        foreach (var arg in resultArgs.Concat(passThroughArgList)) 
+        foreach (var arg in passThroughArgList.Concat(resultArgs)) 
             startInfo.ArgumentList.Add(arg);  
 #else
         var sb = new StringBuilder();
 
-        sb.Append(Parser.Default.FormatCommandLine(resultOptions));
 
         if (!string.IsNullOrEmpty(passThroughArguments))
         {
-            sb.Append(' ');
             sb.Append(passThroughArguments);
+            sb.Append(' ');
         }
+        sb.Append(Parser.Default.FormatCommandLine(resultOptions));
 
         startInfo.Arguments = sb.ToString();
 #endif
