@@ -3,29 +3,37 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Product;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal abstract class FileRepository(IServiceProvider serviceProvider) : IFileRepository
+internal sealed class FileRepository : IFileRepository
 {
-    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ConcurrentDictionary<IInstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
-    private readonly IProductService _productService = serviceProvider.GetRequiredService<IProductService>();
+    private readonly IFileSystem _fileSystem;
 
-    protected readonly IFileSystem FileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+    private string NewFileExtension { get; }
+    private IDirectoryInfo Root { get; }
+    
+    public FileRepository(string location, IFileSystem fileSystem, string newFileExtension = "new")
+    {
+        ThrowHelper.ThrowIfNullOrEmpty(location);
+        ThrowHelper.ThrowIfNullOrEmpty(newFileExtension);
 
-    protected abstract IDirectoryInfo Root { get; }
+        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+        
+        NewFileExtension = newFileExtension;
+       
+        Root = _fileSystem.DirectoryInfo.New(location);
+        Root.Create();
+    }
 
-    protected virtual string FileExtensions => "new";
-
-    public IFileInfo AddComponent(IInstallableComponent component)
+    public IFileInfo AddComponent(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         if (component == null)
             throw new ArgumentNullException(nameof(component));
-        return _componentStore.GetOrAdd(component, CreateComponentFile);
+        return _componentStore.GetOrAdd(component, c => CreateComponentFile(c, variables));
     }
 
     public IFileInfo? GetComponent(IInstallableComponent component)
@@ -48,14 +56,14 @@ internal abstract class FileRepository(IServiceProvider serviceProvider) : IFile
         file.DeleteWithRetry();
     }
 
-    private IFileInfo CreateComponentFile(IInstallableComponent component)
+    private IFileInfo CreateComponentFile(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
-        var namePrefix = GetNamePrefix(component);
+        var namePrefix = GetNamePrefix(component, variables);
 
         IFileInfo file = null!;
         for (var i = 0; i < 10; i++)
         {
-            file = FileSystem.FileInfo.New(CreateRandomFilePath(namePrefix));
+            file = _fileSystem.FileInfo.New(CreateRandomFilePath(namePrefix));
             if (!file.Exists)
                 break;
         }
@@ -70,26 +78,26 @@ internal abstract class FileRepository(IServiceProvider serviceProvider) : IFile
         return file;
     }
 
-    private string? GetNamePrefix(IInstallableComponent component)
+    private string? GetNamePrefix(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         if (component is not SingleFileComponent singleFileComponent)
             return null;
-        var file = singleFileComponent.GetFile(_serviceProvider, _productService.GetCurrentInstance().Variables);
+        var file = singleFileComponent.GetFile(_fileSystem, variables);
         return file.Name;
     }
     
     private string CreateRandomFilePath(string? namePrefix)
     {
         var fileName = CreateFileName(namePrefix);
-        return FileSystem.Path.Combine(Root.FullName, fileName);
+        return _fileSystem.Path.Combine(Root.FullName, fileName);
     }
 
     private string CreateFileName(string? prefix)
     {
-        var randomFilePart = FileSystem.Path.GetFileNameWithoutExtension(FileSystem.Path.GetRandomFileName());
+        var randomFilePart = _fileSystem.Path.GetFileNameWithoutExtension(_fileSystem.Path.GetRandomFileName());
         if (string.IsNullOrEmpty(prefix) || string.IsNullOrWhiteSpace(prefix))
-            return $"{randomFilePart}.{FileExtensions}";
+            return $"{randomFilePart}.{NewFileExtension}";
         prefix = prefix!.TrimEnd('.');
-        return $"{prefix}.{randomFilePart}.{FileExtensions}";
+        return $"{prefix}.{randomFilePart}.{NewFileExtension}";
     }
 }

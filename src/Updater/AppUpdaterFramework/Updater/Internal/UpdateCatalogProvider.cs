@@ -37,25 +37,19 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
         // Empty available catalog: Uninstall
         if (!availableInstallableComponents.Any())
             return new UpdateCatalog(installedProduct, availableCatalog.Product, currentInstalledComponents
-                .Select(c => new UpdateItem(c, null, UpdateAction.Delete)), UpdateCatalogAction.Uninstall);
+                .Select(c => new UpdateItem(c, null, UpdateAction.Delete)));
 
         // Empty current catalog: Fresh install
         if (!currentInstalledComponents.Any())
             return new UpdateCatalog(installedProduct, availableCatalog.Product, availableInstallableComponents
-                    .Select(c => new UpdateItem(null, c, UpdateAction.Update)), UpdateCatalogAction.Install);
+                    .Select(c => new UpdateItem(null, c, UpdateAction.Update)));
 
 
         var availableInstalledComponents =
             _detector.DetectInstalledComponents(availableCatalog, installedProduct.Variables);
 
-
         var updateItems = Compare(currentCatalog, availableInstalledComponents);
-
-        var action = updateItems.Any(i => i.Action is UpdateAction.Delete or UpdateAction.Update)
-            ? UpdateCatalogAction.Update
-            : UpdateCatalogAction.None;
-
-        return new UpdateCatalog(installedProduct, availableCatalog.Product, updateItems, action);
+        return new UpdateCatalog(installedProduct, availableCatalog.Product, updateItems);
     }
 
 

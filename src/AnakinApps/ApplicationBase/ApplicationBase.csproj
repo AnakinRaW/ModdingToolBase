@@ -5,37 +5,34 @@
 		<RootNamespace>AnakinRaW.ApplicationBase</RootNamespace>
 		<AssemblyName>AnakinRaW.ApplicationBase</AssemblyName>
 	</PropertyGroup>
-	
+
 	<PropertyGroup>
 		<Description>Abstraction layer to support self-updates, resetting and global error handling for my apps.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.Registry" Version="12.3.4" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.Registry" Version="12.3.8" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
 		<PackageReference Include="Flurl" Version="4.0.0" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="PolySharp" Version="1.15.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.1.2" />
-		<PackageReference Include="IsExternalInit" Version="1.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Required" Version="1.0.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.1.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
-	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
-	  <ProjectReference Include="..\..\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+		<ProjectReference Include="..\..\Updater\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+		<ProjectReference Include="..\..\Updater\ExternalUpdater.Core\ExternalUpdater.Core.csproj" />
 	</ItemGroup>
 
-	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />
+	<Import Project="..\ApplicationBase.Shared\ApplicationBase.Shared.projitems" Label="Shared" />
 
 </Project>

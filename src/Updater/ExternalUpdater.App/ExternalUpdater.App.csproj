@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net481</TargetFrameworks>
+		<RootNamespace>AnakinRaW.ExternalUpdater</RootNamespace>
+		
+		<!-- Changing this affects ExternalUpdaterConstants.cs also! -->
+		<AssemblyName>AnakinRaW.ExternalUpdater</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Description>An external updater that allows updating an application and restarting it.</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.8" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.3.8" />
+		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="Costura.Fody" Version="6.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<TreatAsUsed>true</TreatAsUsed>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.4" />
+		<PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\ExternalUpdater.Core\ExternalUpdater.Core.csproj">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</ProjectReference>
+	</ItemGroup>
+
+</Project>

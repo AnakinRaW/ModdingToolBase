@@ -16,7 +16,6 @@ using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.FileSystem;
 using AnakinRaW.CommonUtilities.SimplePipeline;
 using AnakinRaW.CommonUtilities.SimplePipeline.Runners;
-using EnvDTE;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -108,12 +107,12 @@ internal sealed class UpdatePipeline : Pipeline
         {
             if (itemToInstall.UpdateComponent is IPhysicalInstallable physicalInstallable)
             {
-                var path = physicalInstallable.GetFullPath(ServiceProvider, _installedProduct.Variables);
+                var path = physicalInstallable.GetFullPath(_fileSystem, _installedProduct.Variables);
                 var shallNotRemove = removes.Where(x =>
                 {
                     if (x.InstalledComponent is not IPhysicalInstallable installed)
                         return false;
-                    var otherPath = installed.GetFullPath(ServiceProvider, _installedProduct.Variables);
+                    var otherPath = installed.GetFullPath(_fileSystem, _installedProduct.Variables);
                     return _fileSystem.Path.AreEqual(path, otherPath);
                 });
 
@@ -131,7 +130,7 @@ internal sealed class UpdatePipeline : Pipeline
                 if (updateComponent.OriginInfo is null)
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
 
-                var downloadTask = new DownloadStep(updateComponent, configuration, downloadManager, ServiceProvider);
+                var downloadTask = new DownloadStep(updateComponent, configuration, downloadManager, _installedProduct.Variables, ServiceProvider);
                 downloadTask.Canceled += DownloadCancelled;
                 var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, configuration, _installedProduct.Variables, ServiceProvider);
 

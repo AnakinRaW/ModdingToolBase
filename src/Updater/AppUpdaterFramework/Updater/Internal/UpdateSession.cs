@@ -9,22 +9,32 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 internal class UpdateSession(IProductReference product, IApplicationUpdater updater) : IUpdateSession
 {
     private readonly IApplicationUpdater _updater = updater ?? throw new ArgumentNullException(nameof(updater));
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource? _cts;
 
     public event EventHandler<UpdateProgressEventArgs>? DownloadProgress;
     public event EventHandler<UpdateProgressEventArgs>? InstallProgress;
+
     public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
-    internal async Task<UpdateResult> StartUpdate()
+    internal async Task<UpdateResult> StartUpdate(CancellationToken token)
     {
         try
         {
-            _updater.Progress += OnProgress;
-            return await _updater.UpdateAsync(_cts.Token);
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            try
+            {
+                _updater.Progress += OnProgress;
+                return await _updater.UpdateAsync(_cts.Token);
+            }
+            finally
+            {
+                _updater.Progress -= OnProgress;
+            }
         }
         finally
         {
-            _updater.Progress -= OnProgress;
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 
@@ -38,6 +48,6 @@ internal class UpdateSession(IProductReference product, IApplicationUpdater upda
 
     public void Cancel()
     {
-        _cts.Cancel();
+        _cts?.Cancel();
     }
 }

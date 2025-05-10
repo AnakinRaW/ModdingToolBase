@@ -1,46 +1,48 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Configuration;
-using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
+﻿using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Updater;
+using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.External;
+using Microsoft.Extensions.Logging;
+using IServiceProvider = System.IServiceProvider;
 
 namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
-public class UpdateResultHandler : IUpdateResultHandler
+public class UpdateResultHandler
 {
-    private readonly UpdateConfiguration _updateConfiguration;
-    private readonly IRestartHandler _restartHandler;
-    private readonly IUpdateResultInteractionHandler _interactionHandler;
+    protected readonly IServiceProvider ServiceProvider;
+    protected readonly UpdateConfiguration UpdateConfiguration;
+    protected readonly IExternalUpdaterService ExternalUpdaterService;
+    protected readonly ILogger? Logger;
 
     public UpdateResultHandler(IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null) 
-            throw new ArgumentNullException(nameof(serviceProvider));
-        _interactionHandler = serviceProvider.GetRequiredService<IUpdateResultInteractionHandler>();
-        _restartHandler = serviceProvider.GetRequiredService<IRestartHandler>();
-        _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+        ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        UpdateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+        ExternalUpdaterService = serviceProvider.GetRequiredService<IExternalUpdaterService>();
+        Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
     public async Task Handle(UpdateResult result)
     {
         if (result.RestartType == RestartType.ApplicationElevation)
         {
-            await HandleRestartInternal(RestartReason.Elevation);
+            await HandleRestart(RestartReason.Elevation);
             return;
         }
 
         if (result.FailedRestore)
         {
-            await HandleRestartInternal(RestartReason.FailedRestore);
+            await HandleRestart(RestartReason.RestoreFailed);
             return;
         }
 
         if (result.RestartType == RestartType.ApplicationRestart)
         {
-            await HandleRestartInternal(RestartReason.Update);
+            await HandleRestart(RestartReason.Update);
             return;
         }
 
@@ -51,8 +53,8 @@ public class UpdateResultHandler : IUpdateResultHandler
         }
 
         await ShowError(result);
-    }
-
+    } 
+    
     protected virtual Task HandleSuccess()
     {
         return Task.CompletedTask;
@@ -60,32 +62,58 @@ public class UpdateResultHandler : IUpdateResultHandler
 
     protected virtual Task ShowError(UpdateResult updateResult)
     {
-        var message = updateResult.Exception is AggregateException aggregateException
-            ? aggregateException.InnerExceptions.First().Message
-            : updateResult.Exception!.Message;
-
-        return _interactionHandler.ShowError(message);
+        Logger?.LogError("The update failed with an error: " + updateResult.ErrorMessage);
+        return Task.CompletedTask;
+    }
+    protected virtual Task<bool> ShallRestart(RestartReason reason)
+    {
+        return Task.FromResult(UpdateConfiguration.RestartConfiguration.SupportsRestart);
     }
 
-    protected virtual async Task HandleRestart(RestartReason reason)
+    protected virtual void RestartApplication(RestartReason reason)
     {
-        var shallRestart = await _interactionHandler.ShallRestart(reason);
-        if (!shallRestart)
-            return;
+        var restartOptions = CreateOptions(reason);
+        ExternalUpdaterService.Launch(restartOptions);
+        Shutdown();
+    }
+    
+    protected virtual void Shutdown()
+    {
+        Environment.Exit(RestartConstants.RestartRequiredCode);
+    }
 
-        var restartKind = reason switch
+    private async Task HandleRestart(RestartReason reason)
+    {
+        var reasonText = "Unknown Reason";
+        switch (reason)
         {
-            RestartReason.Update => RequiredRestartOptionsKind.Update,
-            RestartReason.Elevation => RequiredRestartOptionsKind.RestartElevated,
-            RestartReason.FailedRestore => RequiredRestartOptionsKind.Restart,
-            _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
-        };
+            case RestartReason.Update:
+                reasonText = "An update is required.";
+                break;
+            case RestartReason.Elevation:
+                reasonText = "The application needs to run with admin rights.";
+                break;
+            case RestartReason.RestoreFailed:
+                reasonText = "An internal error occurred and the application needs to be restored.";
+                break;
+        }
 
-        _restartHandler.Restart(restartKind);
+        var message = $"Application needs to be restarted. Reason: {reasonText}";
+        Logger?.LogWarning(message);
+
+        if (!UpdateConfiguration.RestartConfiguration.SupportsRestart || !await ShallRestart(reason))
+            return;
+        RestartApplication(reason);
     }
 
-    private Task HandleRestartInternal(RestartReason reason)
+    private ExternalUpdaterOptions CreateOptions(RestartReason restartReason)
     {
-        return !_updateConfiguration.RestartConfiguration.SupportsRestart ? Task.CompletedTask : HandleRestart(reason);
+        return restartReason switch
+        {
+            RestartReason.RestoreFailed => ExternalUpdaterService.CreateRestartOptions(),
+            RestartReason.Elevation => ExternalUpdaterService.CreateRestartOptions(true),
+            RestartReason.Update => ExternalUpdaterService.CreateUpdateOptions(),
+            _ => throw new ArgumentOutOfRangeException(nameof(restartReason), restartReason, null)
+        };
     }
 }

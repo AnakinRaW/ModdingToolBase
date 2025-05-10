@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Runtime.ExceptionServices;
@@ -23,11 +24,12 @@ internal class DownloadStep(
     IInstallableComponent installable,
     UpdateConfiguration updateConfiguration,
     IDownloadManager downloadManager,
+    IReadOnlyDictionary<string, string> productVariables,
     IServiceProvider serviceProvider)
     : SynchronizedStep(serviceProvider), IComponentStep
 {
     private readonly UpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
-    private readonly IDownloadRepository _downloadRepository = serviceProvider.GetRequiredService<IDownloadRepository>();
+    private readonly IDownloadRepositoryFactory _downloadRepositoryFactory = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>();
 
     public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;
 
@@ -86,11 +88,12 @@ internal class DownloadStep(
 
         try
         {
-            var downloadPath = _downloadRepository.AddComponent(Component);
+            var downloadPath = _downloadRepositoryFactory.GetRepository().AddComponent(Component, productVariables);
             DownloadPath = downloadPath;
 
+            var downloadRetryCount = 1 + _updateConfiguration.DownloadRetryCount;
 
-            for (var i = 0; i < _updateConfiguration.DownloadRetryCount; i++)
+            for (var i = 0; i < downloadRetryCount; i++)
             {
                 if (token.IsCancellationRequested)
                     break;

@@ -28,6 +28,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     private readonly IInstallableComponent? _currentComponent;
     private readonly DownloadStep? _download;
     private readonly IInstallerFactory _installerFactory;
+    private readonly IBackupManager _backupManager;
 
     private IInstallableComponent Component { get; }
 
@@ -74,6 +75,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
         _productVariables = productVariables;
         _installerFactory = serviceProvider.GetRequiredService<IInstallerFactory>();
+        _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
     }
 
     public override string ToString()
@@ -185,16 +187,14 @@ internal class InstallStep : PipelineStep, IComponentStep
             UpdateAction.Delete => Component,
             _ => throw new ArgumentOutOfRangeException()
         };
-
-        var backupManager = Services.GetRequiredService<IBackupManager>();
         
         try
         {
-            backupManager.BackupComponent(componentToBackup);
+            _backupManager.BackupComponent(componentToBackup);
         }
         catch (Exception ex)
         {
-            Logger?.LogWarning(ex, $"Creating backup of {Component.Id} failed.");
+            Logger?.LogWarning(ex, $"Creating backup of '{Component.Id}' failed.");
             if (_updateConfiguration.BackupPolicy == BackupPolicy.Required)
             {
                 Logger?.LogError("Stopping install due to BackupPolicy");

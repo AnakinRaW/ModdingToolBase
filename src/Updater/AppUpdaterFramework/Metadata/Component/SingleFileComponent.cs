@@ -1,6 +1,4 @@
 ﻿using AnakinRaW.CommonUtilities;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Utilities;
@@ -34,25 +32,23 @@ public sealed class SingleFileComponent : InstallableComponent, IPhysicalInstall
         FileName = fileName;
     }
 
-    internal IFileInfo GetFile(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables)
+    internal IFileInfo GetFile(IFileSystem fileSystem, IReadOnlyDictionary<string, string> variables)
     {
         if (_fileInfo is null)
         {
-            var path = GetFullPath(serviceProvider, variables);
-            var fs = serviceProvider.GetRequiredService<IFileSystem>();
-            _fileInfo = fs.FileInfo.New(path);
+            var path = GetFullPath(fileSystem, variables);
+            _fileInfo = fileSystem.FileInfo.New(path);
         }
         return _fileInfo;
     }
 
-    public override string GetFullPath(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables)
+    public override string GetFullPath(IFileSystem fileSystem, IReadOnlyDictionary<string, string> variables)
     {
         if (_fullPath is null)
         {
             var fileName = StringTemplateEngine.ResolveVariables(FileName, variables);
             var installPath = StringTemplateEngine.ResolveVariables(InstallPath, variables);
-            var fs = serviceProvider.GetRequiredService<IFileSystem>();
-            _fullPath = fs.Path.Combine(installPath, fileName);
+            _fullPath = fileSystem.Path.Combine(installPath, fileName);
         }
         return _fullPath;
     }

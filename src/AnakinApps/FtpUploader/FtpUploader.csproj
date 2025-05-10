@@ -18,7 +18,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
-		<PackageReference Include="SSH.NET" Version="2024.2.0" />
+		<PackageReference Include="SSH.NET" Version="2025.0.0" />
 		<PackageReference Include="Testably.Abstractions" Version="9.0.0" />
 		<PackageReference Include="Flurl" Version="4.0.0" />
 	</ItemGroup>
@@ -27,7 +27,7 @@
 	  <ProjectReference Include="..\..\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
 	</ItemGroup>
 
-	<Import Project="..\ApplicationConstants\ApplicationConstants.projitems" Label="Shared" />
+	<Import Project="..\ApplicationBase.Shared\ApplicationBase.Shared.projitems" Label="Shared" />
 
 
 </Project>

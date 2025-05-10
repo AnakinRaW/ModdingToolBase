@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using AnakinRaW.AppUpdaterFramework.Configuration;
+﻿using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -15,6 +10,12 @@ using AnakinRaW.ExternalUpdater;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
+using IServiceProvider = System.IServiceProvider;
 
 namespace AnakinRaW.AppUpdaterFramework.External;
 
@@ -23,60 +24,63 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IServiceProvider _serviceProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IProductService _productService;
-    private readonly IExternalUpdaterLauncher _launcher;
     private readonly IPendingComponentStore _pendingComponentStore;
     private readonly IReadOnlyBackupManager _backupManager;
-    private readonly IReadOnlyDownloadRepository _downloadRepository;
-    private readonly ICurrentProcessInfoProvider _currentProcessInfoProvider;
+    private readonly IReadOnlyFileRepository _downloadFileRepository;
     private readonly UpdateConfiguration _updateConfig;
 
     private readonly string _tempPath;
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _serviceProvider = serviceProvider;
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _launcher = serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
         _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
-        _downloadRepository = serviceProvider.GetRequiredService<IReadOnlyDownloadRepository>();
-        _currentProcessInfoProvider = serviceProvider.GetRequiredService<ICurrentProcessInfoProvider>();
+        _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetReadOnlyRepository();
         _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
         // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator cause commandline arg parsing errors
         _tempPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
     }
 
-    public UpdateOptions CreateUpdateOptions()
+    public ExternalUpdateOptions CreateUpdateOptions()
     {
-        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
         var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
 
-        return new UpdateOptions
+        return new ExternalUpdateOptions
         {
             AppToStart = cpi.ProcessFilePath!,
             AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
             UpdateFile = updateInformationFile,
-            LoggingDirectory = _tempPath
+            LoggingDirectory = _tempPath,
+#if DEBUG
+            Timeout = 90,
+#endif
         };
     }
 
-    public RestartOptions CreateRestartOptions(bool elevate)
+    public ExternalRestartOptions CreateRestartOptions(bool elevate)
     {
-        var cpi = _currentProcessInfoProvider.GetCurrentProcessInfo();
+        var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
-        return new RestartOptions
+
+        return new ExternalRestartOptions
         {
             AppToStart = cpi.ProcessFilePath!,
             AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
             Elevate = elevate,
-            LoggingDirectory = _tempPath
+            LoggingDirectory = _tempPath,
+#if DEBUG
+            Timeout = 90,
+#endif
         };
     }
 
@@ -86,16 +90,17 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
 
         if (updater is not SingleFileComponent updaterComponent)
-            throw new NotSupportedException("External updater component not registered to current product.");
+            throw new InvalidOperationException("External updater component not registered to current product.");
 
-        var filePath = updaterComponent.GetFullPath(_serviceProvider, _productService.GetCurrentInstance().Variables);
+        var filePath = updaterComponent.GetFullPath(_fileSystem, _productService.GetCurrentInstance().Variables);
         return _fileSystem.FileInfo.New(filePath);
     }
 
     public void Launch(ExternalUpdaterOptions options)
     {
         var updater = GetExternalUpdater();
-        _launcher.Start(updater, options);
+        var launcher = _serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
+        using var _ = launcher.Start(updater, options);
     }
 
     private List<UpdateInformation> CollectUpdateInformation()
@@ -169,7 +174,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         if (action == UpdateAction.Keep)
             throw new NotSupportedException("UpdateAction Keep is not supported");
 
-        var componentLocation = component.GetFullPath(_serviceProvider, _productService.GetCurrentInstance().Variables);
+        var componentLocation = component.GetFullPath(_fileSystem, _productService.GetCurrentInstance().Variables);
 
         string? destination;
         string source;
@@ -177,7 +182,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         switch (action)
         {
             case UpdateAction.Update:
-                source = _downloadRepository.GetComponent(component)?.FullName ??
+                source = _downloadFileRepository.GetComponent(component)?.FullName ??
                          throw new InvalidOperationException(
                              $"Unable to find source location for component: {component}");
                 destination = componentLocation;
@@ -200,8 +205,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     private string? CreateAppStartArguments()
     {
-        if (!_updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart)
-            return null;
-        return null;
+        return _updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart ? 
+            ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThroughAsBase64() : 
+            null;
     }
 }

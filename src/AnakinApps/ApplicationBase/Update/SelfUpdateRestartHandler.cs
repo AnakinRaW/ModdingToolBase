@@ -1,0 +1,130 @@
+﻿using System;
+using System.IO.Abstractions;
+using AnakinRaW.ApplicationBase.Environment;
+using AnakinRaW.CommonUtilities;
+using AnakinRaW.CommonUtilities.FileSystem.Normalization;
+using AnakinRaW.CommonUtilities.Registry;
+using AnakinRaW.ExternalUpdater;
+using AnakinRaW.ExternalUpdater.Options;
+using AnakinRaW.ExternalUpdater.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+
+namespace AnakinRaW.ApplicationBase.Update;
+
+internal sealed class SelfUpdateRestartHandler : IDisposable
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly string? _logFileDirectory;
+    private readonly IFileSystem _fileSystem;
+    private readonly ILogger? _logger;
+    private readonly UpdatableApplicationEnvironment _applicationEnvironment;
+    private readonly ApplicationUpdateRegistry _updateRegistry;
+
+    public SelfUpdateRestartHandler(
+        UpdatableApplicationEnvironment applicationEnvironment, 
+        IServiceProvider services,
+        string? logFileDirectory = null)
+    {
+        _applicationEnvironment = applicationEnvironment;
+        _serviceProvider = services;
+        _logFileDirectory = logFileDirectory;
+        _fileSystem = services.GetRequiredService<IFileSystem>();
+        _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
+        
+        var registry = services.GetRequiredService<IRegistry>();
+        _updateRegistry = new ApplicationUpdateRegistry(registry, _applicationEnvironment);
+    }
+
+    public SelfUpdateResult HandleSelfUpdate(string[] args)
+    {
+        if (!_applicationEnvironment.UpdateConfiguration.RestartConfiguration.SupportsRestart)
+            return SelfUpdateResult.None;
+
+        if (ExternalUpdaterResultOptions.TryParse(args, out var externalUpdaterResult) && !HandleRestartResult(externalUpdaterResult.Result))
+            return SelfUpdateResult.Reset;
+
+        if (_updateRegistry.RequiresUpdate)
+        {
+            _logger?.LogInformation("Registry indicating update is required: Running external updater...");
+            try
+            {
+                LaunchExternalUpdater();
+                _logger?.LogInformation("ExternalUpdater running. Closing application!");
+                return SelfUpdateResult.RestartRequired;
+            }
+            catch (Exception e)
+            {
+                _logger?.LogError(e, $"Failed to run ExternalUpdater. Starting application normally: {e.Message}");
+                _updateRegistry.Reset();
+            }
+        }
+
+        return SelfUpdateResult.Success;
+    }
+
+    public void Dispose()
+    {
+        _updateRegistry.Dispose();
+    }
+
+    private bool HandleRestartResult(ExternalUpdaterResult result)
+    {
+        _logger?.LogTrace($"ExternalUpdater result: '{result}'");
+
+        if (result == ExternalUpdaterResult.UpdateFailedNoRestore || _updateRegistry.ResetApp)
+        {
+            _logger?.LogDebug($"Resetting app due to ExternalUpdater result '{result}' or UpdateRegistry/ResetApp = {_updateRegistry.ResetApp}");
+            _updateRegistry.Reset();
+            return false;
+        }
+
+        if (result is ExternalUpdaterResult.UpdateFailedWithRestore or ExternalUpdaterResult.UpdateSuccess)
+        {
+            _logger?.LogDebug($"ExternalUpdater indicated result '{result}'.");
+            _updateRegistry.Reset();
+        }
+
+        return true;
+    }
+
+    private void LaunchExternalUpdater()
+    {
+        var updaterPath = _updateRegistry.UpdaterPath;
+        if (string.IsNullOrEmpty(updaterPath))
+            throw new InvalidOperationException("No path for ExternalUpdater set in registry.");
+
+        var updater = _fileSystem.FileInfo.New(updaterPath!);
+
+        var updateArgs = _updateRegistry.UpdateCommandArgs;
+        if (updateArgs is null)
+            throw new InvalidOperationException("No options for ExternalUpdater set in registry.");
+
+        var cpi = CurrentProcessInfo.Current;
+        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+            throw new NotSupportedException("The current process is not running from a file.");
+
+        var loggingPath = string.IsNullOrEmpty(_logFileDirectory)
+            ? _fileSystem.Path.GetTempPath()
+            : _logFileDirectory;
+
+        // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator cause commandline arg parsing errors
+        loggingPath = PathNormalizer.Normalize(loggingPath!, PathNormalizeOptions.TrimTrailingSeparators);
+
+        var passThroughArgs = _applicationEnvironment
+            .UpdateConfiguration.RestartConfiguration.PassCurrentArgumentsForRestart
+            ? ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThroughAsBase64()
+            : null;
+
+        var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)
+            .WithCurrentData(
+                cpi.ProcessFilePath!,
+                passThroughArgs,
+                cpi.Id,
+                loggingPath,
+                _serviceProvider);
+
+        using var _ = new ExternalUpdaterLauncher(_serviceProvider).Start(updater, launchOptions);
+    }
+}

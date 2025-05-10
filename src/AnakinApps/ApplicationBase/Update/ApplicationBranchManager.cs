@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -13,14 +13,14 @@ public class ApplicationBranchManager : BranchManagerBase
 
     public override string StableBranchName => ApplicationConstants.StableBranchName;
 
-    public ApplicationBranchManager(IServiceProvider serviceProvider) : base(serviceProvider)
+    public ApplicationBranchManager(UpdatableApplicationEnvironment applicationEnvironment, IServiceProvider serviceProvider) : base(serviceProvider)
     {
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
-        var applicationEnvironment = serviceProvider.GetRequiredService<IApplicationEnvironment>();
+       
         _branchUtilities = new ApplicationBranchUtilities(
             applicationEnvironment.UpdateMirrors,
-            applicationEnvironment.UpdateDownloadManagerConfiguration,
+            applicationEnvironment.UpdateConfiguration.DownloadConfiguration,
             serviceProvider);
     }
 
@@ -29,7 +29,7 @@ public class ApplicationBranchManager : BranchManagerBase
         return _branchUtilities.GetAvailableBranchesAsync();
     }
 
-    protected override ICollection<Uri> BuildManifestUris(string branchName)
+    protected override IEnumerable<Uri> BuildManifestLocations(string branchName)
     {
         return _branchUtilities.BuildManifestUris(branchName);
     }

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:designer="clr-namespace:AnakinRaW.ApplicationBase.ViewModels.Designer"
              xmlns:converters1="clr-namespace:AnakinRaW.ApplicationBase.Converters"
-             xmlns:interaction="clr-namespace:AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;assembly=AnakinRaW.AppUpdaterFramework"
+             xmlns:interaction1="clr-namespace:AnakinRaW.AppUpdaterFramework.Handlers.Interaction;assembly=AnakinRaW.AppUpdaterFramework"
              mc:Ignorable="d" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance {x:Type designer:DesignerKillProcessDialogViewModel}, IsDesignTimeCreatable=True}">
 
@@ -13,7 +13,7 @@
 
         <converters1:LockingProcessInfoTextConverter x:Key="LockingProcessInfoTextConverter"/>
 
-        <DataTemplate x:Key="ProcessItemTemplate" DataType="{x:Type interaction:ILockingProcess}">
+        <DataTemplate x:Key="ProcessItemTemplate" DataType="{x:Type interaction1:ILockingProcess}">
             <TextBlock Margin="12,0,0,0" Text="{Binding ., Converter={StaticResource LockingProcessInfoTextConverter}}" FontStyle="Italic"/>
         </DataTemplate>
     </FrameworkElement.Resources>

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO.Abstractions;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -10,5 +10,5 @@ public interface IPhysicalInstallable : IInstallableComponent
     /// </summary>
     string InstallPath { get; }
 
-    string GetFullPath(IServiceProvider serviceProvider, IReadOnlyDictionary<string, string> variables);
+    string GetFullPath(IFileSystem fileSystem, IReadOnlyDictionary<string, string> variables);
 }

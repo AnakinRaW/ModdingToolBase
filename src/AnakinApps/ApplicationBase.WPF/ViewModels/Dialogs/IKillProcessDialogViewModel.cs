@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 

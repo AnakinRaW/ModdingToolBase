@@ -15,17 +15,17 @@ public class UpdateConfiguration
         DownloadConfiguration = DownloadManagerConfiguration.Default
     };
 
+    public required string DownloadLocation { get; init; }
+
     public byte DownloadRetryCount { get; init; }
 
-    public required string DownloadLocation { get; init; }
+    public DownloadManagerConfiguration DownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
+
+    public bool ValidateInstallation { get; init; }
 
     public BackupPolicy BackupPolicy { get; init; }
 
     public string? BackupLocation { get; init; }
-
-    public bool ValidateInstallation { get; init; }
-
-    public DownloadManagerConfiguration DownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
 
     public UpdateRestartConfiguration RestartConfiguration { get; init; } = new();
 }

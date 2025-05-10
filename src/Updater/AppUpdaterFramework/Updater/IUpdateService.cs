@@ -12,11 +12,15 @@ public interface IUpdateService
 
     event EventHandler<IUpdateCatalog?> CheckingForUpdatesCompleted;
 
+    event EventHandler<UpdateResult?> UpdateCompleted;
+
     event EventHandler<IUpdateSession> UpdateStarted;
 
-    event EventHandler UpdateCompleted;
+    bool IsUpdating { get; }
+
+    bool IsCheckingForUpdates { get; }
 
     Task<IUpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default);
-
-    Task<UpdateResult> UpdateAsync(IUpdateCatalog updateCatalog);
+    
+    Task<UpdateResult?> UpdateAsync(IUpdateCatalog updateCatalog, CancellationToken token = default);
 }

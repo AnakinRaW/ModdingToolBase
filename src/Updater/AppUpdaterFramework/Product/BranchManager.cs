@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
@@ -25,23 +25,15 @@ public abstract class BranchManagerBase : IBranchManager
         _manifestLoader = serviceProvider.GetRequiredService<IManifestLoader>();
     }
 
+    public ProductBranch GetBranchFromName(string branchName)
+    {
+        ThrowHelper.ThrowIfNullOrEmpty(branchName);
+        var isDefault = ProductBranch.BranchNamEqualityComparer.Equals(branchName, StableBranchName);
+        var manifestLocations = BuildManifestLocations(branchName);
+        return new ProductBranch(branchName, manifestLocations, isDefault);
+    }
+
     public abstract Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
-
-    public static string GetBranchName(SemVersion version, string defaultName, out bool isPrerelease)
-    {
-        var branchName = version.Prerelease;
-        if (string.IsNullOrEmpty(branchName))
-            branchName = defaultName;
-        isPrerelease = version.IsPrerelease;
-        return branchName;
-    }
-
-    public virtual ProductBranch GetBranchFromVersion(SemVersion version)
-    {
-        var branchName = GetBranchName(version, StableBranchName, out var preRelease);
-        var manifestUris = BuildManifestUris(branchName);
-        return new ProductBranch(branchName, manifestUris, preRelease);
-    }
 
     public async Task<IProductManifest> GetManifestAsync(IProductReference productReference, CancellationToken token = default)
     {
@@ -54,7 +46,6 @@ public abstract class BranchManagerBase : IBranchManager
         var branch = productReference.Branch;
         
         Exception? lastException = null;
-
 
         if (branch.ManifestLocations.Count == 0)
             throw new CatalogDownloadException("No location to an update manifest specified.");
@@ -82,8 +73,8 @@ public abstract class BranchManagerBase : IBranchManager
         _logger?.LogError(lastException, message);
         throw new CatalogDownloadException("Could not download branch manifest from all sources.", lastException!);
     }
-    
-    protected abstract ICollection<Uri> BuildManifestUris(string branchName);
+
+    protected abstract IEnumerable<Uri> BuildManifestLocations(string branchName);
 
     protected virtual DownloadOptions? GetDownloadOptionsForManifestDownload(Uri manifestUri, IProductReference productReference)
     {

@@ -19,10 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppUpdaterFramework.Manifes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppUpdaterFramework.WPF", "src\Updater\AppUpdaterFramework.WPF\AppUpdaterFramework.WPF.csproj", "{46E102C1-82EA-4B9F-8277-946383BCBBC7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalUpdater", "src\Updater\ExternalUpdater\ExternalUpdater.csproj", "{7897F0FF-D4EF-44C4-B281-4CEED210C200}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalUpdater.CLI", "src\Updater\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj", "{E7148201-658F-4014-860C-3E88CB9056E1}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommonUtilities", "CommonUtilities", "{00D28FD4-7920-4E1E-B4C9-F03677506441}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.Windows", "src\CommonUtilities\CommonUtilities.Windows\CommonUtilities.Windows.csproj", "{2A6A5D0B-975C-4C07-B30C-02122D3E0A9C}"
@@ -35,13 +31,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.WPF.Core", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonUtilities.WPF.Imaging", "src\CommonUtilities\CommonUtilities.WPF.Imaging\CommonUtilities.WPF.Imaging.csproj", "{783B77D6-1D37-47DF-97A2-9A43EFB6FD32}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ApplicationConstants", "src\AnakinApps\ApplicationConstants\ApplicationConstants.shproj", "{B297A13A-8E3A-436C-BA97-8B5F57827FFE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ApplicationBase.Shared", "src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.shproj", "{B297A13A-8E3A-436C-BA97-8B5F57827FFE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppUpdaterFramework.Core", "src\Updater\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj", "{E35EE0D4-5517-460F-A369-42F21929FD27}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FtpUploader", "src\AnakinApps\FtpUploader\FtpUploader.csproj", "{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationBase.CLI", "src\AnakinApps\ApplicationBase.CLI\ApplicationBase.CLI.csproj", "{84859A20-0775-4B22-BA6A-D315DD824BA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationBase.CommandLine", "src\AnakinApps\ApplicationBase.CommandLine\ApplicationBase.CommandLine.csproj", "{D73B19D4-4E86-B4D9-96A9-58CC93A23BCB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalUpdater.Core", "src\Updater\ExternalUpdater.Core\ExternalUpdater.Core.csproj", "{BCB7F421-E647-3191-37F6-B9F558E3BA65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalUpdater.App", "src\Updater\ExternalUpdater.App\ExternalUpdater.App.csproj", "{CEF9C237-584B-9229-B68E-180E9D9B5A63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,14 +73,6 @@ Global
 		{46E102C1-82EA-4B9F-8277-946383BCBBC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46E102C1-82EA-4B9F-8277-946383BCBBC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E102C1-82EA-4B9F-8277-946383BCBBC7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7897F0FF-D4EF-44C4-B281-4CEED210C200}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7897F0FF-D4EF-44C4-B281-4CEED210C200}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7897F0FF-D4EF-44C4-B281-4CEED210C200}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7897F0FF-D4EF-44C4-B281-4CEED210C200}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7148201-658F-4014-860C-3E88CB9056E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7148201-658F-4014-860C-3E88CB9056E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7148201-658F-4014-860C-3E88CB9056E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7148201-658F-4014-860C-3E88CB9056E1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2A6A5D0B-975C-4C07-B30C-02122D3E0A9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2A6A5D0B-975C-4C07-B30C-02122D3E0A9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A6A5D0B-975C-4C07-B30C-02122D3E0A9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -109,10 +101,18 @@ Global
 		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26}.Release|Any CPU.Build.0 = Release|Any CPU
-		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{84859A20-0775-4B22-BA6A-D315DD824BA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D73B19D4-4E86-B4D9-96A9-58CC93A23BCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D73B19D4-4E86-B4D9-96A9-58CC93A23BCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D73B19D4-4E86-B4D9-96A9-58CC93A23BCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D73B19D4-4E86-B4D9-96A9-58CC93A23BCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCB7F421-E647-3191-37F6-B9F558E3BA65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCB7F421-E647-3191-37F6-B9F558E3BA65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCB7F421-E647-3191-37F6-B9F558E3BA65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCB7F421-E647-3191-37F6-B9F558E3BA65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEF9C237-584B-9229-B68E-180E9D9B5A63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEF9C237-584B-9229-B68E-180E9D9B5A63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEF9C237-584B-9229-B68E-180E9D9B5A63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEF9C237-584B-9229-B68E-180E9D9B5A63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -124,8 +124,6 @@ Global
 		{80358CFB-9F90-484D-B8B2-923949F25B7C} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 		{F45728E9-A66B-4BBD-BA60-3A5667D364AC} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 		{46E102C1-82EA-4B9F-8277-946383BCBBC7} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
-		{7897F0FF-D4EF-44C4-B281-4CEED210C200} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
-		{E7148201-658F-4014-860C-3E88CB9056E1} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 		{2A6A5D0B-975C-4C07-B30C-02122D3E0A9C} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
 		{310F805C-4174-4B67-86BD-CC2AFB46158A} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
 		{617A8CAB-1187-4BCD-B7A9-8F8C79AE0C22} = {00D28FD4-7920-4E1E-B4C9-F03677506441}
@@ -134,15 +132,16 @@ Global
 		{B297A13A-8E3A-436C-BA97-8B5F57827FFE} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
 		{E35EE0D4-5517-460F-A369-42F21929FD27} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 		{9BF0BDF9-2120-4B70-A2EC-48418F81CD26} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
-		{84859A20-0775-4B22-BA6A-D315DD824BA1} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
+		{D73B19D4-4E86-B4D9-96A9-58CC93A23BCB} = {96123381-B6EC-4D84-BF50-3A35AFECA911}
+		{BCB7F421-E647-3191-37F6-B9F558E3BA65} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
+		{CEF9C237-584B-9229-B68E-180E9D9B5A63} = {A766C145-56AC-4234-A34E-E0CAC345FE0F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2DEE17D6-FFB9-40DF-B176-62A708BABB71}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{96907c99-deab-4c71-bdf9-28c900460659}*SharedItemsImports = 5
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{9bf0bdf9-2120-4b70-a2ec-48418f81cd26}*SharedItemsImports = 5
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{b297a13a-8e3a-436c-ba97-8b5f57827ffe}*SharedItemsImports = 13
-		src\AnakinApps\ApplicationConstants\ApplicationConstants.projitems*{cf2a0a06-f0bd-40ea-953c-717da03c7e89}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.projitems*{96907c99-deab-4c71-bdf9-28c900460659}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.projitems*{9bf0bdf9-2120-4b70-a2ec-48418f81cd26}*SharedItemsImports = 5
+		src\AnakinApps\ApplicationBase.Shared\ApplicationBase.Shared.projitems*{cf2a0a06-f0bd-40ea-953c-717da03c7e89}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
