@@ -7,7 +7,7 @@ public static class ExternalUpdaterConstants
     
     public static string GetExecutableFileName()
     {
-        return "AnakinRaW.ExternalUpdate.exe";
+        return "AnakinRaW.ExternalUpdater.exe";
         //return $"{ComponentIdentity}.exe";
     }
 }
