@@ -2,10 +2,12 @@
 
 public static class ExternalUpdaterConstants
 {
-    public const string ComponentIdentity = "AnakinRaW.ExternalUpdater";
+    //public const string ComponentIdentity = "AnakinRaW.ExternalUpdater";
+    public const string ComponentIdentity = "ExternalUpdater";
     
     public static string GetExecutableFileName()
     {
-        return $"{ComponentIdentity}.exe";
+        return "AnakinRaW.ExternalUpdate.exe";
+        //return $"{ComponentIdentity}.exe";
     }
 }
