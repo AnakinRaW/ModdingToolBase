@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 
@@ -23,10 +22,10 @@ public static class ExternalUpdaterArgumentUtilities
     {
         ExternalUpdaterOptions result = null!;
         
-        result = Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(args)
+        result = Parser.Default.ParseArguments<ExternalRestartOptions, ExternalUpdateOptions>(args)
             .MapResult(
-                (RestartOptions opts) => result = opts,
-                (UpdateOptions opts) => result = opts,
+                (ExternalRestartOptions opts) => result = opts,
+                (ExternalUpdateOptions opts) => result = opts,
                 errors => throw new ArgumentException($"The provided args cannot be parsed: {errors.FirstOrDefault()}"));
 
         return result;
@@ -34,21 +33,13 @@ public static class ExternalUpdaterArgumentUtilities
 
     public static string ToArgs(this ExternalUpdaterOptions option)
     {
-        return Parser.Default.FormatCommandLine(option, config =>
+        return Parser.Default.FormatCommandLine(option, s =>
         {
-            config.SkipDefault = true;
+            s.SkipDefault = true;
         });
     }
 
-    internal static string QuoteArgs(string input)
-    {
-        return $"\"{input}\"";
-    }
-
-    [DllImport("kernel32", CharSet = CharSet.Unicode)]
-    static extern IntPtr GetCommandLineW();
-
-    public static string? GetCurrentApplicationCommandLineForPassThrough()
+    public static string? GetCurrentApplicationCommandLineForPassThroughAsBase64()
     {
         var currentCommandLineArgs = Environment.CommandLine.SplitArgs(true);
 
@@ -86,13 +77,14 @@ public static class ExternalUpdaterArgumentUtilities
         if (actualArgs.Count == 0)
             return null;
 
-        return string.Join(" ", actualArgs);
+        var argsString = string.Join(" ", actualArgs);
+        return Convert.ToBase64String(Encoding.Default.GetBytes(argsString));
     }
 
     public static ExternalUpdaterOptions WithCurrentData(
         this ExternalUpdaterOptions options, 
         string appToStart,
-        string? appToStartArgs,
+        string? appToStartArgsBase64,
         int? pid,
         string? loggingDirectory,
         IServiceProvider serviceProvider)
@@ -103,7 +95,7 @@ public static class ExternalUpdaterArgumentUtilities
         if (!string.IsNullOrEmpty(loggingDirectory))
             loggingDirectory = fileSystem.Path.GetFullPath(loggingDirectory!);
 
-        if (options is UpdateOptions updateOptions)
+        if (options is ExternalUpdateOptions updateOptions)
         {
             if (ReplaceUpdateItemsWithCurrentApp(updateOptions, appToStart, out var updateItems, serviceProvider))
                 options = updateOptions with { UpdateFile = null, Payload = updateItems!.ToPayload() };
@@ -112,7 +104,7 @@ public static class ExternalUpdaterArgumentUtilities
         return options with
         {
             AppToStart = appToStart, 
-            AppToStartArguments = appToStartArgs,
+            AppToStartArguments = appToStartArgsBase64,
             Pid = pid, 
             LoggingDirectory = loggingDirectory
         };
@@ -130,7 +122,7 @@ public static class ExternalUpdaterArgumentUtilities
     }
 
     private static bool ReplaceUpdateItemsWithCurrentApp(
-        UpdateOptions oldOptions, 
+        ExternalUpdateOptions oldOptions, 
         string currentAppPath, 
         out IList<UpdateInformation>? updateInformation, 
         IServiceProvider serviceProvider)

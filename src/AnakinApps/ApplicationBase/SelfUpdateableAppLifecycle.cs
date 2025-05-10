@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -46,12 +48,12 @@ public abstract class SelfUpdateableAppLifecycle
     public async Task<int> StartAsync(string[] args)
     {
         StartInternal(args);
-        var appServices = CreateAppServices(); 
+        var appServices = CreateAppServices(args); 
         // ConfigureAwait cannot be set to false here, because WPF apps might expect the context of the main thread.
         return await RunAppAsync(args, appServices);
     }
 
-    private IServiceProvider CreateAppServices()
+    private IServiceProvider CreateAppServices(IReadOnlyCollection<string> args)
     {
         var services = new ServiceCollection();
 
@@ -62,7 +64,7 @@ public abstract class SelfUpdateableAppLifecycle
         if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplication)
             services.AddSingleton<IUpdateConfigurationProvider>(updatableApplication);
 
-        CreateAppServices(services);
+        CreateAppServices(services, args);
         return services.BuildServiceProvider();
     }
 
@@ -74,9 +76,11 @@ public abstract class SelfUpdateableAppLifecycle
 
     protected abstract Task<int> RunAppAsync(string[] args, IServiceProvider appServiceProvider);
 
-    protected abstract void ResetApp();
+    protected virtual void ResetApp(ILogger? logger)
+    {
+    }
 
-    protected virtual void CreateAppServices(IServiceCollection services)
+    protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyCollection<string> args)
     {
     }
 
@@ -102,7 +106,7 @@ public abstract class SelfUpdateableAppLifecycle
             var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
 
             if (selfUpdateResult == SelfUpdateResult.Reset)
-                ResetApp();
+                ResetApp(logger);
             if (selfUpdateResult == SelfUpdateResult.RestartRequired)
                 System.Environment.Exit(RestartConstants.RestartRequiredCode);
         }
@@ -144,7 +148,7 @@ public abstract class SelfUpdateableAppLifecycle
 
             var loggingDir = _bootstrapperLoggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, tempSubFolderName));
 
-            var filePath = (FileSystem.Path.Combine(loggingDir, "appBootstrap.log"));
+            var filePath = FileSystem.Path.Combine(loggingDir, "appBootstrap.log");
 
             var fileLogger = new LoggerConfiguration()
                 .WriteTo.File(filePath, rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: minLogLevel)

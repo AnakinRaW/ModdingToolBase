@@ -7,7 +7,7 @@ public record ExternalUpdaterOptions
     [Option("appToStart", Required = true, HelpText = "The absolute path of the application to start.")]
     public required string AppToStart { get; init; }
 
-    [Option("appToStartArgs", Required = false, HelpText = "The arguments to use when launching 'appToStart'.")]
+    [Option("appToStartArgs", Required = false, HelpText = "The arguments to use when launching 'appToStart' encoded as base64.")]
     public string? AppToStartArguments { get; init; } = null;
 
     [Option("elevate", Required = false, HelpText = "The application shall be started with higher rights.")]

@@ -45,14 +45,14 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _tempPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
     }
 
-    public UpdateOptions CreateUpdateOptions()
+    public ExternalUpdateOptions CreateUpdateOptions()
     {
         var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
         var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
 
-        return new UpdateOptions
+        return new ExternalUpdateOptions
         {
             AppToStart = cpi.ProcessFilePath!,
             AppToStartArguments = CreateAppStartArguments(),
@@ -65,13 +65,13 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         };
     }
 
-    public RestartOptions CreateRestartOptions(bool elevate)
+    public ExternalRestartOptions CreateRestartOptions(bool elevate)
     {
         var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
 
-        return new RestartOptions
+        return new ExternalRestartOptions
         {
             AppToStart = cpi.ProcessFilePath!,
             AppToStartArguments = CreateAppStartArguments(),
@@ -206,7 +206,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private string? CreateAppStartArguments()
     {
         return _updateConfig.RestartConfiguration.PassCurrentArgumentsForRestart ? 
-            ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThrough() : 
+            ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThroughAsBase64() : 
             null;
     }
 }

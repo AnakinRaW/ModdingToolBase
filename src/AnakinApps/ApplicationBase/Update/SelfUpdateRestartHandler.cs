@@ -114,7 +114,7 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
 
         var passThroughArgs = _applicationEnvironment
             .UpdateConfiguration.RestartConfiguration.PassCurrentArgumentsForRestart
-            ? ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThrough()
+            ? ExternalUpdaterArgumentUtilities.GetCurrentApplicationCommandLineForPassThroughAsBase64()
             : null;
 
         var launchOptions = ExternalUpdaterArgumentUtilities.FromArgs(updateArgs)

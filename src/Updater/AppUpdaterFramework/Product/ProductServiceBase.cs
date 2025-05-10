@@ -158,7 +158,7 @@ public abstract class ProductServiceBase : IProductService
         }
     }
 
-    private void OnUpdateCompleted(object sender, EventArgs e)
+    private void OnUpdateCompleted(object sender, UpdateResult? e)
     {
         Reset();
     }

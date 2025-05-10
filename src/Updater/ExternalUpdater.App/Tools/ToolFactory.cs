@@ -9,8 +9,8 @@ internal class ToolFactory
     {
         return options switch
         {
-            UpdateOptions updateArguments => new UpdateTool(updateArguments, serviceProvider),
-            RestartOptions restartArguments => new RestartTool(restartArguments, serviceProvider),
+            ExternalUpdateOptions updateArguments => new UpdateTool(updateArguments, serviceProvider),
+            ExternalRestartOptions restartArguments => new RestartTool(restartArguments, serviceProvider),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

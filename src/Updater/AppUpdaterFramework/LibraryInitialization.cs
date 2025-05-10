@@ -1,6 +1,5 @@
 ﻿using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.External;
-using AnakinRaW.AppUpdaterFramework.FileLocking;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Installer;
@@ -40,11 +39,6 @@ public static class LibraryInitialization
         serviceCollection.TryAddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
         serviceCollection.TryAddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
 
-        serviceCollection.TryAddSingleton<IRestartHandler>(sp => new UpdateRestartHandler(sp));
         serviceCollection.TryAddSingleton<ILockedFileInteractionHandler>(sp => new DefaultLockedFileInteractionHandler(sp));
-        serviceCollection.TryAddSingleton<IUpdateResultInteractionHandler>(sp => new DefaultUpdateResultInteractionHandler(sp));
-        serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new UpdateResultHandler(sp));
-        serviceCollection.TryAddSingleton<IUpdateHandler>(sp => new UpdateHandler(sp));
-        serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new UpdateResultHandler(sp));
     }
 }

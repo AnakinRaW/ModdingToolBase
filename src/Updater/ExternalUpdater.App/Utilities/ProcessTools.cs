@@ -27,7 +27,7 @@ internal class ProcessTools : IProcessTools
     public void StartApplication(
         IFileInfo application,
         ExternalUpdaterResultOptions appStartOptions,
-        string? passThroughArgs,
+        string? passThroughArgsBase64,
         bool elevate)
     {
         if (!application.Exists)
@@ -38,7 +38,7 @@ internal class ProcessTools : IProcessTools
             UseShellExecute = true,
         };
 
-        AddArgumentsToStartInfo(startInfo, appStartOptions, passThroughArgs);
+        AddArgumentsToStartInfo(startInfo, appStartOptions, passThroughArgsBase64);
 
         if (elevate)
             startInfo.Verb = "runas";
@@ -52,31 +52,18 @@ internal class ProcessTools : IProcessTools
     private static void AddArgumentsToStartInfo(
         ProcessStartInfo startInfo, 
         ExternalUpdaterResultOptions resultOptions,
-        string? passThroughArguments)
+        string? passThroughArgsBase64)
     {
-#if NET
-        var resultArgs = Parser.Default.FormatCommandLineArgs(resultOptions);
-        
-        string[]? passThroughArgList = !string.IsNullOrEmpty(passThroughArguments)
-            // We don't use keepQuote=true here, because starting a process with ArgumentList already handles escaping.
-            ? passThroughArguments.SplitArgs() 
-            : [];
-
-        foreach (var arg in passThroughArgList.Concat(resultArgs)) 
-            startInfo.ArgumentList.Add(arg);  
-#else
         var sb = new StringBuilder();
-
-
-        if (!string.IsNullOrEmpty(passThroughArguments))
+        if (!string.IsNullOrEmpty(passThroughArgsBase64))
         {
-            sb.Append(passThroughArguments);
+            var decoded = Encoding.Default.GetString(Convert.FromBase64String(passThroughArgsBase64));
+            sb.Append(decoded);
             sb.Append(' ');
         }
         sb.Append(Parser.Default.FormatCommandLine(resultOptions));
 
         startInfo.Arguments = sb.ToString();
-#endif
     }
 
 

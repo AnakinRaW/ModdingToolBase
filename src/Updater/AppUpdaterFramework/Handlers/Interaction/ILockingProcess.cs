@@ -1,4 +1,4 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Handlers;
+﻿namespace AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 public interface ILockingProcess
 {

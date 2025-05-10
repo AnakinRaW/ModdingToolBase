@@ -4,5 +4,5 @@ public enum RestartReason
 {
     Update,
     Elevation,
-    FailedRestore
+    RestoreFailed
 }

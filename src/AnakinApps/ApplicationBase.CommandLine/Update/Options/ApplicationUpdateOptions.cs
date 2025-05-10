@@ -11,11 +11,7 @@ public sealed class ApplicationUpdateOptions
         HelpText = "The branch that shall be used for updating. If no branch is specified the current branch will be taken")]
     public string? BranchName { get; init; }
 
-    [Option("updateBranchUrl", Default = null, Required = false, 
+    [Option("updateManifestUrl", Default = null, Required = false, 
         HelpText = "The base URL where to pull update information from. If no URL is specified the default URLs of the application will be used.")]
-    public string? BranchUrl { get; init; }
-
-    public bool? AutomaticRestart { get; init; }
-
-    public bool? Silent { get; init; }
+    public string? ManifestUrl { get; init; }
 }

@@ -4,12 +4,20 @@ namespace AnakinRaW.ApplicationBase;
 
 public static class ConsoleUtilities
 {
+    private const char DefaultLineChar = '─';
+    private const int DefaultLineLength = 20;
+
     public delegate bool ConsoleQuestionValueFactory<T>(string input, out T value);
 
-    public static void WriteHorizontalLine(char lineChar = '─', int length = 20)
+    public static void WriteHorizontalLine(char lineChar = DefaultLineChar, int length = DefaultLineLength)
     {
         var line = new string(lineChar, length);
         Console.WriteLine(line);
+    }
+
+    public static IDisposable HorizontalLineSeparatedBlock(char lineChar = DefaultLineChar, int length = DefaultLineLength)
+    {
+        return new InHorizontalLineBlock(lineChar, length);
     }
 
     public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n')
@@ -31,7 +39,7 @@ public static class ConsoleUtilities
 
             if (answer.Equals(char.ToUpperInvariant(no)))
             {
-                result = true;
+                result = false;
                 return true;
             }
 
@@ -79,7 +87,7 @@ public static class ConsoleUtilities
             {
                 if (input.Length > 0)
                 {
-                    input = input[..^1];
+                    input = input.Substring(0, input.Length - 1);
                     Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                     Console.Write(' ');
                     Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
@@ -93,5 +101,23 @@ public static class ConsoleUtilities
         }
 
         return input;
+    }
+
+    private class InHorizontalLineBlock : IDisposable
+    {
+        private readonly char _lineChar;
+        private readonly int _length;
+
+        public InHorizontalLineBlock(char lineChar = '─', int length = 20)
+        {
+            _lineChar = lineChar;
+            _length = length;
+            WriteHorizontalLine(lineChar, length);
+        }
+
+        public void Dispose()
+        {
+            WriteHorizontalLine(_lineChar, _length);
+        }
     }
 }

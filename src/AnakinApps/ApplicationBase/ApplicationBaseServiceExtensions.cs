@@ -2,7 +2,6 @@
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework;
-using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -30,7 +29,6 @@ public static class ApplicationBaseServiceExtensions
         additionalUpdateServices?.Invoke(serviceCollection);
 
         serviceCollection.TryAddSingleton<IHashingService>(sp => new HashingService(sp));
-        serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new ApplicationUpdateResultHandler(applicationEnvironment, sp));
         
         serviceCollection.AddUpdateFramework();
 

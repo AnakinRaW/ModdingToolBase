@@ -1,17 +1,16 @@
-﻿using System;
-using AnakinRaW.ApplicationBase.Utilities;
-using AnakinRaW.CommonUtilities;
+﻿using AnakinRaW.CommonUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 
-namespace AnakinRaW.ApplicationBase.Services;
+namespace AnakinRaW.ApplicationBase.Utilities;
 
-public class UnhandledExceptionHandler : DisposableObject, IUnhandledExceptionHandler
+public class UnhandledExceptionHandler : DisposableObject
 {
     protected readonly ILogger? Logger;
     protected readonly IServiceProvider Services;
 
-    protected UnhandledExceptionHandler(IServiceProvider services)
+    public UnhandledExceptionHandler(IServiceProvider services)
     {
         Services = services ?? throw new ArgumentNullException(nameof(services));
         Logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());

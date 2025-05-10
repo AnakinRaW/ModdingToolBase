@@ -20,7 +20,7 @@ internal class DefaultLockedFileInteractionHandler : ILockedFileInteractionHandl
         _logger?.LogTrace($"Interaction Result: {LockedFileHandlerInteractionResult.Cancel}");
         return LockedFileHandlerInteractionResult.Cancel;
     }
-
+    
     public void HandleError(string message)
     {
         _logger?.LogTrace($"Interaction Error: {message}");

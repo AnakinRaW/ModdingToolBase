@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using AnakinRaW.ApplicationBase.Environment;
+﻿using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
@@ -11,6 +7,10 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 
 namespace AnakinRaW.ApplicationBase.Update;
 

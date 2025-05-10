@@ -9,7 +9,7 @@ internal interface IProcessTools
     void StartApplication(
         IFileInfo application,
         ExternalUpdaterResultOptions appStartOptions, 
-        string? passThroughArgs, 
+        string? passThroughArgsBase64, 
         bool elevate);
 
     Task<bool> WaitForExitAsync(int? pid, CancellationToken token);

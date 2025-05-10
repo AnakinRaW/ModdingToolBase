@@ -20,10 +20,10 @@ internal static class Program
 {
     private static async Task<int> Main(string[] args)
     {
-        return await Parser.Default.ParseArguments<RestartOptions, UpdateOptions>(args)
+        return await Parser.Default.ParseArguments<ExternalRestartOptions, ExternalUpdateOptions>(args)
             .MapResult(
-                (RestartOptions opts) => ExecuteApplication(opts),
-                (UpdateOptions opts) => ExecuteApplication(opts),
+                (ExternalRestartOptions opts) => ExecuteApplication(opts),
+                (ExternalUpdateOptions opts) => ExecuteApplication(opts),
                 ErrorArgs);
     }
 

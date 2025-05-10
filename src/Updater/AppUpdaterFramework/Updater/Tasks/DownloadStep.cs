@@ -91,8 +91,9 @@ internal class DownloadStep(
             var downloadPath = _downloadRepositoryFactory.GetRepository().AddComponent(Component, productVariables);
             DownloadPath = downloadPath;
 
+            var downloadRetryCount = 1 + _updateConfiguration.DownloadRetryCount;
 
-            for (var i = 0; i < _updateConfiguration.DownloadRetryCount; i++)
+            for (var i = 0; i < downloadRetryCount; i++)
             {
                 if (token.IsCancellationRequested)
                     break;

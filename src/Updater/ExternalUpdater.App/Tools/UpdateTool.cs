@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ExternalUpdater.Tools;
 
-internal sealed class UpdateTool(UpdateOptions options, IServiceProvider serviceProvider)
-    : ProcessTool<UpdateOptions>(options, serviceProvider)
+internal sealed class UpdateTool(ExternalUpdateOptions options, IServiceProvider serviceProvider)
+    : ProcessTool<ExternalUpdateOptions>(options, serviceProvider)
 {
     public override async Task<ExternalUpdaterResult> Run()
     {

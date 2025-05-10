@@ -1,11 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Abstractions;
-using AnakinRaW.CommonUtilities;
+﻿using AnakinRaW.CommonUtilities;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Abstractions;
 
 namespace AnakinRaW.ExternalUpdater.Services;
 

@@ -1,5 +1,4 @@
-﻿using AnakinRaW.AppUpdaterFramework.FileLocking;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;

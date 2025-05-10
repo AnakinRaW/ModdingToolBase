@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AnakinRaW.ExternalUpdater.Options;
 
 [Verb("update", HelpText = "Updates the given application and restarts it")]
-public sealed record UpdateOptions : ExternalUpdaterOptions
+public sealed record ExternalUpdateOptions : ExternalUpdaterOptions
 {
     private IReadOnlyCollection<UpdateInformation>? _updateItems;
     

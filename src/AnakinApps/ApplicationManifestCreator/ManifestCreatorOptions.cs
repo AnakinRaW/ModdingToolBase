@@ -15,6 +15,10 @@ internal class ManifestCreatorOptions
     [Option("origin", Required = true, HelpText = "Root url where all components are expected to be deployed. Must be an absolute uri.")]
     public string Origin { get; init; } = null!;
 
+    [Option('b', "branch", Default = null, 
+        HelpText = "The name of the branch to create the manifest for, or the default branch name if not specified.")]
+    public string? Branch { get; init; } = null!;
+
     [Option("appDataFiles", HelpText = "Files which shall be installed to the application's AppData directory.",
         Separator = ';')]
     public ICollection<string> AppDataComponents { get; init; } = [];

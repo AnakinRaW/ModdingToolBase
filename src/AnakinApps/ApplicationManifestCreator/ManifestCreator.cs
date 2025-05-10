@@ -48,11 +48,11 @@ internal class ManifestCreator
 
     public async Task<int> Run()
     {
+        var branch = _branchManager.GetBranchFromName(Options.Branch ?? _branchManager.StableBranchName);
         var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
-        var branch = productReference.Branch;
-        if (branch is null)
-            throw new InvalidOperationException("No product newBranch created");
 
+        productReference = new ProductReference(productReference.Name, productReference.Version, branch);
+        
         var manifest = await CreateManifest(productReference);
         await WriteManifest(manifest);
 
