@@ -13,18 +13,17 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
 		<PackageReference Include="Testably.Abstractions" Version="9.0.0" />
 		<PackageReference Include="Flurl" Version="4.0.0" />
-		<PackageReference Include="IsExternalInit" Version="1.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Required" Version="1.0.0">
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="PolySharp" Version="1.15.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

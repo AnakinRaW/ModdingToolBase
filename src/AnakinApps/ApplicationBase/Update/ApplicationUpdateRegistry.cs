@@ -46,6 +46,18 @@ public sealed class ApplicationUpdateRegistry : IDisposable
         }
     }
 
+    public string? UpdateBranch
+    {
+        get => _registryKey.GetValueOrDefault<string?>(nameof(UpdateBranch), null, out _);
+        private set
+        {
+            if (string.IsNullOrEmpty(value))
+                _registryKey.DeleteValue(nameof(UpdateBranch));
+            else
+                _registryKey.SetValue(nameof(UpdateBranch), value!);
+        }
+    }
+
     public ApplicationUpdateRegistry(IRegistry registry, UpdatableApplicationEnvironment appEnvironment)
     {
         if (registry == null) 
@@ -89,5 +101,10 @@ public sealed class ApplicationUpdateRegistry : IDisposable
     public void Dispose()
     {
         _registryKey.Dispose();
+    }
+
+    public void SetBranch(string? branchName)
+    {
+        UpdateBranch = branchName;
     }
 }

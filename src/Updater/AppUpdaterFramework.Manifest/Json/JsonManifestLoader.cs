@@ -1,4 +1,11 @@
-﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -6,15 +13,8 @@ using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace AnakinRaW.AppUpdaterFramework;
+namespace AnakinRaW.AppUpdaterFramework.Json;
 
 public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoaderBase(serviceProvider)
 {
@@ -45,12 +45,11 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
             throw new CatalogException("Serialized manifest is null");
 
         var availProduct = BuildReference(appManifest);
-        ValidateCompatibleManifest(availProduct, productReference);
         var catalog = BuildCatalog(appManifest.Components);
         return new ProductManifest(availProduct, catalog);
     }
 
-    private IProductReference BuildReference(ApplicationManifest applicationManifest)
+    private ProductReference BuildReference(ApplicationManifest applicationManifest)
     {
         SemVersion? version = null;
         if (applicationManifest.Version is not null)
@@ -65,7 +64,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
         return new ProductReference(applicationManifest.Name, version, branch);
     }
 
-    private static IReadOnlyList<IProductComponent> BuildCatalog(IEnumerable<AppComponent> manifestComponents)
+    private static List<IProductComponent> BuildCatalog(IEnumerable<AppComponent> manifestComponents)
     {
         var catalog = new List<IProductComponent>();
         foreach (var manifestComponent in manifestComponents)

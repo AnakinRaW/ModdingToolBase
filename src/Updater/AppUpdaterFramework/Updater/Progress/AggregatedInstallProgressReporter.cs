@@ -9,7 +9,7 @@ internal class AggregatedInstallProgressReporter(IComponentProgressReporter prog
     : ComponentAggregatedProgressReporter(progressReporter, steps)
 {
     private readonly object _syncLock = new();
-    private readonly HashSet<string> _visitedComponents = new();
+    private readonly HashSet<string> _visitedComponents = [];
 
     private long _totalProgressSize;
 

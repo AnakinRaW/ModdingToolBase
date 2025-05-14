@@ -58,7 +58,7 @@ internal class WindowsLockingProcessManager : IDisposable
         _registered = true;
         var rgProcesses = processArray?.Select(Convert).ToArray();
 
-        var result = RstrtMgr.RmRegisterResources(_sessionId, fileCount, fileNames, processCount, rgProcesses, 0, null);
+        var result = RstrtMgr.RmRegisterResources(_sessionId, fileCount, fileNames, processCount, rgProcesses);
         if (result.Failed)
             throw new Win32Exception(result.ToHRESULT().Code);
     }
@@ -82,7 +82,7 @@ internal class WindowsLockingProcessManager : IDisposable
         do
         {
 #pragma warning disable CS8604 // Possible null reference argument.
-            result = RstrtMgr.RmGetList(_sessionId, out var pnProcInfoNeeded, ref pnProcInfo, rmProcessInfoArray, out _).ToHRESULT().Code;
+            result = RstrtMgr.RmGetList(_sessionId, out var pnProcInfoNeeded, ref pnProcInfo, rmProcessInfoArray!, out _).ToHRESULT().Code;
 #pragma warning restore CS8604 // Possible null reference argument.
 
             switch (result)

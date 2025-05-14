@@ -4,7 +4,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
 namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
 
-public interface IManifestInstallationDetector
+internal interface IManifestInstallationDetector
 {
     IReadOnlyCollection<IInstallableComponent> DetectInstalledComponents(
         IProductManifest catalog, 

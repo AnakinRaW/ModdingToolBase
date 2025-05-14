@@ -7,7 +7,7 @@ namespace AnakinRaW.AppUpdaterFramework.Restart;
 internal class PendingComponentStore : IWritablePendingComponentStore
 {
 #if NETSTANDARD2_1
-    private readonly ConcurrentBag<PendingComponent> _pendingComponents = new();
+    private readonly ConcurrentBag<PendingComponent> _pendingComponents = [];
 #else
     private readonly ConcurrentStack<PendingComponent> _pendingComponents = new();
 #endif

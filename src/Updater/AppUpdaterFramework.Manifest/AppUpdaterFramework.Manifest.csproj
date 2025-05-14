@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	
+
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<RootNamespace>AnakinRaW.AppUpdaterFramework</RootNamespace>
@@ -7,20 +7,23 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Description>Provides a JSON manifest model.</Description>
+		<Description>Provides data structures to represent an application's manifest.</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.8" />
-		<PackageReference Include="IsExternalInit" Version="1.0.3">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="System.Text.Json" Version="9.0.4" />
+		<PackageReference Include="System.Text.Json" Version="9.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+		<PackageReference Include="PolySharp" Version="1.15.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AppUpdaterFramework\AppUpdaterFramework.csproj" />
 	</ItemGroup>
 
 </Project>

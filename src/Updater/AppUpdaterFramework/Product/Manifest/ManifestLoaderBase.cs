@@ -11,7 +11,7 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
 {
     protected readonly IServiceProvider ServiceProvider = serviceProvider;
 
-    public Task<IProductManifest> LoadManifestAsync(
+    public async Task<IProductManifest> LoadManifestAsync(
         Uri manifestUri, 
         IProductReference productReference,
         DownloadOptions? downloadOptions,
@@ -21,7 +21,9 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
             throw new ArgumentNullException(nameof(manifestUri));
         if (productReference == null)
             throw new ArgumentNullException(nameof(productReference));
-        return LoadManifestCoreAsync(manifestUri, productReference, downloadOptions, cancellationToken);
+        var manifest = await LoadManifestCoreAsync(manifestUri, productReference, downloadOptions, cancellationToken).ConfigureAwait(false);
+        ValidateCompatibleManifest(manifest.Product, productReference);
+        return manifest;
     }
 
     protected abstract Task<IProductManifest> LoadManifestCoreAsync(
@@ -30,7 +32,7 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
         DownloadOptions? downloadOptions,
         CancellationToken cancellationToken = default);
 
-    protected void ValidateCompatibleManifest(IProductReference manifestProduct, IProductReference installedProduct)
+    protected static void ValidateCompatibleManifest(IProductReference manifestProduct, IProductReference installedProduct)
     {
         if (!ProductReferenceEqualityComparer.NameOnly.Equals(manifestProduct, installedProduct))
             throw new CatalogException(

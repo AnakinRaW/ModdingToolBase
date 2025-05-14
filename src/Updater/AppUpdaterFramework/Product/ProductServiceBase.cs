@@ -17,12 +17,11 @@ public abstract class ProductServiceBase : IProductService
 { 
     private readonly object _syncLock = new();
     private readonly IRestartManager _restartManager;
+    protected readonly ILogger? Logger;
+    protected readonly IServiceProvider ServiceProvider;
 
     private bool _isInitialized;
     private InstalledProduct? _installedProduct;
-
-    protected readonly ILogger? Logger;
-    protected readonly IServiceProvider ServiceProvider;
 
     public abstract IDirectoryInfo InstallLocation { get; }
 
@@ -31,8 +30,8 @@ public abstract class ProductServiceBase : IProductService
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _restartManager = serviceProvider.GetRequiredService<IRestartManager>();
-        _restartManager.RestartRequired += OnRestartRequired!;
-        serviceProvider.GetRequiredService<IUpdateService>().UpdateCompleted += OnUpdateCompleted!;
+        _restartManager.RestartRequired += OnRestartRequired;
+        serviceProvider.GetRequiredService<IUpdateService>().UpdateCompleted += OnUpdateCompleted;
     }
 
     public IInstalledProduct GetCurrentInstance()

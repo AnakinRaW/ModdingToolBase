@@ -28,8 +28,8 @@ internal sealed class UpdatePipeline : Pipeline
 
     private readonly HashSet<IUpdateItem> _itemsToProcess;
     
-    private readonly List<DownloadStep> _componentsToDownload = new();
-    private readonly List<InstallStep> _installsOrRemoves = new();
+    private readonly List<DownloadStep> _componentsToDownload = [];
+    private readonly List<InstallStep> _installsOrRemoves = [];
 
     private readonly ParallelStepRunner _downloadsRunner;
     private readonly SequentialStepRunner _installsRunner;

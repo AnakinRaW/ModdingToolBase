@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
-using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.AppUpdaterFramework.Json;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;

@@ -27,7 +27,6 @@ internal sealed class RestartManager : IRestartManager
         {
             RestartType.None => true,
             RestartType.ApplicationRestart => newRestartType > RestartType.ApplicationRestart,
-            RestartType.ApplicationElevation => false,
             _ => false
         };
     }

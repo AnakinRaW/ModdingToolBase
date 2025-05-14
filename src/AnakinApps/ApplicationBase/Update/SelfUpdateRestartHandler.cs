@@ -47,11 +47,10 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
 
         if (_updateRegistry.RequiresUpdate)
         {
-            _logger?.LogInformation("Registry indicating update is required: Running external updater...");
+            _logger?.LogDebug("Registry indicating update is required: Running external updater...");
             try
             {
                 LaunchExternalUpdater();
-                _logger?.LogInformation("ExternalUpdater running. Closing application!");
                 return SelfUpdateResult.RestartRequired;
             }
             catch (Exception e)

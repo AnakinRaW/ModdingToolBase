@@ -93,7 +93,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         }
 
         var installer = _installerFactory.CreateInstaller(Component);
-        installer.Progress += OnInstallerProgress!;
+        installer.Progress += OnInstallerProgress;
 
         try
         {
@@ -156,7 +156,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         }
         finally
         {
-            installer.Progress -= OnInstallerProgress!;
+            installer.Progress -= OnInstallerProgress;
         }
     }
 

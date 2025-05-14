@@ -3,7 +3,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
-using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.AppUpdaterFramework.Json;
 using Flurl;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

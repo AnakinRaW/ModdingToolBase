@@ -26,7 +26,7 @@ internal class Program
 
     private static async Task<int> UploadFiles(FtpUploadOptions opts)
     {
-        var services = CreateServices(opts);
+        var services = CreateServices();
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
@@ -45,7 +45,7 @@ internal class Program
         }
     }
 
-    private static IServiceProvider CreateServices(FtpUploadOptions options)
+    private static IServiceProvider CreateServices()
     {
         var services = new ServiceCollection();
         var fileSystem = new RealFileSystem();
@@ -55,6 +55,7 @@ internal class Program
         {
             l.ClearProviders();
 
+            // ReSharper disable once RedundantAssignment
             var logLevel = LogLevel.Information;
 #if DEBUG
             logLevel = LogLevel.Trace;

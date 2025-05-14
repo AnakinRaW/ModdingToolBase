@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
-using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 
 namespace AnakinRaW.ApplicationBase.Update;

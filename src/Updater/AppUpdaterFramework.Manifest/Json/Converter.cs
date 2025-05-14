@@ -6,7 +6,7 @@ using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-namespace AnakinRaW.AppUpdaterFramework;
+namespace AnakinRaW.AppUpdaterFramework.Json;
 
 public static class Converter
 {

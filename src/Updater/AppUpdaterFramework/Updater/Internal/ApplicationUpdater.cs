@@ -14,21 +14,14 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class ApplicationUpdater : IApplicationUpdater, IComponentProgressReporter
+internal class ApplicationUpdater(IUpdateCatalog updateCatalog, IServiceProvider serviceProvider)
+    : IApplicationUpdater, IComponentProgressReporter
 {
     public event EventHandler<UpdateProgressEventArgs>? Progress;
 
-    private readonly IUpdateCatalog _updateCatalog;
-    private readonly IServiceProvider _serviceProvider;
-
-    private readonly ILogger? _logger;
-
-    public ApplicationUpdater(IUpdateCatalog updateCatalog, IServiceProvider serviceProvider)
-    {
-        _updateCatalog = updateCatalog ?? throw new ArgumentNullException(nameof(updateCatalog));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-    }
+    private readonly IUpdateCatalog _updateCatalog = updateCatalog ?? throw new ArgumentNullException(nameof(updateCatalog));
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly ILogger? _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationUpdater));
 
     public void Report(double progress, string? progressText, ProgressType type, ComponentProgressInfo detailedProgress)
     {

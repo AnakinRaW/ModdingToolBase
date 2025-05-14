@@ -37,7 +37,7 @@ internal static class Extensions
     {
         switch (error)
         {
-            case T _:
+            case T:
                 return true;
             case AggregateException aggregateException:
                 return aggregateException.InnerExceptions.Any(p => p.IsExceptionType<T>());
@@ -62,7 +62,7 @@ internal static class Extensions
     public static Exception? TryGetWrappedException(this Exception exception)
     {
         var wrappedExceptions = exception.TryGetWrappedExceptions();
-        return wrappedExceptions != null && wrappedExceptions.Count == 1 ? wrappedExceptions.Single() : null;
+        return wrappedExceptions is { Count: 1 } ? wrappedExceptions.Single() : null;
     }
 
     public static IReadOnlyCollection<Exception>? TryGetWrappedExceptions(this Exception exception)

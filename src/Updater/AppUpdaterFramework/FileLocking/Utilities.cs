@@ -67,7 +67,7 @@ internal static class Utilities
 
     private static int? GetDebuggerProcess()
     {
-        foreach (var instance in GetVSInstances())
+        foreach (var instance in GetVsInstances())
         {
             var processes = instance.Vs.Debugger.DebuggedProcesses;
             if (processes.Cast<EnvDTE.Process>().Any(process => process.ProcessID == CurrentProcess.Id))
@@ -83,7 +83,7 @@ internal static class Utilities
     [DllImport("ole32.dll")]
     public static extern int CreateBindCtx(int reserved, out IBindCtx ppbc);
 
-    private static IEnumerable<(_DTE Vs, int Pid)> GetVSInstances()
+    private static IEnumerable<(_DTE Vs, int Pid)> GetVsInstances()
     {
         var monikers = new IMoniker[1];
 
@@ -94,15 +94,24 @@ internal static class Utilities
         while (monikerEnumerator.Next(1, monikers, out _) == 0)
         {
             CreateBindCtx(0, out var ctx);
+            var moniker = monikers[0];
 
-            monikers[0].GetDisplayName(ctx, null, out var runningObjectName);
-
-            runningObjectTable.GetObject(monikers[0], out var runningObjectVal);
-
-            if (runningObjectVal is _DTE dte && runningObjectName.StartsWith("!VisualStudio"))
+            try
             {
-                var currentProcessId = int.Parse(runningObjectName.Split(':')[1]);
-                yield return (dte, currentProcessId);
+                monikers[0].GetDisplayName(ctx, null, out var runningObjectName);
+                Marshal.ReleaseComObject(ctx);
+
+                runningObjectTable.GetObject(monikers[0], out var runningObjectVal);
+
+                if (runningObjectVal is _DTE dte && runningObjectName.StartsWith("!VisualStudio.DTE"))
+                {
+                    var currentProcessId = int.Parse(runningObjectName.Split(':')[1]);
+                    yield return (dte, currentProcessId);
+                }
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(moniker);
             }
         }
     }

@@ -65,6 +65,7 @@ internal class Program
         {
             l.ClearProviders();
 
+            // ReSharper disable once RedundantAssignment
             var logLevel = LogLevel.Information;
 #if DEBUG
             logLevel = LogLevel.Trace;

@@ -7,24 +7,50 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.ApplicationBase.Environment;
+using AnakinRaW.CommonUtilities.Registry;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
 public abstract class ApplicationUpdater
 {
+    protected readonly UpdatableApplicationEnvironment Environment;
     protected readonly IServiceProvider ServiceProvider;
     protected readonly IProductService ProductService;
     protected readonly IBranchManager BranchManager;
     protected readonly IUpdateService UpdateService;
     protected readonly ILogger? Logger;
 
-    protected ApplicationUpdater(IServiceProvider serviceProvider)
+    protected ApplicationUpdater(UpdatableApplicationEnvironment environment, IServiceProvider serviceProvider)
     {
+        Environment = environment;
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         ProductService = ServiceProvider.GetRequiredService<IProductService>();
         BranchManager = ServiceProvider.GetRequiredService<IBranchManager>();
         UpdateService = ServiceProvider.GetRequiredService<IUpdateService>();
         Logger = ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
+    }
+
+    public string GetBranchNameFromRegistry(string? branchName, bool setRegistry)
+    {
+        var registry = ServiceProvider.GetRequiredService<IRegistry>();
+        using var updateRegistry = new ApplicationUpdateRegistry(registry, Environment);
+
+        var stableBranchName = BranchManager.StableBranchName;
+
+        if (!string.IsNullOrEmpty(branchName))
+        {
+            if (setRegistry)
+            {
+                updateRegistry.SetBranch(ProductBranch.BranchNamEqualityComparer.Equals(branchName!, stableBranchName)
+                    ? null
+                    : branchName);
+            }
+            return branchName!;
+        }
+
+        var updateBranch = updateRegistry.UpdateBranch;
+        return string.IsNullOrEmpty(updateBranch) ? stableBranchName : updateBranch!;
     }
 
     public ProductBranch CreateBranch(string? branchName = null, string? manifestLocation = null)

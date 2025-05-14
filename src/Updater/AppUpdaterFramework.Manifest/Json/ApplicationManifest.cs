@@ -5,10 +5,11 @@ using System.Text.Json.Serialization;
 using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Semver;
 
-namespace AnakinRaW.AppUpdaterFramework;
+namespace AnakinRaW.AppUpdaterFramework.Json;
 
 public abstract record AppComponentBase(
     [property: JsonPropertyName("id")] string Id,
@@ -46,7 +47,7 @@ public record AppComponent(
 {
     public IComponentGroup ToGroup()
     {
-        var items = Items ?? Array.Empty<ComponentId>();
+        var items = Items ?? [];
         return new ComponentGroup(ToIdentity(), items.Select(i => i.ToIdentity()).ToList())
         {
             Name = Name
@@ -68,11 +69,9 @@ public record AppComponent(
             ? new InstallationSize(InstallSize!.Value.SystemDrive, InstallSize.Value.ProductDrive)
             : default;
 
-        IReadOnlyList<IDetectionCondition> conditions;
-        if (DetectConditions is null)
-            conditions = Array.Empty<IDetectionCondition>();
-        else
-            conditions = DetectConditions.Select(c => c.ToCondition()).ToList();
+        var conditions = DetectConditions is null
+            ? []
+            : DetectConditions.Select(c => c.ToCondition()).ToList();
 
         return new SingleFileComponent(ToIdentity(), InstallPath!, FileName!, OriginInfo.ToOriginInfo())
         {
@@ -96,7 +95,7 @@ public record DetectCondition(
     public IDetectionCondition ToCondition()
     {
         if (Type != ConditionType.File)
-            throw new NotSupportedException($"{Type} currently not supported");
+            throw new NotSupportedException($"{Type} currently not supported.");
 
         if (string.IsNullOrEmpty(FilePath))
             throw new CatalogException($"Illegal manifest: {nameof(FilePath)} must not be null or empty.");

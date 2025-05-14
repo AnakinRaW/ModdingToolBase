@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Abstractions;
-using System.Threading;
-using System.Threading.Tasks;
-using AnakinRaW.ApplicationBase.Environment;
+﻿using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Handlers;
@@ -12,6 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using System;
+using System.Collections.Generic;
+using System.IO.Abstractions;
+using System.Threading;
+using System.Threading.Tasks;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace AnakinRaW.ApplicationBase;
@@ -95,10 +95,12 @@ public abstract class SelfUpdateableAppLifecycle
         _bootstrapperServices = CreateBootstrapperServices();
 
         var logger = _bootstrapperServices.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        logger?.LogTrace($"Application started with raw arguments: '{args}'");
+        logger?.LogTrace($"Application started with raw arguments: '{System.Environment.CommandLine}'");
 
         if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
+            logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
+
             using var updateBootstrapper = new SelfUpdateRestartHandler(
                 updatableApplicationEnvironment,
                 _bootstrapperServices,
@@ -106,12 +108,19 @@ public abstract class SelfUpdateableAppLifecycle
             var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
 
             if (selfUpdateResult == SelfUpdateResult.Reset)
+            {
+                logger?.LogWarning("Self update failed ungracefully. Resetting application...");
                 ResetApp(logger);
+            }
             if (selfUpdateResult == SelfUpdateResult.RestartRequired)
+            {
+                logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
                 System.Environment.Exit(RestartConstants.RestartRequiredCode);
+            }
         }
 
         // Initialization of the app must happen after completing the self-update process.
+        logger?.LogInformation("Initializing application.");
         InitializeApp();
     }
 
@@ -134,11 +143,11 @@ public abstract class SelfUpdateableAppLifecycle
         {
             c.ClearProviders();
 
-            var minLogLevel =
+            // ReSharper disable once RedundantAssignment
+            var logLevel = LogEventLevel.Information;
 #if DEBUG
-                LogEventLevel.Verbose;
-#else
-                LogEventLevel.Debug;
+            logLevel = LogEventLevel.Debug;
+            c.AddDebug();
 #endif
 
             var fileSystem = FileSystem;
@@ -151,7 +160,8 @@ public abstract class SelfUpdateableAppLifecycle
             var filePath = FileSystem.Path.Combine(loggingDir, "appBootstrap.log");
 
             var fileLogger = new LoggerConfiguration()
-                .WriteTo.File(filePath, rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: minLogLevel)
+                .WriteTo.File(filePath, rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: logLevel)
+                .MinimumLevel.Is(logLevel)
                 .CreateLogger();
 
             c.AddSerilog(fileLogger);

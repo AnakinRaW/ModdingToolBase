@@ -12,17 +12,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.8" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
-		<PackageReference Include="IsExternalInit" Version="1.0.3">
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
+		<PackageReference Include="Semver" Version="3.0.0" />
+		<PackageReference Include="Mono.Cecil" Version="0.11.6" PrivateAssets="build;compile" />
+		<PackageReference Include="PolySharp" Version="1.15.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Required" Version="1.0.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Semver" Version="3.0.0" />
-		<PackageReference Include="Mono.Cecil" Version="0.11.6" PrivateAssets="build;compile" />
 	</ItemGroup>
 	
 </Project>

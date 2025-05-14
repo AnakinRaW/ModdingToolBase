@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,6 @@ internal sealed class MetadataExtractor : IMetadataExtractor
     private static readonly HashTypeKey FileHashType = HashTypeKey.SHA256;
 
     private readonly IFileSystem _fileSystem;
-    private readonly IBranchManager _branchManager;
     private readonly IAssemblyMetadataExtractor _assemblyMetadataExtractor;
 
     public MetadataExtractor(IServiceProvider serviceProvider)
@@ -26,7 +24,6 @@ internal sealed class MetadataExtractor : IMetadataExtractor
         if (serviceProvider == null) 
             throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _branchManager = serviceProvider.GetRequiredService<IBranchManager>();
         _assemblyMetadataExtractor = serviceProvider.GetService<IAssemblyMetadataExtractor>() ?? new AssemblyMetadataExtractor(serviceProvider);
     }
 

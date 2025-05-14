@@ -120,4 +120,18 @@ public static class ConsoleUtilities
             WriteHorizontalLine(_lineChar, _length);
         }
     }
+
+    public static void WriteApplicationFatalError(string appName)
+    {
+        Console.WriteLine();
+        using (HorizontalLineSeparatedBlock('*'))
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine($" {appName} Failure! ");
+            Console.ResetColor();
+        }
+        Console.WriteLine();
+        Console.WriteLine("The application encountered an unexpected error and will terminate now!");
+        Console.WriteLine();
+    }
 }
