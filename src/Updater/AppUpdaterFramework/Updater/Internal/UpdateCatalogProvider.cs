@@ -15,7 +15,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
 {
     private readonly IManifestInstallationDetector _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
 
-    public IUpdateCatalog Create(IInstalledProduct installedProduct, IInstalledComponentsCatalog currentCatalog, IProductManifest availableCatalog)
+    public IUpdateCatalog Create(IInstalledProduct installedProduct, InstalledComponentsCatalog currentCatalog, IProductManifest availableCatalog)
     {
         if (currentCatalog == null)
             throw new ArgumentNullException(nameof(currentCatalog));
@@ -25,7 +25,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
         if (!ProductReferenceEqualityComparer.NameOnly.Equals(currentCatalog.Product, availableCatalog.Product))
             throw new InvalidOperationException("Cannot build update catalog from different products.");
 
-        var currentInstalledComponents = new HashSet<IInstallableComponent>(currentCatalog.GetInstallableComponents(),
+        var currentInstalledComponents = new HashSet<IInstallableComponent>(currentCatalog.Components,
             ProductComponentIdentityComparer.VersionIndependent);
 
         var availableInstallableComponents = new HashSet<IInstallableComponent>(availableCatalog.GetInstallableComponents(),
@@ -53,7 +53,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
     }
 
 
-    private static ICollection<IUpdateItem> Compare(IInstalledComponentsCatalog currentCatalog, IEnumerable<IInstallableComponent> availableComponents)
+    private static ICollection<IUpdateItem> Compare(InstalledComponentsCatalog currentCatalog, IEnumerable<IInstallableComponent> availableComponents)
     {
         var updateItems = new List<IUpdateItem>();
 

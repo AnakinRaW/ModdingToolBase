@@ -43,7 +43,7 @@ public abstract class ProductServiceBase : IProductService
         }
     }
 
-    public IInstalledComponentsCatalog GetInstalledComponents()
+    public InstalledComponentsCatalog GetInstalledComponents()
     {
         Initialize();
         var currentInstance = GetCurrentInstance();

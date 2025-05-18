@@ -10,5 +10,5 @@ public interface IProductService
 
     IProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? branch);
 
-    IInstalledComponentsCatalog GetInstalledComponents();
+    InstalledComponentsCatalog GetInstalledComponents();
 }
