@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.CommonUtilities.DownloadManager;
@@ -12,7 +11,7 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
 {
     protected readonly IServiceProvider ServiceProvider = serviceProvider;
 
-    public async Task<IProductManifest> LoadManifestAsync(
+    public async Task<ProductManifest> LoadManifestAsync(
         Uri manifestUri, 
         IProductReference productReference,
         DownloadOptions? downloadOptions,
@@ -27,7 +26,7 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
         return manifest;
     }
 
-    protected abstract Task<IProductManifest> LoadManifestCoreAsync(
+    protected abstract Task<ProductManifest> LoadManifestCoreAsync(
         Uri manifestUri,
         IProductReference productReference,
         DownloadOptions? downloadOptions,

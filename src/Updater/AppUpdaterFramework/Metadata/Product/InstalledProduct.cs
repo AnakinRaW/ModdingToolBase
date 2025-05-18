@@ -1,8 +1,8 @@
-﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
-using AnakinRaW.CommonUtilities;
+﻿using AnakinRaW.CommonUtilities;
 using Semver;
 using System;
 using System.Collections.Generic;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -22,12 +22,12 @@ internal sealed class InstalledProduct : IInstalledProduct
 
     public ProductState State { get; internal set; }
 
-    public IProductManifest Manifest { get; }
+    public ProductManifest Manifest { get; }
 
     public InstalledProduct(
         IProductReference reference, 
         string installationPath, 
-        IProductManifest manifest,
+        ProductManifest manifest,
         IReadOnlyDictionary<string, string> variables,
         ProductState state = ProductState.Installed)
     {

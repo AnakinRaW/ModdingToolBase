@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -29,7 +28,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
         return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, token);
     }
 
-    protected override async Task<IProductManifest> LoadManifestCoreAsync(
+    protected override async Task<ProductManifest> LoadManifestCoreAsync(
         Uri manifestUri, 
         IProductReference productReference,
         DownloadOptions? downloadOptions,

@@ -1,5 +1,4 @@
 ﻿using AnakinRaW.ApplicationBase;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities;
@@ -10,6 +9,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.ApplicationManifestCreator;
 
@@ -37,7 +37,7 @@ internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, I
         return ApplicationBranchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
     }
 
-    public Task<IProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default)
+    public Task<ProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default)
     {
         throw new NotSupportedException();
     }

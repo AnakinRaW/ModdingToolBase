@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
@@ -14,5 +14,5 @@ public interface IBranchManager
 
     Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
 
-    Task<IProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default);
+    Task<ProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default);
 }

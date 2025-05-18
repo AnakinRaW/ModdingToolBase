@@ -2,27 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
 namespace AnakinRaW.AppUpdaterFramework.Utilities;
 
 internal static class Extensions
 {
-    internal static IEnumerable<IInstallableComponent> GetInstallableComponents(this IProductCatalog<IProductComponent> catalog)
-    {
-        if (!catalog.Components.Any())
-            return [];
-        var result = new List<IInstallableComponent>();
-        foreach (var item in catalog.Components)
-        {
-            if (item is IInstallableComponent installable)
-                result.Add(installable);
-        }
-        return result;
-    }
-
     internal static void RaiseAsync(this EventHandler? handler, object sender, EventArgs e)
     {
         Task.Run(() => handler?.Invoke(sender, e));

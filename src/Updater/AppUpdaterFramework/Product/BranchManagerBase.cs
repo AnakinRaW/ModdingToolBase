@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
@@ -36,7 +35,7 @@ public abstract class BranchManagerBase : IBranchManager
 
     public abstract Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
 
-    public async Task<IProductManifest> GetManifestAsync(IProductReference productReference, CancellationToken token = default)
+    public async Task<ProductManifest> GetManifestAsync(IProductReference productReference, CancellationToken token = default)
     {
         if (productReference == null) 
             throw new ArgumentNullException(nameof(productReference));

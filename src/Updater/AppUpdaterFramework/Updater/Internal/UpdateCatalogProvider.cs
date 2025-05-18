@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
@@ -15,7 +15,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
 {
     private readonly IManifestInstallationDetector _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
 
-    public IUpdateCatalog Create(IInstalledProduct installedProduct, IProductManifest availableCatalog)
+    public IUpdateCatalog Create(IInstalledProduct installedProduct, ProductManifest availableCatalog)
     {
         if (installedProduct == null) 
             throw new ArgumentNullException(nameof(installedProduct));

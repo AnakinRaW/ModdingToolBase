@@ -2,7 +2,6 @@
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
@@ -10,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -20,7 +20,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
 
     private readonly CosturaResourceExtractor _resourceExtractor = new(applicationEnvironment.AssemblyInfo.Assembly, serviceProvider);
 
-    protected sealed override IProductManifest GetManifestForInstalledProduct(
+    protected sealed override ProductManifest GetManifestForInstalledProduct(
         IProductReference installedProduct,
         IReadOnlyDictionary<string, string> productVariables)
     {

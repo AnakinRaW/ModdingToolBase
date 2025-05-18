@@ -1,5 +1,4 @@
-﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
-using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Updater;
@@ -10,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
 
@@ -64,7 +64,7 @@ public abstract class ProductServiceBase : IProductService
 
     protected abstract IProductReference CreateCurrentProductReference();
 
-    protected abstract IProductManifest GetManifestForInstalledProduct(
+    protected abstract ProductManifest GetManifestForInstalledProduct(
         IProductReference installedProduct, 
         IReadOnlyDictionary<string, string> productVariables);
 
@@ -116,7 +116,7 @@ public abstract class ProductServiceBase : IProductService
         return new InstalledProduct(productReference, InstallLocation.FullName, manifest, variables, state);
     }
 
-    private void DetectManifest(IProductManifest manifest, IReadOnlyDictionary<string, string> variables)
+    private void DetectManifest(ProductManifest manifest, IReadOnlyDictionary<string, string> variables)
     {
         var detectionService = ServiceProvider.GetRequiredService<IManifestInstallationDetector>();
         detectionService.DetectInstalledComponents(manifest, variables);

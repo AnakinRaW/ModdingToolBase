@@ -1,5 +1,5 @@
-﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
@@ -11,5 +11,5 @@ public interface IInstalledProduct : IProductReference
 
     ProductState State { get; }
 
-    IProductManifest Manifest { get; }
+    ProductManifest Manifest { get; }
 }
