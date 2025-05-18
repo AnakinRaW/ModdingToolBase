@@ -1,9 +1,8 @@
 ﻿using System;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.CommonUtilities;
 using Semver;
 
-namespace AnakinRaW.AppUpdaterFramework.Detection;
+namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
 
 public sealed record SingleFileDetectCondition : IDetectionCondition
 {

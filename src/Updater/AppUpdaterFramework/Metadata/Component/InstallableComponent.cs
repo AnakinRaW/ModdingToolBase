@@ -1,6 +1,6 @@
-﻿using AnakinRaW.AppUpdaterFramework.Detection;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 

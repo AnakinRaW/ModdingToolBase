@@ -1,4 +1,4 @@
-﻿namespace AnakinRaW.AppUpdaterFramework.Detection;
+﻿namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
 
 public interface IDetectionCondition
 {

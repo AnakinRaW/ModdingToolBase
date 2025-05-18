@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
 
 namespace AnakinRaW.AppUpdaterFramework.Detection;
 
