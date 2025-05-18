@@ -5,17 +5,6 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 
-public sealed class InstalledComponentsCatalog(IProductReference product, IReadOnlyCollection<IInstallableComponent> items)
-{
-    public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
-
-    public IReadOnlyCollection<IInstallableComponent> Components { get; } = items;
-}
-
-
-
-
-
 public sealed class ProductManifestBase
 {
     public IProductReference Product { get; }

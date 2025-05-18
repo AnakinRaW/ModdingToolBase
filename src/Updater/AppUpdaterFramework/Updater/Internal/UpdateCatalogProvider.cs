@@ -15,17 +15,14 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
 {
     private readonly IManifestInstallationDetector _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
 
-    public IUpdateCatalog Create(IInstalledProduct installedProduct, InstalledComponentsCatalog currentCatalog, IProductManifest availableCatalog)
+    public IUpdateCatalog Create(IInstalledProduct installedProduct, IProductManifest availableCatalog)
     {
-        if (currentCatalog == null)
-            throw new ArgumentNullException(nameof(currentCatalog));
+        if (installedProduct == null) 
+            throw new ArgumentNullException(nameof(installedProduct));
         if (availableCatalog == null)
             throw new ArgumentNullException(nameof(availableCatalog));
 
-        if (!ProductReferenceEqualityComparer.NameOnly.Equals(currentCatalog.Product, availableCatalog.Product))
-            throw new InvalidOperationException("Cannot build update catalog from different products.");
-
-        var currentInstalledComponents = new HashSet<IInstallableComponent>(currentCatalog.Components,
+        var currentInstalledComponents = new HashSet<IInstallableComponent>(installedProduct.Manifest.GetInstallableComponents(),
             ProductComponentIdentityComparer.VersionIndependent);
 
         var availableInstallableComponents = new HashSet<IInstallableComponent>(availableCatalog.GetInstallableComponents(),
@@ -45,19 +42,18 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
                     .Select(c => new UpdateItem(null, c, UpdateAction.Update)));
 
 
-        var availableInstalledComponents =
-            _detector.DetectInstalledComponents(availableCatalog, installedProduct.Variables);
+        _detector.DetectInstalledComponents(availableCatalog, installedProduct.Variables);
 
-        var updateItems = Compare(currentCatalog, availableInstalledComponents);
+        var updateItems = Compare(currentInstalledComponents, availableInstallableComponents);
         return new UpdateCatalog(installedProduct, availableCatalog.Product, updateItems);
     }
 
 
-    private static ICollection<IUpdateItem> Compare(InstalledComponentsCatalog currentCatalog, IEnumerable<IInstallableComponent> availableComponents)
+    private static ICollection<IUpdateItem> Compare(IEnumerable<IInstallableComponent> currentCatalog, IEnumerable<IInstallableComponent> availableComponents)
     {
         var updateItems = new List<IUpdateItem>();
 
-        var currentItems = currentCatalog.Components.ToList();
+        var currentItems = currentCatalog.ToList();
 
         foreach (var availableItem in availableComponents)
         {

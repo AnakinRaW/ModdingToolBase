@@ -86,7 +86,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     public IFileInfo GetExternalUpdater()
     {
-        var updater = _productService.GetInstalledComponents().Components
+        var updater = _productService.GetCurrentInstance().Manifest.Components
             .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
 
         if (updater is not SingleFileComponent updaterComponent)

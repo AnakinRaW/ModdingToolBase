@@ -55,11 +55,13 @@ internal class UpdateService : IUpdateService
             var manifest = await manifestRepo.GetManifestAsync(productReference, token).ConfigureAwait(false);
 
             var productService = _serviceProvider.GetRequiredService<IProductService>();
-            var installedComponents = productService.GetInstalledComponents();
+            
+            productService.UpdateComponentDetectionState();
+            
             var currentInstance = productService.GetCurrentInstance();
 
             var updateCatalogBuilder = _serviceProvider.GetRequiredService<IUpdateCatalogProvider>();
-            updateCatalog = updateCatalogBuilder.Create(currentInstance, installedComponents, manifest);
+            updateCatalog = updateCatalogBuilder.Create(currentInstance, manifest);
 
             return updateCatalog;
         }

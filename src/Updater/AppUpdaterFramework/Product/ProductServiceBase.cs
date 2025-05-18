@@ -43,15 +43,6 @@ public abstract class ProductServiceBase : IProductService
         }
     }
 
-    public InstalledComponentsCatalog GetInstalledComponents()
-    {
-        Initialize();
-        var currentInstance = GetCurrentInstance();
-        var detectionService = ServiceProvider.GetRequiredService<IManifestInstallationDetector>();
-        var installedComponents = detectionService.DetectInstalledComponents(currentInstance.Manifest, currentInstance.Variables);
-        return new InstalledComponentsCatalog(currentInstance, installedComponents);
-    }
-
     public virtual IProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? newBranch)
     {
         var current = GetCurrentInstance();
@@ -62,6 +53,13 @@ public abstract class ProductServiceBase : IProductService
         if (newVersion is not null)
             version = newVersion;
         return new ProductReference(current.Name, version, branch);
+    }
+
+    public void UpdateComponentDetectionState()
+    {
+        Initialize();
+        var currentInstance = GetCurrentInstance();
+        DetectManifest(currentInstance.Manifest, currentInstance.Variables);
     }
 
     protected abstract IProductReference CreateCurrentProductReference();
@@ -113,8 +111,15 @@ public abstract class ProductServiceBase : IProductService
         var productReference = CreateCurrentProductReference();
         var variables = AddProductVariables(productReference);
         var manifest = GetManifestForInstalledProduct(productReference, variables);
+        DetectManifest(manifest, variables);
         var state = FetchInstallState();
         return new InstalledProduct(productReference, InstallLocation.FullName, manifest, variables, state);
+    }
+
+    private void DetectManifest(IProductManifest manifest, IReadOnlyDictionary<string, string> variables)
+    {
+        var detectionService = ServiceProvider.GetRequiredService<IManifestInstallationDetector>();
+        detectionService.DetectInstalledComponents(manifest, variables);
     }
 
     private IReadOnlyDictionary<string, string> AddProductVariables(IProductReference product)
