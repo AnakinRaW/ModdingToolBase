@@ -12,7 +12,7 @@ public static class Converter
 {
     public static AppComponent ToAppComponent(this IProductComponent component)
     {
-        if (component is IComponentGroup group)
+        if (component is ComponentGroup group)
             return FromGroup(group);
         if (component is SingleFileComponent file)
             return FromFile(file);
@@ -32,7 +32,7 @@ public static class Converter
             appComponents);
     }
 
-    private static AppComponent FromGroup(IComponentGroup group)
+    private static AppComponent FromGroup(ComponentGroup group)
     {
         return new AppComponent(
             group.Id, 

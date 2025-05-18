@@ -45,7 +45,7 @@ public record AppComponent(
     [property: JsonPropertyName("detectConditions")] IReadOnlyList<DetectCondition>? DetectConditions
 ) : AppComponentBase(Id, Version, Name)
 {
-    public IComponentGroup ToGroup()
+    public ComponentGroup ToGroup()
     {
         var items = Items ?? [];
         return new ComponentGroup(ToIdentity(), items.Select(i => i.ToIdentity()).ToList())
