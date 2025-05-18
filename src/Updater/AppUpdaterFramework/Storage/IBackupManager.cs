@@ -4,9 +4,9 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 
 internal interface IBackupManager : IReadOnlyBackupManager
 {
-    void BackupComponent(IInstallableComponent component);
+    void BackupComponent(InstallableComponent component);
     
     void RestoreAll();
 
-    void RemoveBackup(IInstallableComponent component);
+    void RemoveBackup(InstallableComponent component);
 }

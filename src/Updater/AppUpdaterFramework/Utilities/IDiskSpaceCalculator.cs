@@ -5,8 +5,8 @@ namespace AnakinRaW.AppUpdaterFramework.Utilities;
 internal interface IDiskSpaceCalculator
 {
     void ThrowIfNotEnoughDiskSpaceAvailable(
-        IInstallableComponent newComponent, 
-        IInstallableComponent? oldComponent,
+        InstallableComponent newComponent, 
+        InstallableComponent? oldComponent,
         string? installPath, 
         DiskSpaceCalculator.CalculationOptions options);
 }

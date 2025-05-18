@@ -98,7 +98,7 @@ internal class ManifestCreator
             });
 
         var installables =
-            new HashSet<IInstallableComponent>(ProductComponentIdentityComparer.VersionIndependent)
+            new HashSet<InstallableComponent>(ProductComponentIdentityComparer.VersionIndependent)
             {
                 appComponent
             };
@@ -115,7 +115,7 @@ internal class ManifestCreator
             branch,
             installables);
 
-        var allComponents = installables.Cast<IProductComponent>().ToList();
+        var allComponents = installables.Cast<ProductComponent>().ToList();
         allComponents.Insert(0, CreateGroup(productReference, installables));
         
        return productReference.ToApplicationManifest(allComponents);
@@ -126,7 +126,7 @@ internal class ManifestCreator
         string installLocation, 
         ExtractorAdditionalInformation.InstallDrive drive, 
         ProductBranch branch,
-        ISet<IInstallableComponent> set)
+        ISet<InstallableComponent> set)
     {
         foreach (var component in files.Select(_fileSystem.FileInfo.New))
         {
@@ -144,9 +144,9 @@ internal class ManifestCreator
         }
     }
 
-    private static IComponentGroup CreateGroup(ProductReference product, IEnumerable<IInstallableComponent> componentInfos)
+    private static ComponentGroup CreateGroup(ProductReference product, IEnumerable<InstallableComponent> componentInfos)
     {
-        return new ComponentGroup(new ProductComponentIdentity(ApplicationConstants.AppGroupId, product.Version), componentInfos.ToList())
+        return new ComponentGroup(ApplicationConstants.AppGroupId, product.Version, componentInfos.ToList())
         {
             Name = product.Name
         };

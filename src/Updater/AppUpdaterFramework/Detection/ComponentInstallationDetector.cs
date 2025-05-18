@@ -9,7 +9,7 @@ internal class ComponentInstallationDetector(IServiceProvider services) : ICompo
 {
     private readonly Dictionary<ConditionType, IDetector> _detectors = new();
 
-    public bool IsInstalled(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    public bool IsInstalled(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         if (component == null)
             throw new ArgumentNullException(nameof(component));

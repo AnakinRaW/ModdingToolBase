@@ -6,7 +6,7 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 public sealed class ProductComponentIdentityComparer(
     bool excludeVersion = false,
     StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
-    : IEqualityComparer<IProductComponentIdentity>
+    : IEqualityComparer<ProductComponentIdentity>
 {
     public static readonly ProductComponentIdentityComparer Default = new();
     public static readonly ProductComponentIdentityComparer VersionIndependent = new(true);
@@ -22,7 +22,7 @@ public sealed class ProductComponentIdentityComparer(
         _ => throw new ArgumentException("The comparison type is not supported", nameof(comparisonType))
     };
 
-    public bool Equals(IProductComponentIdentity? x, IProductComponentIdentity? y)
+    public bool Equals(ProductComponentIdentity? x, ProductComponentIdentity? y)
     {
         if (x == y)
             return true;
@@ -40,7 +40,7 @@ public sealed class ProductComponentIdentityComparer(
         return true;
     }
 
-    public int GetHashCode(IProductComponentIdentity? obj)
+    public int GetHashCode(ProductComponentIdentity? obj)
     {
         if (obj == null)
             return 0;

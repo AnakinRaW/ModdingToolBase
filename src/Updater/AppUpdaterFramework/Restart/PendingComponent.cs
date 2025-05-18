@@ -5,7 +5,7 @@ namespace AnakinRaW.AppUpdaterFramework.Restart;
 
 public record PendingComponent
 {
-    public required IInstallableComponent Component { get; init; }
+    public required InstallableComponent Component { get; init; }
 
     public required UpdateAction Action { get; init; }
 }

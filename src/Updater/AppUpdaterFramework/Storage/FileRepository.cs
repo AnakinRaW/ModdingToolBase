@@ -10,7 +10,7 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 
 internal sealed class FileRepository : IFileRepository
 {
-    private readonly ConcurrentDictionary<IInstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
+    private readonly ConcurrentDictionary<InstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
     private readonly IFileSystem _fileSystem;
 
     private string NewFileExtension { get; }
@@ -29,14 +29,14 @@ internal sealed class FileRepository : IFileRepository
         Root.Create();
     }
 
-    public IFileInfo AddComponent(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    public IFileInfo AddComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         if (component == null)
             throw new ArgumentNullException(nameof(component));
         return _componentStore.GetOrAdd(component, c => CreateComponentFile(c, variables));
     }
 
-    public IFileInfo? GetComponent(IInstallableComponent component)
+    public IFileInfo? GetComponent(InstallableComponent component)
     {
         if (component == null) 
             throw new ArgumentNullException(nameof(component));
@@ -44,19 +44,19 @@ internal sealed class FileRepository : IFileRepository
         return file;
     }
 
-    public IDictionary<IInstallableComponent, IFileInfo> GetComponents()
+    public IDictionary<InstallableComponent, IFileInfo> GetComponents()
     {
-        return new Dictionary<IInstallableComponent, IFileInfo>(_componentStore, ProductComponentIdentityComparer.Default);
+        return new Dictionary<InstallableComponent, IFileInfo>(_componentStore, ProductComponentIdentityComparer.Default);
     }
 
-    public void RemoveComponent(IInstallableComponent component)
+    public void RemoveComponent(InstallableComponent component)
     {
         if (!_componentStore.TryRemove(component, out var file))
             return;
         file.DeleteWithRetry();
     }
 
-    private IFileInfo CreateComponentFile(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    private IFileInfo CreateComponentFile(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         var namePrefix = GetNamePrefix(component, variables);
 
@@ -78,7 +78,7 @@ internal sealed class FileRepository : IFileRepository
         return file;
     }
 
-    private string? GetNamePrefix(IInstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    private string? GetNamePrefix(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         if (component is not SingleFileComponent singleFileComponent)
             return null;

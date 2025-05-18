@@ -25,14 +25,14 @@ internal class InstallStep : PipelineStep, IComponentStep
     private readonly UpdateConfiguration _updateConfiguration;
     private readonly IReadOnlyDictionary<string, string> _productVariables;
     private readonly UpdateAction _action;
-    private readonly IInstallableComponent? _currentComponent;
+    private readonly InstallableComponent? _currentComponent;
     private readonly DownloadStep? _download;
     private readonly IInstallerFactory _installerFactory;
     private readonly IBackupManager _backupManager;
 
-    private IInstallableComponent Component { get; }
+    private InstallableComponent Component { get; }
 
-    IProductComponent IComponentStep.Component => Component;
+    ProductComponent IComponentStep.Component => Component;
 
     internal InstallResult Result { get; private set; } = InstallResult.Success;
 
@@ -41,7 +41,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     public long Size => Component.InstallationSize.Total;
 
     public InstallStep(
-        IInstallableComponent installable, 
+        InstallableComponent installable, 
         UpdateConfiguration updateConfiguration,
         IReadOnlyDictionary<string, string> productVariables,
         IServiceProvider serviceProvider) :
@@ -50,8 +50,8 @@ internal class InstallStep : PipelineStep, IComponentStep
     }
 
     public InstallStep(
-        IInstallableComponent installable,
-        IInstallableComponent? currentComponent, 
+        InstallableComponent installable,
+        InstallableComponent? currentComponent, 
         DownloadStep download, 
         UpdateConfiguration updateConfiguration,
         IReadOnlyDictionary<string, string> productVariables,
@@ -63,7 +63,7 @@ internal class InstallStep : PipelineStep, IComponentStep
     }
 
     private InstallStep(
-        IInstallableComponent installable, 
+        InstallableComponent installable, 
         UpdateAction updateAction,
         UpdateConfiguration updateConfiguration,
         IReadOnlyDictionary<string, string> productVariables,
@@ -209,7 +209,7 @@ internal class InstallStep : PipelineStep, IComponentStep
             return;
         var options = DiskSpaceCalculator.CalculationOptions.All;
 
-        var installPath = Component is IPhysicalInstallable physicalInstallable ? physicalInstallable.InstallPath : null;
+        var installPath = Component is PhysicallyInstallableComponent physicalInstallable ? physicalInstallable.InstallPath : null;
         if (!string.IsNullOrEmpty(installPath))
             installPath = StringTemplateEngine.ResolveVariables(installPath!, _productVariables);
 

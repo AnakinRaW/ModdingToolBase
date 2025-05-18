@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public sealed class ComponentGroup : ProductComponent
+public sealed class ComponentGroup(
+    string id,
+    SemVersion? version,
+    IReadOnlyCollection<ProductComponentIdentity> components)
+    : ProductComponent(id, version)
 {
     public override ComponentType Type => ComponentType.Group;
 
-    public IReadOnlyCollection<IProductComponentIdentity> Components { get; }
-
-    public ComponentGroup(IProductComponentIdentity identity, IReadOnlyCollection<IProductComponentIdentity> components) : base(identity)
-    {
-        if (identity == null)
-            throw new ArgumentNullException(nameof(identity));
-        Components = components;
-    }
+    public IReadOnlyCollection<ProductComponentIdentity> Components { get; } = components;
 }

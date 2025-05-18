@@ -114,7 +114,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         {
             if (pendingComponent.Action == UpdateAction.Keep)
                 continue;
-            if (pendingComponent.Component is not IPhysicalInstallable physicalInstallable)
+            if (pendingComponent.Component is not PhysicallyInstallableComponent physicalInstallable)
                 throw new NotSupportedException("Non physical components are currently not supported");
 
             BackupInformation? backupInformation = null;
@@ -169,7 +169,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         };
     }
 
-    private FileCopyInformation CreateFromComponent(IPhysicalInstallable component, UpdateAction action)
+    private FileCopyInformation CreateFromComponent(PhysicallyInstallableComponent component, UpdateAction action)
     {
         if (action == UpdateAction.Keep)
             throw new NotSupportedException("UpdateAction Keep is not supported");

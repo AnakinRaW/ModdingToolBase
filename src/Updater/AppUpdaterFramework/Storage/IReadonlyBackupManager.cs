@@ -5,5 +5,5 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 
 internal interface IReadOnlyBackupManager
 {
-    IDictionary<IInstallableComponent, BackupValueData> Backups { get; }
+    IDictionary<InstallableComponent, BackupValueData> Backups { get; }
 }

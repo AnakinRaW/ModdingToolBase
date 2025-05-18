@@ -16,8 +16,8 @@ internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpac
     private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
     public void ThrowIfNotEnoughDiskSpaceAvailable(
-        IInstallableComponent newComponent, 
-        IInstallableComponent? oldComponent, 
+        InstallableComponent newComponent, 
+        InstallableComponent? oldComponent, 
         string? installPath, 
         CalculationOptions options)
     {
@@ -35,8 +35,8 @@ internal class DiskSpaceCalculator(IServiceProvider serviceProvider) : IDiskSpac
     }
 
     private IEnumerable<DriveSpaceData> GetDiskInformation(
-        IInstallableComponent newComponent, 
-        IInstallableComponent? oldComponent, 
+        InstallableComponent newComponent, 
+        InstallableComponent? oldComponent, 
         string? installPath, 
         CalculationOptions options)
     {

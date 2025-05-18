@@ -64,9 +64,9 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
         return new ProductReference(applicationManifest.Name, version, branch);
     }
 
-    private static List<IProductComponent> BuildCatalog(IEnumerable<AppComponent> manifestComponents)
+    private static List<ProductComponent> BuildCatalog(IEnumerable<AppComponent> manifestComponents)
     {
-        var catalog = new List<IProductComponent>();
+        var catalog = new List<ProductComponent>();
         foreach (var manifestComponent in manifestComponents)
         {
             switch (manifestComponent.Type)

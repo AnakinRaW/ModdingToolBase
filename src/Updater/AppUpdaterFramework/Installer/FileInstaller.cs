@@ -19,7 +19,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
     private readonly ILockedFileHandler _lockedFileHandler = serviceProvider.GetRequiredService<ILockedFileHandler>();
 
     protected override InstallResult InstallCore(
-        IInstallableComponent component, 
+        InstallableComponent component, 
         IFileInfo source,
         IReadOnlyDictionary<string, string> variables, 
         CancellationToken token)
@@ -39,7 +39,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
     }
 
     protected override InstallResult RemoveCore(
-        IInstallableComponent component,
+        InstallableComponent component,
         IReadOnlyDictionary<string, string> variables, 
         CancellationToken token)
     {

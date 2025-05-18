@@ -4,7 +4,7 @@ using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public sealed class ProductComponentIdentity : IProductComponentIdentity
+public class ProductComponentIdentity : IEquatable<ProductComponentIdentity>
 {
     public string Id { get; }
     
@@ -32,12 +32,12 @@ public sealed class ProductComponentIdentity : IProductComponentIdentity
         return Format(this, excludeVersion);
     }
 
-    public bool Equals(IProductComponentIdentity? other)
+    public bool Equals(ProductComponentIdentity? other)
     {
         return ProductComponentIdentityComparer.Default.Equals(this, other);
     }
 
-    internal static string Format(IProductComponentIdentity identity, bool excludeVersion = false)
+    internal static string Format(ProductComponentIdentity identity, bool excludeVersion = false)
     {
         if (identity == null) 
             throw new ArgumentNullException(nameof(identity));

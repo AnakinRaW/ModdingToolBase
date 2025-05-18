@@ -21,10 +21,10 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
         if (availableCatalog == null)
             throw new ArgumentNullException(nameof(availableCatalog));
 
-        var currentInstalledComponents = new HashSet<IInstallableComponent>(installedProduct.Manifest.GetInstallableComponents(),
+        var currentInstalledComponents = new HashSet<InstallableComponent>(installedProduct.Manifest.GetInstallableComponents(),
             ProductComponentIdentityComparer.VersionIndependent);
 
-        var availableInstallableComponents = new HashSet<IInstallableComponent>(availableCatalog.GetInstallableComponents(),
+        var availableInstallableComponents = new HashSet<InstallableComponent>(availableCatalog.GetInstallableComponents(),
             ProductComponentIdentityComparer.VersionIndependent);
 
         if (!currentInstalledComponents.Any() && !availableInstallableComponents.Any())
@@ -49,8 +49,8 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
 
 
     private static ICollection<UpdateItem> Compare(
-        ICollection<IInstallableComponent> installedComponents, 
-        ICollection<IInstallableComponent> availableComponents)
+        ICollection<InstallableComponent> installedComponents, 
+        ICollection<InstallableComponent> availableComponents)
     {
         var updateItems = new List<UpdateItem>();
 

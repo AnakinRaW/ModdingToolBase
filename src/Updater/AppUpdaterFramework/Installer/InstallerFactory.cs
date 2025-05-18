@@ -8,7 +8,7 @@ internal class InstallerFactory(IServiceProvider serviceProvider) : IInstallerFa
 {
     private readonly Dictionary<ComponentType, IInstaller> _installers = new();
 
-    public IInstaller CreateInstaller(IInstallableComponent component)
+    public IInstaller CreateInstaller(InstallableComponent component)
     {
         if (component == null) 
             throw new ArgumentNullException(nameof(component));

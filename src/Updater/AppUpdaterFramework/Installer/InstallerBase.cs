@@ -23,22 +23,22 @@ internal abstract class InstallerBase : IInstaller
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public InstallResult Install(IInstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
+    public InstallResult Install(InstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
     {
         return ExecuteInstallerAction(component, source, InstallAction.Install, variables, token);
     }
 
-    public InstallResult Remove(IInstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
+    public InstallResult Remove(InstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
     {
         return ExecuteInstallerAction(component, null, InstallAction.Remove, variables, token);
     }
 
-    protected abstract InstallResult RemoveCore(IInstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token);
+    protected abstract InstallResult RemoveCore(InstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token);
 
-    protected abstract InstallResult InstallCore(IInstallableComponent component, IFileInfo source, IReadOnlyDictionary<string, string> variables, CancellationToken token);
+    protected abstract InstallResult InstallCore(InstallableComponent component, IFileInfo source, IReadOnlyDictionary<string, string> variables, CancellationToken token);
 
 
-    private InstallResult ExecuteInstallerAction(IInstallableComponent component, IFileInfo? source, InstallAction action, IReadOnlyDictionary<string, string> variables, CancellationToken token)
+    private InstallResult ExecuteInstallerAction(InstallableComponent component, IFileInfo? source, InstallAction action, IReadOnlyDictionary<string, string> variables, CancellationToken token)
     {
         try
         {
@@ -83,7 +83,7 @@ internal abstract class InstallerBase : IInstaller
     }
 
     protected InstallResult ExecuteWithInteractiveRetry(
-        IInstallableComponent component,
+        InstallableComponent component,
         Func<InstallOperationResult> action,
         Func<InstallOperationResult, InstallerInteractionResult> interaction,
         CancellationToken token)
@@ -122,12 +122,12 @@ internal abstract class InstallerBase : IInstaller
         return result;
     }
 
-    private void OnProgress(IInstallableComponent component, double progress)
+    private void OnProgress(InstallableComponent component, double progress)
     {
         Progress?.Invoke(this, new ComponentProgressEventArgs(progress, component.GetDisplayName()));
     }
 
-    private void LogFailure(IProductComponent? component, InstallAction executeAction, string details)
+    private void LogFailure(ProductComponent? component, InstallAction executeAction, string details)
     {
         Logger?.LogError(component != null
             ? $"Component '{component.GetDisplayName()}' failed to {executeAction.ToString().ToLowerInvariant()}. {details}"

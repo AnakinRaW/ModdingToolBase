@@ -7,16 +7,16 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
-public sealed class ProductManifest : IEnumerable<IProductComponent>
+public sealed class ProductManifest : IEnumerable<ProductComponent>
 {
     public ProductReference Product { get; }
 
-    public IReadOnlyCollection<IProductComponent> Components { get; }
+    public IReadOnlyCollection<ProductComponent> Components { get; }
 
-    public IEnumerable<IInstallableComponent> GetInstallableComponents() =>
-        Components.Where(x => x is IInstallableComponent).OfType<IInstallableComponent>();
+    public IEnumerable<InstallableComponent> GetInstallableComponents() =>
+        Components.Where(x => x is InstallableComponent).OfType<InstallableComponent>();
 
-    public ProductManifest(ProductReference product, IEnumerable<IProductComponent> components)
+    public ProductManifest(ProductReference product, IEnumerable<ProductComponent> components)
     {
         if (components == null)
             throw new ArgumentNullException(nameof(components));
@@ -24,7 +24,7 @@ public sealed class ProductManifest : IEnumerable<IProductComponent>
         Components = components.ToList();
     }
 
-    public IEnumerator<IProductComponent> GetEnumerator()
+    public IEnumerator<ProductComponent> GetEnumerator()
     {
         return Components.GetEnumerator();
     }

@@ -17,7 +17,7 @@ public abstract record AppComponentBase(
     [property: JsonPropertyName("name")] string? Name
 )
 {
-    public IProductComponentIdentity ToIdentity()
+    public ProductComponentIdentity ToIdentity()
     {
         return !string.IsNullOrEmpty(Version)
             ? new ProductComponentIdentity(Id, ManifestHelpers.CreateNullableSemVersion(Version))
@@ -48,13 +48,14 @@ public record AppComponent(
     public ComponentGroup ToGroup()
     {
         var items = Items ?? [];
-        return new ComponentGroup(ToIdentity(), items.Select(i => i.ToIdentity()).ToList())
+        var identity = ToIdentity();
+        return new ComponentGroup(identity.Id, identity.Version, items.Select(i => i.ToIdentity()).ToList())
         {
             Name = Name
         };
     }
 
-    public IInstallableComponent ToInstallable()
+    public InstallableComponent ToInstallable()
     {
         if (string.IsNullOrEmpty(InstallPath))
             throw new ManifestException($"Illegal manifest: {nameof(InstallPath)} must not be null or empty.");
@@ -73,7 +74,8 @@ public record AppComponent(
             ? []
             : DetectConditions.Select(c => c.ToCondition()).ToList();
 
-        return new SingleFileComponent(ToIdentity(), InstallPath!, FileName!, OriginInfo.ToOriginInfo())
+        var identity = ToIdentity();
+        return new SingleFileComponent(identity.Id, identity.Version, InstallPath!, FileName!, OriginInfo.ToOriginInfo())
         {
             Name = Name,
             InstallationSize = installationSize,

@@ -6,5 +6,5 @@ namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
 internal interface IComponentStep : IProgressStep<ComponentProgressInfo>
 {
-    IProductComponent Component { get; }
+    ProductComponent Component { get; }
 }

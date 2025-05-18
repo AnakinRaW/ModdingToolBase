@@ -28,7 +28,7 @@ public sealed class AssemblyMetadataExtractor
         _assemblyMetadataExtractor = new CecilMetadataExtractor(serviceProvider);
     }
 
-    public IInstallableComponent ComponentFromAssembly(
+    public InstallableComponent ComponentFromAssembly(
         Assembly assembly, 
         string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
@@ -42,7 +42,7 @@ public sealed class AssemblyMetadataExtractor
         return ComponentFromStream(assemblyStream, installLocation, additionalInformation);
     }
 
-    public Task<IInstallableComponent> ComponentFromFileAsync(
+    public Task<InstallableComponent> ComponentFromFileAsync(
         IFileInfo file, 
         string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
@@ -63,7 +63,7 @@ public sealed class AssemblyMetadataExtractor
         return _assemblyMetadataExtractor.ReadComponentInformation(stream);
     }
 
-    public IInstallableComponent ComponentFromStream(
+    public InstallableComponent ComponentFromStream(
         Stream stream, 
         string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
@@ -80,7 +80,7 @@ public sealed class AssemblyMetadataExtractor
         var integrityInfo = new ComponentIntegrityInformation(componentInformation.Hash, FileHashType);
         var originInfo = CreateOriginInfo(additionalInformation.Origin, integrityInfo, componentInformation.Size);
 
-        return new SingleFileComponent(id, installLocation, fileName, originInfo)
+        return new SingleFileComponent(id.Id, id.Version, installLocation, fileName, originInfo)
         {
             Name = componentInformation.Name,
             InstallationSize = GetSize(componentInformation.Size, additionalInformation.Drive),

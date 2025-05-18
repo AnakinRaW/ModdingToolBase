@@ -5,5 +5,5 @@ namespace AnakinRaW.AppUpdaterFramework.Detection;
 
 public interface IComponentInstallationDetector
 {
-    bool IsInstalled(IInstallableComponent component, IReadOnlyDictionary<string, string> variables);
+    bool IsInstalled(InstallableComponent component, IReadOnlyDictionary<string, string> variables);
 }

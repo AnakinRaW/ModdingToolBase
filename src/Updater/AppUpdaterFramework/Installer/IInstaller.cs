@@ -12,7 +12,7 @@ internal interface IInstaller
 {
     event EventHandler<ComponentProgressEventArgs> Progress;
 
-    InstallResult Install(IInstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default);
+    InstallResult Install(InstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default);
 
-    InstallResult Remove(IInstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token = default);
+    InstallResult Remove(InstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token = default);
 }

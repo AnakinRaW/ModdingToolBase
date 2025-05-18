@@ -7,13 +7,13 @@ public sealed class UpdateItem
 {
     public string ComponentId { get; }
 
-    public IInstallableComponent? InstalledComponent { get; }
+    public InstallableComponent? InstalledComponent { get; }
 
-    public IInstallableComponent? UpdateComponent { get; }
+    public InstallableComponent? UpdateComponent { get; }
 
     public UpdateAction Action { get; }
 
-    internal UpdateItem(IInstallableComponent? installedComponent, IInstallableComponent? updateComponent, UpdateAction action)
+    internal UpdateItem(InstallableComponent? installedComponent, InstallableComponent? updateComponent, UpdateAction action)
     {
         if (installedComponent is null && updateComponent is null)
             throw new InvalidOperationException("Cannot create update item from no component information.");

@@ -18,7 +18,7 @@ internal class BackupManager : IBackupManager
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IFileSystem _fileSystem;
-    private readonly ConcurrentDictionary<IInstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
+    private readonly ConcurrentDictionary<InstallableComponent, BackupValueData> _backups = new(ProductComponentIdentityComparer.Default);
     private readonly ILogger? _logger;
     private readonly IProductService _productService;
     private readonly IHashingService _hashingService;
@@ -26,7 +26,7 @@ internal class BackupManager : IBackupManager
     //[field: AllowNull]
     private IFileRepository FileRepository => LazyInitializer.EnsureInitialized(ref field, CreateRepository);
 
-    public IDictionary<IInstallableComponent, BackupValueData> Backups => new Dictionary<IInstallableComponent, BackupValueData>(_backups);
+    public IDictionary<InstallableComponent, BackupValueData> Backups => new Dictionary<InstallableComponent, BackupValueData>(_backups);
 
     public BackupManager(IServiceProvider serviceProvider)
     {
@@ -50,7 +50,7 @@ internal class BackupManager : IBackupManager
         return new FileRepository(config.BackupLocation!, _fileSystem, "bak");
     }
 
-    public void BackupComponent(IInstallableComponent component)
+    public void BackupComponent(InstallableComponent component)
     {
         if (component == null)
             throw new ArgumentNullException(nameof(component));
@@ -74,7 +74,7 @@ internal class BackupManager : IBackupManager
         }
     }
     
-    public void RestoreBackup(IInstallableComponent component)
+    public void RestoreBackup(InstallableComponent component)
     {
         if (component == null) 
             throw new ArgumentNullException(nameof(component));
@@ -118,7 +118,7 @@ internal class BackupManager : IBackupManager
         }
     }
 
-    public void RemoveBackup(IInstallableComponent component)
+    public void RemoveBackup(InstallableComponent component)
     {
         _backups.TryRemove(component, out _);
         FileRepository.RemoveComponent(component);
@@ -130,7 +130,7 @@ internal class BackupManager : IBackupManager
             RestoreBackup(component);
     }
 
-    private BackupValueData CreateBackupEntry(IInstallableComponent component)
+    private BackupValueData CreateBackupEntry(InstallableComponent component)
     {
         if (component is not SingleFileComponent singleFileComponent)
             throw new NotSupportedException($"option '{nameof(component)}' must be of type '{nameof(SingleFileComponent)}'");

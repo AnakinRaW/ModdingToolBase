@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Utilities;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
@@ -9,26 +10,22 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 /// A component representing a single file.
 /// </summary>
 /// <remarks>
-/// The property <see cref="IInstallableComponent.DetectConditions"/> shall not get used for installation detection.
+/// The property <see cref="InstallableComponent.DetectConditions"/> shall not get used for installation detection.
 /// </remarks>
-public sealed class SingleFileComponent : InstallableComponent, IPhysicalInstallable
+public sealed class SingleFileComponent : PhysicallyInstallableComponent
 {
     public override ComponentType Type => ComponentType.File;
 
     private IFileInfo? _fileInfo;
     private string? _fullPath;
 
-    /// <inheritdoc/>
-    public string InstallPath { get; }
-
     public string FileName { get; }
 
-    public SingleFileComponent(IProductComponentIdentity identity, string installPath, string fileName, OriginInfo? originInfo) 
-        : base(identity, originInfo)
+    public SingleFileComponent(string id, SemVersion? version, string installPath, string fileName, OriginInfo? originInfo) 
+        : base(id, version, installPath, originInfo)
     {
         ThrowHelper.ThrowIfNullOrEmpty(installPath);
         ThrowHelper.ThrowIfNullOrEmpty(fileName);
-        InstallPath = installPath;
         FileName = fileName;
     }
 

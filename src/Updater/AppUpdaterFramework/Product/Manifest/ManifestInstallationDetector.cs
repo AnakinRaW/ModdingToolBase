@@ -20,14 +20,14 @@ internal class ManifestInstallationDetector(IServiceProvider serviceProvider) : 
 
         foreach (var manifestItem in manifest.Components)
         {
-            if (manifestItem is not IInstallableComponent installable)
+            if (manifestItem is not InstallableComponent installable)
                 continue;
             if (manifestItem.DetectedState == DetectionState.None)
                 installable.DetectedState = IsInstalled(installable, productVariables);
         }
     }
 
-    private DetectionState IsInstalled(IInstallableComponent installable, IReadOnlyDictionary<string, string> productVariables)
+    private DetectionState IsInstalled(InstallableComponent installable, IReadOnlyDictionary<string, string> productVariables)
     {
         return _installationDetector.IsInstalled(installable, productVariables)
             ? DetectionState.Present

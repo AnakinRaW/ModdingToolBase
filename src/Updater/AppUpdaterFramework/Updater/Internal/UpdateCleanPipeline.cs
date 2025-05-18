@@ -13,10 +13,10 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 
 internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(serviceProvider)
 {
-    private readonly List<IInstallableComponent> _filesFailedToBeCleaned = [];
+    private readonly List<InstallableComponent> _filesFailedToBeCleaned = [];
     private readonly IBackupManager _backupManager = serviceProvider.GetRequiredService<IBackupManager>();
-    private readonly List<IInstallableComponent> _downloadsToClean = [];
-    private readonly List<IInstallableComponent> _backupsToClean = [];
+    private readonly List<InstallableComponent> _downloadsToClean = [];
+    private readonly List<InstallableComponent> _backupsToClean = [];
     private readonly IFileRepository _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetRepository();
 
     protected override Task<bool> PrepareCoreAsync()
@@ -56,7 +56,7 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
         return Task.CompletedTask;
     }
 
-    private void GuardedClean(IInstallableComponent component,  Action<IInstallableComponent> cleanOperation)
+    private void GuardedClean(InstallableComponent component,  Action<InstallableComponent> cleanOperation)
     {
         try
         {

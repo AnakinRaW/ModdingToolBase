@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
+using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public abstract class InstallableComponent(IProductComponentIdentity identity, OriginInfo? originInfo)
-    : ProductComponent(identity), IInstallableComponent
+public abstract class InstallableComponent(string id, SemVersion? version, OriginInfo? originInfo)
+    : ProductComponent(id, version)
 {
     public long DownloadSize => OriginInfo?.Size ?? 0;
 
@@ -14,6 +14,4 @@ public abstract class InstallableComponent(IProductComponentIdentity identity, O
     public IReadOnlyList<IDetectionCondition> DetectConditions { get; init; } = [];
 
     public InstallationSize InstallationSize { get; init; }
-
-    public abstract string? GetFullPath(IFileSystem fileSystem, IReadOnlyDictionary<string, string> variables);
 }

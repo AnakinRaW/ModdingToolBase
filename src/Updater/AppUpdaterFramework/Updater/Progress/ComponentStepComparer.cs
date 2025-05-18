@@ -8,7 +8,7 @@ internal class ComponentStepComparer : IEqualityComparer<IComponentStep>
 {
     internal static readonly IEqualityComparer<IComponentStep> Default = new ComponentStepComparer();
     
-    private static readonly IEqualityComparer<IProductComponentIdentity> Comparer = ProductComponentIdentityComparer.Default;
+    private static readonly IEqualityComparer<ProductComponentIdentity> Comparer = ProductComponentIdentityComparer.Default;
 
     private ComponentStepComparer()
     {

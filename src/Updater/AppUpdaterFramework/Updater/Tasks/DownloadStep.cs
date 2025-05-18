@@ -21,7 +21,7 @@ using Microsoft.Extensions.Logging;
 namespace AnakinRaW.AppUpdaterFramework.Updater.Tasks;
 
 internal class DownloadStep(
-    IInstallableComponent installable,
+    InstallableComponent installable,
     UpdateConfiguration updateConfiguration,
     IDownloadManager downloadManager,
     IReadOnlyDictionary<string, string> productVariables,
@@ -41,9 +41,9 @@ internal class DownloadStep(
 
     private Uri Uri { get; } = installable.OriginInfo!.Url;
 
-    private IInstallableComponent Component { get; } = installable ?? throw new ArgumentNullException(nameof(installable));
+    private InstallableComponent Component { get; } = installable ?? throw new ArgumentNullException(nameof(installable));
 
-    IProductComponent IComponentStep.Component => Component;
+    ProductComponent IComponentStep.Component => Component;
 
     public override string ToString()
     {

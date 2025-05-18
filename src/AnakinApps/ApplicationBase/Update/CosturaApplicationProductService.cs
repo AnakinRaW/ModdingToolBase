@@ -24,7 +24,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
         ProductReference installedProduct,
         IReadOnlyDictionary<string, string> productVariables)
     {
-        var installedComponents = new List<IInstallableComponent>();
+        var installedComponents = new List<InstallableComponent>();
 
         var application = ApplicationEnvironment.AssemblyInfo.Assembly;
         var appComponent = _metadataExtractor.ComponentFromAssembly(
@@ -43,9 +43,9 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
             installedComponents.Add(updaterComponent);
         }
 
-        var productComponents = new List<IProductComponent>(installedComponents.Count + 1)
+        var productComponents = new List<ProductComponent>(installedComponents.Count + 1)
         {
-            new ComponentGroup(new ProductComponentIdentity(ApplicationConstants.AppGroupId, installedProduct.Version), installedComponents)
+            new ComponentGroup(ApplicationConstants.AppGroupId, installedProduct.Version, installedComponents)
             {
                 Name = installedProduct.Name
             }
@@ -55,7 +55,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
         return new ProductManifest(installedProduct, productComponents);
     }
 
-    private IInstallableComponent CreateExternalUpdaterComponent(IReadOnlyDictionary<string, string> productVariables)
+    private InstallableComponent CreateExternalUpdaterComponent(IReadOnlyDictionary<string, string> productVariables)
     {
         var installDirectory = GetExternalUpdaterInstallLocation(productVariables, out var nextToApp);
 

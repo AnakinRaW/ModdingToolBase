@@ -10,7 +10,7 @@ namespace AnakinRaW.AppUpdaterFramework.Json;
 
 public static class Converter
 {
-    public static AppComponent ToAppComponent(this IProductComponent component)
+    public static AppComponent ToAppComponent(this ProductComponent component)
     {
         if (component is ComponentGroup group)
             return FromGroup(group);
@@ -21,7 +21,7 @@ public static class Converter
     }
 
     public static ApplicationManifest ToApplicationManifest(this ProductReference productReference,
-        IEnumerable<IProductComponent> components)
+        IEnumerable<ProductComponent> components)
     {
         var appComponents = components.Select(ToAppComponent).ToList();
 
@@ -47,7 +47,7 @@ public static class Converter
             null);
     }
 
-    private static ComponentId ToComponentId(IProductComponentIdentity identity)
+    private static ComponentId ToComponentId(ProductComponentIdentity identity)
     {
         return new ComponentId(identity.Id, identity.Version?.ToString());
     }

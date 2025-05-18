@@ -105,12 +105,12 @@ internal sealed class UpdatePipeline : Pipeline
 
         foreach (var itemToInstall in installs)
         {
-            if (itemToInstall.UpdateComponent is IPhysicalInstallable physicalInstallable)
+            if (itemToInstall.UpdateComponent is PhysicallyInstallableComponent physicalInstallable)
             {
                 var path = physicalInstallable.GetFullPath(_fileSystem, _installedProduct.Variables);
                 var shallNotRemove = removes.Where(x =>
                 {
-                    if (x.InstalledComponent is not IPhysicalInstallable installed)
+                    if (x.InstalledComponent is not PhysicallyInstallableComponent installed)
                         return false;
                     var otherPath = installed.GetFullPath(_fileSystem, _installedProduct.Variables);
                     return _fileSystem.Path.AreEqual(path, otherPath);

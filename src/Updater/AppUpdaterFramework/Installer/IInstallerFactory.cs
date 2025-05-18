@@ -4,5 +4,5 @@ namespace AnakinRaW.AppUpdaterFramework.Installer;
 
 internal interface IInstallerFactory
 {
-    IInstaller CreateInstaller(IInstallableComponent component);
+    IInstaller CreateInstaller(InstallableComponent component);
 }
