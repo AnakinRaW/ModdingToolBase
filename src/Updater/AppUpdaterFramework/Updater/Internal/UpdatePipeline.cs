@@ -26,7 +26,7 @@ internal sealed class UpdatePipeline : Pipeline
     private readonly IComponentProgressReporter _progressReporter;
     private readonly InstalledProduct _installedProduct;
 
-    private readonly HashSet<IUpdateItem> _itemsToProcess;
+    private readonly HashSet<UpdateItem> _itemsToProcess;
     
     private readonly List<DownloadStep> _componentsToDownload = [];
     private readonly List<InstallStep> _installsOrRemoves = [];
@@ -92,8 +92,8 @@ internal sealed class UpdatePipeline : Pipeline
 
         var downloadManager = new DownloadManager(configuration.DownloadConfiguration, ServiceProvider);
 
-        var installs = new List<IUpdateItem>();
-        var removes = new List<IUpdateItem>();
+        var installs = new List<UpdateItem>();
+        var removes = new List<UpdateItem>();
 
         foreach (var updateItem in _itemsToProcess)
         {

@@ -3,7 +3,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-internal sealed class UpdateItem : IUpdateItem
+public sealed class UpdateItem
 {
     public string ComponentId { get; }
 
@@ -13,7 +13,7 @@ internal sealed class UpdateItem : IUpdateItem
 
     public UpdateAction Action { get; }
 
-    public UpdateItem(IInstallableComponent? installedComponent, IInstallableComponent? updateComponent, UpdateAction action)
+    internal UpdateItem(IInstallableComponent? installedComponent, IInstallableComponent? updateComponent, UpdateAction action)
     {
         if (installedComponent is null && updateComponent is null)
             throw new InvalidOperationException("Cannot create update item from no component information.");
@@ -30,7 +30,7 @@ internal sealed class UpdateItem : IUpdateItem
         Action = action;
     }
 
-    public bool Equals(IUpdateItem? other)
+    public bool Equals(UpdateItem? other)
     {
         return ComponentId == other?.ComponentId;
     }

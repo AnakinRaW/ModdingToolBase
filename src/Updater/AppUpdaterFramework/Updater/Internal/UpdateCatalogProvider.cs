@@ -48,11 +48,11 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
     }
 
 
-    private static ICollection<IUpdateItem> Compare(
+    private static ICollection<UpdateItem> Compare(
         ICollection<IInstallableComponent> installedComponents, 
         ICollection<IInstallableComponent> availableComponents)
     {
-        var updateItems = new List<IUpdateItem>();
+        var updateItems = new List<UpdateItem>();
 
         var currentItems = installedComponents.ToList();
 

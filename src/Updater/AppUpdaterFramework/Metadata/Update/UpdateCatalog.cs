@@ -12,14 +12,14 @@ public sealed class UpdateCatalog
 
     public ProductReference UpdateReference { get; }
 
-    public IReadOnlyCollection<IUpdateItem> UpdateItems { get; }
+    public IReadOnlyCollection<UpdateItem> UpdateItems { get; }
 
     public UpdateCatalogAction Action { get; }
 
     internal UpdateCatalog(
         InstalledProduct installedProduct,
         ProductReference updateReference,
-        IEnumerable<IUpdateItem> updateItems)
+        IEnumerable<UpdateItem> updateItems)
     {
         InstalledProduct = installedProduct ?? throw new ArgumentNullException(nameof(installedProduct));
         UpdateReference = updateReference ?? throw new ArgumentNullException(nameof(updateReference));
