@@ -25,7 +25,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IUpdateResultInteractionHandler>(sp => new DialogResultInteractionHandler(sp));
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp)));
-        serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateInteractionHandler>(sp => new DialogUpdateInteractionHandler(sp)));
+        serviceCollection.Replace(ServiceDescriptor.Singleton<ILockedFileInteractionHandler>(sp => new DialogUpdateInteractionHandler(sp)));
 
         // Overrides
         serviceCollection.Replace(ServiceDescriptor.Singleton<IRestartHandler>(sp => new UpdateRestartCommandHandler(sp)));

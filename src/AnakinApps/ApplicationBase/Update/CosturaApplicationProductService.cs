@@ -6,7 +6,6 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,7 +16,7 @@ namespace AnakinRaW.ApplicationBase.Update;
 public class CosturaApplicationProductService(ApplicationEnvironment applicationEnvironment, IServiceProvider serviceProvider) 
     : ApplicationProductService(applicationEnvironment, serviceProvider)
 {
-    private readonly IMetadataExtractor _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
+    private readonly AssemblyMetadataExtractor _metadataExtractor = new(serviceProvider);
 
     private readonly CosturaResourceExtractor _resourceExtractor = new(applicationEnvironment.AssemblyInfo.Assembly, serviceProvider);
 

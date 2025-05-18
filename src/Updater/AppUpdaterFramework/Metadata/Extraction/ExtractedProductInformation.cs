@@ -1,8 +1,8 @@
 ﻿using Semver;
 
-namespace AnakinRaW.AppUpdaterFramework.Metadata;
+namespace AnakinRaW.AppUpdaterFramework.Metadata.Extraction;
 
-public record ProductInformation
+internal sealed record ExtractedProductInformation
 {
     public required string ProductName { get; init; }
 

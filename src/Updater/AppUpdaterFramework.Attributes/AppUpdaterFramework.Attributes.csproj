@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>AnakinRaW.AppUpdaterFramework.Attributes</RootNamespace>
+		<AssemblyName>AnakinRaW.AppUpdaterFramework.Attributes</AssemblyName>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Description>Provides assembly-level attribues used by the AppUpdaterFramework to annotate products and components.</Description>
+	</PropertyGroup>
+
+</Project>

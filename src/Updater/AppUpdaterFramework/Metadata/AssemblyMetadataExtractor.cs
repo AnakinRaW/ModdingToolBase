@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
+using AnakinRaW.AppUpdaterFramework.Metadata.Extraction;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -12,42 +13,43 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
-internal sealed class MetadataExtractor : IMetadataExtractor
+public sealed class AssemblyMetadataExtractor
 {
     private static readonly HashTypeKey FileHashType = HashTypeKey.SHA256;
 
     private readonly IFileSystem _fileSystem;
-    private readonly IAssemblyMetadataExtractor _assemblyMetadataExtractor;
+    private readonly CecilMetadataExtractor _assemblyMetadataExtractor;
 
-    public MetadataExtractor(IServiceProvider serviceProvider)
+    public AssemblyMetadataExtractor(IServiceProvider serviceProvider)
     {
         if (serviceProvider == null) 
             throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _assemblyMetadataExtractor = serviceProvider.GetService<IAssemblyMetadataExtractor>() ?? new AssemblyMetadataExtractor(serviceProvider);
+        _assemblyMetadataExtractor = new CecilMetadataExtractor(serviceProvider);
     }
 
-    public IInstallableComponent ComponentFromAssembly(Assembly assembly, string installLocation,
+    public IInstallableComponent ComponentFromAssembly(
+        Assembly assembly, 
+        string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
+        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
         if (assembly == null) 
             throw new ArgumentNullException(nameof(assembly));
-        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
 
         var assemblyFile = assembly.Location;
         using var assemblyStream = _fileSystem.FileStream.New(assemblyFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         return ComponentFromStream(assemblyStream, installLocation, additionalInformation);
     }
 
-    public Task<IInstallableComponent> ComponentFromFileAsync(IFileInfo file, string installLocation,
+    public Task<IInstallableComponent> ComponentFromFileAsync(
+        IFileInfo file, 
+        string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
+        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
         if (file == null)
             throw new ArgumentNullException(nameof(file));
-        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
-
-        if (!file.Exists)
-            throw new FileNotFoundException("Component assembly not found.", file.FullName);
 
         return Task.Run(() =>
         {
@@ -66,9 +68,9 @@ internal sealed class MetadataExtractor : IMetadataExtractor
         string installLocation,
         ExtractorAdditionalInformation additionalInformation = default)
     {
+        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
         if (stream == null) 
             throw new ArgumentNullException(nameof(stream));
-        ThrowHelper.ThrowIfNullOrEmpty(installLocation);
 
         var componentInformation = InformationFromStream(stream);
 
@@ -98,10 +100,6 @@ internal sealed class MetadataExtractor : IMetadataExtractor
     {
         if (file == null) 
             throw new ArgumentNullException(nameof(file));
-
-        if (!file.Exists)
-            throw new FileNotFoundException("Component assembly not found.", file.FullName);
-
         return Task.Run(() =>
         {
             using var assemblyStream = file.OpenRead();
@@ -125,7 +123,7 @@ internal sealed class MetadataExtractor : IMetadataExtractor
         return new ProductReference(productInfo.ProductName, productInfo.Version);
     }
 
-    private OriginInfo? CreateOriginInfo(Uri? origin, ComponentIntegrityInformation integrityInformation, long? size = null)
+    private static OriginInfo? CreateOriginInfo(Uri? origin, ComponentIntegrityInformation integrityInformation, long? size = null)
     {
         if (origin is null)
             return null;
@@ -141,6 +139,8 @@ internal sealed class MetadataExtractor : IMetadataExtractor
 
     private static InstallationSize GetSize(long size, ExtractorAdditionalInformation.InstallDrive drive)
     {
-        return drive == ExtractorAdditionalInformation.InstallDrive.System ? new InstallationSize(size, 0) : new InstallationSize(0, size);
+        return drive == ExtractorAdditionalInformation.InstallDrive.System
+            ? new InstallationSize(size, 0)
+            : new InstallationSize(0, size);
     }
 }

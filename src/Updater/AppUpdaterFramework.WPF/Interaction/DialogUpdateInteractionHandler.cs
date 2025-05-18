@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Interaction;
 
-internal class DialogUpdateInteractionHandler : IUpdateInteractionHandler
+internal class DialogUpdateInteractionHandler : ILockedFileInteractionHandler
 {
     private readonly IQueuedDialogService _dialogService;
     private readonly IUpdateDialogViewModelFactory _viewModelFactory;

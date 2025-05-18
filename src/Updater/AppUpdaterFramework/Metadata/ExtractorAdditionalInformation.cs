@@ -4,9 +4,9 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata;
 
 public readonly struct ExtractorAdditionalInformation
 {
-    public Uri? Origin { get; init; }
-
     public string? OverrideFileName { get; init; }
+
+    public Uri? Origin { get; init; }
 
     public InstallDrive Drive { get; init; }
 

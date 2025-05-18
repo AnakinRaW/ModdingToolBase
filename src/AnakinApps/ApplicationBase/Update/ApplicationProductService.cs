@@ -14,7 +14,7 @@ namespace AnakinRaW.ApplicationBase.Update;
 public abstract class ApplicationProductService(ApplicationEnvironment applicationEnvironment, IServiceProvider serviceProvider)
     : ProductServiceBase(serviceProvider)
 {
-    private readonly IMetadataExtractor _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
+    private readonly AssemblyMetadataExtractor _metadataExtractor = new(serviceProvider);
 
     protected readonly ApplicationEnvironment ApplicationEnvironment = applicationEnvironment ?? throw new ArgumentNullException(nameof(applicationEnvironment));
     protected readonly IFileSystem FileSystem = serviceProvider.GetRequiredService<IFileSystem>();

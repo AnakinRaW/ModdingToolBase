@@ -1,9 +1,9 @@
 ﻿using System;
 using Semver;
 
-namespace AnakinRaW.AppUpdaterFramework.Metadata;
+namespace AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
-public record ComponentFileInformation
+public sealed record ComponentFileInformation
 {
     public required string Id { get; init; }
 

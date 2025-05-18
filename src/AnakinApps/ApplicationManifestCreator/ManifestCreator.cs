@@ -21,7 +21,7 @@ internal class ManifestCreator
 {
     private readonly ILogger? _logger;
     private readonly IFileSystem _fileSystem;
-    private readonly IMetadataExtractor _metadataExtractor;
+    private readonly AssemblyMetadataExtractor _metadataExtractor;
     private readonly AppManifestCreatorBranchManager _branchManager;
 
     public ManifestCreatorOptions Options { get; }
@@ -34,7 +34,7 @@ internal class ManifestCreator
             throw new ArgumentNullException(nameof(serviceProvider));
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
-        _metadataExtractor = serviceProvider.GetRequiredService<IMetadataExtractor>();
+        _metadataExtractor = new AssemblyMetadataExtractor(serviceProvider);
         _branchManager = serviceProvider.GetRequiredService<AppManifestCreatorBranchManager>();
 
         Options = options ?? throw new ArgumentNullException(nameof(options));

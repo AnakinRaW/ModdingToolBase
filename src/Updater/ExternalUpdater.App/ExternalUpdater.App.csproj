@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AppUpdaterFramework.Core\AppUpdaterFramework.Core.csproj">
+		<ProjectReference Include="..\AppUpdaterFramework.Attributes\AppUpdaterFramework.Attributes.csproj">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</ProjectReference>

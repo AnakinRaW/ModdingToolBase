@@ -34,7 +34,6 @@ public static class LibraryInitialization
         serviceCollection.TryAddSingleton<IUpdateService>(sp => new UpdateService(sp));
         serviceCollection.TryAddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
         serviceCollection.TryAddSingleton<IManifestInstallationDetector>(sp => new ManifestInstallationDetector(sp));
-        serviceCollection.TryAddSingleton<IMetadataExtractor>(sp => new MetadataExtractor(sp));
         serviceCollection.TryAddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
         serviceCollection.TryAddSingleton<IExternalUpdaterService>(sp => new ExternalUpdaterService(sp));
         serviceCollection.TryAddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));

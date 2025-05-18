@@ -2,16 +2,15 @@
 using System.IO;
 using System.Reflection;
 using AnakinRaW.AppUpdaterFramework.Attributes;
-using AnakinRaW.AppUpdaterFramework.Utilities;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Mono.Cecil;
 using Semver;
-using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
 
-namespace AnakinRaW.AppUpdaterFramework.Metadata;
+namespace AnakinRaW.AppUpdaterFramework.Metadata.Extraction;
 
-internal class AssemblyMetadataExtractor(IServiceProvider serviceProvider) : IAssemblyMetadataExtractor
+internal class CecilMetadataExtractor(IServiceProvider serviceProvider)
 {
     private readonly IHashingService _hashingService = serviceProvider.GetRequiredService<IHashingService>();
 
@@ -42,7 +41,7 @@ internal class AssemblyMetadataExtractor(IServiceProvider serviceProvider) : IAs
         };
     }
 
-    public ProductInformation ReadProductInformation(Stream assemblyStream)
+    public ExtractedProductInformation ReadProductInformation(Stream assemblyStream)
     {
         assemblyStream.Position = 0;
 
@@ -51,44 +50,46 @@ internal class AssemblyMetadataExtractor(IServiceProvider serviceProvider) : IAs
         var infoVersion = GetInformationalVersion(assembly);
         var productName = GetProductName(assembly);
 
-        return new ProductInformation
+        return new ExtractedProductInformation
         {
             ProductName = productName,
             Version = infoVersion
         };
     }
 
-    private static string GetComponentId(ICustomAttributeProvider assemblyDefinition)
+    private static string GetComponentId(AssemblyDefinition assemblyDefinition)
     {
-        return assemblyDefinition.CustomAttributes.GetAttributeCtorString(typeof(UpdateComponentAttribute)) ??
-               throw new InvalidOperationException($"The specified assembly does not contain the {nameof(UpdateComponentAttribute)} attribute.");
+        return assemblyDefinition.GetSingleAttributeOfType(typeof(UpdateComponentAttribute))
+                   ?.GetAttributeCtorString() ??
+               throw new InvalidOperationException(
+                   $"The specified assembly does not contain the {nameof(UpdateComponentAttribute)} attribute.");
     }
 
-    private static string? GetComponentName(ICustomAttributeProvider assemblyDefinition)
+    private static string? GetComponentName(AssemblyDefinition assemblyDefinition)
     {
-        return assemblyDefinition.CustomAttributes.GetAttributePropertyString(typeof(UpdateComponentAttribute),
-            nameof(UpdateComponentAttribute.Name));
+        return assemblyDefinition.GetSingleAttributeOfType(typeof(UpdateComponentAttribute))
+            ?.GetAttributePropertyString(nameof(UpdateComponentAttribute.Name));
     }
 
-    private static Version? GetFileVersion(ICustomAttributeProvider assemblyDefinition)
+    private static Version? GetFileVersion(AssemblyDefinition assemblyDefinition)
     {
-        var fileVersion = assemblyDefinition.CustomAttributes.GetAttributeCtorString(typeof(AssemblyFileVersionAttribute));
+        var fileVersion = assemblyDefinition.GetSingleAttributeOfType(typeof(AssemblyFileVersionAttribute))?.GetAttributeCtorString();
         return fileVersion is null ? null : Version.Parse(fileVersion);
     }
 
-    private static string GetProductName(ICustomAttributeProvider assemblyDefinition)
+    private static string GetProductName(AssemblyDefinition assemblyDefinition)
     {
-        return assemblyDefinition.CustomAttributes.GetAttributeCtorString(typeof(UpdateProductAttribute)) ??
-               throw new InvalidOperationException($"The specified assembly does not contain the {nameof(UpdateProductAttribute)} attribute.");
+        return assemblyDefinition.GetSingleAttributeOfType(typeof(UpdateProductAttribute))?.GetAttributeCtorString() ??
+            throw new InvalidOperationException($"The specified assembly does not contain the {nameof(UpdateProductAttribute)} attribute.");
     }
 
-    private static SemVersion? GetInformationalVersion(ICustomAttributeProvider assemblyDefinition)
+    private static SemVersion? GetInformationalVersion(AssemblyDefinition assemblyDefinition)
     {
-        var infoVersion = assemblyDefinition.CustomAttributes.GetAttributeCtorString(typeof(AssemblyInformationalVersionAttribute));
+        var infoVersion = assemblyDefinition.GetSingleAttributeOfType(typeof(AssemblyInformationalVersionAttribute))?.GetAttributeCtorString();
         return infoVersion is null ? null : SemVersion.Parse(infoVersion, SemVersionStyles.Any);
     }
 
-    private AssemblyDefinition GetAssemblyDefinition(Stream assemblyStream)
+    private static AssemblyDefinition GetAssemblyDefinition(Stream assemblyStream)
     {
         return AssemblyDefinition.ReadAssembly(assemblyStream, new ReaderParameters { ReadSymbols = false });
     }
