@@ -80,7 +80,7 @@ internal class ManifestCreator
             await textWriter.WriteLineAsync(branch);
     }
 
-    private async Task<ApplicationManifest> CreateManifest(IProductReference productReference)
+    private async Task<ApplicationManifest> CreateManifest(ProductReference productReference)
     {
         var branch = productReference.Branch;
         if (branch is null)
@@ -144,7 +144,7 @@ internal class ManifestCreator
         }
     }
 
-    private static IComponentGroup CreateGroup(IProductReference product, IEnumerable<IInstallableComponent> componentInfos)
+    private static IComponentGroup CreateGroup(ProductReference product, IEnumerable<IInstallableComponent> componentInfos)
     {
         return new ComponentGroup(new ProductComponentIdentity(ApplicationConstants.AppGroupId, product.Version), componentInfos.ToList())
         {

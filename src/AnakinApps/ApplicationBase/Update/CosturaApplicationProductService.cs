@@ -21,7 +21,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
     private readonly CosturaResourceExtractor _resourceExtractor = new(applicationEnvironment.AssemblyInfo.Assembly, serviceProvider);
 
     protected sealed override ProductManifest GetManifestForInstalledProduct(
-        IProductReference installedProduct,
+        ProductReference installedProduct,
         IReadOnlyDictionary<string, string> productVariables)
     {
         var installedComponents = new List<IInstallableComponent>();

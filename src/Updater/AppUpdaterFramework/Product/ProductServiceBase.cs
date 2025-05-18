@@ -43,7 +43,7 @@ public abstract class ProductServiceBase : IProductService
         }
     }
 
-    public virtual IProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? newBranch)
+    public virtual ProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? newBranch)
     {
         var current = GetCurrentInstance();
         var branch = current.Branch;
@@ -62,13 +62,13 @@ public abstract class ProductServiceBase : IProductService
         DetectManifest(currentInstance.Manifest, currentInstance.Variables);
     }
 
-    protected abstract IProductReference CreateCurrentProductReference();
+    protected abstract ProductReference CreateCurrentProductReference();
 
     protected abstract ProductManifest GetManifestForInstalledProduct(
-        IProductReference installedProduct, 
+        ProductReference installedProduct, 
         IReadOnlyDictionary<string, string> productVariables);
 
-    protected virtual void AddAdditionalProductVariables(IDictionary<string, string> variables, IProductReference product)
+    protected virtual void AddAdditionalProductVariables(IDictionary<string, string> variables, ProductReference product)
     {
     }
 
@@ -113,7 +113,14 @@ public abstract class ProductServiceBase : IProductService
         var manifest = GetManifestForInstalledProduct(productReference, variables);
         DetectManifest(manifest, variables);
         var state = FetchInstallState();
-        return new InstalledProduct(productReference, InstallLocation.FullName, manifest, variables, state);
+        return new InstalledProduct(
+            productReference.Name,
+            productReference.Version,
+            productReference.Branch,
+            InstallLocation.FullName,
+            manifest,
+            variables,
+            state);
     }
 
     private void DetectManifest(ProductManifest manifest, IReadOnlyDictionary<string, string> variables)
@@ -122,7 +129,7 @@ public abstract class ProductServiceBase : IProductService
         detectionService.DetectInstalledComponents(manifest, variables);
     }
 
-    private IReadOnlyDictionary<string, string> AddProductVariables(IProductReference product)
+    private IReadOnlyDictionary<string, string> AddProductVariables(ProductReference product)
     {
         var variables = new Dictionary<string, string>();
         var installLocation = InstallLocation;

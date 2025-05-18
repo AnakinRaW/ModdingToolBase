@@ -37,7 +37,7 @@ internal class AppManifestCreatorBranchManager(ManifestCreatorOptions options, I
         return ApplicationBranchUtilities.BuildComponentUri(_branchUtilities.Mirrors.First(), branch.Name, componentFile.Name).ToUri();
     }
 
-    public Task<ProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default)
+    public Task<ProductManifest> GetManifestAsync(ProductReference branch, CancellationToken token = default)
     {
         throw new NotSupportedException();
     }

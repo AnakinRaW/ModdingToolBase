@@ -14,5 +14,5 @@ public interface IBranchManager
 
     Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
 
-    Task<ProductManifest> GetManifestAsync(IProductReference branch, CancellationToken token = default);
+    Task<ProductManifest> GetManifestAsync(ProductReference branch, CancellationToken token = default);
 }

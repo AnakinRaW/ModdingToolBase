@@ -22,12 +22,12 @@ public abstract class ApplicationProductService(ApplicationEnvironment applicati
     [field: AllowNull, MaybeNull]
     public sealed override IDirectoryInfo InstallLocation => field ?? GetInstallLocation();
     
-    protected sealed override IProductReference CreateCurrentProductReference()
+    protected sealed override ProductReference CreateCurrentProductReference()
     {
         return _metadataExtractor.ProductReferenceFromAssembly(ApplicationEnvironment.AssemblyInfo.Assembly);
     }
 
-    protected override void AddAdditionalProductVariables(IDictionary<string, string> variables, IProductReference product)
+    protected override void AddAdditionalProductVariables(IDictionary<string, string> variables, ProductReference product)
     {
         variables.Add(ApplicationVariablesKeys.AppData, ApplicationEnvironment.ApplicationLocalPath);
         variables.Add(ApplicationVariablesKeys.AppFileName, ApplicationEnvironment.AssemblyInfo.ExecutableFileName);

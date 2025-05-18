@@ -6,16 +6,8 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-public sealed class InstalledProduct : IProductReference
+public sealed class InstalledProduct : ProductReference
 {
-    private readonly IProductReference _reference;
-
-    public string Name => _reference.Name;
-
-    public SemVersion? Version => _reference.Version;
-
-    public ProductBranch? Branch => _reference.Branch;
-
     public string InstallationPath { get; }
 
     public IReadOnlyDictionary<string, string> Variables { get; }
@@ -25,14 +17,15 @@ public sealed class InstalledProduct : IProductReference
     public ProductManifest Manifest { get; }
 
     internal InstalledProduct(
-        IProductReference reference, 
+        string name, 
+        SemVersion? version, 
+        ProductBranch? branch,
         string installationPath, 
         ProductManifest manifest,
         IReadOnlyDictionary<string, string> variables,
-        ProductState state = ProductState.Installed)
+        ProductState state = ProductState.Installed) : base(name, version, branch)
     {
         ThrowHelper.ThrowIfNullOrEmpty(installationPath);
-        _reference = reference ?? throw new ArgumentNullException(nameof(reference));
         InstallationPath = installationPath;
         State = state;
         Manifest = manifest ?? throw new ArgumentNullException(nameof(manifest));
@@ -41,7 +34,7 @@ public sealed class InstalledProduct : IProductReference
 
     public override string ToString()
     {
-        return $"Product '{_reference.Name}, v:{_reference.Version?.ToString() ?? "NO_VERSION"}, Branch:{_reference.Branch?.ToString() ?? "NO_BRANCH"}' " +
+        return $"Product '{Name}, v:{Version?.ToString() ?? "NO_VERSION"}, Branch:{Branch?.ToString() ?? "NO_BRANCH"}' " +
                $"at {InstallationPath}";
     }
 }

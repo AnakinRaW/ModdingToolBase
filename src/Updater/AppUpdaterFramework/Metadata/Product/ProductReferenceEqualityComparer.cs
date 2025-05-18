@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-public sealed class ProductReferenceEqualityComparer : IEqualityComparer<IProductReference>
+public sealed class ProductReferenceEqualityComparer : IEqualityComparer<ProductReference>
 {
     public static readonly ProductReferenceEqualityComparer Default = new(true, true);
     public static readonly ProductReferenceEqualityComparer VersionAware = new(true, false);
@@ -19,7 +19,7 @@ public sealed class ProductReferenceEqualityComparer : IEqualityComparer<IProduc
         _compareBranch = compareBranch;
     }
 
-    public bool Equals(IProductReference? x, IProductReference? y)
+    public bool Equals(ProductReference? x, ProductReference? y)
     {
         if (ReferenceEquals(x, y))
             return true;
@@ -41,7 +41,7 @@ public sealed class ProductReferenceEqualityComparer : IEqualityComparer<IProduc
         return true;
     }
 
-    public int GetHashCode(IProductReference obj)
+    public int GetHashCode(ProductReference obj)
     {
         return _compareBranch switch
         {

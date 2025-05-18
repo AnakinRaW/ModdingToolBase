@@ -3,7 +3,7 @@ using Semver;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-public sealed class ProductReference : IProductReference
+public class ProductReference
 {
     public string Name { get; }
 

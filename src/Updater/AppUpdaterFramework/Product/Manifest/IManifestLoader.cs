@@ -11,7 +11,7 @@ public interface IManifestLoader
 {
     Task<ProductManifest> LoadManifestAsync(
         Uri manifestUri,
-        IProductReference productReference, 
+        ProductReference productReference, 
         DownloadOptions? downloadOptions,
         CancellationToken cancellationToken = default);
 }

@@ -10,7 +10,7 @@ public sealed class UpdateCatalog
 {
     public InstalledProduct InstalledProduct { get; }
 
-    public IProductReference UpdateReference { get; }
+    public ProductReference UpdateReference { get; }
 
     public IReadOnlyCollection<IUpdateItem> UpdateItems { get; }
 
@@ -18,7 +18,7 @@ public sealed class UpdateCatalog
 
     internal UpdateCatalog(
         InstalledProduct installedProduct,
-        IProductReference updateReference,
+        ProductReference updateReference,
         IEnumerable<IUpdateItem> updateItems)
     {
         InstalledProduct = installedProduct ?? throw new ArgumentNullException(nameof(installedProduct));

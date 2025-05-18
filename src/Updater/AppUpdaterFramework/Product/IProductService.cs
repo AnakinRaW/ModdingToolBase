@@ -7,7 +7,7 @@ public interface IProductService
 {
     InstalledProduct GetCurrentInstance();
 
-    IProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? branch);
+    ProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? branch);
 
     void UpdateComponentDetectionState();
 }

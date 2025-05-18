@@ -35,7 +35,7 @@ public abstract class BranchManagerBase : IBranchManager
 
     public abstract Task<IEnumerable<ProductBranch>> GetAvailableBranchesAsync();
 
-    public async Task<ProductManifest> GetManifestAsync(IProductReference productReference, CancellationToken token = default)
+    public async Task<ProductManifest> GetManifestAsync(ProductReference productReference, CancellationToken token = default)
     {
         if (productReference == null) 
             throw new ArgumentNullException(nameof(productReference));
@@ -76,7 +76,7 @@ public abstract class BranchManagerBase : IBranchManager
 
     protected abstract IEnumerable<Uri> BuildManifestLocations(string branchName);
 
-    protected virtual DownloadOptions? GetDownloadOptionsForManifestDownload(Uri manifestUri, IProductReference productReference)
+    protected virtual DownloadOptions? GetDownloadOptionsForManifestDownload(Uri manifestUri, ProductReference productReference)
     {
         return null;
     }

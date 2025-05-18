@@ -13,7 +13,7 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
 
     public async Task<ProductManifest> LoadManifestAsync(
         Uri manifestUri, 
-        IProductReference productReference,
+        ProductReference productReference,
         DownloadOptions? downloadOptions,
         CancellationToken cancellationToken = default)
     {
@@ -28,11 +28,11 @@ public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IMa
 
     protected abstract Task<ProductManifest> LoadManifestCoreAsync(
         Uri manifestUri,
-        IProductReference productReference,
+        ProductReference productReference,
         DownloadOptions? downloadOptions,
         CancellationToken cancellationToken = default);
 
-    protected static void ValidateCompatibleManifest(IProductReference manifestProduct, IProductReference installedProduct)
+    protected static void ValidateCompatibleManifest(ProductReference manifestProduct, ProductReference installedProduct)
     {
         if (!ProductReferenceEqualityComparer.NameOnly.Equals(manifestProduct, installedProduct))
             throw new ManifestException(

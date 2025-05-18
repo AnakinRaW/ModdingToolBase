@@ -10,7 +10,7 @@ public interface IUpdateSession
 
     event EventHandler<UpdateProgressEventArgs> InstallProgress;
 
-    IProductReference Product { get; }
+    ProductReference Product { get; }
     
     void Cancel();
 }

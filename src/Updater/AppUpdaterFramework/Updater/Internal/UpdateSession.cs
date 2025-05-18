@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class UpdateSession(IProductReference product, IApplicationUpdater updater) : IUpdateSession
+internal class UpdateSession(ProductReference product, IApplicationUpdater updater) : IUpdateSession
 {
     private readonly IApplicationUpdater _updater = updater ?? throw new ArgumentNullException(nameof(updater));
     private CancellationTokenSource? _cts;
@@ -14,7 +14,7 @@ internal class UpdateSession(IProductReference product, IApplicationUpdater upda
     public event EventHandler<UpdateProgressEventArgs>? DownloadProgress;
     public event EventHandler<UpdateProgressEventArgs>? InstallProgress;
 
-    public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
+    public ProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
     internal async Task<UpdateResult> StartUpdate(CancellationToken token)
     {

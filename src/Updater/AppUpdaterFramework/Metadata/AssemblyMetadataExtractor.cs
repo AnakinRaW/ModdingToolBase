@@ -96,7 +96,7 @@ public sealed class AssemblyMetadataExtractor
         };
     }
 
-    public Task<IProductReference> ProductReferenceFromFileAsync(IFileInfo file)
+    public Task<ProductReference> ProductReferenceFromFileAsync(IFileInfo file)
     {
         if (file == null) 
             throw new ArgumentNullException(nameof(file));
@@ -107,7 +107,7 @@ public sealed class AssemblyMetadataExtractor
         });
     }
 
-    public IProductReference ProductReferenceFromAssembly(Assembly assembly)
+    public ProductReference ProductReferenceFromAssembly(Assembly assembly)
     {
         if (assembly == null) 
             throw new ArgumentNullException(nameof(assembly));
@@ -117,7 +117,7 @@ public sealed class AssemblyMetadataExtractor
         return ProductReferenceFromStream(assemblyStream);
     }
 
-    public IProductReference ProductReferenceFromStream(Stream assemblyStream)
+    public ProductReference ProductReferenceFromStream(Stream assemblyStream)
     {
         var productInfo = _assemblyMetadataExtractor.ReadProductInformation(assemblyStream);
         return new ProductReference(productInfo.ProductName, productInfo.Version);

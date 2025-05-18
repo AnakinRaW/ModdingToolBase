@@ -9,16 +9,17 @@ namespace AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 public sealed class ProductManifest : IEnumerable<IProductComponent>
 {
-    public IProductReference Product { get; }
+    public ProductReference Product { get; }
 
     public IReadOnlyCollection<IProductComponent> Components { get; }
 
     public IEnumerable<IInstallableComponent> GetInstallableComponents() =>
         Components.Where(x => x is IInstallableComponent).OfType<IInstallableComponent>();
 
-    public ProductManifest(IProductReference product, IEnumerable<IProductComponent> components)
+    public ProductManifest(ProductReference product, IEnumerable<IProductComponent> components)
     {
-        if (components == null) throw new ArgumentNullException(nameof(components));
+        if (components == null)
+            throw new ArgumentNullException(nameof(components));
         Product = product ?? throw new ArgumentNullException(nameof(product));
         Components = components.ToList();
     }

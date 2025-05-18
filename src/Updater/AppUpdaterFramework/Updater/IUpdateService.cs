@@ -20,7 +20,7 @@ public interface IUpdateService
 
     bool IsCheckingForUpdates { get; }
 
-    Task<UpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default);
+    Task<UpdateCatalog?> CheckForUpdatesAsync(ProductReference productReference, CancellationToken token = default);
     
     Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default);
 }

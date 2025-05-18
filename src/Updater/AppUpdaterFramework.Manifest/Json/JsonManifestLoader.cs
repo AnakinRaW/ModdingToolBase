@@ -30,7 +30,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
 
     protected override async Task<ProductManifest> LoadManifestCoreAsync(
         Uri manifestUri, 
-        IProductReference productReference,
+        ProductReference productReference,
         DownloadOptions? downloadOptions,
         CancellationToken cancellationToken = default)
     {

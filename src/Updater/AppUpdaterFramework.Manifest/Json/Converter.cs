@@ -20,7 +20,7 @@ public static class Converter
         throw new NotSupportedException();
     }
 
-    public static ApplicationManifest ToApplicationManifest(this IProductReference productReference,
+    public static ApplicationManifest ToApplicationManifest(this ProductReference productReference,
         IEnumerable<IProductComponent> components)
     {
         var appComponents = components.Select(ToAppComponent).ToList();
