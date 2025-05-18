@@ -6,7 +6,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
-internal sealed class InstalledProduct : IInstalledProduct
+public sealed class InstalledProduct : IProductReference
 {
     private readonly IProductReference _reference;
 
@@ -24,7 +24,7 @@ internal sealed class InstalledProduct : IInstalledProduct
 
     public ProductManifest Manifest { get; }
 
-    public InstalledProduct(
+    internal InstalledProduct(
         IProductReference reference, 
         string installationPath, 
         ProductManifest manifest,

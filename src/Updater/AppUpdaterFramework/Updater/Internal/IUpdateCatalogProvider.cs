@@ -6,5 +6,5 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 
 internal interface IUpdateCatalogProvider
 {
-    IUpdateCatalog Create(IInstalledProduct installedProduct, ProductManifest availableManifest);
+    UpdateCatalog Create(InstalledProduct installedProduct, ProductManifest availableManifest);
 }

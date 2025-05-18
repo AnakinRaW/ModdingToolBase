@@ -24,7 +24,7 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 internal sealed class UpdatePipeline : Pipeline
 {
     private readonly IComponentProgressReporter _progressReporter;
-    private readonly IInstalledProduct _installedProduct;
+    private readonly InstalledProduct _installedProduct;
 
     private readonly HashSet<IUpdateItem> _itemsToProcess;
     
@@ -40,7 +40,7 @@ internal sealed class UpdatePipeline : Pipeline
     private AggregatedDownloadProgressReporter? _downloadProgress;
     private AggregatedInstallProgressReporter? _installProgress;
 
-    public UpdatePipeline(IUpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider) : base(serviceProvider)
+    public UpdatePipeline(UpdateCatalog updateCatalog, IComponentProgressReporter progressReporter, IServiceProvider serviceProvider) : base(serviceProvider)
     {
         if (updateCatalog == null) 
             throw new ArgumentNullException(nameof(updateCatalog));

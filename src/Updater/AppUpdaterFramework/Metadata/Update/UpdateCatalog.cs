@@ -6,9 +6,9 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
-internal sealed class UpdateCatalog : IUpdateCatalog
+public sealed class UpdateCatalog
 {
-    public IInstalledProduct InstalledProduct { get; }
+    public InstalledProduct InstalledProduct { get; }
 
     public IProductReference UpdateReference { get; }
 
@@ -16,7 +16,8 @@ internal sealed class UpdateCatalog : IUpdateCatalog
 
     public UpdateCatalogAction Action { get; }
 
-    public UpdateCatalog(IInstalledProduct installedProduct,
+    internal UpdateCatalog(
+        InstalledProduct installedProduct,
         IProductReference updateReference,
         IEnumerable<IUpdateItem> updateItems)
     {
@@ -50,12 +51,6 @@ internal sealed class UpdateCatalog : IUpdateCatalog
             return UpdateCatalogAction.Update;
         
         return UpdateCatalogAction.None;
-    }
-
-
-    internal static UpdateCatalog CreateEmpty(IInstalledProduct installedProduct, IProductReference updateReference)
-    {
-        return new UpdateCatalog(installedProduct, updateReference, []);
     }
 
     public override string ToString()

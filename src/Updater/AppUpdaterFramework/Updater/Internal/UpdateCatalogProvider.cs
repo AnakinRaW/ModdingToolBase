@@ -6,7 +6,6 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
-using AnakinRaW.AppUpdaterFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
@@ -15,7 +14,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
 {
     private readonly IManifestInstallationDetector _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
 
-    public IUpdateCatalog Create(IInstalledProduct installedProduct, ProductManifest availableCatalog)
+    public UpdateCatalog Create(InstalledProduct installedProduct, ProductManifest availableCatalog)
     {
         if (installedProduct == null) 
             throw new ArgumentNullException(nameof(installedProduct));
@@ -29,7 +28,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
             ProductComponentIdentityComparer.VersionIndependent);
 
         if (!currentInstalledComponents.Any() && !availableInstallableComponents.Any())
-            return UpdateCatalog.CreateEmpty(installedProduct, availableCatalog.Product);
+            return new UpdateCatalog(installedProduct, availableCatalog.Product, []);
 
         // Empty available catalog: Uninstall
         if (!availableInstallableComponents.Any())
@@ -49,11 +48,13 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
     }
 
 
-    private static ICollection<IUpdateItem> Compare(IEnumerable<IInstallableComponent> currentCatalog, IEnumerable<IInstallableComponent> availableComponents)
+    private static ICollection<IUpdateItem> Compare(
+        ICollection<IInstallableComponent> installedComponents, 
+        ICollection<IInstallableComponent> availableComponents)
     {
         var updateItems = new List<IUpdateItem>();
 
-        var currentItems = currentCatalog.ToList();
+        var currentItems = installedComponents.ToList();
 
         foreach (var availableItem in availableComponents)
         {

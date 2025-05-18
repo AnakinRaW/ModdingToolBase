@@ -70,7 +70,7 @@ public abstract class ApplicationUpdater
         return new ProductBranch(branchName!, [manifestUri], isDefault);
     }
 
-    public abstract Task<IUpdateCatalog> CheckForUpdateAsync(ProductBranch branch, CancellationToken token = default);
+    public abstract Task<UpdateCatalog> CheckForUpdateAsync(ProductBranch branch, CancellationToken token = default);
 
-    public abstract Task UpdateAsync(IUpdateCatalog updateCatalog, CancellationToken token = default);
+    public abstract Task UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default);
 }

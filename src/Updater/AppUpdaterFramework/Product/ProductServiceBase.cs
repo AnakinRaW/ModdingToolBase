@@ -34,7 +34,7 @@ public abstract class ProductServiceBase : IProductService
         serviceProvider.GetRequiredService<IUpdateService>().UpdateCompleted += OnUpdateCompleted;
     }
 
-    public IInstalledProduct GetCurrentInstance()
+    public InstalledProduct GetCurrentInstance()
     {
         Initialize();
         lock (_syncLock)

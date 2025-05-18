@@ -14,7 +14,7 @@ namespace AnakinRaW.AppUpdaterFramework.Updater;
 internal class UpdateService : IUpdateService
 {
     public event EventHandler? CheckingForUpdatesStarted;
-    public event EventHandler<IUpdateCatalog?>? CheckingForUpdatesCompleted;
+    public event EventHandler<UpdateCatalog?>? CheckingForUpdatesCompleted;
     public event EventHandler<IUpdateSession>? UpdateStarted;
     public event EventHandler<UpdateResult?>? UpdateCompleted;
 
@@ -33,7 +33,7 @@ internal class UpdateService : IUpdateService
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public async Task<IUpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default)
+    public async Task<UpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default)
     {
         lock (_syncLock)
         {
@@ -44,7 +44,7 @@ internal class UpdateService : IUpdateService
 
         CheckingForUpdatesStarted?.RaiseAsync(this, EventArgs.Empty);
 
-        IUpdateCatalog? updateCatalog = null;
+        UpdateCatalog? updateCatalog = null;
 
         try
         {
@@ -78,7 +78,7 @@ internal class UpdateService : IUpdateService
         }
     }
 
-    public async Task<UpdateResult?> UpdateAsync(IUpdateCatalog updateCatalog, CancellationToken token = default)
+    public async Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default)
     {
         lock (_syncLock)
         {

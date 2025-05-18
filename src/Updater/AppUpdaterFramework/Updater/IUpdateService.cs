@@ -10,7 +10,7 @@ public interface IUpdateService
 {
     event EventHandler CheckingForUpdatesStarted;
 
-    event EventHandler<IUpdateCatalog?> CheckingForUpdatesCompleted;
+    event EventHandler<UpdateCatalog?> CheckingForUpdatesCompleted;
 
     event EventHandler<UpdateResult?> UpdateCompleted;
 
@@ -20,7 +20,7 @@ public interface IUpdateService
 
     bool IsCheckingForUpdates { get; }
 
-    Task<IUpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default);
+    Task<UpdateCatalog?> CheckForUpdatesAsync(IProductReference productReference, CancellationToken token = default);
     
-    Task<UpdateResult?> UpdateAsync(IUpdateCatalog updateCatalog, CancellationToken token = default);
+    Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default);
 }

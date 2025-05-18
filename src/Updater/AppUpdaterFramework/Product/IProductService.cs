@@ -5,7 +5,7 @@ namespace AnakinRaW.AppUpdaterFramework.Product;
 
 public interface IProductService
 {
-    IInstalledProduct GetCurrentInstance();
+    InstalledProduct GetCurrentInstance();
 
     IProductReference CreateProductReference(SemVersion? newVersion, ProductBranch? branch);
 
