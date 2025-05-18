@@ -9,5 +9,5 @@ public sealed class ProductManifest(IProductReference product, IReadOnlyCollecti
 {
     public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
-    public IReadOnlyCollection<IProductComponent> Items { get; } = components ?? throw new ArgumentNullException(nameof(components));
+    public IReadOnlyCollection<IProductComponent> Components { get; } = components ?? throw new ArgumentNullException(nameof(components));
 }

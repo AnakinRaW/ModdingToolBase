@@ -7,5 +7,5 @@ public interface IProductCatalog<out T> where T : IProductComponent
 {
     IProductReference Product { get; }
 
-    IReadOnlyCollection<T> Items { get; }
+    IReadOnlyCollection<T> Components { get; }
 }

@@ -9,5 +9,5 @@ internal class InstalledComponentsCatalog(IProductReference product, IReadOnlyCo
 {
     public IProductReference Product { get; } = product ?? throw new ArgumentNullException(nameof(product));
 
-    public IReadOnlyCollection<IInstallableComponent> Items { get; } = items;
+    public IReadOnlyCollection<IInstallableComponent> Components { get; } = items;
 }

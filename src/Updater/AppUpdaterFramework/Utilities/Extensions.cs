@@ -12,10 +12,10 @@ internal static class Extensions
 {
     internal static IEnumerable<IInstallableComponent> GetInstallableComponents(this IProductCatalog<IProductComponent> catalog)
     {
-        if (!catalog.Items.Any())
+        if (!catalog.Components.Any())
             return [];
         var result = new List<IInstallableComponent>();
-        foreach (var item in catalog.Items)
+        foreach (var item in catalog.Components)
         {
             if (item is IInstallableComponent installable)
                 result.Add(installable);

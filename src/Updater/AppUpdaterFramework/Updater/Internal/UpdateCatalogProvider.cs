@@ -57,7 +57,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
     {
         var updateItems = new List<IUpdateItem>();
 
-        var currentItems = currentCatalog.Items.ToList();
+        var currentItems = currentCatalog.Components.ToList();
 
         foreach (var availableItem in availableComponents)
         {

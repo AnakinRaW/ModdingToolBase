@@ -20,7 +20,7 @@ internal class ManifestInstallationDetector(IServiceProvider serviceProvider) : 
             throw new ArgumentNullException(nameof(productVariables));
 
         var installedComponents = new HashSet<IInstallableComponent>(ProductComponentIdentityComparer.VersionIndependent);
-        foreach (var manifestItem in manifest.Items)
+        foreach (var manifestItem in manifest.Components)
         {
             if (manifestItem is not IInstallableComponent installable)
                 continue;
