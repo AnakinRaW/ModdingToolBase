@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities;
@@ -48,7 +49,7 @@ public abstract class BranchManagerBase : IBranchManager
         Exception? lastException = null;
 
         if (branch.ManifestLocations.Count == 0)
-            throw new CatalogDownloadException("No location to an update manifest specified.");
+            throw new ManifestDownloadException("No location to an update manifest specified.");
 
         foreach (var manifestLocation in branch.ManifestLocations)
         {
@@ -71,7 +72,7 @@ public abstract class BranchManagerBase : IBranchManager
 
         var message = $"Unable to get manifest of branch: '{branch.Name}'";
         _logger?.LogError(lastException, message);
-        throw new CatalogDownloadException("Could not download branch manifest from all sources.", lastException!);
+        throw new ManifestDownloadException("Could not download branch manifest from all sources.", lastException!);
     }
 
     protected abstract IEnumerable<Uri> BuildManifestLocations(string branchName);

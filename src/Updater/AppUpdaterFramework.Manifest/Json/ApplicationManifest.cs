@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+﻿using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.Hashing;
 using Semver;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace AnakinRaW.AppUpdaterFramework.Json;
 
@@ -57,13 +58,13 @@ public record AppComponent(
     public IInstallableComponent ToInstallable()
     {
         if (string.IsNullOrEmpty(InstallPath))
-            throw new CatalogException($"Illegal manifest: {nameof(InstallPath)} must not be null or empty.");
+            throw new ManifestException($"Illegal manifest: {nameof(InstallPath)} must not be null or empty.");
 
         if (string.IsNullOrEmpty(FileName))
-            throw new CatalogException($"Illegal manifest: {nameof(FileName)} must not be null.");
+            throw new ManifestException($"Illegal manifest: {nameof(FileName)} must not be null.");
 
         if (OriginInfo is null)
-            throw new CatalogException($"Illegal manifest: {nameof(OriginInfo)} must not be null.");
+            throw new ManifestException($"Illegal manifest: {nameof(OriginInfo)} must not be null.");
 
         var installationSize = InstallSize.HasValue
             ? new InstallationSize(InstallSize!.Value.SystemDrive, InstallSize.Value.ProductDrive)
@@ -98,7 +99,7 @@ public record DetectCondition(
             throw new NotSupportedException($"{Type} currently not supported.");
 
         if (string.IsNullOrEmpty(FilePath))
-            throw new CatalogException($"Illegal manifest: {nameof(FilePath)} must not be null or empty.");
+            throw new ManifestException($"Illegal manifest: {nameof(FilePath)} must not be null or empty.");
 
         return new SingleFileDetectCondition(FilePath)
         {
@@ -123,7 +124,7 @@ public record OriginInfo(
     public Metadata.Component.OriginInfo ToOriginInfo()
     {
         if (string.IsNullOrEmpty(Url))
-            throw new CatalogException($"Illegal manifest: {nameof(Url)} must not be null or empty.");
+            throw new ManifestException($"Illegal manifest: {nameof(Url)} must not be null or empty.");
 
         return new Metadata.Component.OriginInfo(new Uri(Url, UriKind.Absolute))
         {

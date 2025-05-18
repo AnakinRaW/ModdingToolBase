@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Product.Manifest;
@@ -42,7 +43,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
 
         var appManifest = await DeserializeAsync(manifestFileStream, cancellationToken).ConfigureAwait(false);
         if (appManifest is null)
-            throw new CatalogException("Serialized manifest is null");
+            throw new ManifestException("Serialized manifest is null");
 
         var availProduct = BuildReference(appManifest);
         var catalog = BuildCatalog(appManifest.Components);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework.Metadata.Component.Catalog;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -49,7 +49,7 @@ internal class UpdateService : IUpdateService
         try
         {
             if (productReference.Branch is null)
-                throw new CatalogException("Product reference does not have a branch.");
+                throw new ManifestException("Product reference does not have a branch.");
 
             var manifestRepo = _serviceProvider.GetRequiredService<IBranchManager>();
             var manifest = await manifestRepo.GetManifestAsync(productReference, token).ConfigureAwait(false);
