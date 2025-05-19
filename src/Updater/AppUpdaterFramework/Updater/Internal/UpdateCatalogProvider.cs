@@ -27,16 +27,16 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
         var availableInstallableComponents = new HashSet<InstallableComponent>(availableCatalog.GetInstallableComponents(),
             ProductComponentIdentityComparer.VersionIndependent);
 
-        if (!currentInstalledComponents.Any() && !availableInstallableComponents.Any())
+        if (currentInstalledComponents.Count == 0 && availableInstallableComponents.Count == 0)
             return new UpdateCatalog(installedProduct, availableCatalog.Product, []);
 
         // Empty available catalog: Uninstall
-        if (!availableInstallableComponents.Any())
+        if (availableInstallableComponents.Count == 0)
             return new UpdateCatalog(installedProduct, availableCatalog.Product, currentInstalledComponents
                 .Select(c => new UpdateItem(c, null, UpdateAction.Delete)));
 
         // Empty current catalog: Fresh install
-        if (!currentInstalledComponents.Any())
+        if (currentInstalledComponents.Count == 0)
             return new UpdateCatalog(installedProduct, availableCatalog.Product, availableInstallableComponents
                     .Select(c => new UpdateItem(null, c, UpdateAction.Update)));
 

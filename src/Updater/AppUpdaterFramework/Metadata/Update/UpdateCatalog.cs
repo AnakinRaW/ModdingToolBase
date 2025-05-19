@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
+using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 
 namespace AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -42,8 +44,9 @@ public sealed class UpdateCatalog
                 deleteCount++;
         }
 
-        if (updateCount == UpdateItems.Count)
+        if (updateCount == UpdateItems.Count && IsNotInstalled(InstalledProduct.Manifest))
             return UpdateCatalogAction.Install;
+        
         if (deleteCount == UpdateItems.Count)
             return UpdateCatalogAction.Uninstall;
 
@@ -51,6 +54,12 @@ public sealed class UpdateCatalog
             return UpdateCatalogAction.Update;
         
         return UpdateCatalogAction.None;
+    }
+
+    private static bool IsNotInstalled(ProductManifest installedProductManifest)
+    {
+        var currentComponents = installedProductManifest.GetInstallableComponents().ToList();
+        return currentComponents.Count == 0 || currentComponents.All(x => x.DetectedState == DetectionState.Absent);
     }
 
     public override string ToString()
