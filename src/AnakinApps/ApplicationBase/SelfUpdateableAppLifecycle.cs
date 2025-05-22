@@ -160,11 +160,8 @@ public abstract class SelfUpdateableAppLifecycle
             c.AddDebug();
 #endif
 
-            if (verboseLogging)
-            {
+            if (verboseLogging) 
                 logLevel = LogEventLevel.Verbose;
-                c.AddDebug();
-            }
             
             var fileSystem = FileSystem;
 
