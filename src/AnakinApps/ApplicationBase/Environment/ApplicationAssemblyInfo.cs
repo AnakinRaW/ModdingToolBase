@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Reflection;
 using Semver;
@@ -22,12 +22,14 @@ public sealed class ApplicationAssemblyInfo
 
     public string ExecutableFileName { get; }
 
-    public ApplicationAssemblyInfo(Assembly assembly)
+    public ApplicationAssemblyInfo(Assembly assembly, IFileSystem fileSystem)
     {
+        if (fileSystem == null) 
+            throw new ArgumentNullException(nameof(fileSystem));
         Assembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
         InformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-        var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+        var fileVersionInfo = fileSystem.FileVersionInfo.GetVersionInfo(assembly.Location);
         FileVersion = fileVersionInfo.FileVersion;
         ProductName = fileVersionInfo.ProductName;
         AssemblyVersion = assembly.GetName().Version?.ToString();

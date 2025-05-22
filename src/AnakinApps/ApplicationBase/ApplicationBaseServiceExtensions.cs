@@ -2,8 +2,8 @@
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Product;
-using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

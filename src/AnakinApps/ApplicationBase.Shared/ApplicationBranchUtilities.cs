@@ -62,6 +62,7 @@ public class ApplicationBranchUtilities
             try
             {
                 using var ms = new MemoryStream();
+                _logger?.LogInformation($"Downloading branch list from mirror '{requestUri}'");
                 await _downloadManager.DownloadAsync(requestUri.ToUri(), ms);
                 return ms.ToArray();
             }

@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
+using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -24,6 +26,8 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
         ProductReference installedProduct,
         IReadOnlyDictionary<string, string> productVariables)
     {
+        Logger?.LogInformation("Creating manifest for current installed product.");
+
         var installedComponents = new List<InstallableComponent>();
 
         var application = ApplicationEnvironment.AssemblyInfo.Assembly;
@@ -39,6 +43,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
 
         if (ApplicationEnvironment is UpdatableApplicationEnvironment { UpdateConfiguration.RestartConfiguration.SupportsRestart: true })
         {
+            Logger?.LogDebug("Creating component for external installer.");
             var updaterComponent = CreateExternalUpdaterComponent(productVariables);
             installedComponents.Add(updaterComponent);
         }
@@ -79,7 +84,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
             });
     }
 
-    private Stream GetUpdaterAssemblyStream(string installDirectory, bool nextToApp)
+    private FileSystemStream GetUpdaterAssemblyStream(string installDirectory, bool nextToApp)
     {
         var resourceName = ExternalUpdaterConstants.GetExecutableFileName();
 
@@ -111,6 +116,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
             return appDataPath;
         }
 #if DEBUG
+        Logger?.LogTrace("Searching external updater at application location.");
         var localFilePath = FileSystem.Path.Combine(InstallLocation.FullName, externalUpdaterFileName);
         if (FileSystem.File.Exists(localFilePath))
         {

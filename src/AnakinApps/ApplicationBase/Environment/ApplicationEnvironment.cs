@@ -28,7 +28,7 @@ public abstract class ApplicationEnvironment
         if (assembly == null) 
             throw new ArgumentNullException(nameof(assembly));
         FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-        AssemblyInfo = new ApplicationAssemblyInfo(assembly);
+        AssemblyInfo = new ApplicationAssemblyInfo(assembly, fileSystem);
     }
 
     private string BuildLocalPath()

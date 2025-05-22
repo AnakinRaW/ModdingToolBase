@@ -4,6 +4,7 @@ using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
@@ -24,10 +25,12 @@ public abstract class ApplicationUpdateResultHandler(UpdatableApplicationEnviron
                 var externalUpdaterService = _serviceProvider.GetRequiredService<IExternalUpdaterService>();
                 var updateOptions = externalUpdaterService.CreateUpdateOptions();
                 var updater = externalUpdaterService.GetExternalUpdater(); 
+                Logger?.LogTrace("Scheduling update in registry.");
                 updaterRegistry.ScheduleUpdate(updater, updateOptions);
                 break;
             }
             case RestartReason.RestoreFailed:
+                Logger?.LogTrace("Scheduling registry reset.");
                 updaterRegistry.ScheduleReset();
                 break;
         }

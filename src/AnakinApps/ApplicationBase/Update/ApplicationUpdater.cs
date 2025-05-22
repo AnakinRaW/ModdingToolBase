@@ -50,6 +50,7 @@ public abstract class ApplicationUpdater
         }
 
         var updateBranch = updateRegistry.UpdateBranch;
+        Logger?.LogTrace($"Branch name in registry: '{updateBranch}'");
         return string.IsNullOrEmpty(updateBranch) ? stableBranchName : updateBranch!;
     }
 

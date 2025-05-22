@@ -10,8 +10,11 @@ using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.ApplicationBase.Options;
+using CommandLine;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace AnakinRaW.ApplicationBase;
@@ -92,7 +95,7 @@ public abstract class SelfUpdateableAppLifecycle
 
     private void StartInternal(string[] args)
     {
-        _bootstrapperServices = CreateBootstrapperServices();
+        _bootstrapperServices = CreateBootstrapperServices(args);
 
         var logger = _bootstrapperServices.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         logger?.LogTrace($"Application started with raw arguments: '{System.Environment.CommandLine}'");
@@ -124,7 +127,7 @@ public abstract class SelfUpdateableAppLifecycle
         InitializeApp();
     }
 
-    private IServiceProvider CreateBootstrapperServices()
+    private IServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)
     {
         var serviceCollection = new ServiceCollection();
         
@@ -132,12 +135,19 @@ public abstract class SelfUpdateableAppLifecycle
         serviceCollection.AddSingleton(Registry);
         serviceCollection.AddSingleton(ApplicationEnvironment);
 
-        CreateBootstrapLogger(serviceCollection);
+        var verboseLogging = false;
+
+        using var parser = new Parser(s =>
+        {
+            s.IgnoreUnknownArguments = true;
+        });
+        parser.ParseArguments<VerboseLoggingOption>(args).WithParsed(verboseOptions => verboseLogging = verboseOptions.VerboseBootstrapLogging);
+        CreateBootstrapLogger(serviceCollection, verboseLogging);
 
         return serviceCollection.BuildServiceProvider();
     }
 
-    private void CreateBootstrapLogger(IServiceCollection serviceCollection)
+    private void CreateBootstrapLogger(IServiceCollection serviceCollection, bool verboseLogging)
     {
         serviceCollection.AddLogging(c =>
         {
@@ -150,10 +160,16 @@ public abstract class SelfUpdateableAppLifecycle
             c.AddDebug();
 #endif
 
+            if (verboseLogging)
+            {
+                logLevel = LogEventLevel.Verbose;
+                c.AddDebug();
+            }
+            
             var fileSystem = FileSystem;
 
             var tempDir = fileSystem.Path.GetTempPath();
-            var tempSubFolderName = fileSystem.Path.GetRandomFileName();
+            var tempSubFolderName = EncodeDirectoryName(ApplicationEnvironment.ApplicationName);
 
             var loggingDir = _bootstrapperLoggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, tempSubFolderName));
 
@@ -166,5 +182,13 @@ public abstract class SelfUpdateableAppLifecycle
 
             c.AddSerilog(fileLogger);
         });
+    }
+
+    private string EncodeDirectoryName(string appName)
+    {
+        // Using GetInvalidFileNameChars() instead of GetInvalidPathChars in order to encode path control characters ('/' or '\\').
+        var invalidChars = Regex.Escape(new string(FileSystem.Path.GetInvalidFileNameChars()));
+        var pattern = $"[{invalidChars}]";
+        return Regex.Replace(appName, pattern, "_");
     }
 }
