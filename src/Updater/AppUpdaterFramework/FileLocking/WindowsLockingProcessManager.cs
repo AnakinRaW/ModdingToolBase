@@ -47,7 +47,7 @@ internal class WindowsLockingProcessManager : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public void Register(IEnumerable<string>? files = null, IEnumerable<ILockingProcessInfo>? processes = null)
+    public void Register(IEnumerable<string>? files = null, IEnumerable<LockingProcessInfo>? processes = null)
     {
         var fileNames = files?.ToArray();
         var fileCount = (uint?) fileNames?.Length ?? 0;
@@ -72,7 +72,7 @@ internal class WindowsLockingProcessManager : IDisposable
             throw new Win32Exception(result.ToHRESULT().Code);
     }
 
-    public IEnumerable<ILockingProcessInfo> GetProcesses()
+    public IEnumerable<LockingProcessInfo> GetProcesses()
     {
         if (!_registered) 
             return [];
@@ -113,7 +113,7 @@ internal class WindowsLockingProcessManager : IDisposable
             throw new Win32Exception(result.ToHRESULT().Code);
     }
 
-    private static RstrtMgr.RM_UNIQUE_PROCESS Convert(ILockingProcessInfo process)
+    private static RstrtMgr.RM_UNIQUE_PROCESS Convert(LockingProcessInfo process)
     {
         if (process == null) 
             throw new ArgumentNullException(nameof(process));

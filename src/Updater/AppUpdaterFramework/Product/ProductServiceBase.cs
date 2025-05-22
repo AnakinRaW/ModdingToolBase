@@ -1,5 +1,4 @@
 ﻿using AnakinRaW.AppUpdaterFramework.Metadata.Product;
-using AnakinRaW.AppUpdaterFramework.Product.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 
 namespace AnakinRaW.AppUpdaterFramework.Product;
@@ -125,8 +125,7 @@ public abstract class ProductServiceBase : IProductService
 
     private void DetectManifest(ProductManifest manifest, IReadOnlyDictionary<string, string> variables)
     {
-        var detectionService = ServiceProvider.GetRequiredService<IManifestInstallationDetector>();
-        detectionService.DetectInstalledComponents(manifest, variables);
+        new ManifestInstallationDetector(ServiceProvider).DetectInstalledComponents(manifest, variables);
     }
 
     private IReadOnlyDictionary<string, string> AddProductVariables(ProductReference product)

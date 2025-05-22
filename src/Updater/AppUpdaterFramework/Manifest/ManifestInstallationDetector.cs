@@ -5,25 +5,18 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
+namespace AnakinRaW.AppUpdaterFramework.Manifest;
 
-internal class ManifestInstallationDetector(IServiceProvider serviceProvider) : IManifestInstallationDetector
+internal class ManifestInstallationDetector(IServiceProvider serviceProvider)
 {
     private readonly IComponentInstallationDetector _installationDetector = serviceProvider.GetRequiredService<IComponentInstallationDetector>();
 
     public void DetectInstalledComponents(ProductManifest manifest, IReadOnlyDictionary<string, string> productVariables)
     {
-        if (manifest == null) 
-            throw new ArgumentNullException(nameof(manifest));
-        if (productVariables == null) 
-            throw new ArgumentNullException(nameof(productVariables));
-
-        foreach (var manifestItem in manifest.Components)
+        foreach (var manifestItem in manifest.GetInstallableComponents())
         {
-            if (manifestItem is not InstallableComponent installable)
-                continue;
             if (manifestItem.DetectedState == DetectionState.None)
-                installable.DetectedState = IsInstalled(installable, productVariables);
+                manifestItem.DetectedState = IsInstalled(manifestItem, productVariables);
         }
     }
 

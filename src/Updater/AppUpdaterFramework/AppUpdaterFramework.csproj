@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-		<PackageReference Include="envdte" Version="17.13.40008" PrivateAssets="build;compile" />
+		<PackageReference Include="envdte" Version="17.14.40260" PrivateAssets="build;compile" />
 	</ItemGroup>
 
 	<ItemGroup>

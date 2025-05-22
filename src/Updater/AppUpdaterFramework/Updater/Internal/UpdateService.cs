@@ -60,7 +60,7 @@ internal class UpdateService : IUpdateService
             
             var currentInstance = productService.GetCurrentInstance();
 
-            var updateCatalogBuilder = _serviceProvider.GetRequiredService<IUpdateCatalogProvider>();
+            var updateCatalogBuilder = new UpdateCatalogFactory(_serviceProvider);
             updateCatalog = updateCatalogBuilder.Create(currentInstance, manifest);
 
             return updateCatalog;

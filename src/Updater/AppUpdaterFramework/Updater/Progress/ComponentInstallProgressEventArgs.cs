@@ -2,5 +2,5 @@
 
 namespace AnakinRaW.AppUpdaterFramework.Updater.Progress;
 
-internal class ComponentProgressEventArgs(double progress, string progressText) 
+internal class ComponentInstallProgressEventArgs(double progress, string progressText) 
     : ProgressEventArgs<ComponentProgressInfo>(progress, progressText);

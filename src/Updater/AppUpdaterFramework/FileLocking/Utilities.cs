@@ -15,12 +15,12 @@ internal static class Utilities
 {
     private static readonly Process CurrentProcess = Process.GetCurrentProcess();
 
-    public static bool ContainsCurrentProcess(this IEnumerable<ILockingProcessInfo> processes)
+    public static bool ContainsCurrentProcess(this IEnumerable<LockingProcessInfo> processes)
     {
         return processes.Any(x => x.IsCurrentProcess());
     }
 
-    public static IEnumerable<ILockingProcessInfo> WithoutDebugger(this IEnumerable<ILockingProcessInfo> processes)
+    public static IEnumerable<LockingProcessInfo> WithoutDebugger(this IEnumerable<LockingProcessInfo> processes)
     {
 #if DEBUG
         if (!Debugger.IsAttached)
@@ -32,32 +32,32 @@ internal static class Utilities
 #endif
     }
 
-    public static IEnumerable<ILockingProcessInfo> WithoutCurrentProcess(this IEnumerable<ILockingProcessInfo> processes)
+    public static IEnumerable<LockingProcessInfo> WithoutCurrentProcess(this IEnumerable<LockingProcessInfo> processes)
     {
         return processes.Where(x => !x.IsCurrentProcess());
     }
 
-    public static IEnumerable<ILockingProcessInfo> WithoutStopped(this IEnumerable<ILockingProcessInfo> processes)
+    public static IEnumerable<LockingProcessInfo> WithoutStopped(this IEnumerable<LockingProcessInfo> processes)
     {
         return processes.Where(x => !x.IsStopped());
     }
 
-    public static bool AllStopped(this IEnumerable<ILockingProcessInfo> processes)
+    public static bool AllStopped(this IEnumerable<LockingProcessInfo> processes)
     { 
         return processes.All(x => x.IsStopped());
     }
 
-    public static bool AnyRunning(this IEnumerable<ILockingProcessInfo> processes)
+    public static bool AnyRunning(this IEnumerable<LockingProcessInfo> processes)
     {
         return processes.Any(x => x.ApplicationStatus is RstrtMgr.RM_APP_STATUS.RmStatusUnknown or RstrtMgr.RM_APP_STATUS.RmStatusRunning or RstrtMgr.RM_APP_STATUS.RmStatusRestarted);
     }
 
-    public static bool IsCurrentProcess(this ILockingProcessInfo process)
+    public static bool IsCurrentProcess(this LockingProcessInfo process)
     {
         return process.Id == CurrentProcess.Id;
     }
 
-    public static bool IsStopped(this ILockingProcessInfo process)
+    public static bool IsStopped(this LockingProcessInfo process)
     {
         return process.ApplicationStatus is RstrtMgr.RM_APP_STATUS.RmStatusStopped
             or RstrtMgr.RM_APP_STATUS.RmStatusStoppedOther;

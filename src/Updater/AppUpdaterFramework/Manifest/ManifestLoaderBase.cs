@@ -5,7 +5,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.CommonUtilities.DownloadManager;
 
-namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
+namespace AnakinRaW.AppUpdaterFramework.Manifest;
 
 public abstract class ManifestLoaderBase(IServiceProvider serviceProvider) : IManifestLoader
 {

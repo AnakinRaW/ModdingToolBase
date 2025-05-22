@@ -225,7 +225,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         diskSpaceCalculator.ThrowIfNotEnoughDiskSpaceAvailable(Component, _currentComponent, installPath, options);
     }
 
-    private void OnInstallerProgress(object sender, ComponentProgressEventArgs e)
+    private void OnInstallerProgress(object sender, ComponentInstallProgressEventArgs e)
     {
         Progress?.Invoke(this, e);
     }

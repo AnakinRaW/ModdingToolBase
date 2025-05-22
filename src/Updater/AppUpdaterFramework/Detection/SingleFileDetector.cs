@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component.Detection;
 using AnakinRaW.AppUpdaterFramework.Utilities;
@@ -12,27 +11,25 @@ namespace AnakinRaW.AppUpdaterFramework.Detection;
 
 internal sealed class SingleFileDetector(IServiceProvider services) : IDetector
 {
+    private readonly IFileSystem _fileSystem = services.GetRequiredService<IFileSystem>();
+
     public bool Detect(IDetectionCondition condition, IReadOnlyDictionary<string, string> variables)
     {
         if (condition == null) 
             throw new ArgumentNullException(nameof(condition));
         if (variables == null) 
             throw new ArgumentNullException(nameof(variables));
-
         if (condition is not SingleFileDetectCondition fileCondition)
             throw new ArgumentException("condition is not FileCondition", nameof(condition));
 
-        var fileSystem = services.GetRequiredService<IFileSystem>();
-
-
         var filePath = fileCondition.FilePath;
         filePath = StringTemplateEngine.ResolveVariables(filePath, variables);
-        if (string.IsNullOrEmpty(filePath) || !fileSystem.File.Exists(filePath))
+        if (string.IsNullOrEmpty(filePath) || !_fileSystem.File.Exists(filePath))
             return false;
         if (fileCondition.IntegrityInformation.HashType != HashTypeKey.None)
         {
             var hashingService = services.GetRequiredService<IHashingService>();
-            if (!EvaluateFileHash(hashingService, fileSystem.FileInfo.New(filePath),
+            if (!EvaluateFileHash(hashingService, _fileSystem.FileInfo.New(filePath),
                     fileCondition.IntegrityInformation.HashType, fileCondition.IntegrityInformation.Hash))
                 return false;
         }
@@ -54,11 +51,11 @@ internal sealed class SingleFileDetector(IServiceProvider services) : IDetector
         return actualHash.SequenceEqual(expectedHash);
     }
 
-    private FileVersionInfo? GetFileVersionInfo(string filePath)
+    private IFileVersionInfo? GetFileVersionInfo(string filePath)
     {
         try
         { 
-            return FileVersionInfo.GetVersionInfo(filePath);
+            return _fileSystem.FileVersionInfo.GetVersionInfo(filePath);
         }
         catch (Exception)
         {
@@ -66,7 +63,7 @@ internal sealed class SingleFileDetector(IServiceProvider services) : IDetector
         }
     }
 
-    private static bool EvaluateProductVersion(FileVersionInfo? versionInfo, SemVersion version)
+    private static bool EvaluateProductVersion(IFileVersionInfo? versionInfo, SemVersion version)
     {
         if (versionInfo is null)
             return false;
@@ -74,10 +71,11 @@ internal sealed class SingleFileDetector(IServiceProvider services) : IDetector
                actualVersion.Equals(version);
     }
 
-    private static bool EvaluateFileVersion(FileVersionInfo? versionInfo, Version version)
+    private static bool EvaluateFileVersion(IFileVersionInfo? versionInfo, Version version)
     {
         if (versionInfo is null)
             return false;
+        // ReSharper disable once AssignNullToNotNullAttribute
         return Version.TryParse(versionInfo.FileVersion, out var actualVersion) && actualVersion.Equals(version);
     }
 }

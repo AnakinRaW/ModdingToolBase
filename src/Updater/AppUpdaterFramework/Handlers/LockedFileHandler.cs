@@ -102,7 +102,7 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
         _updateInteractionHandler.HandleError(message);
     }
 
-    private LockedFileHandlerInteractionResult PromptProcessKill(IFileInfo file, IEnumerable<ILockingProcessInfo> lockingProcesses)
+    private LockedFileHandlerInteractionResult PromptProcessKill(IFileInfo file, IEnumerable<LockingProcessInfo> lockingProcesses)
     {
         var processes = lockingProcesses.Select(x => (ILockingProcess) new ILockingProcess.LockingProcess(x.Description, x.Id));
         return _updateInteractionHandler.HandleLockedFile(file, processes);

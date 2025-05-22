@@ -10,7 +10,7 @@ namespace AnakinRaW.AppUpdaterFramework.Installer;
 
 internal interface IInstaller
 {
-    event EventHandler<ComponentProgressEventArgs> Progress;
+    event EventHandler<ComponentInstallProgressEventArgs> Progress;
 
     InstallResult Install(InstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default);
 

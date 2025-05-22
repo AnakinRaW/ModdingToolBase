@@ -12,7 +12,7 @@ namespace AnakinRaW.AppUpdaterFramework.Installer;
 
 internal abstract class InstallerBase : IInstaller
 {
-    public event EventHandler<ComponentProgressEventArgs>? Progress;
+    public event EventHandler<ComponentInstallProgressEventArgs>? Progress;
 
     protected readonly ILogger? Logger;
 
@@ -124,7 +124,7 @@ internal abstract class InstallerBase : IInstaller
 
     private void OnProgress(InstallableComponent component, double progress)
     {
-        Progress?.Invoke(this, new ComponentProgressEventArgs(progress, component.GetDisplayName()));
+        Progress?.Invoke(this, new ComponentInstallProgressEventArgs(progress, component.GetDisplayName()));
     }
 
     private void LogFailure(ProductComponent? component, InstallAction executeAction, string details)

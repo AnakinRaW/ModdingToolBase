@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
-using AnakinRaW.AppUpdaterFramework.Product.Manifest;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Updater;
 
-internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdateCatalogProvider
+internal class UpdateCatalogFactory(IServiceProvider serviceProvider)
 {
-    private readonly IManifestInstallationDetector _detector = serviceProvider.GetRequiredService<IManifestInstallationDetector>();
-
     public UpdateCatalog Create(InstalledProduct installedProduct, ProductManifest availableCatalog)
     {
         if (installedProduct == null) 
@@ -40,8 +37,7 @@ internal class UpdateCatalogProvider(IServiceProvider serviceProvider) : IUpdate
             return new UpdateCatalog(installedProduct, availableCatalog.Product, availableInstallableComponents
                     .Select(c => new UpdateItem(null, c, UpdateAction.Update)));
 
-
-        _detector.DetectInstalledComponents(availableCatalog, installedProduct.Variables);
+        new ManifestInstallationDetector(serviceProvider).DetectInstalledComponents(availableCatalog, installedProduct.Variables);
 
         var updateItems = Compare(currentInstalledComponents, availableInstallableComponents);
         return new UpdateCatalog(installedProduct, availableCatalog.Product, updateItems);

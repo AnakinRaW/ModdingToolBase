@@ -10,7 +10,7 @@ using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AnakinRaW.AppUpdaterFramework.Product.Manifest;
+namespace AnakinRaW.AppUpdaterFramework.Manifest;
 
 public sealed class ManifestFileDownloader : DisposableObject
 {

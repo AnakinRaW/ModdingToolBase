@@ -28,7 +28,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyFileRepository _downloadFileRepository;
     private readonly UpdateConfiguration _updateConfig;
-
     private readonly string _tempPath;
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
