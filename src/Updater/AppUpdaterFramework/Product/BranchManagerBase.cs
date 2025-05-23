@@ -71,7 +71,7 @@ public abstract class BranchManagerBase : IBranchManager
 
         var message = $"Unable to get manifest of branch: '{branch.Name}'";
         _logger?.LogError(lastException, message);
-        throw new ManifestDownloadException("Could not download branch manifest from all sources.", lastException!);
+        throw new ManifestDownloadException($"Could not download manifest for branch '{branch.Name}' from all sources.", lastException!);
     }
 
     protected abstract IEnumerable<Uri> BuildManifestLocations(string branchName);
