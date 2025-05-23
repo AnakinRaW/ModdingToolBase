@@ -42,8 +42,12 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
         if (!_applicationEnvironment.UpdateConfiguration.RestartConfiguration.SupportsRestart)
             return SelfUpdateResult.None;
 
-        if (ExternalUpdaterResultOptions.TryParse(args, out var externalUpdaterResult) && !HandleRestartResult(externalUpdaterResult.Result))
-            return SelfUpdateResult.Reset;
+        if (ExternalUpdaterResultOptions.TryParse(args, out var externalUpdaterResult))
+        {
+            HandleRestartResult(externalUpdaterResult.Result, out var resetApplication);
+            if (resetApplication)
+                return SelfUpdateResult.Reset;
+        }
 
         if (_updateRegistry.RequiresUpdate)
         {
@@ -68,15 +72,17 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
         _updateRegistry.Dispose();
     }
 
-    private bool HandleRestartResult(ExternalUpdaterResult result)
+    private void HandleRestartResult(ExternalUpdaterResult result, out bool shouldReset)
     {
+        shouldReset = false;
         _logger?.LogTrace($"ExternalUpdater result: '{result}'");
 
         if (result == ExternalUpdaterResult.UpdateFailedNoRestore || _updateRegistry.ResetApp)
         {
             _logger?.LogDebug($"Resetting app due to ExternalUpdater result '{result}' or UpdateRegistry/ResetApp = {_updateRegistry.ResetApp}");
             _updateRegistry.Reset();
-            return false;
+            shouldReset = true;
+            return;
         }
 
         if (result is ExternalUpdaterResult.UpdateFailedWithRestore or ExternalUpdaterResult.UpdateSuccess)
@@ -84,8 +90,6 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
             _logger?.LogDebug($"ExternalUpdater indicated result '{result}'.");
             _updateRegistry.Reset();
         }
-
-        return true;
     }
 
     private void LaunchExternalUpdater()

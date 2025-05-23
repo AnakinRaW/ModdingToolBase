@@ -81,6 +81,11 @@ public abstract class SelfUpdateableAppLifecycle
 
     protected virtual void ResetApp(ILogger? logger)
     {
+        var updateEnv = UpdatableApplicationEnvironment;
+        if (updateEnv is null)
+            return;
+        using var updateRegistry = new ApplicationUpdateRegistry(Registry, updateEnv);
+        updateRegistry.Reset();
     }
 
     protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyCollection<string> args)
@@ -93,6 +98,11 @@ public abstract class SelfUpdateableAppLifecycle
             ApplicationEnvironment.ApplicationLocalDirectory.Create();
     }
 
+    protected virtual bool ShouldPreBootstrapResetApp(IReadOnlyCollection<string> args)
+    {
+        return false;
+    }
+
     private void StartInternal(string[] args)
     {
         _bootstrapperServices = CreateBootstrapperServices(args);
@@ -100,25 +110,34 @@ public abstract class SelfUpdateableAppLifecycle
         var logger = _bootstrapperServices.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         logger?.LogTrace($"Application started with raw arguments: '{System.Environment.CommandLine}'");
 
-        if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
+        if (ShouldPreBootstrapResetApp(args))
         {
-            logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
-
-            using var updateBootstrapper = new SelfUpdateRestartHandler(
-                updatableApplicationEnvironment,
-                _bootstrapperServices,
-                _bootstrapperLoggingDir);
-            var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
-
-            if (selfUpdateResult == SelfUpdateResult.Reset)
+            logger?.LogWarning("The application was requested to reset itself.");
+            ResetApp(logger);
+        }
+        else
+        {
+            // There is no reason to continue a formally pending update if we reset the application before.
+            if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
             {
-                logger?.LogWarning("Self update failed ungracefully. Resetting application...");
-                ResetApp(logger);
-            }
-            if (selfUpdateResult == SelfUpdateResult.RestartRequired)
-            {
-                logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
-                System.Environment.Exit(RestartConstants.RestartRequiredCode);
+                logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
+
+                using var updateBootstrapper = new SelfUpdateRestartHandler(
+                    updatableApplicationEnvironment,
+                    _bootstrapperServices,
+                    _bootstrapperLoggingDir);
+                var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
+
+                if (selfUpdateResult == SelfUpdateResult.Reset)
+                {
+                    logger?.LogWarning("Self update failed ungracefully. Resetting application...");
+                    ResetApp(logger);
+                }
+                if (selfUpdateResult == SelfUpdateResult.RestartRequired)
+                {
+                    logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
+                    System.Environment.Exit(RestartConstants.RestartRequiredCode);
+                }
             }
         }
 
