@@ -1,20 +1,21 @@
 ﻿using AnakinRaW.ApplicationBase.Environment;
+using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
+using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using AnakinRaW.ApplicationBase.Options;
-using CommandLine;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace AnakinRaW.ApplicationBase;
@@ -22,8 +23,14 @@ namespace AnakinRaW.ApplicationBase;
 public abstract class SelfUpdateableAppLifecycle
 {
     private IServiceProvider _bootstrapperServices = null!;
-
     private string? _bootstrapperLoggingDir;
+
+    protected ILoggerFactory? BootstrapLoggerFactory { get; private set; }
+
+    protected ILogger? Logger { get; private set; }
+
+    [MemberNotNullWhen(true, nameof(UpdatableApplicationEnvironment))]
+    protected bool IsUpdateableApplication => UpdatableApplicationEnvironment is not null;
 
     protected ApplicationEnvironment ApplicationEnvironment
     {
@@ -50,13 +57,41 @@ public abstract class SelfUpdateableAppLifecycle
 
     public async Task<int> StartAsync(string[] args)
     {
-        StartInternal(args);
+        _bootstrapperServices = CreateBootstrapperServices(args);
+
+        BootstrapLoggerFactory = _bootstrapperServices.GetService<ILoggerFactory>();
+        var logger = BootstrapLoggerFactory?.CreateLogger(GetType());
+        logger?.LogTrace($"Application started with raw arguments: '{System.Environment.CommandLine}'");
+        Logger = logger;
+
+        if (ShouldPreBootstrapResetApp(args))
+        {
+            logger?.LogWarning("The application was requested to reset itself.");
+            ResetApp();
+        }
+        else
+        {
+            // There is no reason to continue a formally pending update if we reset the application before.
+            HandlePendingUpdate(args);
+        }
+
+        // Initialization of the app must happen after completing the self-update process.
+        logger?.LogInformation("Initializing application.");
+        var initResult = await InitializeAppAsync(args);
+        if (initResult != 0)
+        {
+            logger?.LogWarning($"Initialization was not successful, error code: {initResult}. Terminating application.");
+            return initResult;
+        }
+
+        logger?.LogInformation("Creating app services.");
         var appServices = CreateAppServices(args); 
+
         // ConfigureAwait cannot be set to false here, because WPF apps might expect the context of the main thread.
         return await RunAppAsync(args, appServices);
     }
 
-    private IServiceProvider CreateAppServices(IReadOnlyCollection<string> args)
+    private IServiceProvider CreateAppServices(IReadOnlyList<string> args)
     {
         var services = new ServiceCollection();
 
@@ -79,7 +114,7 @@ public abstract class SelfUpdateableAppLifecycle
 
     protected abstract Task<int> RunAppAsync(string[] args, IServiceProvider appServiceProvider);
 
-    protected virtual void ResetApp(ILogger? logger)
+    protected virtual void ResetApp()
     {
         var updateEnv = UpdatableApplicationEnvironment;
         if (updateEnv is null)
@@ -88,62 +123,45 @@ public abstract class SelfUpdateableAppLifecycle
         updateRegistry.Reset();
     }
 
-    protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyCollection<string> args)
+    protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyList<string> args)
     {
     }
-
-    protected virtual void InitializeApp()
+    
+    protected virtual Task<int> InitializeAppAsync(IReadOnlyList<string> args)
     {
         if (!FileSystem.Directory.Exists(ApplicationEnvironment.ApplicationLocalPath)) 
             ApplicationEnvironment.ApplicationLocalDirectory.Create();
+        return Task.FromResult(0);
     }
 
-    protected virtual bool ShouldPreBootstrapResetApp(IReadOnlyCollection<string> args)
+    protected virtual bool ShouldPreBootstrapResetApp(IReadOnlyList<string> args)
     {
         return false;
     }
 
-    private void StartInternal(string[] args)
+    private void HandlePendingUpdate(string[] args)
     {
-        _bootstrapperServices = CreateBootstrapperServices(args);
-
-        var logger = _bootstrapperServices.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        logger?.LogTrace($"Application started with raw arguments: '{System.Environment.CommandLine}'");
-
-        if (ShouldPreBootstrapResetApp(args))
+        if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
-            logger?.LogWarning("The application was requested to reset itself.");
-            ResetApp(logger);
-        }
-        else
-        {
-            // There is no reason to continue a formally pending update if we reset the application before.
-            if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
+            Logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
+
+            using var updateBootstrapper = new SelfUpdateRestartHandler(
+                updatableApplicationEnvironment,
+                _bootstrapperServices,
+                _bootstrapperLoggingDir);
+            var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
+
+            if (selfUpdateResult == SelfUpdateResult.Reset)
             {
-                logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
-
-                using var updateBootstrapper = new SelfUpdateRestartHandler(
-                    updatableApplicationEnvironment,
-                    _bootstrapperServices,
-                    _bootstrapperLoggingDir);
-                var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
-
-                if (selfUpdateResult == SelfUpdateResult.Reset)
-                {
-                    logger?.LogWarning("Self update failed ungracefully. Resetting application...");
-                    ResetApp(logger);
-                }
-                if (selfUpdateResult == SelfUpdateResult.RestartRequired)
-                {
-                    logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
-                    System.Environment.Exit(RestartConstants.RestartRequiredCode);
-                }
+                Logger?.LogWarning("Self update failed ungracefully. Resetting application...");
+                ResetApp();
+            }
+            if (selfUpdateResult == SelfUpdateResult.RestartRequired)
+            {
+                Logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
+                System.Environment.Exit(RestartConstants.RestartRequiredCode);
             }
         }
-
-        // Initialization of the app must happen after completing the self-update process.
-        logger?.LogInformation("Initializing application.");
-        InitializeApp();
     }
 
     private IServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)

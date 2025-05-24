@@ -121,7 +121,7 @@ public static class ConsoleUtilities
         }
     }
 
-    public static void WriteApplicationFatalError(string appName)
+    public static void WriteApplicationFatalError(string appName, string? errorMessage = null, string? detailedError = null)
     {
         Console.WriteLine();
         using (HorizontalLineSeparatedBlock('*'))
@@ -132,6 +132,29 @@ public static class ConsoleUtilities
         }
         Console.WriteLine();
         Console.WriteLine("The application encountered an unexpected error and will terminate now!");
+
         Console.WriteLine();
+
+        try
+        {
+            if (!string.IsNullOrEmpty(errorMessage)) 
+                Console.WriteLine($"Error: {errorMessage}");
+
+            if (!string.IsNullOrEmpty(detailedError))
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine(detailedError);
+            }
+        }
+        finally
+        {
+            Console.ResetColor();
+            Console.WriteLine();
+        }
+    }
+
+    public static void WriteApplicationFatalError(string appName, Exception exception)
+    {
+        WriteApplicationFatalError(appName, exception.Message, exception.StackTrace);
     }
 }

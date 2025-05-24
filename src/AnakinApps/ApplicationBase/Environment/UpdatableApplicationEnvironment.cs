@@ -27,8 +27,6 @@ public abstract class UpdatableApplicationEnvironment(Assembly assembly, IFileSy
         }
     }
 
-    public abstract Uri? RepositoryUrl { get; }
-
     public abstract ICollection<Uri> UpdateMirrors { get; }
 
     public abstract string UpdateRegistryPath { get; } 

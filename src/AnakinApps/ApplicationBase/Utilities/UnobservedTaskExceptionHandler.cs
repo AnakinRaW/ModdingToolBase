@@ -13,7 +13,7 @@ public class UnobservedTaskExceptionHandler : DisposableObject
     public UnobservedTaskExceptionHandler(IServiceProvider services)
     {
         _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
-        TaskScheduler.UnobservedTaskException += OnUnobservedException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedException!;
     }
 
     private void OnUnobservedException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -28,6 +28,6 @@ public class UnobservedTaskExceptionHandler : DisposableObject
     
     protected override void DisposeResources()
     {
-        TaskScheduler.UnobservedTaskException -= OnUnobservedException;
+        TaskScheduler.UnobservedTaskException -= OnUnobservedException!;
     }
 }
