@@ -15,6 +15,14 @@ public static class ConsoleUtilities
         Console.WriteLine(line);
     }
 
+    public static void WriteLineRight(string message, int lineLength)
+    {
+        if (message.Length >= lineLength)
+            Console.WriteLine(message);
+        else
+            Console.WriteLine(new string(' ', lineLength - message.Length) + message);
+    }
+
     public static IDisposable HorizontalLineSeparatedBlock(char lineChar = DefaultLineChar, int length = DefaultLineLength)
     {
         return new InHorizontalLineBlock(lineChar, length);
