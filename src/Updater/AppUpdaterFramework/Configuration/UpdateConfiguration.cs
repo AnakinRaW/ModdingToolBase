@@ -6,7 +6,7 @@ namespace AnakinRaW.AppUpdaterFramework.Configuration;
 
 public class UpdateConfiguration
 {
-    internal static readonly UpdateConfiguration Default = new()
+    public static readonly UpdateConfiguration Default = new()
     {
         DownloadRetryCount = 3,
         DownloadLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
