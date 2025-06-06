@@ -14,4 +14,8 @@ public sealed class ApplicationUpdateOptions
     [Option("updateManifestUrl", Default = null, Required = false, 
         HelpText = "The base URL where to pull update information from. If no URL is specified the default URLs of the application will be used.")]
     public string? ManifestUrl { get; init; }
+
+    [Option("verboseUpdateLogging", Default = false, Required = false, 
+        HelpText = "Enables verbose logging of the update procedure")]
+    public bool Verbose { get; init; }
 }
