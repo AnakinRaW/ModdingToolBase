@@ -61,6 +61,8 @@ internal class ProcessTools : IProcessTools
             sb.Append(decoded);
             sb.Append(' ');
         }
+
+        // We need to append (not prepend) in order not to break verbs which may be present in passThroughArgsBase64
         sb.Append(Parser.Default.FormatCommandLine(resultOptions));
 
         startInfo.Arguments = sb.ToString();
