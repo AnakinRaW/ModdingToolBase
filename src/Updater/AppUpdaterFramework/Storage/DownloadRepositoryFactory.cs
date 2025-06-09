@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Threading;
 using AnakinRaW.AppUpdaterFramework.Configuration;
@@ -8,8 +9,8 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 
 internal sealed class DownloadRepositoryFactory(IServiceProvider serviceProvider) : IDownloadRepositoryFactory
 {
-    //[field:AllowNull, MaybeNull]
-    private IFileRepository FileRepository => LazyInitializer.EnsureInitialized(ref field, CreateRepository);
+    [field:AllowNull, MaybeNull]
+    private IFileRepository FileRepository => LazyInitializer.EnsureInitialized(ref field, CreateRepository)!;
 
     private IFileRepository CreateRepository()
     {
