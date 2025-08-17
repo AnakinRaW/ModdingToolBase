@@ -32,6 +32,74 @@ public static class ConsoleUtilities
         return new InHorizontalLineBlock(lineChar, length, startWithNewLine, newLineAtEnd);
     }
 
+    public static FixedHorizontalLineBlock CreateFixedHorizontalLineBlock(
+        char lineChar = DefaultLineChar,
+        int length = DefaultLineLength,
+        bool startWithNewLine = false,
+        bool newLineAtEnd = false)
+    {
+        return new FixedHorizontalLineBlock(lineChar, length, startWithNewLine, newLineAtEnd);
+    }
+
+    private class InHorizontalLineBlock : IDisposable
+    {
+        private readonly char _lineChar;
+        private readonly int _length;
+        private readonly bool _nlEnd;
+
+        public InHorizontalLineBlock(char lineChar = '─', int length = 20, bool nlStart = false, bool nlEnd = false)
+        {
+            _lineChar = lineChar;
+            _length = length;
+            _nlEnd = nlEnd;
+            if (nlStart)
+                Console.WriteLine();
+            WriteHorizontalLine(lineChar, length);
+        }
+
+        public void Dispose()
+        {
+            WriteHorizontalLine(_lineChar, _length);
+            if (_nlEnd)
+                Console.WriteLine();
+        }
+    }
+
+    public static void WriteApplicationFatalError(string appName, string? errorMessage = null, string? detailedError = null)
+    {
+        using (HorizontalLineSeparatedBlock('*', startWithNewLine: true, newLineAtEnd: true))
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine($" {appName} Failure! ");
+            Console.ResetColor();
+        }
+        Console.WriteLine("The application encountered an unexpected error and will terminate now!");
+
+        Console.WriteLine();
+
+        try
+        {
+            if (!string.IsNullOrEmpty(errorMessage)) 
+                Console.WriteLine($"Error: {errorMessage}");
+
+            if (!string.IsNullOrEmpty(detailedError))
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine(detailedError);
+            }
+        }
+        finally
+        {
+            Console.ResetColor();
+            Console.WriteLine();
+        }
+    }
+
+    public static void WriteApplicationFatalError(string appName, Exception exception)
+    {
+        WriteApplicationFatalError(appName, exception.Message, exception.StackTrace);
+    }
+
     public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n')
     {
         var questionText = $"{question} [{yes}/{no}] ";
@@ -115,64 +183,5 @@ public static class ConsoleUtilities
         }
 
         return input;
-    }
-
-    private class InHorizontalLineBlock : IDisposable
-    {
-        private readonly char _lineChar;
-        private readonly int _length;
-        private readonly bool _nlEnd;
-
-        public InHorizontalLineBlock(char lineChar = '─', int length = 20, bool nlStart = false, bool nlEnd = false)
-        {
-            _lineChar = lineChar;
-            _length = length;
-            _nlEnd = nlEnd;
-            if (nlStart)
-                Console.WriteLine();
-            WriteHorizontalLine(lineChar, length);
-        }
-
-        public void Dispose()
-        {
-            WriteHorizontalLine(_lineChar, _length);
-            if (_nlEnd)
-                Console.WriteLine();
-        }
-    }
-
-    public static void WriteApplicationFatalError(string appName, string? errorMessage = null, string? detailedError = null)
-    {
-        using (HorizontalLineSeparatedBlock('*', startWithNewLine: true, newLineAtEnd: true))
-        {
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine($" {appName} Failure! ");
-            Console.ResetColor();
-        }
-        Console.WriteLine("The application encountered an unexpected error and will terminate now!");
-
-        Console.WriteLine();
-
-        try
-        {
-            if (!string.IsNullOrEmpty(errorMessage)) 
-                Console.WriteLine($"Error: {errorMessage}");
-
-            if (!string.IsNullOrEmpty(detailedError))
-            {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(detailedError);
-            }
-        }
-        finally
-        {
-            Console.ResetColor();
-            Console.WriteLine();
-        }
-    }
-
-    public static void WriteApplicationFatalError(string appName, Exception exception)
-    {
-        WriteApplicationFatalError(appName, exception.Message, exception.StackTrace);
     }
 }
