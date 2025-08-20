@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -32,13 +33,13 @@ public static class ConsoleUtilities
         return new InHorizontalLineBlock(lineChar, length, startWithNewLine, newLineAtEnd);
     }
 
-    public static FixedHorizontalLineBlock CreateFixedHorizontalLineBlock(
+    public static HorizontalConsoleFrame CreateHorizontalFrame(
         char lineChar = DefaultLineChar,
         int length = DefaultLineLength,
         bool startWithNewLine = false,
         bool newLineAtEnd = false)
     {
-        return new FixedHorizontalLineBlock(lineChar, length, startWithNewLine, newLineAtEnd);
+        return new HorizontalConsoleFrame(lineChar, length, startWithNewLine, newLineAtEnd);
     }
 
     private class InHorizontalLineBlock : IDisposable
@@ -100,7 +101,7 @@ public static class ConsoleUtilities
         WriteApplicationFatalError(appName, exception.Message, exception.StackTrace);
     }
 
-    public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n')
+    public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n', HorizontalConsoleFrame? frame = null)
     {
         var questionText = $"{question} [{yes}/{no}] ";
         return UserQuestionOnSameLine(questionText, (string input, out bool result) =>
@@ -125,37 +126,68 @@ public static class ConsoleUtilities
 
             result = false;
             return false;
-        });
+        }, frame);
     }
 
-    public static T UserQuestionOnSameLine<T>(string question, ConsoleQuestionValueFactory<T> inputCorrect)
+    public static T UserQuestionOnSameLine<T>(
+        string question, 
+        ConsoleQuestionValueFactory<T> inputCorrect,
+        HorizontalConsoleFrame? frame = null)
     {
+        return UserQuestionOnSameLineInternal(question, inputCorrect, frame);
+    }
+
+    private static T UserQuestionOnSameLineInternal<T>(
+        string question, 
+        ConsoleQuestionValueFactory<T> inputCorrect, 
+        HorizontalConsoleFrame? frame)
+    {
+        var writer = frame?.Writer ?? Console.Out;
+        
         while (true)
         {
             var promptLeft = 0;
             var promptTop = Console.CursorTop;
 
-            Console.SetCursorPosition(promptLeft, promptTop);
+            // Write question
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write(question);
+            if (frame != null)
+                writer.Write(question);
+            else
+            {
+                Console.SetCursorPosition(promptLeft, promptTop);
+                writer.Write(question);
+                Console.SetCursorPosition(promptLeft + question.Length, promptTop);
+            }
             Console.ResetColor();
-            Console.SetCursorPosition(promptLeft + question.Length, promptTop);
 
-            var input = ReadLineInline();
+            var input = ReadLineInline(writer);
 
             if (!inputCorrect(input, out var result))
             {
-                Console.SetCursorPosition(0, promptTop);
-                Console.Write(new string(' ', Console.WindowWidth - 1));
+                // Clear and retry
+                if (frame != null)
+                {
+                    var currentTop = Console.CursorTop;
+                    Console.SetCursorPosition(0, currentTop);
+                    writer.Write(new string(' ', Console.WindowWidth - 1));
+                    Console.SetCursorPosition(0, currentTop);
+                }
+                else
+                {
+                    Console.SetCursorPosition(0, promptTop);
+                    writer.Write(new string(' ', Console.WindowWidth - 1));
+                }
                 continue;
             }
 
-            Console.WriteLine();
+            // Success
+            writer.WriteLine();
             return result;
         }
     }
-
-    private static string ReadLineInline()
+    
+    private static string ReadLineInline(TextWriter writer)
     {
         var input = "";
         while (true)
@@ -171,14 +203,14 @@ public static class ConsoleUtilities
                 {
                     input = input.Substring(0, input.Length - 1);
                     Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                    Console.Write(' ');
+                    writer.Write(' ');
                     Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                 }
             }
             else if (!char.IsControl(key.KeyChar))
             {
                 input += key.KeyChar;
-                Console.Write(key.KeyChar);
+                writer.Write(key.KeyChar);
             }
         }
 
