@@ -4,104 +4,67 @@ using System.Linq;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
 using AnakinRaW.AppUpdaterFramework.Json;
-using Flurl;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Renci.SshNet;
 using IServiceProvider = System.IServiceProvider;
 
 namespace AnakinRaW.FtpUploader;
 
-internal class Uploader : IAsyncDisposable
+internal abstract class UploaderBase : IAsyncDisposable
 {
-    private readonly IServiceProvider _services;
-    private readonly IFileSystem _fileSystem;
-    private readonly ILogger? _logger;
-    private readonly SftpClient _sftpClient;
-    private readonly FtpUploadOptions _options;
+    protected readonly IServiceProvider Services;
+    protected readonly IFileSystem FileSystem;
+    protected readonly ILogger? Logger;
+    protected readonly UploadOptions Options;
 
-    public Uploader(FtpUploadOptions options, IServiceProvider services)
+    protected UploaderBase(UploadOptions options, IServiceProvider services)
     {
-        _services = services;
-        _fileSystem = services.GetRequiredService<IFileSystem>();
-        _options = options;
-        _sftpClient = new SftpClient(_options.Host, _options.Port, _options.UserName, _options.Password);
-        _logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
+        Services = services;
+        FileSystem = services.GetRequiredService<IFileSystem>();
+        Options = options;
+        Logger = services.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
     public async Task Run()
     {
         var fileInformation = GetFileInformation();
 
-        var branchName = await GetBranchName(fileInformation.Manifest);
+        var branchName = await GetBranchName(fileInformation.Manifest).ConfigureAwait(false);
 
-        var toolBasePath = _options.BasePath;
-        var branchPath = Url.Combine(toolBasePath, branchName);
-        
-        _sftpClient.Connect();
-        
+        var toolBasePath = Options.BasePath;
+        var branchPath = GetBranchPath(toolBasePath, branchName);
+
+        await ConnectAsync().ConfigureAwait(false);
+
         CreateFolders(toolBasePath, branchPath);
 
-
-        await UploadFile(fileInformation.Manifest, branchPath);
+        await UploadFile(fileInformation.Manifest, branchPath).ConfigureAwait(false);
 
         if (fileInformation.BranchLookup is not null)
-            await UploadFile(fileInformation.BranchLookup, toolBasePath);
+            await UploadFile(fileInformation.BranchLookup, toolBasePath).ConfigureAwait(false);
 
-        foreach (var applicationFile in fileInformation.ApplicationFiles) 
-            await UploadFile(applicationFile, branchPath);
+        foreach (var applicationFile in fileInformation.ApplicationFiles)
+            await UploadFile(applicationFile, branchPath).ConfigureAwait(false);
     }
 
-    private void CreateFolders(string toolBasePath, string branchPath)
-    {
-        if (!_sftpClient.Exists(toolBasePath))
-            _sftpClient.CreateDirectory(toolBasePath);
+    protected abstract string GetBranchPath(string toolBasePath, string branchName);
 
-        if (!_sftpClient.Exists(branchPath))
-            _sftpClient.CreateDirectory(branchPath);
-        else
-        {
-            DeleteDirectoryRecursive(branchPath);
-            _sftpClient.CreateDirectory(branchPath);
-        }
-    }
+    protected abstract Task ConnectAsync();
 
-    private void DeleteDirectoryRecursive(string path)
-    {
-        foreach (var file in _sftpClient.ListDirectory(path))
-        {
-            if (file.Name != "." && (file.Name != ".."))
-            {
-                if (file.IsDirectory)
-                    DeleteDirectoryRecursive(file.FullName);
-                else
-                    _sftpClient.DeleteFile(file.FullName);
-            }
-        }
-        _sftpClient.DeleteDirectory(path);
-    }
+    protected abstract void CreateFolders(string toolBasePath, string branchPath);
 
-    private async Task UploadFile(IFileInfo fileToUpload, string basePath)
-    {
-        basePath = _fileSystem.Path.TrimEndingDirectorySeparator(basePath);
+    protected abstract Task UploadFile(IFileInfo fileToUpload, string basePath);
 
-        // We cannot use Url.Combine (cause of unwanted encoding of space character) or Path.Combine (cause of using backslash)
-        // Is this a security issue???
-        var filePath = $"{basePath}/{fileToUpload.Name}";
-
-        await using var fileStream = fileToUpload.OpenRead();
-        _logger?.LogInformation($"Uploading file '{fileToUpload.Name}' to {filePath}");
-        await Task.Factory.FromAsync(_sftpClient.BeginUploadFile(fileStream, filePath), _sftpClient.EndUploadFile);
-    }
+    protected abstract Task DisconnectAsync();
 
     private UploaderFileInformation GetFileInformation()
     {
-        var sourceDirectory = _fileSystem.DirectoryInfo.New(_options.SourcePath);
-        
+        var sourceDirectory = FileSystem.DirectoryInfo.New(Options.SourcePath);
+
         var manifest = sourceDirectory.GetFiles(ApplicationConstants.ManifestFileName).FirstOrDefault();
         if (manifest is null)
             throw new InvalidOperationException("Unable to find manifest.json");
-       
+
         var branchLookup = sourceDirectory.GetFiles(ApplicationConstants.BranchLookupFileName).FirstOrDefault();
 
         var appFiles = sourceDirectory.GetFiles("*.*")
@@ -114,23 +77,14 @@ internal class Uploader : IAsyncDisposable
     private async Task<string> GetBranchName(IFileInfo manifestFile)
     {
         await using var fileStream = manifestFile.OpenRead();
-        var manifest = await new JsonManifestLoader(_services).DeserializeAsync(fileStream).ConfigureAwait(false);
+        var manifest = await new JsonManifestLoader(Services).DeserializeAsync(fileStream).ConfigureAwait(false);
         return manifest is null
             ? throw new InvalidOperationException("Unable to deserialize manifest")
             : manifest.Branch ?? throw new InvalidOperationException("Manifest should contain branch name");
     }
 
-    public ValueTask DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
-        try
-        {
-            _sftpClient.Disconnect();
-            _sftpClient.Dispose();
-            return ValueTask.CompletedTask;
-        }
-        catch (Exception e)
-        {
-            return ValueTask.FromException(e);
-        }
+        await DisconnectAsync().ConfigureAwait(false);
     }
 }

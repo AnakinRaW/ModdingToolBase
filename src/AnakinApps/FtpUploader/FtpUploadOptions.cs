@@ -2,7 +2,14 @@
 
 namespace AnakinRaW.FtpUploader;
 
-internal class FtpUploadOptions
+[Verb("local", HelpText = "Upload to a local repository.")]
+internal class LocalUploadOptions : UploadOptions
+{
+    public override bool IsLocal => true;
+}
+
+[Verb("ftp", HelpText = "Upload to an SFTP repository.")]
+internal class FtpUploadOptions : UploadOptions
 {
     [Option('h', "host", Required = true, HelpText = "The host url.")]
     public required string Host { get; init; }
@@ -16,9 +23,16 @@ internal class FtpUploadOptions
     [Option('p', "password", Required = false, HelpText = "The password to authenticate the SFTP user.")]
     public required string Password { get; init; } = string.Empty;
 
+    public override bool IsLocal => false;
+}
+
+internal abstract class UploadOptions
+{
     [Option("base", Required = true, HelpText = "The base path where file shall get uploaded too.")]
     public required string BasePath { get; init; }
 
     [Option('s', "source", Required = true, HelpText = "The source path where all application files are located for uploading, including the manifest and optional branch lookup file.")]
     public required string SourcePath { get; init; }
+
+    public virtual bool IsLocal => true;
 }

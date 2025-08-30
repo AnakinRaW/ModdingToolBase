@@ -15,8 +15,12 @@ internal class Program
     private static async Task<int> Main(string[] args)
     {
         Console.WriteLine($"Raw Command line: {Environment.CommandLine}");
-        return await Parser.Default.ParseArguments<FtpUploadOptions>(args)
-            .MapResult(UploadFiles, ErrorArgs);
+        return await Parser.Default
+            .ParseArguments<LocalUploadOptions, FtpUploadOptions>(args)
+            .MapResult(
+                (LocalUploadOptions opts) => UploadFiles(opts),
+                (FtpUploadOptions opts) => UploadFiles(opts),
+                ErrorArgs);
     }
 
     private static Task<int> ErrorArgs(IEnumerable<Error> arg)
@@ -24,14 +28,21 @@ internal class Program
         return Task.FromResult(0xA0);
     }
 
-    private static async Task<int> UploadFiles(FtpUploadOptions opts)
+    private static async Task<int> UploadFiles(UploadOptions opts)
     {
         var services = CreateServices();
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
-            await using var uploader = new Uploader(opts, services);
-            await uploader.Run();
+            UploaderBase uploader = opts.IsLocal
+                ? new LocalUploader((LocalUploadOptions)opts, services)
+                : new SftpUploader((FtpUploadOptions)opts, services) as UploaderBase;
+
+            await using (uploader)
+            {
+                await uploader.Run();
+            }
+
             logger?.LogTrace("Uploader finished");
             return 0;
         }

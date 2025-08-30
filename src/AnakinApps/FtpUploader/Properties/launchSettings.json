@@ -1,8 +1,12 @@
 {
   "profiles": {
-    "FtpUploader": {
+    "Local": {
       "commandName": "Project",
-      "commandLineArgs": "-h republicatwar.com --port 1579 -u raw -p worngPassword --base downloads/TestTool/ -s C:/test"
+      "commandLineArgs": "local --base c:/test/ModVerify/ --source C:/test"
+    },
+    "SFTP": {
+      "commandName": "Project",
+      "commandLineArgs": "ftp --host republicatwar.com --port 1579 --user raw --password worngPassword --base c:/test/ModVerify/ --source downloads/ModVerify/"
     }
   }
 }
