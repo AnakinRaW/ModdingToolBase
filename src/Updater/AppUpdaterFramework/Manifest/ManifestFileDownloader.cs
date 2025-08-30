@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.DownloadManager.Validation;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,8 @@ public sealed class ManifestFileDownloader : DisposableObject
     private readonly IDownloadManager _downloadManager;
     private readonly IDirectoryInfo? _tempDirectory;
     private readonly ILogger? _logger;
-    
+    private readonly IDownloadValidator? _manifestValidator;
+
     public ManifestFileDownloader(IServiceProvider serviceProvider)
     {
         if (serviceProvider == null)
@@ -28,6 +30,7 @@ public sealed class ManifestFileDownloader : DisposableObject
         var config = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
         _downloadManager = new DownloadManager(config.DownloadConfiguration, serviceProvider);
         _tempDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10);
+        _manifestValidator = serviceProvider.GetService<IManifestValidatorProvider>()?.GetValidator();
     }
 
     public async Task<IFileInfo> DownloadManifestAsync(
@@ -42,8 +45,8 @@ public sealed class ManifestFileDownloader : DisposableObject
         await
 #endif
         using var manifest = _fileSystem.FileStream.New(destPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-        _logger?.LogDebug($"Downloading manifest from '{manifestPath.AbsolutePath}' to '{destPath}'.");
-        await _downloadManager.DownloadAsync(manifestPath, manifest, null , downloadOptions, null, token);
+        _logger?.LogDebug("Downloading manifest from '{source}' to '{destination}'.", manifestPath.AbsolutePath, destPath);
+        await _downloadManager.DownloadAsync(manifestPath, manifest, null , downloadOptions, _manifestValidator, token);
         return _fileSystem.FileInfo.New(destPath);
     }
 
