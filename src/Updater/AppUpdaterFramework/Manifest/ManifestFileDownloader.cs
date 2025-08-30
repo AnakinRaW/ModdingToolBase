@@ -28,7 +28,7 @@ public sealed class ManifestFileDownloader : DisposableObject
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         var config = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-        _downloadManager = new DownloadManager(config.DownloadConfiguration, serviceProvider);
+        _downloadManager = new DownloadManager(config.ManifestDownloadConfiguration, serviceProvider);
         _tempDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10);
         _manifestValidator = serviceProvider.GetService<IManifestValidatorProvider>()?.GetValidator();
     }

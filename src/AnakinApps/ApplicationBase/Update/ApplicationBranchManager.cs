@@ -20,7 +20,7 @@ public class ApplicationBranchManager : BranchManagerBase
        
         _branchUtilities = new ApplicationBranchUtilities(
             applicationEnvironment.UpdateMirrors,
-            applicationEnvironment.UpdateConfiguration.DownloadConfiguration,
+            applicationEnvironment.UpdateConfiguration.BranchDownloadConfiguration,
             serviceProvider);
     }
 

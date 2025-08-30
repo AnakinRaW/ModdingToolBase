@@ -90,7 +90,7 @@ internal sealed class UpdatePipeline : Pipeline
         var configuration = ServiceProvider.GetService<IUpdateConfigurationProvider>()?.GetConfiguration() ??
                             UpdateConfiguration.Default;
 
-        var downloadManager = new DownloadManager(configuration.DownloadConfiguration, ServiceProvider);
+        var downloadManager = new DownloadManager(configuration.ComponentDownloadConfiguration, ServiceProvider);
 
         var installs = new List<UpdateItem>();
         var removes = new List<UpdateItem>();

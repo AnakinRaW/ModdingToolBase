@@ -12,15 +12,21 @@ public class UpdateConfiguration
         DownloadLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
         BackupLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
         BackupPolicy = BackupPolicy.NotRequired,
-        DownloadConfiguration = DownloadManagerConfiguration.Default
+        ComponentDownloadConfiguration = DownloadManagerConfiguration.Default,
+        ManifestDownloadConfiguration = DownloadManagerConfiguration.Default,
+        BranchDownloadConfiguration = DownloadManagerConfiguration.Default
     };
 
     public required string DownloadLocation { get; init; }
 
     public byte DownloadRetryCount { get; init; }
 
-    public DownloadManagerConfiguration DownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
-
+    public DownloadManagerConfiguration ComponentDownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
+    
+    public DownloadManagerConfiguration ManifestDownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
+    
+    public DownloadManagerConfiguration BranchDownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
+    
     public bool ValidateInstallation { get; init; }
 
     public BackupPolicy BackupPolicy { get; init; }
