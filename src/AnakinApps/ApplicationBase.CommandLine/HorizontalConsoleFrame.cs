@@ -1,255 +1,297 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+#if NETSTANDARD2_0
+using System.Linq;
+#endif
 
-namespace AnakinRaW.ApplicationBase;
-
-public sealed class HorizontalConsoleFrame : IDisposable
+namespace AnakinRaW.ApplicationBase
 {
-    private readonly bool _newLineAtEnd;
-    private readonly TextWriter _originalOut;
-    private readonly TextWriter _originalError;
-    private readonly TextReader _originalIn;
-    private readonly FrameTextReader _frameReader;
-    private readonly RedrawingTextWriter _writer;
-    private bool _isDisposed;
-
-    public HorizontalConsoleFrame(char lineChar, int length, bool startWithNewLine, bool newLineAtEnd)
+    public sealed class HorizontalConsoleFrame : IDisposable
     {
-        _newLineAtEnd = newLineAtEnd;
-        _originalOut = Console.Out;
-        _originalError = Console.Error;
-        _originalIn = Console.In;
+        private readonly bool _newLineAtEnd;
+        private readonly TextWriter _originalOut;
+        private readonly TextWriter _originalError;
+        private readonly TextReader _originalIn;
+        private readonly FrameTextReader _frameReader;
+        private readonly RedrawingTextWriter _writer;
+        private bool _isDisposed;
 
-        if (startWithNewLine)
-            Console.WriteLine();
-
-        Console.WriteLine(new string(lineChar, length));
-        Console.WriteLine(new string(lineChar, length));
-
-        _writer = new RedrawingTextWriter(lineChar, length, _originalOut, _originalIn);
-        _frameReader = new FrameTextReader(_writer);
-
-        Console.SetOut(_writer);
-        Console.SetError(_writer);
-        Console.SetIn(_frameReader);
-    }
-
-    public void Dispose()
-    {
-        if (_isDisposed) return;
-        _isDisposed = true;
-
-        Console.SetOut(_originalOut);
-        Console.SetError(_originalError);
-        Console.SetIn(_originalIn);
-
-        _writer.EnsureProperDispose();
-
-        if (_newLineAtEnd)
-            Console.WriteLine();
-
-        _frameReader.Dispose();
-    }
-
-    private sealed class FrameTextReader(RedrawingTextWriter writer) : TextReader
-    {
-        public override string? ReadLine()
+        public HorizontalConsoleFrame(char lineChar, int length, bool startWithNewLine, bool newLineAtEnd)
         {
-            return writer.ReadLine();
+            _newLineAtEnd = newLineAtEnd;
+            _originalOut = Console.Out;
+            _originalError = Console.Error;
+            _originalIn = Console.In;
+
+            if (startWithNewLine)
+                Console.WriteLine();
+
+            Console.WriteLine(new string(lineChar, length));
+            Console.WriteLine(new string(lineChar, length));
+
+            _writer = new RedrawingTextWriter(lineChar, length, _originalOut, _originalIn);
+            _frameReader = new FrameTextReader(_writer);
+
+            Console.SetOut(_writer);
+            Console.SetError(_writer);
+            Console.SetIn(_frameReader);
         }
 
-        public override int Read()
+        public void Dispose()
         {
-            var line = ReadLine();
-            return line?.Length > 0 ? line[0] : -1;
+            if (_isDisposed) return;
+            _isDisposed = true;
+
+            Console.SetOut(_originalOut);
+            Console.SetError(_originalError);
+            Console.SetIn(_originalIn);
+
+            _writer.EnsureProperDispose();
+
+            if (_newLineAtEnd)
+                Console.WriteLine();
+
+            _frameReader.Dispose();
         }
 
-        public override int Read(char[] buffer, int index, int count)
+        private sealed class FrameTextReader(RedrawingTextWriter writer) : TextReader
         {
-            var line = ReadLine();
-            if (string.IsNullOrEmpty(line))
-                return 0;
-
-            var charsToCopy = Math.Min(count, line.Length);
-            line.CopyTo(0, buffer, index, charsToCopy);
-            return charsToCopy;
-        }
-    }
-
-    private sealed class RedrawingTextWriter(char lineChar, int length, TextWriter originalOut, TextReader originalIn)
-        : TextWriter
-    {
-        // ANSI Escape Sequences
-        private static readonly string AnsiCursorUp1 = "\e[1A";        // Move cursor up 1 line
-        private static readonly string AnsiCursorUp2 = "\e[2A";        // Move cursor up 2 lines
-        private static readonly string AnsiCursorDown1 = "\e[1B";      // Move cursor down 1 line
-        private static readonly string AnsiCursorToColumn0 = "\e[0G";   // Move cursor to column 0
-        private static readonly string AnsiSaveCursor = "\e[s";         // Save cursor position
-        private static readonly string AnsiRestoreCursor = "\e[u";      // Restore cursor position
-
-        private bool _isOnContentLine;
-        private bool _bottomLineDrawn;
-
-        public override Encoding Encoding => originalOut.Encoding;
-
-        internal string? ReadLine()
-        {
-            if (!_isOnContentLine)
+            public override string? ReadLine()
             {
-                // Move cursor up 1 line
-                originalOut.Write(AnsiCursorUp1);
-
-                // Clear the current line with spaces
-                originalOut.Write(new string(' ', Math.Min(length, Console.WindowWidth - 1)));
-
-                // Move cursor left to start of line
-                originalOut.Write(GetAnsiMoveLeftSequence(Math.Min(length, Console.WindowWidth - 1)));
-
-                originalOut.WriteLine();
-                originalOut.WriteLine(new string(lineChar, length));
-
-                // Move cursor up 2 lines
-                originalOut.Write(AnsiCursorUp2);
-
-                _isOnContentLine = true;
-                _bottomLineDrawn = true;
+                return writer.ReadLine();
             }
 
-            Console.SetOut(originalOut);
-            Console.SetError(originalOut);
-            Console.SetIn(originalIn);
-
-            string? input;
-            try
+            public override int Read()
             {
-                input = Console.ReadLine();
-            }
-            finally
-            {
-                Console.SetOut(this);
-                Console.SetError(this);
-                Console.SetIn(new FrameTextReader(this));
+                var line = ReadLine();
+                return line?.Length > 0 ? line[0] : -1;
             }
 
-            originalOut.WriteLine(new string(lineChar, length));
-            _isOnContentLine = false;
-            _bottomLineDrawn = true;
-            return input;
-        }
-
-        private void PrepareForContent()
-        {
-            if (!_isOnContentLine)
+            public override int Read(char[] buffer, int index, int count)
             {
-                // Move up one line to overwrite the bottom border
-                originalOut.Write(AnsiCursorUp1);
+                var line = ReadLine();
+                if (string.IsNullOrEmpty(line))
+                    return 0;
 
-                // Clear the line with spaces
-                originalOut.Write(new string(' ', Math.Min(length, Console.WindowWidth - 1)));
-
-                // Move cursor back to start of line
-                originalOut.Write(GetAnsiMoveLeftSequence(Math.Min(length, Console.WindowWidth - 1)));
-
-                _isOnContentLine = true;
-                _bottomLineDrawn = false;
+                var charsToCopy = Math.Min(count, line.Length);
+                line.CopyTo(0, buffer, index, charsToCopy);
+                return charsToCopy;
             }
         }
 
-        public void EnsureProperDispose()
+        private sealed class RedrawingTextWriter(
+            char lineChar,
+            int length,
+            TextWriter originalOut,
+            TextReader originalIn)
+            : TextWriter
         {
-            if (_isOnContentLine && !_bottomLineDrawn)
+            // ANSI Escape Sequences
+            private static readonly string AnsiCursorUp1 = "\e[1A";        // Move cursor up 1 line
+            private static readonly string AnsiCursorDown1 = "\e[1B";      // Move cursor down 1 line
+            private static readonly string AnsiCursorToColumn0 = "\e[0G";   // Move cursor to column 0
+            private static readonly string AnsiSaveCursor = "\e[s";         // Save cursor position
+            private static readonly string AnsiRestoreCursor = "\e[u";      // Restore cursor position
+            private static readonly string AnsiClearLine = "\e[2K";         // Clear entire line
+
+            private bool _isOnContentLine;
+            private bool _hasContentOnCurrentLine;
+
+            public override Encoding Encoding => originalOut.Encoding;
+
+            private void WriteBottomLineWithDefaultColor()
             {
-                originalOut.WriteLine();
-                originalOut.WriteLine(new string(lineChar, length));
-                _isOnContentLine = false;
-                _bottomLineDrawn = true;
-            }
-        }
+                var foregroundColor = Console.ForegroundColor;
+                var backgroundColor = Console.BackgroundColor;
 
-        public override void Write(char value)
-        {
-            PrepareForContent();
-            originalOut.Write(value);
-
-            if (value == '\n' || Console.CursorLeft >= Console.WindowWidth - 1) 
-                RedrawBottomLine();
-        }
-
-        public override void Write(string? value)
-        {
-            if (string.IsNullOrEmpty(value)) return;
-
-            PrepareForContent();
-            originalOut.Write(value);
-
-            if (!_bottomLineDrawn) 
-                RedrawBottomLine();
-        }
-
-        private void RedrawBottomLine()
-        {
-            if (_isOnContentLine && !_bottomLineDrawn)
-            {
-                originalOut.Write(AnsiSaveCursor);      // Save cursor position
-                originalOut.Write(AnsiCursorDown1);     // Move cursor down 1 line  
-                originalOut.Write(AnsiCursorToColumn0); // Move cursor to column 0
-
-                var currentColor = Console.ForegroundColor;
                 Console.ResetColor();
                 originalOut.Write(new string(lineChar, length));
-                Console.ForegroundColor = currentColor;
 
-                originalOut.Write(AnsiRestoreCursor);   // Restore cursor position
-                _bottomLineDrawn = true;
+                Console.ForegroundColor = foregroundColor;
+                Console.BackgroundColor = backgroundColor;
             }
-        }
 
-        /// <summary>
-        /// Gets ANSI escape sequence to move cursor left by specified positions.
-        /// Caches common values to avoid repeated string allocations.
-        /// </summary>
-        private static string GetAnsiMoveLeftSequence(int positions)
-        {
-            // Cache common window widths to avoid repeated allocations
-            return positions switch
+            private void WriteBottomLineNewLineWithDefaultColor()
             {
-                40 => "\e[40D",
-                50 => "\e[50D",
-                80 => "\e[80D",
-                120 => "\e[120D",
-                _ => $"\e[{positions}D" // Fallback for uncommon widths
-            };
-        }
+                var foregroundColor = Console.ForegroundColor;
+                var backgroundColor = Console.BackgroundColor;
 
-        public override void WriteLine()
-        {
-            PrepareForContent();
-            originalOut.WriteLine();
-            originalOut.WriteLine(new string(lineChar, length));
-            _isOnContentLine = false;
-            _bottomLineDrawn = true;
-        }
+                Console.ResetColor();
+                originalOut.WriteLine(new string(lineChar, length));
 
-        public override void WriteLine(string? value)
-        {
-            PrepareForContent();
-            originalOut.WriteLine(value);
-            originalOut.WriteLine(new string(lineChar, length));
-            _isOnContentLine = false;
-            _bottomLineDrawn = true;
-        }
+                Console.ForegroundColor = foregroundColor;
+                Console.BackgroundColor = backgroundColor;
+            }
 
-        public override void Flush()
-        {
-            originalOut.Flush();
-        }
+            internal string? ReadLine()
+            {
+                // Don't move cursor position for input - keep it where it is
+                EnsureBottomLineForInput();
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing) 
-                EnsureProperDispose();
-            base.Dispose(disposing);
+                Console.SetOut(originalOut);
+                Console.SetError(originalOut);
+                Console.SetIn(originalIn);
+
+                string? input;
+                try
+                {
+                    input = Console.ReadLine();
+                }
+                finally
+                {
+                    Console.SetOut(this);
+                    Console.SetError(this);
+                    Console.SetIn(new FrameTextReader(this));
+                }
+
+                // After input, redraw the bottom line
+                WriteBottomLineNewLineWithDefaultColor();
+                _isOnContentLine = false;
+                _hasContentOnCurrentLine = false;
+
+                // Return null if Console.ReadLine() returned null (EOF or redirected input)
+                return input;
+            }
+
+            private void EnsureBottomLineForInput()
+            {
+                if (_isOnContentLine && _hasContentOnCurrentLine)
+                {
+                    // We have content on the current line, just ensure bottom line is below
+                    // Don't move the cursor - keep it where it is for inline input
+                    originalOut.Write(AnsiSaveCursor);
+                    originalOut.Write(AnsiCursorDown1);
+                    originalOut.Write(AnsiCursorToColumn0);
+                    WriteBottomLineWithDefaultColor();
+                    originalOut.Write(AnsiRestoreCursor);
+                }
+                else if (_isOnContentLine)
+                {
+                    // No content on current line, add bottom border
+                    WriteBottomLineNewLineWithDefaultColor();
+                    originalOut.Write(AnsiCursorUp1);
+                    originalOut.Write(AnsiCursorToColumn0);
+                }
+                else
+                {
+                    // Not on content line, just ensure bottom border is there
+                    WriteBottomLineNewLineWithDefaultColor();
+                    originalOut.Write(AnsiCursorUp1);
+                    originalOut.Write(AnsiCursorToColumn0);
+                }
+            }
+
+            private void PrepareForContent()
+            {
+                if (!_isOnContentLine)
+                {
+                    // Move up one line to overwrite the bottom border
+                    originalOut.Write(AnsiCursorUp1);
+                    originalOut.Write(AnsiCursorToColumn0);
+                    originalOut.Write(AnsiClearLine);
+                    _isOnContentLine = true;
+                    _hasContentOnCurrentLine = false;
+                }
+            }
+
+            public void EnsureProperDispose()
+            {
+                if (_isOnContentLine)
+                {
+                    if (_hasContentOnCurrentLine)
+                    {
+                        originalOut.WriteLine();
+                    }
+                    WriteBottomLineNewLineWithDefaultColor();
+                    _isOnContentLine = false;
+                    _hasContentOnCurrentLine = false;
+                }
+            }
+
+            public override void Write(char value)
+            {
+                PrepareForContent();
+                originalOut.Write(value);
+                _hasContentOnCurrentLine = true;
+
+                // If we wrote a newline, we need to handle the bottom line specially
+                if (value == '\n')
+                {
+                    WriteBottomLineNewLineWithDefaultColor();
+                    _isOnContentLine = false;
+                    _hasContentOnCurrentLine = false;
+                }
+                else
+                {
+                    // For regular characters, ensure bottom line is visible
+                    RedrawBottomLineInPlace();
+                }
+            }
+
+            public override void Write(string value)
+            {
+                if (string.IsNullOrEmpty(value)) return;
+
+                PrepareForContent();
+                originalOut.Write(value);
+                _hasContentOnCurrentLine = true;
+
+                // Check if the string contains newlines
+                if (value.Contains('\n'))
+                {
+                    WriteBottomLineNewLineWithDefaultColor();
+                    _isOnContentLine = false;
+                    _hasContentOnCurrentLine = false;
+                }
+                else
+                {
+                    // For text that doesn't end with newline, ensure bottom line is visible
+                    RedrawBottomLineInPlace();
+                }
+            }
+
+            private void RedrawBottomLineInPlace()
+            {
+                if (_isOnContentLine)
+                {
+                    originalOut.Write(AnsiSaveCursor);
+                    originalOut.Write(AnsiCursorDown1);
+                    originalOut.Write(AnsiCursorToColumn0);
+                    WriteBottomLineWithDefaultColor();
+                    originalOut.Write(AnsiRestoreCursor);
+                }
+            }
+
+            public override void WriteLine()
+            {
+                PrepareForContent();
+                originalOut.WriteLine();
+                WriteBottomLineNewLineWithDefaultColor();
+                _isOnContentLine = false;
+                _hasContentOnCurrentLine = false;
+            }
+
+            public override void WriteLine(string value)
+            {
+                PrepareForContent();
+                originalOut.WriteLine(value);
+                WriteBottomLineNewLineWithDefaultColor();
+                _isOnContentLine = false;
+                _hasContentOnCurrentLine = false;
+            }
+
+            public override void Flush()
+            {
+                originalOut.Flush();
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                    EnsureProperDispose();
+                base.Dispose(disposing);
+            }
         }
     }
 }
