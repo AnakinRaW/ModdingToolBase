@@ -31,22 +31,22 @@ public abstract class ApplicationUpdater
         Logger = ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public string GetBranchNameFromRegistry(string? branchName, bool setRegistry)
+    public string GetBranchNameFromRegistry(string? overrideBranchName, bool setRegistry)
     {
         var registry = ServiceProvider.GetRequiredService<IRegistry>();
         using var updateRegistry = new ApplicationUpdateRegistry(registry, Environment);
 
         var stableBranchName = BranchManager.StableBranchName;
 
-        if (!string.IsNullOrEmpty(branchName))
+        if (!string.IsNullOrEmpty(overrideBranchName))
         {
             if (setRegistry)
             {
-                updateRegistry.SetBranch(ProductBranch.BranchNamEqualityComparer.Equals(branchName!, stableBranchName)
+                updateRegistry.SetBranch(ProductBranch.BranchNamEqualityComparer.Equals(overrideBranchName!, stableBranchName)
                     ? null
-                    : branchName);
+                    : overrideBranchName);
             }
-            return branchName!;
+            return overrideBranchName!;
         }
 
         var updateBranch = updateRegistry.UpdateBranch;
