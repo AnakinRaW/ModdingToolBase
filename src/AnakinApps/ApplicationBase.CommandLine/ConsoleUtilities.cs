@@ -101,7 +101,7 @@ public static class ConsoleUtilities
         WriteApplicationFatalError(appName, exception.Message, exception.StackTrace);
     }
 
-    public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n', HorizontalConsoleFrame? frame = null)
+    public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n')
     {
         var questionText = $"{question} [{yes}/{no}] ";
         return UserQuestionOnSameLine(questionText, (string input, out bool result) =>
@@ -126,68 +126,35 @@ public static class ConsoleUtilities
 
             result = false;
             return false;
-        }, frame);
+        });
     }
 
     public static T UserQuestionOnSameLine<T>(
-        string question, 
-        ConsoleQuestionValueFactory<T> inputCorrect,
-        HorizontalConsoleFrame? frame = null)
+        string question,
+        ConsoleQuestionValueFactory<T> inputCorrect)
     {
-        return UserQuestionOnSameLineInternal(question, inputCorrect, frame);
-    }
-
-    private static T UserQuestionOnSameLineInternal<T>(
-        string question, 
-        ConsoleQuestionValueFactory<T> inputCorrect, 
-        HorizontalConsoleFrame? frame)
-    {
-        var writer = frame?.Writer ?? Console.Out;
-        
         while (true)
         {
-            var promptLeft = 0;
-            var promptTop = Console.CursorTop;
-
-            // Write question
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            if (frame != null)
-                writer.Write(question);
-            else
-            {
-                Console.SetCursorPosition(promptLeft, promptTop);
-                writer.Write(question);
-                Console.SetCursorPosition(promptLeft + question.Length, promptTop);
-            }
+            Console.Write(question);
             Console.ResetColor();
 
-            var input = ReadLineInline(writer);
+            var input = ReadLineInline();
 
             if (!inputCorrect(input, out var result))
             {
-                // Clear and retry
-                if (frame != null)
-                {
-                    var currentTop = Console.CursorTop;
-                    Console.SetCursorPosition(0, currentTop);
-                    writer.Write(new string(' ', Console.WindowWidth - 1));
-                    Console.SetCursorPosition(0, currentTop);
-                }
-                else
-                {
-                    Console.SetCursorPosition(0, promptTop);
-                    writer.Write(new string(' ', Console.WindowWidth - 1));
-                }
+                // Clear current line using carriage return + spaces + carriage return
+                // // This works in all console contexts unlike Console.SetCursorPosition()
+                Console.Write("\r" + new string(' ', question.Length + input.Length) + "\r");
                 continue;
             }
 
-            // Success
-            writer.WriteLine();
+            Console.WriteLine(); // Move to next line
             return result;
         }
     }
-    
-    private static string ReadLineInline(TextWriter writer)
+
+    private static string ReadLineInline()
     {
         var input = "";
         while (true)
@@ -202,15 +169,15 @@ public static class ConsoleUtilities
                 if (input.Length > 0)
                 {
                     input = input.Substring(0, input.Length - 1);
-                    Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                    writer.Write(' ');
-                    Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                    // Backspace-space-backspace: move back, overwrite with space, move back again
+                    // This character sequence works in all console contexts
+                    Console.Write("\b \b");
                 }
             }
             else if (!char.IsControl(key.KeyChar))
             {
                 input += key.KeyChar;
-                writer.Write(key.KeyChar);
+                Console.Write(key.KeyChar);
             }
         }
 
