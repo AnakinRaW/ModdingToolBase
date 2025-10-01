@@ -2,7 +2,7 @@
   "profiles": {
     "ApplicationManifestCreator": {
       "commandName": "Project",
-      "commandLineArgs": "-a \"C:/Test/ModVerify.exe\" --appDataFiles C:/Test/AnakinRaW.ExternalUpdater.exe --origin C:/test -o C:/Test -b stable"
+      "commandLineArgs": "-a \"C:/Test/ModVerify.exe\" --appDataFiles C:/Test/AnakinRaW.ExternalUpdater.exe --origin C:/test/ModVerify -o C:/Test -b stable"
     }
   }
 }
