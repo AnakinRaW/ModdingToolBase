@@ -1,0 +1,29 @@
+<Solution>
+  <Folder Name="/AnakinApps/">
+    <Project Path="src/AnakinApps/ApplicationBase.CommandLine/ApplicationBase.CommandLine.csproj" />
+    <Project Path="src/AnakinApps/ApplicationBase.Shared/ApplicationBase.Shared.shproj" />
+    <Project Path="src/AnakinApps/ApplicationBase.WPF/ApplicationBase.WPF.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="src/AnakinApps/ApplicationBase/ApplicationBase.csproj" />
+    <Project Path="src/AnakinApps/ApplicationManifestCreator/ApplicationManifestCreator.csproj" />
+    <Project Path="src/AnakinApps/FtpUploader/FtpUploader.csproj" />
+  </Folder>
+  <Folder Name="/CommonUtilities/">
+    <Project Path="src/CommonUtilities/CommonUtilities.Windows/CommonUtilities.Windows.csproj" />
+    <Project Path="src/CommonUtilities/CommonUtilities.WPF.ApplicationFramework/CommonUtilities.WPF.ApplicationFramework.csproj" />
+    <Project Path="src/CommonUtilities/CommonUtilities.WPF.Controls/CommonUtilities.WPF.Controls.csproj" />
+    <Project Path="src/CommonUtilities/CommonUtilities.WPF.Core/CommonUtilities.WPF.Core.csproj" />
+    <Project Path="src/CommonUtilities/CommonUtilities.WPF.Imaging/CommonUtilities.WPF.Imaging.csproj" />
+  </Folder>
+  <Folder Name="/Updater/">
+    <Project Path="src/Updater/AppUpdaterFramework.Attributes/AppUpdaterFramework.Attributes.csproj" />
+    <Project Path="src/Updater/AppUpdaterFramework.Manifest/AppUpdaterFramework.Manifest.csproj" />
+    <Project Path="src/Updater/AppUpdaterFramework.WPF/AppUpdaterFramework.WPF.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="src/Updater/AppUpdaterFramework/AppUpdaterFramework.csproj" />
+    <Project Path="src/Updater/ExternalUpdater.App/ExternalUpdater.App.csproj" />
+    <Project Path="src/Updater/ExternalUpdater.Core/ExternalUpdater.Core.csproj" />
+  </Folder>
+</Solution>
