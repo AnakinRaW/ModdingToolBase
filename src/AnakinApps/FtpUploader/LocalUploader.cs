@@ -38,7 +38,7 @@ internal class LocalUploader(UploadOptions options, IServiceProvider services) :
         basePath = FileSystem.Path.TrimEndingDirectorySeparator(basePath);
         var destPath = FileSystem.Path.Combine(basePath, fileToUpload.Name);
 
-        Logger?.LogInformation($"Creating local file '{fileToUpload.Name}' at {destPath}");
+        Logger?.LogInformation("Creating local file '{FileName}' at {DestPath}", fileToUpload.Name, destPath);
 
         var destDir = FileSystem.Path.GetDirectoryName(destPath);
         if (destDir is not null && !FileSystem.Directory.Exists(destDir))

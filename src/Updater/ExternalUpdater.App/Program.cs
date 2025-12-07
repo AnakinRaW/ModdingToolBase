@@ -32,13 +32,13 @@ internal static class Program
         var services = CreateServices(args);
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
 
-        logger?.LogTrace($"External updater started with commandline arguments: '{args.ToArgs()}'");
+        logger?.LogTrace("External updater started with commandline arguments: '{Args}'", args.ToArgs());
 
         try
         {
             var tool = new ToolFactory().Create(args, services);
             var result = await tool.Run();
-            logger?.LogTrace($"Tool '{tool}' finished with result: {result}");
+            logger?.LogTrace("Tool '{Tool}' finished with result: {Result}", tool, result);
             return 0;
         }
         catch (Exception e)

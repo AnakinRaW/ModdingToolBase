@@ -103,7 +103,7 @@ internal sealed class CosturaResourceExtractor
             if (_fileSystem.File.Exists(filePath) && !shouldOverwrite(filePath, resourceStream))
                 return;
 
-            _logger?.LogDebug($"Writing file: '{filePath}'");
+            _logger?.LogDebug("Writing file: '{FilePath}'", filePath);
 
             resourceStream.Position = 0;
 

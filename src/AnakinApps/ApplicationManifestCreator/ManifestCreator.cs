@@ -73,7 +73,7 @@ internal class ManifestCreator
         var outputFile = _fileSystem.FileInfo.New(outputFilePath);
         outputFile.Directory?.Create();
 
-        _logger?.LogTrace($"Writing branches lookup file to '{outputFile.FullName}'");
+        _logger?.LogTrace("Writing branches lookup file to '{FilePath}'", outputFile.FullName);
         await using var fileStream = outputFile.Create();
         await using var textWriter = new StreamWriter(fileStream);
         foreach (var branch in branches) 
@@ -161,7 +161,7 @@ internal class ManifestCreator
         var outputFile = _fileSystem.FileInfo.New(outputFilePath);
         outputFile.Directory?.Create();
 
-        _logger?.LogTrace($"Writing manifest to '{outputFile.FullName}'");
+        _logger?.LogTrace("Writing manifest to '{FilePath}'", outputFile.FullName);
 
         await using var fileStream = outputFile.Create();
         await JsonSerializer.SerializeAsync(fileStream, manifest, JsonOptions);

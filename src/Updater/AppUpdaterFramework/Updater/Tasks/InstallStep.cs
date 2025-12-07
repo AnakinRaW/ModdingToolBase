@@ -88,7 +88,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         _download?.Wait();
         if (_download?.Error != null)
         {
-            Logger?.LogWarning($"Skipping {_action} of '{Component.GetUniqueId()}' since downloading it failed.");
+            Logger?.LogWarning("Skipping {UpdateAction} of '{Id}' since downloading it failed.", _action, Component.GetUniqueId());
             return;
         }
 
@@ -122,7 +122,7 @@ internal class InstallStep : PipelineStep, IComponentStep
             {
                 var restartManager = Services.GetRequiredService<IRestartManager>();
                 restartManager.SetRestart(RestartType.ApplicationRestart);
-                Logger?.LogWarning($"Component '{Component.GetDisplayName()}' get scheduled for installation after a restart.");
+                Logger?.LogWarning("Component '{Name}' get scheduled for installation after a restart.", Component.GetDisplayName());
                 
                 var pendingComponentStore = Services.GetRequiredService<IWritablePendingComponentStore>();
                 pendingComponentStore.AddComponent(new PendingComponent
@@ -134,7 +134,7 @@ internal class InstallStep : PipelineStep, IComponentStep
 
             if (Result == InstallResult.FailureElevationRequired)
             {
-                Logger?.LogWarning($"Component '{Component.GetDisplayName()}' was not installed because required permissions are missing.");
+                Logger?.LogWarning("Component '{Name}' was not installed because required permissions are missing.", Component.GetDisplayName());
                 var restartManager = Services.GetRequiredService<IRestartManager>();
                 restartManager.SetRestart(RestartType.ApplicationElevation);
             }
@@ -171,7 +171,7 @@ internal class InstallStep : PipelineStep, IComponentStep
             case UpdateAction.Delete when !isInstalled:
                 return InstallResult.Success;
             default:
-                Logger?.LogWarning($"Validation of installed component '{Component.GetDisplayName()}' failed.");
+                Logger?.LogWarning("Validation of installed component '{Name}' failed.", Component.GetDisplayName());
                 return InstallResult.Failure;
         }
     }
@@ -194,7 +194,7 @@ internal class InstallStep : PipelineStep, IComponentStep
         }
         catch (Exception ex)
         {
-            Logger?.LogWarning(ex, $"Creating backup of '{Component.Id}' failed.");
+            Logger?.LogWarning(ex, "Creating backup of '{Id}' failed.", Component.Id);
             if (_updateConfiguration.BackupPolicy == BackupPolicy.Required)
             {
                 Logger?.LogError("Stopping install due to BackupPolicy");

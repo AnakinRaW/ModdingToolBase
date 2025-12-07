@@ -54,14 +54,14 @@ internal class ApplicationUpdater(UpdateCatalog updateCatalog, IServiceProvider 
             }
             catch (Exception e)
             {
-                _logger?.LogTrace(e, $"Failed to clean update data: {e.Message}");
+                _logger?.LogTrace(e, "Failed to clean update data: {Message}", e.Message);
             }
             
             return updateResult;
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, $"Update operation failed with error: {e.Message}");
+            _logger?.LogError(e, "Update operation failed with error: {Message}", e.Message);
             return CreateResult(e);
         }
     }
@@ -78,7 +78,7 @@ internal class ApplicationUpdater(UpdateCatalog updateCatalog, IServiceProvider 
             // TODO: PreChecks
             try
             {
-                _logger?.LogTrace($"Updating...\r\nCatalog: {_updateCatalog}");
+                _logger?.LogTrace("Updating...\r\nCatalog: {UpdateCatalog}", _updateCatalog);
                 await updatePipeline.RunAsync(token).ConfigureAwait(false);
             }
             catch (Exception e)
@@ -100,7 +100,7 @@ internal class ApplicationUpdater(UpdateCatalog updateCatalog, IServiceProvider 
         }
         catch (Exception e)
         {
-            _logger?.LogError(e, $"Update operation failed with error: {e.Message}");
+            _logger?.LogError(e, "Update operation failed with error: {Message}", e.Message);
             return CreateResult(e);
         }
     }
@@ -120,7 +120,7 @@ internal class ApplicationUpdater(UpdateCatalog updateCatalog, IServiceProvider 
                 _serviceProvider.GetRequiredService<IRestartManager>().SetRestart(RestartType.ApplicationRestart);
 
                var e = new FailedRestoreException(ex);
-                _logger?.LogTrace(e, $"Failed to restore from failed update : {e.Message}");
+                _logger?.LogTrace(e, "Failed to restore from failed update : {Message}", e.Message);
                 throw e;
             }
             finally

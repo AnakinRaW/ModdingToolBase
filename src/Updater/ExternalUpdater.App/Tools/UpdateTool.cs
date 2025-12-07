@@ -18,7 +18,7 @@ internal sealed class UpdateTool(ExternalUpdateOptions options, IServiceProvider
             var updater = new Utilities.ExternalUpdater(updateItems, ServiceProvider);
             var updateResult = await Task.Run(updater.Run).ConfigureAwait(false);
             
-            Logger?.LogDebug($"Updated with result: {updateResult}");
+            Logger?.LogDebug("Updated with result: {Result}", updateResult);
             StartProcess(updateResult);
             return updateResult;
         }

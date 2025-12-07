@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
@@ -67,7 +68,7 @@ internal class DownloadStep(
             if (lastException != null)
             {
                 var action = lastException is DownloadValidationFailedException ? "validate download" : "download";
-                Logger?.LogError(lastException, $"Failed to {action} from '{Uri}'. {lastException.Message}");
+                Logger?.LogError(lastException, "Failed to {Action} from '{Uri}'. {Message}", action, Uri, lastException.Message);
                 throw lastException;
             }
         }
@@ -117,7 +118,7 @@ internal class DownloadStep(
                 catch (OperationCanceledException ex)
                 {
                     lastException = ex;
-                    Logger?.LogWarning($"Download of '{Uri}' was cancelled.");
+                    Logger?.LogWarning("Download of '{Uri}' was cancelled.", Uri);
                     break;
                 }
                 catch (Exception e) when (e.IsExceptionType<UnauthorizedAccessException>())
@@ -129,21 +130,21 @@ internal class DownloadStep(
                     if (ex is AggregateException && ex.IsExceptionType<OperationCanceledException>())
                     {
                         lastException = ex;
-                        Logger?.LogWarning($"Download of {Uri} was cancelled.");
+                        Logger?.LogWarning("Download of {Uri} was cancelled.", Uri);
                         break;
                     }
                     var wrappedException = ex.TryGetWrappedException();
                     if (wrappedException != null)
                         ex = wrappedException;
                     lastException = ex;
-                    Logger?.LogError(ex, $"Failed to download \"{Uri}\" on try {i}: {ex.Message}");
+                    Logger?.LogError(ex, "Failed to download \"{Uri}\" on try {I}: {Message}", Uri, i, ex.Message);
                 }
             }
         }
         catch (UnauthorizedAccessException ex)
         {
             lastException = ex;
-            Logger?.LogError(ex, $"Failed to create download path '{DownloadPath}' due to missing permission: {ex.Message}");
+            Logger?.LogError(ex, "Failed to create download path '{DownloadPath}' due to missing permission: {Message}", DownloadPath, ex.Message);
             var restartManager = Services.GetRequiredService<IRestartManager>();
             restartManager.SetRestart(RestartType.ApplicationElevation);
         }
@@ -168,12 +169,12 @@ internal class DownloadStep(
             try
             {
                 Logger?.LogTrace(
-                    $"Deleting potentially partially downloaded file '{destination}' generated as a result of operation cancellation.");
+                    "Deleting potentially partially downloaded file '{FileInfo}' generated as a result of operation cancellation.", destination);
                 destination.Delete();
             }
             catch (Exception e)
             {
-                Logger?.LogTrace($"Could not delete partially downloaded file '{destination}' due to exception: {e}");
+                Logger?.LogTrace("Could not delete partially downloaded file '{FileInfo}' due to exception: {Exception}", destination, e);
             }
 
             throw;

@@ -59,7 +59,7 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
             }
             catch (Exception e)
             {
-                _logger?.LogError(e, $"Failed to run ExternalUpdater. Starting application normally: {e.Message}");
+                _logger?.LogError(e, "Failed to run ExternalUpdater. Starting application normally: {EMessage}", e.Message);
                 _updateRegistry.Reset();
             }
         }
@@ -75,11 +75,11 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
     private void HandleRestartResult(ExternalUpdaterResult result, out bool shouldReset)
     {
         shouldReset = false;
-        _logger?.LogTrace($"ExternalUpdater result: '{result}'");
+        _logger?.LogTrace("ExternalUpdater result: '{Result}'", result);
 
         if (result == ExternalUpdaterResult.UpdateFailedNoRestore || _updateRegistry.ResetApp)
         {
-            _logger?.LogDebug($"Resetting app due to ExternalUpdater result '{result}' or UpdateRegistry/ResetApp = {_updateRegistry.ResetApp}");
+            _logger?.LogDebug("Resetting app due to ExternalUpdater result '{Result}' or UpdateRegistry/ResetApp = {Reset}", result, _updateRegistry.ResetApp);
             _updateRegistry.Reset();
             shouldReset = true;
             return;
@@ -87,7 +87,7 @@ internal sealed class SelfUpdateRestartHandler : IDisposable
 
         if (result is ExternalUpdaterResult.UpdateFailedWithRestore or ExternalUpdaterResult.UpdateSuccess)
         {
-            _logger?.LogDebug($"ExternalUpdater indicated result '{result}'.");
+            _logger?.LogDebug("ExternalUpdater indicated result '{Result}'.", result);
             _updateRegistry.Reset();
         }
     }

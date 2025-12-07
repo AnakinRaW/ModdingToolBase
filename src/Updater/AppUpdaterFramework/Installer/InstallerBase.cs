@@ -45,7 +45,7 @@ internal abstract class InstallerBase : IInstaller
             OnProgress(component, 0.0);
             try
             {
-                Logger?.LogInformation($"Started: {action}ing {component.GetDisplayName()}");
+                Logger?.LogInformation("Started: {InstallAction}ing {Name}", action, component.GetDisplayName());
                 switch (action)
                 {
                     case InstallAction.Install:
@@ -58,12 +58,12 @@ internal abstract class InstallerBase : IInstaller
             }
             finally
             {
-                Logger?.LogInformation($"Completed: {action}ing {component.GetDisplayName()}");
+                Logger?.LogInformation("Completed: {InstallAction}ing {Name}", action, component.GetDisplayName());
             }
         }
         catch (OperationCanceledException)
         {
-            Logger?.LogInformation($"User canceled during component {action}.");
+            Logger?.LogInformation("User canceled during component {InstallAction}.", action);
             return InstallResult.Cancel;
         }
         catch (UnauthorizedAccessException e)
@@ -95,7 +95,7 @@ internal abstract class InstallerBase : IInstaller
             token.ThrowIfCancellationRequested();
 
             if (retry)
-                Logger?.LogTrace($"Retrying action for component '{component.GetUniqueId()}'");
+                Logger?.LogTrace("Retrying action for component '{Id}'", component.GetUniqueId());
 
             OnProgress(component, 0.0);
             var operationResult = action();

@@ -43,7 +43,7 @@ public class ApplicationBranchUtilities
         var branchesData = await DownloadFromMirrors(lookupUri);
         var branchNames = Encoding.UTF8.GetString(branchesData).Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries);
         
-        if (!branchNames.Any())
+        if (branchNames.Length == 0)
             return [];
 
         var branches = new List<ProductBranch>();
@@ -62,14 +62,14 @@ public class ApplicationBranchUtilities
             try
             {
                 using var ms = new MemoryStream();
-                _logger?.LogInformation($"Downloading branch list from mirror '{requestUri}'");
+                _logger?.LogInformation("Downloading branch list from mirror '{Uri}'", requestUri);
                 await _downloadManager.DownloadAsync(requestUri.ToUri(), ms);
                 return ms.ToArray();
             }
             catch (Exception e) when (e is HttpRequestException or DownloadFailedException)
             {
                 // Ignore and try next mirror
-                _logger?.LogWarning(e, $"Unable to download branch list from mirror '{requestUri}'");
+                _logger?.LogWarning(e, "Unable to download branch list from mirror '{Uri}'", requestUri);
             }
         }
 

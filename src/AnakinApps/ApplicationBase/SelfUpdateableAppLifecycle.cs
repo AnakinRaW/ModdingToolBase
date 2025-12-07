@@ -61,7 +61,7 @@ public abstract class SelfUpdateableAppLifecycle
 
         BootstrapLoggerFactory = _bootstrapperServices.GetService<ILoggerFactory>();
         var logger = BootstrapLoggerFactory?.CreateLogger(GetType());
-        logger?.LogTrace($"Application started with raw arguments: '{System.Environment.CommandLine}'");
+        logger?.LogTrace("Application started with raw arguments: '{Args}'", System.Environment.CommandLine);
         Logger = logger;
 
         if (ShouldPreBootstrapResetApp(args))
@@ -80,7 +80,7 @@ public abstract class SelfUpdateableAppLifecycle
         var initResult = await InitializeAppAsync(args);
         if (initResult != 0)
         {
-            logger?.LogWarning($"Initialization was not successful, error code: {initResult}. Terminating application.");
+            logger?.LogWarning("Initialization was not successful, error code: {Result}. Terminating application.", initResult);
             return initResult;
         }
 

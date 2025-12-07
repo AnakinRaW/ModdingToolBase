@@ -44,7 +44,7 @@ internal class ProcessTools : IProcessTools
             startInfo.Verb = "runas";
         using var process = new Process();
         process.StartInfo = startInfo;
-        _logger?.LogInformation($"Starting application '{startInfo.FileName}' with {startInfo.Arguments}");
+        _logger?.LogInformation("Starting application '{Name}' with {Args}", startInfo.FileName, startInfo.Arguments);
         process.Start();
     }
 
@@ -78,7 +78,7 @@ internal class ProcessTools : IProcessTools
             {
                 try
                 {
-                    _logger?.LogDebug($"Waiting for {parentProcess.ProcessName} to exit...");
+                    _logger?.LogDebug("Waiting for {Process} to exit...", parentProcess.ProcessName);
                     await parentProcess.WaitForExitAsync(token);
                 }
                 catch (TaskCanceledException)
@@ -86,7 +86,7 @@ internal class ProcessTools : IProcessTools
                     if (parentProcess.HasExited)
                         return true;
 
-                    _logger?.LogError($"The process '{parentProcess.ProcessName}:{parentProcess.Id}' did not exit before timeout was reached. Aborting...");
+                    _logger?.LogError("The process '{Process}:{Pid}' did not exit before timeout was reached. Aborting...", parentProcess.ProcessName, parentProcess.Id);
                     return false;
                 }
                 catch (Exception e)
@@ -94,7 +94,7 @@ internal class ProcessTools : IProcessTools
                     if (parentProcess.HasExited)
                         return true;
 
-                    _logger?.LogCritical(e, $"Unable to wait for process '{parentProcess.ProcessName}:{parentProcess.Id}' to terminate: {e.Message}");
+                    _logger?.LogCritical(e, "Unable to wait for process '{Process}:{Pid}' to terminate: {Message}", parentProcess.ProcessName, parentProcess.Id, e.Message);
                     return false;
                 }
             }

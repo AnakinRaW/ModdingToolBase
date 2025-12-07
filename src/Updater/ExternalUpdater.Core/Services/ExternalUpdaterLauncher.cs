@@ -23,7 +23,7 @@ public sealed class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : 
             throw new FileNotFoundException("Could not find updater application", updater.FullName);
 
         var startInfo = CreateStartInfo(updater.FullName, options);
-        _logger?.LogTrace($"Starting external update with process info: {startInfo.FileName} {startInfo.Arguments}");
+        _logger?.LogTrace("Starting external update with process info: {FileName} {Args}", startInfo.FileName, startInfo.Arguments);
         return Process.Start(startInfo)!;
     }
 

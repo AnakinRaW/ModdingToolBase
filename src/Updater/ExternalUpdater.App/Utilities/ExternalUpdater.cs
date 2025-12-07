@@ -25,7 +25,8 @@ internal class ExternalUpdater
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
 
-        _logger?.LogTrace("JSON file to process:\r\n" + JsonSerializer.Serialize(updaterItems, new JsonSerializerOptions { WriteIndented = true }));
+        var json = JsonSerializer.Serialize(updaterItems, new JsonSerializerOptions { WriteIndented = true });
+        _logger?.LogTrace("JSON file to process:\r\n{Json}", json);
 
         UpdaterItems = updaterItems;
 
@@ -34,7 +35,7 @@ internal class ExternalUpdater
             .ToDictionary(x => x.Destination, x => x.Source);
 
         foreach (var pair in _backups)
-            _logger?.LogTrace($"Source added: {pair}");
+            _logger?.LogTrace("Source added: {Backup}", pair);
     }
 
     public ExternalUpdaterResult Run()
@@ -44,7 +45,7 @@ internal class ExternalUpdater
             var itemsToUpdate = UpdaterItems.Where(u => u.Update is not null).Select(x => x.Update!);
             foreach (var item in itemsToUpdate)
             {
-                _logger?.LogTrace($"Processing item: {item}");
+                _logger?.LogTrace("Processing item: {File}", item);
                 var fileInfo = _fileSystem.FileInfo.New(item.File);
 
                 if (string.IsNullOrEmpty(item.Destination))
@@ -56,14 +57,14 @@ internal class ExternalUpdater
         }
         catch (Exception e)
         {
-            _logger?.LogCritical($"Error while updating: {e.Message}");
+            _logger?.LogCritical("Error while updating: {Message}", e.Message);
             _logger?.LogDebug("Restore backup");
 
             try
             {
                 foreach (var backup in _backups)
                 {
-                    _logger?.LogDebug($"Restore item: {backup}");
+                    _logger?.LogDebug("Restore item: {Backup}", backup);
                     if (string.IsNullOrEmpty(backup.Value))
                         _fileSystem.FileInfo.New(backup.Key).DeleteWithRetry();
                     else
@@ -73,7 +74,7 @@ internal class ExternalUpdater
             }
             catch (Exception backupException)
             {
-                _logger?.LogError($"Error while restoring backup: {backupException.Message}");
+                _logger?.LogError("Error while restoring backup: {Message}", backupException.Message);
                 return ExternalUpdaterResult.UpdateFailedNoRestore;
             }
         }
@@ -100,7 +101,7 @@ internal class ExternalUpdater
         }
         catch (Exception e)
         {
-            _logger?.LogWarning($"Cleaning failed with error: {e.Message}");
+            _logger?.LogWarning("Cleaning failed with error: {Message}", e.Message);
         }
     }
 }

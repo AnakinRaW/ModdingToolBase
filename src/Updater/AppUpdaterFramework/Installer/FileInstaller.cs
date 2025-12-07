@@ -70,7 +70,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
             destinationStream = _fileSystem.CreateFileWithRetry(destination.FullName);
             if (destinationStream is null)
             {
-                Logger?.LogTrace($"Creation of file '{file.FullName}' failed.");
+                Logger?.LogTrace("Creation of file '{FilePath}' failed.", file.FullName);
                 return InstallOperationResult.Failed;
             }
             return InstallOperationResult.Success;
@@ -95,7 +95,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
     {
         if (!file.Exists)
         {
-            Logger?.LogTrace($"'{file}' file is already deleted.");
+            Logger?.LogTrace("'{FileInfo}' file is already deleted.", file);
             return InstallOperationResult.Success;
         }
 
@@ -104,7 +104,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
             var deleteSuccess = fileToDelete.TryDeleteWithRetry(2, 500, (ex, _) =>
             {
                 Logger?.LogTrace(
-                    $"Error occurred while deleting file '{fileToDelete}'. Error details: {ex.Message}. Retrying after {0.5f} seconds...");
+                    "Error occurred while deleting file '{FileToDelete}'. Error details: {Message}. Retrying after {Retry} seconds...", fileToDelete, ex.Message, 0.5f);
                 return true;
             });
             Logger?.LogTrace(deleteSuccess ? $"Source '{fileToDelete}' deleted." : $"Source '{fileToDelete}' was not deleted");
@@ -120,17 +120,17 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         }
         catch (IOException e) when (new HRESULT(e.HResult).Code == Win32Error.ERROR_SHARING_VIOLATION)
         {
-            Logger?.LogWarning($"Source '{file}' is locked");
+            Logger?.LogWarning("Source '{FileInfo}' is locked", file);
             return InstallOperationResult.LockedFile;
         }
         catch (UnauthorizedAccessException)
         {
-            Logger?.LogWarning($"Missing permission on Source '{file}'");
+            Logger?.LogWarning("Missing permission on Source '{FileInfo}'", file);
             return InstallOperationResult.NoPermission;
         }
         catch (Exception e)
         {
-            Logger?.LogError(e, $"Unable to perform {action} on file '{file}': {e.Message}");
+            Logger?.LogError(e, "Unable to perform {InstallAction} on file '{FileInfo}': {Message}", action, file, e.Message);
             return InstallOperationResult.Failed;
         }
     }

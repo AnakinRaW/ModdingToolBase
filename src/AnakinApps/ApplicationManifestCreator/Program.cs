@@ -36,7 +36,7 @@ internal class Program
         try
         {
             var result = await new ManifestCreator(opts, services).Run();
-            logger?.LogTrace($"ManifestCreator finished with result: {result}");
+            logger?.LogTrace("ManifestCreator finished with result: {Result}", result);
             return 0;
         }
         catch (Exception e)

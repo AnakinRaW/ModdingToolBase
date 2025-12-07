@@ -50,7 +50,7 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
             return ILockedFileHandler.Result.Locked;
         }
 
-        _logger?.LogTrace($"Handling locked file '{file}'");
+        _logger?.LogTrace("Handling locked file '{FileInfo}'", file);
 
         var processesWithoutSelf = lockingProcesses.WithoutCurrentProcess().WithoutDebugger().WithoutStopped().ToList();
 
@@ -68,7 +68,7 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
             // Interaction indicated to abort handling
             if (interactionResult == LockedFileHandlerInteractionResult.Cancel)
             {
-                _logger?.LogTrace($"Interaction result: Locked file '{file}' shall not be unlocked.");
+                _logger?.LogTrace("Interaction result: Locked file '{FileInfo}' shall not be unlocked.", file);
                 return ILockedFileHandler.Result.Locked;
             }
 
@@ -90,7 +90,7 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
             if (!_updateConfiguration.RestartConfiguration.SupportsRestart)
                 return ILockedFileHandler.Result.Locked;
 
-            _logger?.LogTrace($"Source '{file}' is locked by current application. Restart is required.");
+            _logger?.LogTrace("Source '{FileInfo}' is locked by current application. Restart is required.", file);
             return ILockedFileHandler.Result.RequiresRestart;
         }
 

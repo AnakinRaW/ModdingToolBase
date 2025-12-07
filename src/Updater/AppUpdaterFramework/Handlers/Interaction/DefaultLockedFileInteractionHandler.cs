@@ -17,12 +17,12 @@ internal class DefaultLockedFileInteractionHandler : ILockedFileInteractionHandl
 
     public LockedFileHandlerInteractionResult HandleLockedFile(IFileInfo file, IEnumerable<ILockingProcess> lockingProcesses)
     {
-        _logger?.LogTrace($"Interaction Result: {LockedFileHandlerInteractionResult.Cancel}");
+        _logger?.LogTrace("Interaction Result: {Result}", LockedFileHandlerInteractionResult.Cancel);
         return LockedFileHandlerInteractionResult.Cancel;
     }
     
     public void HandleError(string message)
     {
-        _logger?.LogTrace($"Interaction Error: {message}");
+        _logger?.LogTrace("Interaction Error: {Message}", message);
     }
 }
