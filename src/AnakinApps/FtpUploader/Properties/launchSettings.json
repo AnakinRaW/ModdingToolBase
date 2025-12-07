@@ -6,7 +6,7 @@
     },
     "SFTP": {
       "commandName": "Project",
-      "commandLineArgs": "ftp --host republicatwar.com --port 1579 --user raw --password worngPassword --base c:/test/ModVerify/ --source downloads/ModVerify/"
+      "commandLineArgs": "ftp --host republicatwar.com --port 1579 --user worngUser --password worngPassword --base c:/test/ModVerify/ --source downloads/ModVerify/"
     }
   }
 }
