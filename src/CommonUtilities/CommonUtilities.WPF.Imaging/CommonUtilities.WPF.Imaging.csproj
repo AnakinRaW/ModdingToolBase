@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
+		<TargetFrameworks>net481;net10.0-windows</TargetFrameworks>
 		<RootNamespace>AnakinRaW.CommonUtilities.Wpf.Imaging</RootNamespace>
 		<AssemblyName>AnakinRaW.CommonUtilities.WPF.Imaging</AssemblyName>
 		<UseWPF>true</UseWPF>
@@ -18,7 +18,7 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	</PropertyGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net481' ">
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" PrivateAssets="all" />
 	</ItemGroup>
 	

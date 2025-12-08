@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	
 	<PropertyGroup>
-		<TargetFrameworks>net48;net9.0-windows</TargetFrameworks>
+		<TargetFrameworks>net481;net10.0-windows</TargetFrameworks>
 		<UseWPF>true</UseWPF>
 		<RootNamespace>AnakinRaW.AppUpdaterFramework</RootNamespace>
 		<AssemblyName>AnakinRaW.AppUpdaterFramework.WPF</AssemblyName>
@@ -12,14 +12,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.Windows\CommonUtilities.Windows.csproj" />
 	  <ProjectReference Include="..\..\CommonUtilities\CommonUtilities.WPF.ApplicationFramework\CommonUtilities.WPF.ApplicationFramework.csproj" />
 	  <ProjectReference Include="..\AppUpdaterFramework\AppUpdaterFramework.csproj" />
-	  <ProjectReference Include="..\ExternalUpdater.CLI\ExternalUpdater.CLI.csproj" />
+	  <ProjectReference Include="..\ExternalUpdater.App\ExternalUpdater.App.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>
