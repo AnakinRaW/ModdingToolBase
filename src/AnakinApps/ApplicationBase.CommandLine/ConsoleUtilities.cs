@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace AnakinRaW.ApplicationBase;
 
@@ -97,7 +100,70 @@ public static class ConsoleUtilities
 
     public static void WriteApplicationFatalError(string appName, Exception exception)
     {
-        WriteApplicationFatalError(appName, exception.Message, exception.StackTrace);
+        var message = FormatExceptionMessage(exception);
+        var details = FormatExceptionDetails(exception);
+
+        WriteApplicationFatalError(appName, message, details);
+    }
+
+    private static string FormatExceptionMessage(Exception ex)
+    {
+        return ex switch
+        {
+            TypeInitializationException tie =>
+                $"{ex.GetType().Name} in type '{tie.TypeName}'",
+            AggregateException ae =>
+                $"{ex.GetType().Name} ({ae.InnerExceptions.Count} errors)",
+            _ => $"{ex.GetType().Name}: {ex.Message}"
+        };
+    }
+
+    private static string FormatExceptionDetails(Exception ex)
+    {
+        var sb = new StringBuilder();
+        FormatExceptionChain(ex, sb, indent: 0);
+        return sb.ToString();
+    }
+
+    private static void FormatExceptionChain(Exception ex, StringBuilder sb, int indent)
+    {
+        var prefix = new string(' ', indent * 2);
+
+        switch (ex)
+        {
+            case AggregateException ae:
+                sb.AppendLine($"{prefix}{ae.Message}");
+                foreach (var inner in ae.InnerExceptions)
+                {
+                    sb.AppendLine($"{prefix}---> [{inner.GetType().Name}]");
+                    FormatExceptionChain(inner, sb, indent + 1);
+                }
+                break;
+
+            case ReflectionTypeLoadException rtle:
+                sb.AppendLine($"{prefix}{rtle.Message}");
+                foreach (var loader in rtle.LoaderExceptions?.Where(e => e != null) ?? [])
+                {
+                    sb.AppendLine($"{prefix}---> [{loader!.GetType().Name}] {loader.Message}");
+                }
+                sb.AppendLine();
+                sb.AppendLine(rtle.StackTrace);
+                break;
+
+            default:
+                sb.AppendLine($"{prefix}{ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    sb.AppendLine($"{prefix}---> [{ex.InnerException.GetType().Name}]");
+                    FormatExceptionChain(ex.InnerException, sb, indent + 1);
+                }
+                else
+                {
+                    sb.AppendLine();
+                    sb.AppendLine(ex.StackTrace);
+                }
+                break;
+        }
     }
 
     public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n')
