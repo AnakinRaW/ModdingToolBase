@@ -151,7 +151,6 @@ public static class ConsoleUtilities
                 break;
 
             default:
-                sb.AppendLine($"{prefix}{ex.Message}");
                 if (ex.InnerException != null)
                 {
                     sb.AppendLine($"{prefix}---> [{ex.InnerException.GetType().Name}]");
@@ -159,7 +158,6 @@ public static class ConsoleUtilities
                 }
                 else
                 {
-                    sb.AppendLine();
                     sb.AppendLine(ex.StackTrace);
                 }
                 break;
