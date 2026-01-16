@@ -74,8 +74,6 @@ internal class ApplicationUpdater(UpdateCatalog updateCatalog, IServiceProvider 
                 throw new InvalidOperationException("Nothing to update!");
 
             using var updatePipeline = new UpdatePipeline(_updateCatalog, this, _serviceProvider);
-            await updatePipeline.PrepareAsync().ConfigureAwait(false);
-            // TODO: PreChecks
             try
             {
                 _logger?.LogTrace("Updating...\r\nCatalog: {UpdateCatalog}", _updateCatalog);

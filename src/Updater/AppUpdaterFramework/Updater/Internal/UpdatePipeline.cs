@@ -104,6 +104,9 @@ internal sealed class UpdatePipeline : Pipeline
             }
         }
 
+        // TODO: Add PreChecks as a separate step to a runner.
+        // That is if we have downloads, to the download runner, otherwise to the install runner.
+
         foreach (var updateItem in installs.Concat(removes))
         {
             var installedComponent = updateItem.InstalledComponent;

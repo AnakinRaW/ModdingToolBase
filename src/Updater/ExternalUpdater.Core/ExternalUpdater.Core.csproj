@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.3-g989307af40" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.5-g3f61908ec7" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="3.0.0" />
 		<PackageReference Include="Testably.Abstractions" Version="10.0.0" />
