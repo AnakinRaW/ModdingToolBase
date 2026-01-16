@@ -11,18 +11,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="12.3.9" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="12.3.9" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="12.3.9" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="13.0.3-g989307af40" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="13.0.3-g989307af40" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="13.0.3-g989307af40" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
 		<PackageReference Include="Semver" Version="3.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Mono.Cecil" Version="0.11.6" PrivateAssets="build;compile" />
-		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="4.2.1" PrivateAssets="build;compile" />
+		<PackageReference Include="Vanara.PInvoke.RstrtMgr" Version="5.0.0" PrivateAssets="build;compile" />
 		<PackageReference Include="PolySharp" Version="1.15.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

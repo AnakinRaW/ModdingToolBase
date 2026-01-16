@@ -11,12 +11,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.9" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.3-g989307af40" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="Semver" Version="3.0.0" />
 		<PackageReference Include="Testably.Abstractions" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
-		<PackageReference Include="System.Text.Json" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
+		<PackageReference Include="System.Text.Json" Version="10.0.2" />
 		<PackageReference Include="PolySharp" Version="1.15.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

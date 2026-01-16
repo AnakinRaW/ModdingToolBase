@@ -18,8 +18,8 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
     private readonly List<InstallableComponent> _downloadsToClean = [];
     private readonly List<InstallableComponent> _backupsToClean = [];
     private readonly IFileRepository _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetRepository();
-
-    protected override Task<bool> PrepareCoreAsync()
+    
+    protected override Task PrepareCoreAsync(CancellationToken token)
     {
         _backupsToClean.Clear();
         _downloadsToClean.Clear();
@@ -29,9 +29,9 @@ internal class UpdateCleanPipeline(IServiceProvider serviceProvider) : Pipeline(
         return Task.FromResult(true);
     }
 
-    protected override Task RunCoreAsync(CancellationToken token)
+    protected override Task ExecuteAsync(CancellationToken token)
     {
-        if (!_downloadsToClean.Any() && !_backupsToClean.Any())
+        if (_downloadsToClean.Count == 0 && _backupsToClean.Count == 0)
         {
             Logger?.LogTrace("No files to clean up");
             return Task.CompletedTask;

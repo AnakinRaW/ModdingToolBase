@@ -31,7 +31,7 @@ internal sealed class UpdatePipeline : Pipeline
     private readonly List<DownloadStep> _componentsToDownload = [];
     private readonly List<InstallStep> _installsOrRemoves = [];
 
-    private readonly ParallelStepRunner _downloadsRunner;
+    private readonly AsyncStepRunner _downloadsRunner;
     private readonly SequentialStepRunner _installsRunner;
     private readonly IRestartManager _restartManager;
 
@@ -53,29 +53,12 @@ internal sealed class UpdatePipeline : Pipeline
         _itemsToProcess = [..updateCatalog.UpdateItems];
 
         _installsRunner = new SequentialStepRunner(ServiceProvider);
-        _downloadsRunner = new ParallelStepRunner(2, ServiceProvider);
+        _downloadsRunner = new AsyncStepRunner(2, ServiceProvider);
 
         RegisterEvents();
     }
 
-    private void RegisterEvents()
-    {
-        _downloadsRunner.Error += OnError;
-        _installsRunner.Error += OnError;
-        _restartManager.RestartRequired += OnRestartRequired;
-    }
-
-    private void UnregisterEvents()
-    {
-        _downloadsRunner.Error -= OnError;
-        _installsRunner.Error -= OnError;
-        _restartManager.RestartRequired -= OnRestartRequired;
-
-        foreach (var downloadStep in _componentsToDownload) 
-            downloadStep.Canceled -= DownloadCancelled;
-    }
-
-    protected override Task<bool> PrepareCoreAsync()
+    protected override Task PrepareCoreAsync(CancellationToken token)
     { 
         if (_itemsToProcess.Count == 0)
         {
@@ -131,7 +114,6 @@ internal sealed class UpdatePipeline : Pipeline
                     throw new InvalidOperationException($"OriginInfo is missing for '{updateComponent}'");
 
                 var downloadTask = new DownloadStep(updateComponent, configuration, downloadManager, _installedProduct.Variables, ServiceProvider);
-                downloadTask.Canceled += DownloadCancelled;
                 var installTask = new InstallStep(updateComponent, installedComponent, downloadTask, configuration, _installedProduct.Variables, ServiceProvider);
 
                 _installsOrRemoves.Add(installTask);
@@ -158,12 +140,7 @@ internal sealed class UpdatePipeline : Pipeline
         return Task.FromResult(true);
     }
 
-    private void DownloadCancelled(object sender, EventArgs e)
-    {
-        Cancel();
-    }
-
-    protected override async Task RunCoreAsync(CancellationToken token)
+    protected override async Task ExecuteAsync(CancellationToken token)
     {
         _progressReporter.Report(0.0, "Starting update...", ProgressTypes.Install, new ComponentProgressInfo());
 
@@ -223,6 +200,34 @@ internal sealed class UpdatePipeline : Pipeline
         _installProgress?.Dispose();
         _downloadProgress = null;
         _installProgress = null;
+    }
+
+    private void RegisterEvents()
+    {
+        _downloadsRunner.Error += OnError;
+        _installsRunner.Error += OnError;
+        _restartManager.RestartRequired += OnRestartRequired;
+    }
+
+    private void UnregisterEvents()
+    {
+        _downloadsRunner.Error -= OnError;
+        _installsRunner.Error -= OnError;
+        _restartManager.RestartRequired -= OnRestartRequired;
+    }
+
+    private void OnError(object sender, StepRunnerErrorEventArgs e)
+    {
+        var isCancel = IsCancel(e);
+        Cancelled |= isCancel;
+        Failed |= !isCancel;
+        if (isCancel)
+            Cancel();
+    }
+
+    private static bool IsCancel(StepRunnerErrorEventArgs e)
+    {
+        return e.Cancel || e.Exception.IsExceptionType<OperationCanceledException>();
     }
 
     private void OnRestartRequired(object? sender, EventArgs e)

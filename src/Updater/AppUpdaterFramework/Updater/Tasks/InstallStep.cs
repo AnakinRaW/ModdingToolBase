@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.Installer;
@@ -83,15 +84,18 @@ internal class InstallStep : PipelineStep, IComponentStep
         return $"{_action}ing \"{Component.GetUniqueId()}\"";
     }
 
-    protected override void RunCore(CancellationToken token)
+    protected override async Task RunCoreAsync(CancellationToken token)
     {
-        _download?.Wait();
-        if (_download?.Error != null)
+        if (_download is not null)
         {
-            Logger?.LogWarning("Skipping {UpdateAction} of '{Id}' since downloading it failed.", _action, Component.GetUniqueId());
-            return;
+            await _download;
+            if (_download.Error != null)
+            {
+                Logger?.LogWarning("Skipping {UpdateAction} of '{Id}' since downloading it failed.", _action, Component.GetUniqueId());
+                return;
+            }
         }
-
+        
         var installer = _installerFactory.CreateInstaller(Component);
         installer.Progress += OnInstallerProgress;
 

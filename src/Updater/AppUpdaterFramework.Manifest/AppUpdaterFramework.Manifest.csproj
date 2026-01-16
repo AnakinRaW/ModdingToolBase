@@ -11,8 +11,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.9" />
-		<PackageReference Include="System.Text.Json" Version="10.0.1" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.3-g989307af40" />
+		<PackageReference Include="System.Text.Json" Version="10.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>

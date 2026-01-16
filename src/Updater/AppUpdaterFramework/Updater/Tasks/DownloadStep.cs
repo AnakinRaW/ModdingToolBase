@@ -27,7 +27,7 @@ internal class DownloadStep(
     IDownloadManager downloadManager,
     IReadOnlyDictionary<string, string> productVariables,
     IServiceProvider serviceProvider)
-    : SynchronizedStep(serviceProvider), IComponentStep
+    : PipelineStep(serviceProvider), IComponentStep
 {
     private readonly UpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
     private readonly IDownloadRepositoryFactory _downloadRepositoryFactory = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>();
@@ -51,7 +51,7 @@ internal class DownloadStep(
         return $"Downloading component '{Component.GetUniqueId()}' form \"{Uri}\"";
     }
 
-    protected override void RunSynchronized(CancellationToken token)
+    protected override async Task RunCoreAsync(CancellationToken token)
     {
         if (token.IsCancellationRequested)
             return;
@@ -61,7 +61,7 @@ internal class DownloadStep(
             
             Exception? lastException = null;
             if (!token.IsCancellationRequested)
-                DownloadAction(token, out lastException);
+                lastException = await DownloadActionAsync(token).ConfigureAwait(false);
 
             token.ThrowIfCancellationRequested();
 
@@ -83,9 +83,9 @@ internal class DownloadStep(
         Progress?.Invoke(this, new ProgressEventArgs<ComponentProgressInfo>(progress, "_"));
     }
 
-    private void DownloadAction(CancellationToken token, out Exception? lastException)
+    private async Task<Exception?> DownloadActionAsync(CancellationToken token)
     {
-        lastException = null;
+        Exception? lastException = null;
 
         try
         {
@@ -101,7 +101,7 @@ internal class DownloadStep(
 
                 try
                 {
-                    DownloadAndVerifyAsync(DownloadPath, token).Wait(CancellationToken.None);
+                    await DownloadAndVerifyAsync(DownloadPath, token).ConfigureAwait(false);
                     DownloadPath.Refresh();
                     if (!DownloadPath.Exists)
                     {
@@ -110,9 +110,8 @@ internal class DownloadStep(
                         Logger?.LogWarning(message);
                         throw new FileNotFoundException(message, DownloadPath.FullName);
                     }
-
+                    
                     lastException = null;
-
                     break;
                 }
                 catch (OperationCanceledException ex)
@@ -148,6 +147,8 @@ internal class DownloadStep(
             var restartManager = Services.GetRequiredService<IRestartManager>();
             restartManager.SetRestart(RestartType.ApplicationElevation);
         }
+
+        return lastException;
     }
 
     private async Task DownloadAndVerifyAsync(IFileInfo destination, CancellationToken token)
@@ -161,7 +162,8 @@ internal class DownloadStep(
             using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 #endif
             await downloadManager.DownloadAsync(Uri, file, OnProgress, null,
-                new HashDownloadValidator(integrityInformation.Hash, integrityInformation.HashType, Services), token);
+                new HashDownloadValidator(integrityInformation.Hash, integrityInformation.HashType, Services), token)
+                .ConfigureAwait(false);
 
         }
         catch (OperationCanceledException)
