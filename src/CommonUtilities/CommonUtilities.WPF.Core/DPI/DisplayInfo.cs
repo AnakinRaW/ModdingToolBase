@@ -5,7 +5,7 @@ using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.DPI;
 
-public class DisplayInfo : IComparable<DisplayInfo>, IEquatable<DisplayInfo>
+public sealed class DisplayInfo : IComparable<DisplayInfo>, IEquatable<DisplayInfo>
 {
     public double DpiX { get; }
 
@@ -15,7 +15,7 @@ public class DisplayInfo : IComparable<DisplayInfo>, IEquatable<DisplayInfo>
 
     public bool IsPrimary => MonitorInfo.IsPrimary();
 
-    public IntPtr MonitorHandle { get; }
+    public HMONITOR MonitorHandle { get; }
 
     public Size Size => MonitorInfo.rcMonitor.ToSize();
 
@@ -27,7 +27,7 @@ public class DisplayInfo : IComparable<DisplayInfo>, IEquatable<DisplayInfo>
 
     private PolarVector Vector { get; }
 
-    internal DisplayInfo(IntPtr hMonitor, User32.MONITORINFO monitorInfo)
+    internal DisplayInfo(HMONITOR hMonitor, User32.MONITORINFO monitorInfo)
     {
         MonitorHandle = hMonitor;
         MonitorInfo = monitorInfo;

@@ -18,12 +18,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="12.3.9" />
-		<PackageReference Include="System.Collections.Immutable" Version="10.0.1" PrivateAssets="all" />
-		<PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.2.1" PrivateAssets="all" />
-		<PackageReference Include="Vanara.PInvoke.SHCore" Version="4.2.1" PrivateAssets="all" />
-		<PackageReference Include="Vanara.PInvoke.Shell32" Version="4.2.1" PrivateAssets="all" />
-		<PackageReference Include="Vanara.PInvoke.User32" Version="4.2.1" PrivateAssets="all" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.5-g3f61908ec7" />
+		<PackageReference Include="System.Collections.Immutable" Version="10.0.2" PrivateAssets="all" />
+		<PackageReference Include="Vanara.PInvoke.Gdi32" Version="5.0.0" PrivateAssets="all" />
+		<PackageReference Include="Vanara.PInvoke.SHCore" Version="5.0.0" PrivateAssets="all" />
+		<PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.0" PrivateAssets="all" />
+		<PackageReference Include="Vanara.PInvoke.User32" Version="5.0.0" PrivateAssets="all" />
 	</ItemGroup>
 	
 </Project>

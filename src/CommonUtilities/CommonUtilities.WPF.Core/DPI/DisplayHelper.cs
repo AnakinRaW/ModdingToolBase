@@ -298,7 +298,7 @@ public static class DisplayHelper
                 {
                     var monitorInfo = new User32.MONITORINFO();
                     GetMonitorInfo(hMonitor, ref monitorInfo);
-                    var displayInfo = new DisplayInfo(hMonitor, monitorInfo);
+                    var displayInfo = new DisplayInfo(hMonitor.DangerousGetHandle(), monitorInfo);
                     DisplaysInternal.Add(displayInfo);
                     return true;
                 }, IntPtr.Zero);

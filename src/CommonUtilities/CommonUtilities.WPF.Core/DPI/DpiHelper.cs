@@ -183,9 +183,9 @@ public static class DpiHelper
         return new DpiScope(awareness);
     }
 
-    public static void GetMonitorDpi(this IntPtr hmonitor, out double dpiX, out double dpiY)
+    public static void GetMonitorDpi(this HMONITOR hmonitor, out double dpiX, out double dpiY)
     {
-        ValidateIntPtr(hmonitor, nameof(hmonitor));
+        ValidateIntPtr(hmonitor.DangerousGetHandle(), nameof(hmonitor));
         if (IsPerMonitorAwarenessEnabled)
         {
             var dpi = GetDpiForMonitor(hmonitor);
@@ -215,7 +215,7 @@ public static class DpiHelper
         return hwnd.GetWindowDpi() / 96.0;
     }
 
-    private static Dpi GetDpiForMonitor(IntPtr hmonitor)
+    private static Dpi GetDpiForMonitor(HMONITOR hmonitor)
     {
         var dpiForMonitor = new Dpi
         {
