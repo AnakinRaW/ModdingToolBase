@@ -77,7 +77,7 @@ public abstract class SelfUpdateableAppLifecycle
 
         // Initialization of the app must happen after completing the self-update process.
         logger?.LogInformation("Initializing application.");
-        var initResult = await InitializeAppAsync(args);
+        var initResult = await InitializeAppAsync(args, _bootstrapperServices);
         if (initResult != 0)
         {
             logger?.LogWarning("Initialization was not successful, error code: {Result}. Terminating application.", initResult);
@@ -127,7 +127,7 @@ public abstract class SelfUpdateableAppLifecycle
     {
     }
     
-    protected virtual Task<int> InitializeAppAsync(IReadOnlyList<string> args)
+    protected virtual Task<int> InitializeAppAsync(IReadOnlyList<string> args, IServiceProvider bootstrapServices)
     {
         if (!FileSystem.Directory.Exists(ApplicationEnvironment.ApplicationLocalPath)) 
             ApplicationEnvironment.ApplicationLocalDirectory.Create();
