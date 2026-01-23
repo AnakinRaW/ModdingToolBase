@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -44,28 +45,73 @@ public static class ConsoleUtilities
         return new HorizontalConsoleFrame(lineChar, length, startWithNewLine, newLineAtEnd);
     }
 
-    private class InHorizontalLineBlock : IDisposable
+    public static void PrintAsTable(ICollection<(string key, object value)> data, int valueColumnWidth = 60)
     {
-        private readonly char _lineChar;
-        private readonly int _length;
-        private readonly bool _nlEnd;
+        if (data.Count == 0)
+            return;
 
-        public InHorizontalLineBlock(char lineChar = '─', int length = 20, bool nlStart = false, bool nlEnd = false)
+        var keyWidth = data.Max(x => x.key?.Length ?? 0) + 2;
+
+        foreach (var (key, value) in data)
         {
-            _lineChar = lineChar;
-            _length = length;
-            _nlEnd = nlEnd;
-            if (nlStart)
-                Console.WriteLine();
-            WriteHorizontalLine(lineChar, length);
+            var valueStr = value?.ToString() ?? string.Empty;
+            var wrappedLines = WrapText(valueStr, valueColumnWidth);
+            Console.WriteLine($"{key.PadRight(keyWidth)}{wrappedLines[0]}");
+            for (var i = 1; i < wrappedLines.Count; i++)
+                Console.WriteLine($"{new string(' ', keyWidth)}{wrappedLines[i]}");
+        }
+    }
+
+    private static List<string> WrapText(string text, int maxWidth)
+    {
+        var lines = new List<string>();
+
+        if (string.IsNullOrEmpty(text))
+        {
+            lines.Add(string.Empty);
+            return lines;
         }
 
-        public void Dispose()
+        var words = text.Split([' '], StringSplitOptions.None);
+        var currentLine = new StringBuilder();
+
+        foreach (var word in words)
         {
-            WriteHorizontalLine(_lineChar, _length);
-            if (_nlEnd)
-                Console.WriteLine();
+            var proposedLength = currentLine.Length + (currentLine.Length > 0 ? 1 : 0) + word.Length;
+
+            if (proposedLength > maxWidth && currentLine.Length > 0)
+            {
+                lines.Add(currentLine.ToString());
+                currentLine.Clear();
+            }
+
+            if (word.Length > maxWidth)
+            {
+                var remaining = word.Length;
+                var offset = 0;
+                while (remaining > 0)
+                {
+                    var chunkSize = Math.Min(maxWidth, remaining);
+                    lines.Add(word.Substring(offset, chunkSize));
+                    offset += chunkSize;
+                    remaining -= chunkSize;
+                }
+            }
+            else
+            {
+                if (currentLine.Length > 0)
+                    currentLine.Append(' ');
+                currentLine.Append(word);
+            }
         }
+
+        if (currentLine.Length > 0)
+            lines.Add(currentLine.ToString());
+
+        if (lines.Count == 0)
+            lines.Add(string.Empty);
+
+        return lines;
     }
 
     public static void WriteApplicationFatalError(string appName, string? errorMessage = null, string? detailedError = null)
@@ -245,5 +291,29 @@ public static class ConsoleUtilities
         }
 
         return input;
+    }
+
+    private class InHorizontalLineBlock : IDisposable
+    {
+        private readonly char _lineChar;
+        private readonly int _length;
+        private readonly bool _nlEnd;
+
+        public InHorizontalLineBlock(char lineChar = '─', int length = 20, bool nlStart = false, bool nlEnd = false)
+        {
+            _lineChar = lineChar;
+            _length = length;
+            _nlEnd = nlEnd;
+            if (nlStart)
+                Console.WriteLine();
+            WriteHorizontalLine(lineChar, length);
+        }
+
+        public void Dispose()
+        {
+            WriteHorizontalLine(_lineChar, _length);
+            if (_nlEnd)
+                Console.WriteLine();
+        }
     }
 }
