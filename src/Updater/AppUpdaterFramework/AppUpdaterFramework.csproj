@@ -15,8 +15,8 @@
 		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="13.0.1" />
 		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="13.0.1" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
 		<PackageReference Include="Semver" Version="3.0.0" />
 	</ItemGroup>
 
