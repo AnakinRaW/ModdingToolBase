@@ -5,7 +5,7 @@ using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AnakinRaW.ApplicationManifestCreator;
+namespace AnakinRaW.ApplicationManifestSigner;
 
 /// <summary>
 /// Signs a manifest with the supplied <see cref="SigningKey"/> and returns a copy with the

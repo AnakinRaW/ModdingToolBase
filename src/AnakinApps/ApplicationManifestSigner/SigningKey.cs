@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace AnakinRaW.ApplicationManifestCreator;
+namespace AnakinRaW.ApplicationManifestSigner;
 
 /// <summary>
 /// An ECDsa P-256 signing key paired with the certificate that holds its public half.

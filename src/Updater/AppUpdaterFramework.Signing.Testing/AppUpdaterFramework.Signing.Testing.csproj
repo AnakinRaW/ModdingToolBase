@@ -21,6 +21,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\AppUpdaterFramework\AppUpdaterFramework.csproj" />
+		<ProjectReference Include="..\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
 	</ItemGroup>
 
 </Project>

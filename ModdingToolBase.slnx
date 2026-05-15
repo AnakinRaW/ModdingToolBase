@@ -7,6 +7,7 @@
     </Project>
     <Project Path="src/AnakinApps/ApplicationBase/ApplicationBase.csproj" />
     <Project Path="src/AnakinApps/ApplicationManifestCreator/ApplicationManifestCreator.csproj" />
+    <Project Path="src/AnakinApps/ApplicationManifestSigner/ApplicationManifestSigner.csproj" />
     <Project Path="src/AnakinApps/FtpUploader/FtpUploader.csproj" />
   </Folder>
   <Folder Name="/CommonUtilities/">
@@ -28,7 +29,7 @@
     <Project Path="src/Updater/ExternalUpdater.Core/ExternalUpdater.Core.csproj" />
   </Folder>
   <Folder Name="/Test/">
-    <Project Path="test/AnakinApps/ApplicationManifestCreator.Test/ApplicationManifestCreator.Test.csproj" />
+    <Project Path="test/AnakinApps/ApplicationManifestSigner.Test/ApplicationManifestSigner.Test.csproj" />
     <Project Path="test/Updater/AppUpdaterFramework.Manifest.Test/AppUpdaterFramework.Manifest.Test.csproj" />
     <Project Path="test/Updater/AppUpdaterFramework.Test/AppUpdaterFramework.Test.csproj" />
   </Folder>

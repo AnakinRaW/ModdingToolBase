@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net10.0</TargetFrameworks>
-		<RootNamespace>AnakinRaW.ApplicationManifestCreator.Test</RootNamespace>
+		<RootNamespace>AnakinRaW.ApplicationManifestSigner.Test</RootNamespace>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 
@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\src\AnakinApps\ApplicationManifestCreator\ApplicationManifestCreator.csproj" />
+		<ProjectReference Include="..\..\..\src\AnakinApps\ApplicationManifestSigner\ApplicationManifestSigner.csproj" />
 		<ProjectReference Include="..\..\..\src\Updater\AppUpdaterFramework.Manifest\AppUpdaterFramework.Manifest.csproj" />
 		<ProjectReference Include="..\..\..\src\Updater\AppUpdaterFramework.Signing.Testing\AppUpdaterFramework.Signing.Testing.csproj" />
 	</ItemGroup>

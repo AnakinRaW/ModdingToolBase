@@ -1,43 +1,18 @@
 using System;
 using System.IO;
-using System.IO.Abstractions;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using AnakinRaW.CommonUtilities.Hashing;
-using AnakinRaW.CommonUtilities.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Testably.Abstractions;
 using Xunit;
 
 namespace AnakinRaW.AppUpdaterFramework.Security.Testing;
 
-/// <summary>
-/// Abstract xunit test suite for <see cref="ManifestVerifierBase"/> implementations.
-/// </summary>
-/// <remarks>
-/// Subclass this and implement the four hooks (verifier factory + the three stream factories) to
-/// get a baseline of verifier tests for free: null-stream guard, missing-signature handling,
-/// untrusted-cert handling, tampered-content handling, and a full sign-verify round-trip across
-/// every <see cref="SignatureAlgorithm"/>.
-/// </remarks>
-public abstract class ManifestVerifierTestSuiteBase : TestBaseWithServiceProvider
+public abstract class ManifestVerifierTestSuiteBase : TestBaseForSigning
 {
     protected IManifestVerifier Verifier { get; }
-    protected ICertificateStore TrustStore { get; }
 
     protected ManifestVerifierTestSuiteBase()
     {
-        TrustStore = ServiceProvider.GetRequiredService<ICertificateStore>();
         Verifier = CreateVerifier(ServiceProvider);
-    }
-
-    protected override void SetupServices(IServiceCollection serviceCollection)
-    {
-        base.SetupServices(serviceCollection);
-        serviceCollection.AddSingleton<IFileSystem>(new RealFileSystem());
-        serviceCollection.AddSingleton<IHashingService>(p => new HashingService(p));
-        serviceCollection.AddSingleton(SigningConfiguration.Default);
-        serviceCollection.AddSingleton<ICertificateStore>(p => new CertificateStore(p));
     }
 
     /// <summary>Creates the verifier instance under test.</summary>
@@ -56,12 +31,32 @@ public abstract class ManifestVerifierTestSuiteBase : TestBaseWithServiceProvide
         SignatureAlgorithm algorithm);
 
     /// <summary>
-    /// Produces a stream containing a manifest signed by <paramref name="signingKey"/> but with
-    /// content modified after signing so the signature no longer verifies.
+    /// Produces a stream containing a manifest signed with the given key, then with the signed
+    /// content modified so the recomputed digest no longer matches.
     /// </summary>
-    protected abstract Stream CreateTamperedSignedManifestStream(
+    protected abstract Stream CreateTamperedContentStream(
         ECDsa signingKey,
         X509Certificate2 signingCert,
+        SignatureAlgorithm algorithm);
+
+    /// <summary>
+    /// Produces a stream containing a manifest with valid content and a valid certificate, but
+    /// with the embedded signature value bytes flipped so signature verification fails.
+    /// </summary>
+    protected abstract Stream CreateCorruptedSignatureBytesStream(
+        ECDsa signingKey,
+        X509Certificate2 signingCert,
+        SignatureAlgorithm algorithm);
+
+    /// <summary>
+    /// Produces a stream containing a manifest signed by <paramref name="signingKey"/>, then with
+    /// the embedded certificate replaced by <paramref name="substituteCert"/>. The signature still
+    /// matches the original signing key, but the manifest now claims to be signed by the substitute.
+    /// </summary>
+    protected abstract Stream CreateCertSubstitutedStream(
+        ECDsa signingKey,
+        X509Certificate2 signingCert,
+        X509Certificate2 substituteCert,
         SignatureAlgorithm algorithm);
 
     [Fact]
@@ -107,14 +102,47 @@ public abstract class ManifestVerifierTestSuiteBase : TestBaseWithServiceProvide
     }
 
     [Fact]
-    public void Verify_TamperedSignedManifest_ReturnsSignatureInvalid()
+    public void Verify_TamperedContent_ReturnsSignatureInvalid()
     {
         var (key, cert) = TestCertificates.CreateEcdsaSigningPair();
         using (key)
         using (cert)
-        using (var stream = CreateTamperedSignedManifestStream(key, cert, SignatureAlgorithm.ES256))
+        using (var stream = CreateTamperedContentStream(key, cert, SignatureAlgorithm.ES256))
         {
             TrustStore.Add(cert);
+            Assert.Equal(VerificationResult.SignatureInvalid, Verifier.Verify(stream));
+        }
+    }
+
+    [Fact]
+    public void Verify_CorruptedSignatureBytes_ReturnsSignatureInvalid()
+    {
+        var (key, cert) = TestCertificates.CreateEcdsaSigningPair();
+        using (key)
+        using (cert)
+        using (var stream = CreateCorruptedSignatureBytesStream(key, cert, SignatureAlgorithm.ES256))
+        {
+            TrustStore.Add(cert);
+            Assert.Equal(VerificationResult.SignatureInvalid, Verifier.Verify(stream));
+        }
+    }
+
+    [Fact]
+    public void Verify_SubstitutedTrustedCert_ReturnsSignatureInvalid()
+    {
+        // Both the original signing cert AND the substitute are in the trust store. The verifier
+        // should still reject because the signature was made with the original key but the manifest
+        // now embeds the substitute cert — VerifyHash against the substitute's public key fails.
+        var (signKey, signCert) = TestCertificates.CreateEcdsaSigningPair();
+        var (subKey, subCert) = TestCertificates.CreateEcdsaSigningPair();
+        using (signKey)
+        using (signCert)
+        using (subKey)
+        using (subCert)
+        using (var stream = CreateCertSubstitutedStream(signKey, signCert, subCert, SignatureAlgorithm.ES256))
+        {
+            TrustStore.Add(signCert);
+            TrustStore.Add(subCert);
             Assert.Equal(VerificationResult.SignatureInvalid, Verifier.Verify(stream));
         }
     }
