@@ -61,11 +61,9 @@ public class JsonManifestVerifierSuite : ManifestVerifierTestSuiteBase
 
     private ApplicationManifest SignWith(ApplicationManifest manifest, ECDsa key, X509Certificate2 cert, SignatureAlgorithm algorithm)
     {
-        var sp = new ServiceCollection()
-            .AddSingleton(ServiceProvider.GetRequiredService<IHashingService>())
-            .AddSingleton(new SigningConfiguration { SignatureAlgorithm = algorithm })
-            .BuildServiceProvider();
-        var signer = new ManifestSigner(sp);
+        var signer = new ManifestSigner(
+            ServiceProvider.GetRequiredService<IHashingService>(),
+            new SigningConfiguration { SignatureAlgorithm = algorithm });
         // Wrap without disposing: base suite owns the key/cert lifetime and still uses the cert
         // after this method returns.
         var signingKey = new SigningKey(key, cert);

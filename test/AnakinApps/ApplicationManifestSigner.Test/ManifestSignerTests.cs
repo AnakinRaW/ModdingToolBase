@@ -1,10 +1,8 @@
 using System;
-using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.AppUpdaterFramework.Security.Testing;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
-using Testably.Abstractions;
 using Xunit;
 
 namespace AnakinRaW.ApplicationManifestSigner.Test;
@@ -19,7 +17,7 @@ public class ManifestSignerTests : TestBaseForSigning
 
     public ManifestSignerTests()
     {
-        _signer = new ManifestSigner(ServiceProvider);
+        _signer = new ManifestSigner(ServiceProvider.GetRequiredService<IHashingService>(), SigningConfig);
     }
 
     [Fact]
@@ -56,12 +54,8 @@ public class ManifestSignerTests : TestBaseForSigning
     [Fact]
     public void Sign_WritesConfiguredAlgorithmIntoManifest_ES384()
     {
-        var sp = new ServiceCollection()
-            .AddSingleton<IFileSystem>(new RealFileSystem())
-            .AddSingleton<IHashingService>(p => new HashingService(p))
-            .AddSingleton(new SigningConfiguration { SignatureAlgorithm = SignatureAlgorithm.ES384 })
-            .BuildServiceProvider();
-        var signer = new ManifestSigner(sp);
+        var hashing = ServiceProvider.GetRequiredService<IHashingService>();
+        var signer = new ManifestSigner(hashing, new SigningConfiguration { SignatureAlgorithm = SignatureAlgorithm.ES384 });
 
         using var key = TestCertificateFactory.CreateSigningKey();
         var signed = signer.Sign(TestManifests.CreateSample(), key);

@@ -31,7 +31,9 @@ internal static class Program
             var manifest = await ReadManifestAsync(options.ManifestPath);
             using var key = SigningKey.LoadFromPfx(options.PfxPath, options.PfxPassword);
 
-            var signer = new ManifestSigner(services);
+            var signer = new ManifestSigner(
+                services.GetRequiredService<IHashingService>(),
+                new SigningConfiguration());
             var signed = signer.Sign(manifest, key);
 
             await WriteManifestAsync(signed, options.OutputPath ?? options.ManifestPath);
@@ -64,7 +66,6 @@ internal static class Program
         var services = new ServiceCollection();
         services.AddSingleton<IFileSystem>(new RealFileSystem());
         services.AddSingleton<IHashingService>(sp => new HashingService(sp));
-        services.AddSingleton(SigningConfiguration.Default);
         services.AddLogging(b => b.AddConsole());
         return services.BuildServiceProvider();
     }

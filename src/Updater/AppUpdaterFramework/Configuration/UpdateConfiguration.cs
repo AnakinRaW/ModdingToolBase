@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 
@@ -34,4 +35,9 @@ public class UpdateConfiguration
     public string? BackupLocation { get; init; }
 
     public UpdateRestartConfiguration RestartConfiguration { get; init; } = new();
+
+    /// <summary>
+    /// Signature algorithm and enforcement policy used by the manifest signer and verifier.
+    /// </summary>
+    public SigningConfiguration Signing { get; init; } = new();
 }

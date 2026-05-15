@@ -27,9 +27,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
-        serviceCollection.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
-        serviceCollection.TryAddSingleton(SigningConfiguration.Default);
-
+        
         // Default implementations
         serviceCollection.TryAddSingleton<IUpdateService>(sp => new UpdateService(sp));
         serviceCollection.TryAddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
@@ -38,5 +36,7 @@ public static class LibraryInitialization
         serviceCollection.TryAddSingleton<IExternalUpdaterLauncher>(sp => new ExternalUpdaterLauncher(sp));
 
         serviceCollection.TryAddSingleton<ILockedFileInteractionHandler>(sp => new DefaultLockedFileInteractionHandler(sp));
+
+        serviceCollection.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
     }
 }
