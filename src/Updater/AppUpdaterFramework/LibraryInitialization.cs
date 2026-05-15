@@ -4,6 +4,7 @@ using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Installer;
 using AnakinRaW.AppUpdaterFramework.Restart;
+using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.AppUpdaterFramework.Storage;
 using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.AppUpdaterFramework.Utilities;
@@ -26,6 +27,8 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
+        serviceCollection.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
+        serviceCollection.TryAddSingleton(SigningConfiguration.Default);
 
         // Default implementations
         serviceCollection.TryAddSingleton<IUpdateService>(sp => new UpdateService(sp));

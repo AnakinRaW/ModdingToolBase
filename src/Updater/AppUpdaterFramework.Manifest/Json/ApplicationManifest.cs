@@ -30,7 +30,14 @@ public record ApplicationManifest(
     [property: JsonPropertyName("version")] string? Version,
     [property: JsonPropertyName("branch")] string? Branch,
     [property: JsonPropertyName("components")] IReadOnlyList<AppComponent> Components
-);
+)
+{
+    /// <summary>
+    /// Optional embedded signature block. Set by the manifest signer; null on unsigned manifests.
+    /// </summary>
+    [JsonPropertyName("signature")]
+    public ManifestSignature? Signature { get; init; }
+}
 
 public record AppComponent(
     string Id,

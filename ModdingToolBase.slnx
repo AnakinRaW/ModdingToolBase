@@ -19,11 +19,17 @@
   <Folder Name="/Updater/">
     <Project Path="src/Updater/AppUpdaterFramework.Attributes/AppUpdaterFramework.Attributes.csproj" />
     <Project Path="src/Updater/AppUpdaterFramework.Manifest/AppUpdaterFramework.Manifest.csproj" />
+    <Project Path="src/Updater/AppUpdaterFramework.Signing.Testing/AppUpdaterFramework.Signing.Testing.csproj" />
     <Project Path="src/Updater/AppUpdaterFramework.WPF/AppUpdaterFramework.WPF.csproj">
       <Build Solution="Debug|*" Project="false" />
     </Project>
     <Project Path="src/Updater/AppUpdaterFramework/AppUpdaterFramework.csproj" />
     <Project Path="src/Updater/ExternalUpdater.App/ExternalUpdater.App.csproj" />
     <Project Path="src/Updater/ExternalUpdater.Core/ExternalUpdater.Core.csproj" />
+  </Folder>
+  <Folder Name="/Test/">
+    <Project Path="test/AnakinApps/ApplicationManifestCreator.Test/ApplicationManifestCreator.Test.csproj" />
+    <Project Path="test/Updater/AppUpdaterFramework.Manifest.Test/AppUpdaterFramework.Manifest.Test.csproj" />
+    <Project Path="test/Updater/AppUpdaterFramework.Test/AppUpdaterFramework.Test.csproj" />
   </Folder>
 </Solution>

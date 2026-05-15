@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
 using AnakinRaW.AppUpdaterFramework.Json;
@@ -26,8 +25,6 @@ internal class ManifestCreator
 
     public ManifestCreatorOptions Options { get; }
 
-    private JsonSerializerOptions JsonOptions { get; }
-
     public ManifestCreator(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     {
         if (serviceProvider == null)
@@ -38,12 +35,6 @@ internal class ManifestCreator
         _branchManager = serviceProvider.GetRequiredService<AppManifestCreatorBranchManager>();
 
         Options = options ?? throw new ArgumentNullException(nameof(options));
-        JsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Converters = { new JsonStringEnumConverter() },
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
     }
 
     public async Task<int> Run()
@@ -164,6 +155,6 @@ internal class ManifestCreator
         _logger?.LogTrace("Writing manifest to '{FilePath}'", outputFile.FullName);
 
         await using var fileStream = outputFile.Create();
-        await JsonSerializer.SerializeAsync(fileStream, manifest, JsonOptions);
+        await JsonSerializer.SerializeAsync(fileStream, manifest, ManifestJsonOptions.Default);
     }
 }
