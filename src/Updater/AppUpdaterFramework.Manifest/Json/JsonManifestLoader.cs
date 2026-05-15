@@ -23,7 +23,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream, CancellationToken token = default)
+    public static ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream, CancellationToken token = default)
     {
         return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, token);
     }
