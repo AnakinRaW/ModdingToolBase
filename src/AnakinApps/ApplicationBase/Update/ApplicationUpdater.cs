@@ -56,19 +56,32 @@ public abstract class ApplicationUpdater
 
     public ProductBranch CreateBranch(string? branchName = null, string? manifestLocation = null)
     {
-        var isDefault = true;
-        
-        if (string.IsNullOrEmpty(branchName))
-            branchName = BranchManager.StableBranchName;
-        else
-            isDefault = ProductBranch.BranchNamEqualityComparer.Equals(branchName!, BranchManager.StableBranchName);
+        var (resolvedBranchName, isDefault) = ResolveBranchName(branchName);
 
         if (string.IsNullOrEmpty(manifestLocation))
-            return BranchManager.GetBranchFromName(branchName!);
+            return BranchManager.GetBranchFromName(resolvedBranchName);
 
-        var manifestUri = new Uri(manifestLocation, UriKind.Absolute);
+        var manifestUri = new Uri(manifestLocation!, UriKind.Absolute);
+        return new ProductBranch(resolvedBranchName, [manifestUri], isDefault);
+    }
 
-        return new ProductBranch(branchName!, [manifestUri], isDefault);
+    public ProductBranch CreateBranchFromServerUrl(string serverBaseUrl, string? branchName = null)
+    {
+        if (string.IsNullOrEmpty(serverBaseUrl))
+            throw new ArgumentException("Server base URL must not be empty.", nameof(serverBaseUrl));
+
+        var (resolvedBranchName, isDefault) = ResolveBranchName(branchName);
+
+        var serverUri = new Uri(serverBaseUrl, UriKind.Absolute);
+        var manifestUri = ApplicationBranchUtilities.BuildManifestUri(serverUri, resolvedBranchName);
+        return new ProductBranch(resolvedBranchName, [manifestUri], isDefault);
+    }
+
+    private (string Name, bool IsDefault) ResolveBranchName(string? branchName)
+    {
+        return string.IsNullOrEmpty(branchName) 
+            ? (BranchManager.StableBranchName, true) 
+            : (branchName, ProductBranch.BranchNamEqualityComparer.Equals(branchName!, BranchManager.StableBranchName));
     }
 
     public abstract Task<UpdateCatalog> CheckForUpdateAsync(ProductBranch branch, CancellationToken token = default);

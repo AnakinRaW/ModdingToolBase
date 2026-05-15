@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using Flurl;
@@ -83,7 +84,15 @@ public class ApplicationBranchUtilities
 
     public IEnumerable<Uri> BuildManifestUris(string branchName)
     {
-        return Mirrors.Select(mirrorUri => mirrorUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri());
+        return Mirrors.Select(mirrorUri => BuildManifestUri(mirrorUri, branchName));
+    }
+
+    public static Uri BuildManifestUri(Uri serverBaseUri, string branchName)
+    {
+        if (serverBaseUri == null)
+            throw new ArgumentNullException(nameof(serverBaseUri));
+        ThrowHelper.ThrowIfNullOrEmpty(branchName);
+        return serverBaseUri.AppendPathSegments(branchName, ApplicationConstants.ManifestFileName).ToUri();
     }
 
     internal static Url BuildComponentUri(Uri baseUri, string branchName, string fileName)

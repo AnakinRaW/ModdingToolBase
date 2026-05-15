@@ -11,11 +11,17 @@ public sealed class ApplicationUpdateOptions
         HelpText = "The branch that shall be used for updating. If no branch is specified the current branch will be taken")]
     public string? BranchName { get; init; }
 
-    [Option("updateManifestUrl", Default = null, Required = false, 
-        HelpText = "The base URL where to pull update information from. If no URL is specified the default URLs of the application will be used.")]
+    [Option("updateManifestUrl", SetName = "manifestSource", Default = null, Required = false,
+        HelpText = "The absolute URL of the update manifest. " +
+                   "Mutually exclusive with --updateServerUrl. If neither is specified the default URLs of the application will be used.")]
     public string? ManifestUrl { get; init; }
 
-    [Option("verboseUpdateLogging", Default = false, Required = false, 
+    [Option("updateServerUrl", SetName = "serverSource", Default = null, Required = false,
+        HelpText = "The base URL of a custom update server. The manifest URL is resolved as <updateServerUrl>/<branch>/manifest.json. " +
+                   "Mutually exclusive with --updateManifestUrl. If neither is specified the default URLs of the application will be used.")]
+    public string? ServerUrl { get; init; }
+
+    [Option("verboseUpdateLogging", Default = false, Required = false,
         HelpText = "Enables verbose logging of the update procedure")]
     public bool Verbose { get; init; }
 }
