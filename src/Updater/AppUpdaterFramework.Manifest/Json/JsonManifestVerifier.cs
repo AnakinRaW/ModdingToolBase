@@ -6,9 +6,9 @@ using AnakinRaW.AppUpdaterFramework.Security;
 namespace AnakinRaW.AppUpdaterFramework.Json;
 
 /// <summary>
-/// JSON-schema implementation of <see cref="IManifestVerifier"/>. Reads the manifest stream as
-/// <see cref="ApplicationManifest"/> and surfaces its signature block to <see cref="ManifestVerifierBase"/>
-/// for cryptographic verification.
+/// JSON-schema <see cref="ManifestVerifierBase"/> subclass. Reads the manifest stream as
+/// <see cref="ApplicationManifest"/> and surfaces its signature block to the base for cryptographic
+/// verification.
 /// </summary>
 public sealed class JsonManifestVerifier(IServiceProvider serviceProvider) : ManifestVerifierBase(serviceProvider)
 {

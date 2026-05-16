@@ -14,7 +14,7 @@ public class UpdateConfiguration
         BackupLocation = PathNormalizer.Normalize(Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators),
         BackupPolicy = BackupPolicy.NotRequired,
         ComponentDownloadConfiguration = DownloadManagerConfiguration.Default,
-        ManifestDownloadConfiguration = DownloadManagerConfiguration.Default,
+        ManifestDownloadConfiguration = ManifestDownloadConfiguration.Default,
         BranchDownloadConfiguration = DownloadManagerConfiguration.Default
     };
 
@@ -23,9 +23,9 @@ public class UpdateConfiguration
     public byte DownloadRetryCount { get; init; }
 
     public DownloadManagerConfiguration ComponentDownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
-    
-    public DownloadManagerConfiguration ManifestDownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
-    
+
+    public ManifestDownloadConfiguration ManifestDownloadConfiguration { get; init; } = ManifestDownloadConfiguration.Default;
+
     public DownloadManagerConfiguration BranchDownloadConfiguration { get; init; } = DownloadManagerConfiguration.Default;
     
     public bool ValidateInstallation { get; init; }
@@ -39,5 +39,5 @@ public class UpdateConfiguration
     /// <summary>
     /// Signature algorithm and enforcement policy used by the manifest signer and verifier.
     /// </summary>
-    public SigningConfiguration Signing { get; init; } = new();
+    public SigningConfiguration ManifestSigningConfiguration { get; init; } = new();
 }

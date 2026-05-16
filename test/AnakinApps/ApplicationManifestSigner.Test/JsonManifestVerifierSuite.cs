@@ -17,7 +17,7 @@ namespace AnakinRaW.ApplicationManifestSigner.Test;
 /// </summary>
 public class JsonManifestVerifierSuite : ManifestVerifierTestSuiteBase
 {
-    protected override IManifestVerifier CreateVerifier(IServiceProvider serviceProvider)
+    protected override ManifestVerifierBase CreateVerifier(IServiceProvider serviceProvider)
         => new JsonManifestVerifier(serviceProvider);
 
     protected override Stream CreateUnsignedManifestStream()

@@ -1,3 +1,5 @@
+using System.IO;
+using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,15 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AnakinRaW.AppUpdaterFramework.Security.Testing;
 
 /// <summary>
-/// Common test base for signing-related tests. Wires <see cref="IHashingService"/> and
-/// <see cref="ICertificateStore"/> into the test SP, and exposes the trust store and an active
-/// <see cref="SigningConfiguration"/> as typed properties.
+/// Common test base for signing-related tests. Wires <see cref="IHashingService"/>,
+/// <see cref="ICertificateStore"/>, <see cref="ISignatureVerifier"/>, and an
+/// <see cref="IUpdateConfigurationProvider"/> backed by <see cref="CreateSigningConfiguration"/>
+/// into the test SP.
 /// </summary>
-/// <remarks>
-/// <see cref="SigningConfiguration"/> is intentionally not registered in DI — it lives inside
-/// <c>UpdateConfiguration</c> for runtime use. Tests that need to vary the configuration override
-/// <see cref="CreateSigningConfiguration"/>.
-/// </remarks>
 public abstract class TestBaseForSigning : TestBaseWithFileSystem
 {
     protected ICertificateStore TrustStore { get; }
@@ -30,10 +28,21 @@ public abstract class TestBaseForSigning : TestBaseWithFileSystem
         base.SetupServices(serviceCollection);
         serviceCollection.AddSingleton<IHashingService>(p => new HashingService(p));
         serviceCollection.AddSingleton<ICertificateStore>(p => new CertificateStore(p));
+        serviceCollection.AddSingleton<ISignatureVerifier>(p => new SignatureVerifier(p));
+        serviceCollection.AddSingleton<IUpdateConfigurationProvider>(_ => new TestConfigProvider(CreateSigningConfiguration()));
     }
 
     protected virtual SigningConfiguration CreateSigningConfiguration()
     {
         return SigningConfiguration.Default;
+    }
+
+    private sealed class TestConfigProvider(SigningConfiguration signing) : IUpdateConfigurationProvider
+    {
+        public UpdateConfiguration GetConfiguration() => new()
+        {
+            DownloadLocation = Path.GetTempPath(),
+            ManifestSigningConfiguration = signing,
+        };
     }
 }

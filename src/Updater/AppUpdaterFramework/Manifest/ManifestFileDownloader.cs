@@ -4,6 +4,7 @@ using System.IO.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Validation;
@@ -28,9 +29,12 @@ public sealed class ManifestFileDownloader : DisposableObject
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         var config = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-        _downloadManager = new DownloadManager(config.ManifestDownloadConfiguration, serviceProvider);
+
+        var verifier = serviceProvider.GetRequiredService<ManifestVerifierBase>();
+        _manifestValidator = new SignatureVerifyingManifestValidator(verifier);
+
+        _downloadManager = new DownloadManager(config.ManifestDownloadConfiguration.ToDownloadManagerConfiguration(), serviceProvider);
         _tempDirectory = _fileSystem.CreateTemporaryFolderInTempWithRetry(10);
-        _manifestValidator = serviceProvider.GetService<IManifestValidatorProvider>()?.GetValidator();
     }
 
     public async Task<IFileInfo> DownloadManifestAsync(
@@ -46,7 +50,14 @@ public sealed class ManifestFileDownloader : DisposableObject
 #endif
         using var manifest = _fileSystem.FileStream.New(destPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
         _logger?.LogDebug("Downloading manifest from '{source}' to '{destination}'.", manifestPath.AbsolutePath, destPath);
-        await _downloadManager.DownloadAsync(manifestPath, manifest, null , downloadOptions, _manifestValidator, token);
+        try
+        {
+            await _downloadManager.DownloadAsync(manifestPath, manifest, null, downloadOptions, _manifestValidator, token);
+        }
+        catch (DownloadValidationFailedException ex) when (ex.InnerException is SignatureVerificationFailedException sigEx)
+        {
+            throw sigEx;
+        }
         return _fileSystem.FileInfo.New(destPath);
     }
 

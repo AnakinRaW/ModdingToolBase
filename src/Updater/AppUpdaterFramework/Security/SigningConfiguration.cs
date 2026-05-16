@@ -2,8 +2,7 @@ namespace AnakinRaW.AppUpdaterFramework.Security;
 
 /// <summary>
 /// Configures the signature algorithm and enforcement policy used by the manifest signer and
-/// verifier. Registered as a singleton by <c>AddUpdateFramework</c>; hosts override by registering
-/// their own instance.
+/// verifier.
 /// </summary>
 public sealed class SigningConfiguration
 {

@@ -8,7 +8,7 @@ namespace AnakinRaW.AppUpdaterFramework.Security.Testing;
 
 public abstract class ManifestVerifierTestSuiteBase : TestBaseForSigning
 {
-    protected IManifestVerifier Verifier { get; }
+    protected ManifestVerifierBase Verifier { get; }
 
     protected ManifestVerifierTestSuiteBase()
     {
@@ -16,7 +16,7 @@ public abstract class ManifestVerifierTestSuiteBase : TestBaseForSigning
     }
 
     /// <summary>Creates the verifier instance under test.</summary>
-    protected abstract IManifestVerifier CreateVerifier(IServiceProvider serviceProvider);
+    protected abstract ManifestVerifierBase CreateVerifier(IServiceProvider serviceProvider);
 
     /// <summary>Produces a stream containing a syntactically valid manifest with no signature block.</summary>
     protected abstract Stream CreateUnsignedManifestStream();

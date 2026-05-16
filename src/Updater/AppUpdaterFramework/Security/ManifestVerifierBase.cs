@@ -1,72 +1,49 @@
 using System;
 using System.IO;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using AnakinRaW.CommonUtilities.Hashing;
+using AnakinRaW.AppUpdaterFramework.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Security;
 
 /// <summary>
-/// Base class for <see cref="IManifestVerifier"/> implementations. Performs the format-agnostic
-/// verification work; subclasses provide the format-specific extraction from the manifest stream.
+/// Abstract base for manifest verifiers. The framework keys DI on this type — not on an
+/// interface — so a host cannot register an unrelated implementation that bypasses signature
+/// verification. The only host extension point is overriding <see cref="TryParseSignature"/> to
+/// extract a <see cref="ParsedSignature"/> from the host's manifest format. <see cref="Verify"/>
+/// is non-virtual and bakes in the policy short-circuit and crypto/trust chain.
 /// </summary>
-public abstract class ManifestVerifierBase : IManifestVerifier
+public abstract class ManifestVerifierBase
 {
-    private readonly IHashingService _hashingService;
-    private readonly ICertificateStore _trustedCertificates;
+    private readonly ISignatureVerifier _signatureVerifier;
+    private readonly IUpdateConfigurationProvider _configurationProvider;
 
     protected ManifestVerifierBase(IServiceProvider serviceProvider)
     {
-        if (serviceProvider is null) 
+        if (serviceProvider is null)
             throw new ArgumentNullException(nameof(serviceProvider));
-        _hashingService = serviceProvider.GetRequiredService<IHashingService>();
-        _trustedCertificates = serviceProvider.GetRequiredService<ICertificateStore>();
+        _signatureVerifier = serviceProvider.GetRequiredService<ISignatureVerifier>();
+        _configurationProvider = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>();
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Verifies a manifest stream against the configured signature policy. Returns
+    /// <see cref="VerificationResult.Ok"/> immediately when policy is <see cref="SignaturePolicy.Off"/>;
+    /// otherwise parses the signature block via <see cref="TryParseSignature"/> and runs the full
+    /// crypto + trust check via <see cref="ISignatureVerifier"/>.
+    /// </summary>
     public VerificationResult Verify(Stream manifestStream)
     {
         if (manifestStream is null)
             throw new ArgumentNullException(nameof(manifestStream));
 
+        if (_configurationProvider.GetConfiguration().ManifestSigningConfiguration.Policy == SignaturePolicy.Off)
+            return VerificationResult.Ok;
+
         var result = TryParseSignature(manifestStream, out var parsed);
         if (result != VerificationResult.Ok || parsed is null)
             return result;
 
-        if (!SignatureAlgorithmExtensions.TryParse(parsed.Algorithm, out var algorithm))
-            return VerificationResult.UnsupportedAlgorithm;
-
-        X509Certificate2 cert;
-        try
-        {
-            cert = new X509Certificate2(parsed.CertificateDer);
-        }
-        catch (CryptographicException)
-        {
-            return VerificationResult.MalformedSignatureBlock;
-        }
-
-        try
-        {
-            if (!_trustedCertificates.Contains(cert))
-                return VerificationResult.UntrustedCert;
-
-            using var stream = new MemoryStream(parsed.CanonicalBytes, writable: false);
-            var digest = _hashingService.GetHash(stream, algorithm.GetHashType());
-
-            using var publicKey = cert.GetECDsaPublicKey();
-            if (publicKey is null)
-                return VerificationResult.MalformedSignatureBlock;
-
-            return publicKey.VerifyHash(digest, parsed.SignatureValue)
-                ? VerificationResult.Ok
-                : VerificationResult.SignatureInvalid;
-        }
-        finally
-        {
-            cert.Dispose();
-        }
+        return _signatureVerifier.Verify(parsed);
     }
 
     /// <summary>

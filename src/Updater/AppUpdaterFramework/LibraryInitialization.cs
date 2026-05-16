@@ -38,5 +38,7 @@ public static class LibraryInitialization
         serviceCollection.TryAddSingleton<ILockedFileInteractionHandler>(sp => new DefaultLockedFileInteractionHandler(sp));
 
         serviceCollection.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
+        serviceCollection.AddSingleton<ISignatureVerifier>(sp => new SignatureVerifier(sp));
+        serviceCollection.TryAddSingleton<ManifestVerifierBase>(sp => new NullManifestVerifier(sp));
     }
 }

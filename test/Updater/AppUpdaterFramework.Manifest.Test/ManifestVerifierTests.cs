@@ -9,7 +9,7 @@ namespace AnakinRaW.AppUpdaterFramework.Manifest.Test;
 
 public class ManifestVerifierTests : TestBaseForSigning
 {
-    private readonly IManifestVerifier _verifier;
+    private readonly ManifestVerifierBase _verifier;
 
     public ManifestVerifierTests()
     {
