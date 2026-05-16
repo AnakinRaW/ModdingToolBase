@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework;
-using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,7 +58,6 @@ internal class Program
         services.AddUpdateFramework();
 
         services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
-        services.AddSingleton<IBranchManager>(sp => sp.GetRequiredService<AppManifestCreatorBranchManager>());
 
         services.AddLogging(l =>
         {
