@@ -31,6 +31,7 @@ public static class ApplicationBaseServiceExtensions
         additionalUpdateServices?.Invoke(serviceCollection);
 
         serviceCollection.TryAddSingleton<IHashingService>(sp => new HashingService(sp));
+        serviceCollection.AddSingleton(sp => new CertificateManager(sp));
 
         serviceCollection.AddUpdateFramework();
 
