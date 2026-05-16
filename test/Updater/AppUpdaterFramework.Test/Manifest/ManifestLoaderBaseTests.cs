@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Configuration;
@@ -79,6 +80,31 @@ public class ManifestLoaderBaseTests
     }
 
     [Fact]
+    public void VerifyAndParse_PolicyRequired_ComponentMissingIntegrityInfo_Throws()
+    {
+        var sigVerifier = new StubSigVerifier(VerificationResult.Ok);
+        var loader = BuildLoader(SignaturePolicy.Required, hasSignature: true,
+            sigVerifier: sigVerifier,
+            componentWithoutIntegrity: true);
+        using var stream = new MemoryStream([1]);
+
+        var ex = Assert.Throws<ManifestException>(() => loader.LoadAndVerifyManifest(stream));
+        Assert.Contains("integrity information", ex.Message);
+    }
+
+    [Fact]
+    public void VerifyAndParse_PolicyOff_ComponentMissingIntegrityInfo_StillReturns()
+    {
+        // Off skips signature verification, and the integrity-info guard only applies under Required.
+        var loader = BuildLoader(SignaturePolicy.Off, hasSignature: false,
+            componentWithoutIntegrity: true);
+        using var stream = new MemoryStream([1]);
+
+        var manifest = loader.LoadAndVerifyManifest(stream);
+        Assert.NotNull(manifest);
+    }
+
+    [Fact]
     public void VerifyAndParse_PolicyOff_DoesNotCallSignatureVerifier()
     {
         var sigVerifier = new StubSigVerifier(VerificationResult.SignatureInvalid);
@@ -94,7 +120,8 @@ public class ManifestLoaderBaseTests
         SignaturePolicy policy,
         bool hasSignature,
         VerificationResult parseResult = VerificationResult.Ok,
-        StubSigVerifier? sigVerifier = null)
+        StubSigVerifier? sigVerifier = null,
+        bool componentWithoutIntegrity = false)
     {
         var services = new ServiceCollection();
         services.AddSingleton<IFileSystem>(new RealFileSystem());
@@ -102,10 +129,10 @@ public class ManifestLoaderBaseTests
         services.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
         services.AddSingleton<ISignatureVerifier>(sigVerifier ?? new StubSigVerifier(VerificationResult.Ok));
         services.AddSingleton<IUpdateConfigurationProvider>(new StaticConfigProvider(policy));
-        return new StubLoader(services.BuildServiceProvider(), parseResult, hasSignature);
+        return new StubLoader(services.BuildServiceProvider(), parseResult, hasSignature, componentWithoutIntegrity);
     }
 
-    private sealed class StubLoader(IServiceProvider sp, VerificationResult parseResult, bool hasSignature)
+    private sealed class StubLoader(IServiceProvider sp, VerificationResult parseResult, bool hasSignature, bool componentWithoutIntegrity)
         : ManifestLoaderBase(sp)
     {
         protected override ProductManifest ParseManifestAndSignature(
@@ -117,7 +144,15 @@ public class ManifestLoaderBaseTests
             signature = hasSignature
                 ? new ParsedSignature("ES256", [1], [2], [3])
                 : null;
-            return new ProductManifest(new ProductReference("test", null, null), []);
+            var components = componentWithoutIntegrity
+                ?
+                [
+                    new Metadata.Component.SingleFileComponent(
+                    "comp", null, "$(InstallDir)", "foo.dll",
+                    new Metadata.Component.OriginInfo(new Uri("https://example.test/foo.dll")))
+                ]
+                : (IEnumerable<Metadata.Component.ProductComponent>)[];
+            return new ProductManifest(new ProductReference("test", null, null), components);
         }
     }
 

@@ -9,6 +9,7 @@ using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Security;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Testably.Abstractions;
@@ -24,7 +25,7 @@ public class ManifestFetcherTests
         var (fetcher, loader) = Build([SequencedLoader.Outcome.Ok], _ => Task.CompletedTask);
         var reference = MakeReference(2);
 
-        var manifest = await fetcher.FetchAsync(reference, default);
+        var manifest = await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken);
 
         Assert.NotNull(manifest);
         Assert.Equal(1, loader.CallCount);
@@ -39,7 +40,7 @@ public class ManifestFetcherTests
             _ => Task.CompletedTask);
         var reference = MakeReference(2);
 
-        var manifest = await fetcher.FetchAsync(reference, default);
+        var manifest = await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken);
 
         Assert.NotNull(manifest);
         Assert.Equal(2, loader.CallCount);
@@ -55,7 +56,7 @@ public class ManifestFetcherTests
         var reference = MakeReference(2);
 
         var ex = await Assert.ThrowsAsync<ManifestDownloadException>(
-            () => fetcher.FetchAsync(reference, default));
+            async () => await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken));
         Assert.IsType<SignatureVerificationFailedException>(ex.InnerException);
         Assert.Equal(2, loader.CallCount);
     }
@@ -71,7 +72,7 @@ public class ManifestFetcherTests
                 : Task.CompletedTask);
         var reference = MakeReference(2);
 
-        var manifest = await fetcher.FetchAsync(reference, default);
+        var manifest = await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken);
         Assert.NotNull(manifest);
         Assert.Equal(1, loader.CallCount);
     }
@@ -82,7 +83,36 @@ public class ManifestFetcherTests
         var (fetcher, _) = Build([], _ => Task.CompletedTask);
         var reference = MakeReference(0);
 
-        await Assert.ThrowsAsync<ManifestDownloadException>(() => fetcher.FetchAsync(reference, default));
+        await Assert.ThrowsAsync<ManifestDownloadException>(() => fetcher.FetchAsync(reference, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public void Ctor_PolicyRequiredAndComponentValidationNotRequired_Throws()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IFileSystem>(new RealFileSystem());
+        services.AddSingleton<IHashingService>(sp => new HashingService(sp));
+        services.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
+        services.AddSingleton<ISignatureVerifier>(new AlwaysOkSigVerifier());
+        services.AddSingleton<IUpdateConfigurationProvider>(new InconsistentConfigProvider());
+        services.AddSingleton<IManifestLoaderProvider>(sp => new ManifestLoaderProvider(new SequencedLoader(sp, [])));
+        var sp = services.BuildServiceProvider();
+
+        var ex = Assert.Throws<InvalidOperationException>(() => new ManifestFetcher(sp));
+        Assert.Contains("ComponentDownloadConfiguration.ValidationPolicy", ex.Message);
+    }
+
+    private sealed class InconsistentConfigProvider : IUpdateConfigurationProvider
+    {
+        public UpdateConfiguration GetConfiguration() => new()
+        {
+            DownloadLocation = Path.GetTempPath(),
+            ManifestSigningConfiguration = new SigningConfiguration { Policy = SignaturePolicy.Required },
+            ComponentDownloadConfiguration = new DownloadManagerConfiguration
+            {
+                ValidationPolicy = ValidationPolicy.NoValidation
+            }
+        };
     }
 
     private static (TestFetcher fetcher, SequencedLoader loader) Build(
@@ -95,7 +125,7 @@ public class ManifestFetcherTests
         services.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
         services.AddSingleton<ISignatureVerifier>(new AlwaysOkSigVerifier());
         services.AddSingleton<IUpdateConfigurationProvider>(new ConfigProvider());
-        SequencedLoader? createdLoader = null;
+        SequencedLoader? createdLoader;
         services.AddSingleton<IManifestLoaderProvider>(sp =>
         {
             createdLoader = new SequencedLoader(sp, outcomes);
@@ -160,7 +190,11 @@ public class ManifestFetcherTests
         public UpdateConfiguration GetConfiguration() => new()
         {
             DownloadLocation = Path.GetTempPath(),
-            ManifestSigningConfiguration = new SigningConfiguration { Policy = SignaturePolicy.Required }
+            ManifestSigningConfiguration = new SigningConfiguration { Policy = SignaturePolicy.Required },
+            ComponentDownloadConfiguration = new DownloadManagerConfiguration
+            {
+                ValidationPolicy = ValidationPolicy.Required
+            }
         };
     }
 }

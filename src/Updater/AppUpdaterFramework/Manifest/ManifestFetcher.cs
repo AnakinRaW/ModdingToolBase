@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.CommonUtilities.DownloadManager;
+using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,13 +25,28 @@ internal class ManifestFetcher : IManifestFetcher
 
     public ManifestFetcher(IServiceProvider serviceProvider)
     {
-        if (serviceProvider is null) 
+        if (serviceProvider is null)
             throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _manifestLoader = serviceProvider.GetRequiredService<IManifestLoaderProvider>().Loader;
         var config = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
+        EnsureConsistentConfiguration(config);
         _downloadManager = new DownloadManager(config.ManifestDownloadConfiguration.ToDownloadManagerConfiguration(), serviceProvider);
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger<ManifestFetcher>();
+    }
+
+    private static void EnsureConsistentConfiguration(UpdateConfiguration config)
+    {
+        if (config.ManifestSigningConfiguration.Policy != SignaturePolicy.Required)
+            return;
+        if (config.ComponentDownloadConfiguration.ValidationPolicy != ValidationPolicy.Required)
+        {
+            throw new InvalidOperationException(
+                $"SignaturePolicy is Required but ComponentDownloadConfiguration.ValidationPolicy is " +
+                $"{config.ComponentDownloadConfiguration.ValidationPolicy}. Signing the manifest is " +
+                "moot if downloaded components aren't hash-checked against it. Set " +
+                "ComponentDownloadConfiguration.ValidationPolicy to Required.");
+        }
     }
 
     public async Task<ProductManifest> FetchAsync(ProductReference productReference, CancellationToken cancellationToken)

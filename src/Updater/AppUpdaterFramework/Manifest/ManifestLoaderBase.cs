@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Security;
+using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Manifest;
@@ -59,9 +61,27 @@ public abstract class ManifestLoaderBase
             throw new SignatureVerificationFailedException(VerificationResult.MissingSignature);
 
         var verifyResult = _signatureVerifier.Verify(signature);
-        return verifyResult != VerificationResult.Ok
-            ? throw new SignatureVerificationFailedException(verifyResult)
-            : manifest;
+        if (verifyResult != VerificationResult.Ok)
+            throw new SignatureVerificationFailedException(verifyResult);
+
+        EnsureComponentsHaveIntegrityInformation(manifest);
+        return manifest;
+    }
+
+    private static void EnsureComponentsHaveIntegrityInformation(ProductManifest manifest)
+    {
+        foreach (var component in manifest.Components)
+        {
+            if (component is not InstallableComponent installable)
+                continue;
+            var origin = installable.OriginInfo;
+            if (origin is null || origin.IntegrityInformation.HashType == HashTypeKey.None || origin.IntegrityInformation.Hash is null)
+            {
+                throw new ManifestException(
+                    $"Component '{installable.Id}' in a signed manifest is missing integrity information " +
+                    "(content hash). A signed manifest must declare a verifiable hash for every installable component.");
+            }
+        }
     }
 
     /// <summary>
