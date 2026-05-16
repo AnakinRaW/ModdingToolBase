@@ -22,7 +22,8 @@ internal sealed class SignatureVerifier : ISignatureVerifier
 
     public VerificationResult Verify(ParsedSignature parsed)
     {
-        if (parsed is null) throw new ArgumentNullException(nameof(parsed));
+        if (parsed is null) 
+            throw new ArgumentNullException(nameof(parsed));
 
         if (!SignatureAlgorithmExtensions.TryParse(parsed.Algorithm, out var algorithm))
             return VerificationResult.UnsupportedAlgorithm;

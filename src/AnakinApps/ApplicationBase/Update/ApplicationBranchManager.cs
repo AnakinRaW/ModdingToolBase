@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase.Environment;
@@ -13,11 +13,11 @@ public class ApplicationBranchManager : BranchManagerBase
 
     public override string StableBranchName => ApplicationConstants.StableBranchName;
 
-    public ApplicationBranchManager(UpdatableApplicationEnvironment applicationEnvironment, IServiceProvider serviceProvider) : base(serviceProvider)
+    public ApplicationBranchManager(UpdatableApplicationEnvironment applicationEnvironment, IServiceProvider serviceProvider)
     {
         if (serviceProvider == null)
             throw new ArgumentNullException(nameof(serviceProvider));
-       
+
         _branchUtilities = new ApplicationBranchUtilities(
             applicationEnvironment.UpdateMirrors,
             applicationEnvironment.UpdateConfiguration.BranchDownloadConfiguration,

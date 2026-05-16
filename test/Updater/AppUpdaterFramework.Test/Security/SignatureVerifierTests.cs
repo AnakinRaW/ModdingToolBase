@@ -5,7 +5,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.AppUpdaterFramework.Security.Testing;
-using AnakinRaW.CommonUtilities.Hashing;
 using Microsoft.Extensions.DependencyInjection;
 using Testably.Abstractions;
 using Xunit;

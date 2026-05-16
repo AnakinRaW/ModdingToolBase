@@ -12,7 +12,7 @@ public enum VerificationResult
     /// canonical manifest bytes.
     /// </summary>
     Ok,
-
+    
     /// <summary>
     /// The manifest was parsed successfully but contains no <c>signature</c> block. Returned only
     /// when <see cref="SigningConfiguration.Policy"/> is <see cref="SignaturePolicy.Required"/>.

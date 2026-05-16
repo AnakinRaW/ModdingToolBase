@@ -1,8 +1,9 @@
-﻿using AnakinRaW.AppUpdaterFramework.Detection;
+using AnakinRaW.AppUpdaterFramework.Detection;
 using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Installer;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.AppUpdaterFramework.Storage;
@@ -18,7 +19,6 @@ public static class LibraryInitialization
 {
     public static void AddUpdateFramework(this IServiceCollection serviceCollection)
     {
-        // All internal
         serviceCollection.AddSingleton<IInstallerFactory>(sp => new InstallerFactory(sp));
         serviceCollection.AddSingleton<IDiskSpaceCalculator>(sp => new DiskSpaceCalculator(sp));
         serviceCollection.AddSingleton<IBackupManager>(sp => new BackupManager(sp));
@@ -27,8 +27,10 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
         serviceCollection.AddSingleton<IWritablePendingComponentStore>(new PendingComponentStore());
-        
-        // Default implementations
+
+        serviceCollection.AddSingleton<ISignatureVerifier>(sp => new SignatureVerifier(sp));
+        serviceCollection.AddSingleton<IManifestFetcher>(sp => new ManifestFetcher(sp));
+
         serviceCollection.TryAddSingleton<IUpdateService>(sp => new UpdateService(sp));
         serviceCollection.TryAddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
         serviceCollection.TryAddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
@@ -38,7 +40,5 @@ public static class LibraryInitialization
         serviceCollection.TryAddSingleton<ILockedFileInteractionHandler>(sp => new DefaultLockedFileInteractionHandler(sp));
 
         serviceCollection.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
-        serviceCollection.AddSingleton<ISignatureVerifier>(sp => new SignatureVerifier(sp));
-        serviceCollection.TryAddSingleton<ManifestVerifierBase>(sp => new NullManifestVerifier(sp));
     }
 }

@@ -1,16 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.AppUpdaterFramework.Product;
-using AnakinRaW.CommonUtilities.DownloadManager;
 using Microsoft.Extensions.DependencyInjection;
 using Semver;
 
@@ -18,35 +15,46 @@ namespace AnakinRaW.AppUpdaterFramework.Json;
 
 public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : ManifestLoaderBase(serviceProvider)
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+
+    protected override ProductManifest ParseManifestAndSignature(Stream manifestStream, out ParsedSignature? signature)
     {
-        Converters = { new JsonStringEnumConverter() }
-    };
+        signature = null;
 
-    public static ValueTask<ApplicationManifest?> DeserializeAsync(Stream stream, CancellationToken token = default)
-    {
-        return JsonSerializer.DeserializeAsync<ApplicationManifest>(stream, JsonSerializerOptions, token);
-    }
+        ApplicationManifest appManifest;
+        try
+        {
+            appManifest = JsonSerializer.Deserialize<ApplicationManifest>(manifestStream, ManifestJsonOptions.Default)
+                ?? throw new ManifestException("Deserialized manifest was null.");
+        }
+        catch (JsonException ex)
+        {
+            throw new ManifestException("Failed to parse manifest JSON.", ex);
+        }
 
-    protected override async Task<ProductManifest> LoadManifestCoreAsync(
-        Uri manifestUri, 
-        ProductReference productReference,
-        DownloadOptions? downloadOptions,
-        CancellationToken cancellationToken = default)
-    {
-        using var manifestFileLoader = new ManifestFileDownloader(ServiceProvider);
+        var manifest = new ProductManifest(BuildReference(appManifest), BuildCatalog(appManifest.Components));
 
-        var manifestFile = await manifestFileLoader.DownloadManifestAsync(manifestUri, downloadOptions, cancellationToken);
+        var sig = appManifest.Signature;
+        if (sig is null)
+            return manifest;
 
-        using var manifestFileStream = manifestFile.OpenRead();
+        if (string.IsNullOrEmpty(sig.Algorithm) || string.IsNullOrEmpty(sig.Value) || string.IsNullOrEmpty(sig.Certificate))
+            throw new SignatureVerificationFailedException(VerificationResult.MalformedSignatureBlock);
 
-        var appManifest = await DeserializeAsync(manifestFileStream, cancellationToken).ConfigureAwait(false);
-        if (appManifest is null)
-            throw new ManifestException("Serialized manifest is null");
+        byte[] signatureBytes, certBytes;
+        try
+        {
+            signatureBytes = Convert.FromBase64String(sig.Value);
+            certBytes = Convert.FromBase64String(sig.Certificate);
+        }
+        catch (FormatException)
+        {
+            throw new SignatureVerificationFailedException(VerificationResult.MalformedSignatureBlock);
+        }
 
-        var availProduct = BuildReference(appManifest);
-        var catalog = BuildCatalog(appManifest.Components);
-        return new ProductManifest(availProduct, catalog);
+        var canonicalBytes = CanonicalManifestSerializer.SerializeForDigest(appManifest);
+        signature = new ParsedSignature(sig.Algorithm, signatureBytes, certBytes, canonicalBytes);
+        return manifest;
     }
 
     private ProductReference BuildReference(ApplicationManifest applicationManifest)
@@ -58,7 +66,7 @@ public sealed class JsonManifestLoader(IServiceProvider serviceProvider) : Manif
         ProductBranch? branch = null;
         if (applicationManifest.Branch is not null)
         {
-            var branchManager = ServiceProvider.GetRequiredService<IBranchManager>();
+            var branchManager = _serviceProvider.GetRequiredService<IBranchManager>();
             branch = branchManager.GetBranchFromName(applicationManifest.Branch);
         }
         return new ProductReference(applicationManifest.Name, version, branch);

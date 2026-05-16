@@ -1,4 +1,4 @@
-using AnakinRaW.AppUpdaterFramework.Security;
+using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AnakinRaW.AppUpdaterFramework.Json;
@@ -9,13 +9,13 @@ namespace AnakinRaW.AppUpdaterFramework.Json;
 public static class JsonManifestServiceExtensions
 {
     /// <summary>
-    /// Registers <see cref="JsonManifestVerifier"/> as the framework's <see cref="ManifestVerifierBase"/>.
-    /// Without this call, <c>AddUpdateFramework</c>'s default <c>NullManifestVerifier</c> reports every
-    /// manifest as missing a signature, which fails under <see cref="SignaturePolicy.Required"/>.
+    /// Registers <see cref="JsonManifestLoader"/> as a singleton concrete type. Hosts pass the
+    /// resolved instance to their <c>BranchManagerBase</c> subclass via constructor parameter.
     /// </summary>
-    public static IServiceCollection AddJsonManifestVerifier(this IServiceCollection services)
+    public static IServiceCollection AddJsonManifestLoader(this IServiceCollection services)
     {
-        services.AddSingleton<ManifestVerifierBase>(sp => new JsonManifestVerifier(sp));
+        if (services is null) throw new ArgumentNullException(nameof(services));
+        services.AddSingleton(sp => new JsonManifestLoader(sp));
         return services;
     }
 }

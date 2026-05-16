@@ -7,16 +7,10 @@ namespace AnakinRaW.AppUpdaterFramework.Test.Configuration;
 public class ManifestDownloadConfigurationTests
 {
     [Fact]
-    public void ToDownloadManagerConfiguration_AlwaysRequiresValidation()
+    public void ToDownloadManagerConfiguration_DefaultBehavior()
     {
         var dmc = new ManifestDownloadConfiguration().ToDownloadManagerConfiguration();
         Assert.Equal(ValidationPolicy.Required, dmc.ValidationPolicy);
-    }
-
-    [Fact]
-    public void ToDownloadManagerConfiguration_NeverAllowsEmptyFileDownload()
-    {
-        var dmc = new ManifestDownloadConfiguration().ToDownloadManagerConfiguration();
         Assert.False(dmc.AllowEmptyFileDownload);
     }
 

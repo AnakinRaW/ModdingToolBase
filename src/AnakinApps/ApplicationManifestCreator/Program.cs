@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,8 +53,6 @@ internal class Program
         var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IHashingService>(sp => new HashingService(sp));
-
-        services.AddUpdateFramework();
 
         services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
 

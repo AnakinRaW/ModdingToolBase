@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -51,8 +52,8 @@ internal class UpdateService : IUpdateService
             if (productReference.Branch is null)
                 throw new ManifestException("Product reference does not have a branch.");
 
-            var manifestRepo = _serviceProvider.GetRequiredService<IBranchManager>();
-            var manifest = await manifestRepo.GetManifestAsync(productReference, token).ConfigureAwait(false);
+            var fetcher = _serviceProvider.GetRequiredService<IManifestFetcher>();
+            var manifest = await fetcher.FetchAsync(productReference, token).ConfigureAwait(false);
 
             var productService = _serviceProvider.GetRequiredService<IProductService>();
             
