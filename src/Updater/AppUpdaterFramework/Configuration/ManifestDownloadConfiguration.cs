@@ -6,9 +6,9 @@ namespace AnakinRaW.AppUpdaterFramework.Configuration;
 /// Host-configurable subset of <see cref="DownloadManagerConfiguration"/> used for manifest downloads.
 /// </summary>
 /// <remarks>
-/// <see cref="DownloadManagerConfiguration.ValidationPolicy"/> is set to
-/// <see cref="ValidationPolicy.Required"/> and <see cref="DownloadManagerConfiguration.AllowEmptyFileDownload"/>
-/// is set to <see langword="false"/> for manifest downloads.
+/// <see cref="DownloadManagerConfiguration.ValidationPolicy"/> is fixed to
+/// <see cref="ValidationPolicy.NoValidation"/> and
+/// <see cref="DownloadManagerConfiguration.AllowEmptyFileDownload"/> is fixed to <see langword="false"/>.
 /// </remarks>
 public sealed class ManifestDownloadConfiguration
 {
@@ -32,7 +32,7 @@ public sealed class ManifestDownloadConfiguration
     {
         DownloadRetryDelay = DownloadRetryDelay,
         InternetClient = InternetClient,
-        ValidationPolicy = ValidationPolicy.Required,
+        ValidationPolicy = ValidationPolicy.NoValidation,
         AllowEmptyFileDownload = false,
     };
 }

@@ -10,7 +10,7 @@ public class ManifestDownloadConfigurationTests
     public void ToDownloadManagerConfiguration_DefaultBehavior()
     {
         var dmc = new ManifestDownloadConfiguration().ToDownloadManagerConfiguration();
-        Assert.Equal(ValidationPolicy.Required, dmc.ValidationPolicy);
+        Assert.Equal(ValidationPolicy.NoValidation, dmc.ValidationPolicy);
         Assert.False(dmc.AllowEmptyFileDownload);
     }
 
