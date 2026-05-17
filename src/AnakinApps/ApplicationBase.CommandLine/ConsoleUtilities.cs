@@ -210,12 +210,43 @@ public static class ConsoleUtilities
         }
     }
 
-    public static bool UserYesNoQuestion(string question, char yes = 'Y', char no = 'n')
+    public static bool UserYesNoQuestion(string question, char yes = 'y', char no = 'n', bool? defaultAnswer = null)
     {
+        if (yes == no)
+            throw new ArgumentException("Yes and No characters must be different.");
+
+        switch (defaultAnswer)
+        {
+            case true:
+                yes = char.ToUpperInvariant(yes);
+                no = char.ToLowerInvariant(no);
+                break;
+            case false:
+                yes = char.ToLowerInvariant(yes);
+                no = char.ToUpperInvariant(no);
+                break;
+        }
+
         var questionText = $"{question} [{yes}/{no}] ";
+
+        return UserYesNoQuestionCore(questionText, yes, no, defaultAnswer);
+    }
+
+    private static bool UserYesNoQuestionCore(string questionText, char yes, char no, bool? defaultAnswer)
+    {
+        if (yes == no)
+            throw new ArgumentException("Yes and No characters must be different.");
+        
         return UserQuestionOnSameLine(questionText, (string input, out bool result) =>
         {
             result = false;
+            
+            if (defaultAnswer is not null && string.IsNullOrWhiteSpace(input))
+            {
+                result = defaultAnswer.Value;
+                return true;
+            }
+
             if (input.Length != 1)
                 return false;
 
@@ -253,7 +284,7 @@ public static class ConsoleUtilities
             if (!inputCorrect(input, out var result))
             {
                 // Clear current line using carriage return + spaces + carriage return
-                // // This works in all console contexts unlike Console.SetCursorPosition()
+                // This works in all console contexts unlike Console.SetCursorPosition()
                 Console.Write("\r" + new string(' ', question.Length + input.Length) + "\r");
                 continue;
             }
