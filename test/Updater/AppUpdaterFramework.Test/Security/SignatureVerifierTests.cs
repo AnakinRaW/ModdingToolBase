@@ -121,6 +121,83 @@ public class SignatureVerifierTests : TestBaseForSigning
         Assert.Throws<ArgumentNullException>(() => _verifier.Verify(null!));
     }
 
+    [Fact]
+    public void Verify_IntermediateChainsToTrustedRoot_ReturnsOk()
+    {
+        var (root, intKey, intCert) = TestCertificates.CreateRootAndIntermediate();
+        using (root)
+        using (intKey)
+        using (intCert)
+        {
+            // Trust ONLY the root — the central design property.
+            TrustStore.Add(root);
+            var parsed = Sign(intKey, intCert, "hello, world", SignatureAlgorithm.ES256);
+            Assert.Equal(VerificationResult.Ok, _verifier.Verify(parsed));
+        }
+    }
+
+    [Fact]
+    public void Verify_IntermediateWithoutTrustedRoot_ReturnsUntrustedCert()
+    {
+        var (root, intKey, intCert) = TestCertificates.CreateRootAndIntermediate();
+        using (root)
+        using (intKey)
+        using (intCert)
+        {
+            // Trust store intentionally does NOT contain `root`.
+            var parsed = Sign(intKey, intCert, "hello, world", SignatureAlgorithm.ES256);
+            Assert.Equal(VerificationResult.UntrustedCert, _verifier.Verify(parsed));
+        }
+    }
+
+    [Fact]
+    public void Verify_IntermediateChainsToDifferentRoot_ReturnsUntrustedCert()
+    {
+        var (rootA, intKey, intCert) = TestCertificates.CreateRootAndIntermediate(rootSubject: "CN=Test Root A");
+        using var rootB = TestCertificates.CreateSelfSigned("CN=Test Root B");
+        using (rootA)
+        using (intKey)
+        using (intCert)
+        {
+            // We trust a DIFFERENT root than the one that signed the intermediate.
+            TrustStore.Add(rootB);
+            var parsed = Sign(intKey, intCert, "hello, world", SignatureAlgorithm.ES256);
+            Assert.Equal(VerificationResult.UntrustedCert, _verifier.Verify(parsed));
+        }
+    }
+
+    [Fact]
+    public void Verify_ExpiredIntermediate_ReturnsUntrustedCert()
+    {
+        var (root, intKey, intCert) = TestCertificates.CreateRootAndIntermediate(
+            intermediateNotBefore: DateTimeOffset.UtcNow.AddYears(-2),
+            intermediateNotAfter: DateTimeOffset.UtcNow.AddYears(-1));
+        using (root)
+        using (intKey)
+        using (intCert)
+        {
+            TrustStore.Add(root);
+            var parsed = Sign(intKey, intCert, "hello, world", SignatureAlgorithm.ES256);
+            Assert.Equal(VerificationResult.UntrustedCert, _verifier.Verify(parsed));
+        }
+    }
+
+    [Fact]
+    public void Verify_NotYetValidIntermediate_ReturnsUntrustedCert()
+    {
+        var (root, intKey, intCert) = TestCertificates.CreateRootAndIntermediate(
+            intermediateNotBefore: DateTimeOffset.UtcNow.AddYears(1),
+            intermediateNotAfter: DateTimeOffset.UtcNow.AddYears(2));
+        using (root)
+        using (intKey)
+        using (intCert)
+        {
+            TrustStore.Add(root);
+            var parsed = Sign(intKey, intCert, "hello, world", SignatureAlgorithm.ES256);
+            Assert.Equal(VerificationResult.UntrustedCert, _verifier.Verify(parsed));
+        }
+    }
+
     private static ParsedSignature Sign(ECDsa key, X509Certificate2 cert, string content, SignatureAlgorithm algorithm)
     {
         var contentBytes = Encoding.UTF8.GetBytes(content);

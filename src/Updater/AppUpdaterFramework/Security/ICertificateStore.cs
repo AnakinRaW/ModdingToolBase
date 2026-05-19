@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AnakinRaW.AppUpdaterFramework.Security;
@@ -16,8 +17,9 @@ public interface ICertificateStore
     /// Adds a certificate to the set of trusted anchors.
     /// </summary>
     /// <param name="certificate">
-    /// The certificate to trust. The store records its DER fingerprint only; the caller retains
-    /// ownership of the <see cref="X509Certificate2"/> instance and is responsible for disposing it.
+    /// The certificate to trust. The store takes its own copy of the certificate; the caller
+    /// retains ownership of the passed <see cref="X509Certificate2"/> instance and is free to
+    /// dispose it.
     /// </param>
     /// <exception cref="ArgumentNullException"><paramref name="certificate"/> is <see langword="null"/>.</exception>
     void Add(X509Certificate2 certificate);
@@ -43,4 +45,14 @@ public interface ICertificateStore
     /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="certificate"/> is <see langword="null"/>.</exception>
     bool Contains(X509Certificate2 certificate);
+
+    /// <summary>
+    /// Returns a snapshot of all currently-trusted certificates.
+    /// </summary>
+    /// <remarks>
+    /// Returned instances are owned by the store and must not be disposed by the caller. The
+    /// snapshot is consistent at the moment of the call; concurrent modifications via
+    /// <see cref="Add"/> / <see cref="Remove"/> after this returns are not reflected.
+    /// </remarks>
+    IReadOnlyCollection<X509Certificate2> GetAll();
 }

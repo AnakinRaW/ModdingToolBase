@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -22,7 +23,7 @@ internal sealed class SignatureVerifier : ISignatureVerifier
 
     public VerificationResult Verify(ParsedSignature parsed)
     {
-        if (parsed is null) 
+        if (parsed is null)
             throw new ArgumentNullException(nameof(parsed));
 
         if (!SignatureAlgorithmExtensions.TryParse(parsed.Algorithm, out var algorithm))
@@ -40,7 +41,7 @@ internal sealed class SignatureVerifier : ISignatureVerifier
 
         using (cert)
         {
-            if (!_trustedCertificates.Contains(cert))
+            if (!ChainsToTrustAnchor(cert))
                 return VerificationResult.UntrustedCert;
 
             using var stream = new MemoryStream(parsed.CanonicalBytes, writable: false);
@@ -54,5 +55,35 @@ internal sealed class SignatureVerifier : ISignatureVerifier
                 ? VerificationResult.Ok
                 : VerificationResult.SignatureInvalid;
         }
+    }
+
+    // Portable to netstandard2.0 — `X509ChainTrustMode.CustomRootTrust` + `CustomTrustStore`
+    // would be cleaner but is .NET 5+ only. Anchors go in ExtraStore,
+    // AllowUnknownCertificateAuthority masks the "unknown CA" error, and the chain's terminal
+    // cert is byte-checked against our anchors ourselves. The OS cert store may influence path
+    // building but can't grant trust the terminal check rejects.
+    private bool ChainsToTrustAnchor(X509Certificate2 cert)
+    {
+        var trustAnchors = _trustedCertificates.GetAll();
+        if (trustAnchors.Count == 0)
+            return false;
+
+        using var chain = new X509Chain();
+        chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+        chain.ChainPolicy.VerificationTime = DateTime.UtcNow;
+        chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+        foreach (var anchor in trustAnchors)
+            chain.ChainPolicy.ExtraStore.Add(anchor);
+
+        if (!chain.Build(cert))
+            return false;
+
+        var terminal = chain.ChainElements[chain.ChainElements.Count - 1].Certificate.RawData;
+        foreach (var anchor in trustAnchors)
+        {
+            if (anchor.RawData.SequenceEqual(terminal))
+                return true;
+        }
+        return false;
     }
 }
