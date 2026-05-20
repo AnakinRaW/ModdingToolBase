@@ -1,8 +1,11 @@
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.AppUpdaterFramework.External;
+using AnakinRaW.AppUpdaterFramework.Metadata;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.ExternalUpdater;
@@ -17,6 +20,7 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
     private readonly IFileSystem _fileSystem;
     private readonly IHashingService _hashingService;
     private readonly CosturaResourceExtractor _resourceExtractor;
+    private readonly AssemblyMetadataExtractor _metadataExtractor;
     private readonly ILogger? _logger;
     private readonly Lazy<ComponentIntegrityInformation> _integrity;
 
@@ -28,25 +32,36 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
         _resourceExtractor = new CosturaResourceExtractor(environment.AssemblyInfo.Assembly, serviceProvider);
+        _metadataExtractor = new AssemblyMetadataExtractor(serviceProvider);
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(CosturaExternalUpdaterProvider));
         _integrity = new Lazy<ComponentIntegrityInformation>(ComputeIntegrity);
     }
 
     public ComponentIntegrityInformation GetIntegrity() => _integrity.Value;
 
+    // Extracts the embedded updater and overwrites a stale on-disk copy whenever the running exe's bundled version is newer. 
     public void EnsureAvailable()
     {
         var resourceName = RequireEmbeddedResource();
         var installDirectory = _environment.ApplicationLocalPath;
-        var targetPath = _fileSystem.Path.Combine(installDirectory, resourceName);
-        if (_fileSystem.File.Exists(targetPath))
-            return;
-
         if (!_fileSystem.Directory.Exists(installDirectory))
             _fileSystem.Directory.CreateDirectory(installDirectory);
 
-        _logger?.LogDebug("Extracting embedded external updater to '{Path}'.", targetPath);
-        _resourceExtractor.Extract(resourceName, installDirectory);
+        _resourceExtractor.Extract(resourceName, installDirectory, ShouldOverwrite);
+        return;
+
+        // This prevents a "double update" case where a main-app upgrade replaces ModVerify.exe but leaves an
+        // older updater on disk, forcing a second update cycle just to bring the updater forward.
+        bool ShouldOverwrite(string file, Stream embeddedStream)
+        {
+            if (!Version.TryParse(FileVersionInfo.GetVersionInfo(file).FileVersion, out var installedVersion))
+                return true;
+            var embeddedVersion = _metadataExtractor.InformationFromStream(embeddedStream).FileVersion;
+            if (embeddedVersion is null)
+                return true;
+            _logger?.LogDebug("External updater on disk: {Installed}; embedded: {Embedded}.", installedVersion, embeddedVersion);
+            return embeddedVersion > installedVersion;
+        }
     }
 
     private ComponentIntegrityInformation ComputeIntegrity()
