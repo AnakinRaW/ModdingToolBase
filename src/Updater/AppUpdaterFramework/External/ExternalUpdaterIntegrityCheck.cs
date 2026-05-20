@@ -11,17 +11,17 @@ using Microsoft.Extensions.Logging;
 
 namespace AnakinRaW.AppUpdaterFramework.External;
 
-internal sealed class UpdaterIntegrityCheck : IUpdaterIntegrityCheck
+internal sealed class ExternalUpdaterIntegrityCheck : IExternalUpdaterIntegrityCheck
 {
     private readonly IHashingService _hashingService;
     private readonly ILogger? _logger;
 
-    public UpdaterIntegrityCheck(IServiceProvider serviceProvider)
+    public ExternalUpdaterIntegrityCheck(IServiceProvider serviceProvider)
     {
         if (serviceProvider is null)
             throw new ArgumentNullException(nameof(serviceProvider));
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
-        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(UpdaterIntegrityCheck));
+        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterIntegrityCheck));
     }
 
     public void EnsureMatchesAny(IFileInfo updater, IReadOnlyCollection<ComponentIntegrityInformation> acceptable)

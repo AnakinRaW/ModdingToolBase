@@ -10,16 +10,16 @@ using Xunit;
 
 namespace AnakinRaW.AppUpdaterFramework.Test.External;
 
-public class UpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDisposable
+public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDisposable
 {
     private readonly IHashingService _hashingService;
-    private readonly IUpdaterIntegrityCheck _check;
+    private readonly IExternalUpdaterIntegrityCheck _check;
     private readonly string _tempFile;
 
-    public UpdaterIntegrityCheckTests()
+    public ExternalUpdaterIntegrityCheckTests()
     {
         _hashingService = ServiceProvider.GetRequiredService<IHashingService>();
-        _check = new UpdaterIntegrityCheck(ServiceProvider);
+        _check = new ExternalUpdaterIntegrityCheck(ServiceProvider);
         var tempDir = FileSystem.Path.GetTempPath();
         FileSystem.Directory.CreateDirectory(tempDir);
         _tempFile = FileSystem.Path.Combine(tempDir, $"updater-integrity-check-{Guid.NewGuid():N}.bin");
@@ -137,6 +137,6 @@ public class UpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDisposable
     [Fact]
     public void Ctor_NullServiceProvider_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => new UpdaterIntegrityCheck(null!));
+        Assert.Throws<ArgumentNullException>(() => new ExternalUpdaterIntegrityCheck(null!));
     }
 }
