@@ -7,9 +7,8 @@ using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.ExternalUpdater;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.IO.Abstractions;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using Microsoft.Extensions.Logging;
 
@@ -44,8 +43,8 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
         if (ApplicationEnvironment is UpdatableApplicationEnvironment { UpdateConfiguration.RestartConfiguration.SupportsRestart: true })
         {
             Logger?.LogDebug("Creating component for external installer.");
-            var updaterComponent = CreateExternalUpdaterComponent(productVariables);
-            installedComponents.Add(updaterComponent);
+            if (TryCreateExternalUpdaterComponent(productVariables, out var updaterComponent))
+                installedComponents.Add(updaterComponent);
         }
 
         var productComponents = new List<ProductComponent>(installedComponents.Count + 1)
@@ -60,21 +59,31 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
         return new ProductManifest(installedProduct, productComponents);
     }
 
-    private InstallableComponent CreateExternalUpdaterComponent(IReadOnlyDictionary<string, string> productVariables)
+    // The installed manifest describes what is on disk.
+    private bool TryCreateExternalUpdaterComponent(
+        IReadOnlyDictionary<string, string> productVariables,
+        [NotNullWhen(true)] out InstallableComponent? component)
     {
         var installDirectory = GetExternalUpdaterInstallLocation(productVariables, out var nextToApp);
+        var resourceName = ExternalUpdaterConstants.GetExecutableFileName();
+        var filePath = FileSystem.Path.Combine(installDirectory, resourceName);
 
-        using var updaterStream = GetUpdaterAssemblyStream(installDirectory, nextToApp);
+        if (!FileSystem.File.Exists(filePath))
+        {
+            Logger?.LogDebug("External updater not present at '{Path}'", filePath);
+            component = null;
+            return false;
+        }
 
-        updaterStream.Seek(0, SeekOrigin.Begin);
+        using var fileStream = FileSystem.FileStream.New(filePath, FileMode.Open, FileAccess.Read);
 
         var componentInstallLocation =
             StringTemplateEngine.ToVariable(nextToApp
                 ? KnownProductVariablesKeys.InstallDir
                 : ApplicationVariablesKeys.AppData);
 
-        return _metadataExtractor.ComponentFromStream(
-            updaterStream,
+        component = _metadataExtractor.ComponentFromStream(
+            fileStream,
             componentInstallLocation,
             new ExtractorAdditionalInformation
             {
@@ -82,27 +91,7 @@ public class CosturaApplicationProductService(ApplicationEnvironment application
                     ? ExtractorAdditionalInformation.InstallDrive.App
                     : ExtractorAdditionalInformation.InstallDrive.System
             });
-    }
-
-    private FileSystemStream GetUpdaterAssemblyStream(string installDirectory, bool nextToApp)
-    {
-        var resourceName = ExternalUpdaterConstants.GetExecutableFileName();
-
-        if (!nextToApp) 
-            _resourceExtractor.Extract(resourceName, installDirectory, ShouldOverwriteUpdater);
-
-        var filePath = FileSystem.Path.Combine(installDirectory, resourceName);
-        return FileSystem.FileStream.New(filePath, FileMode.Open, FileAccess.Read);
-
-        bool ShouldOverwriteUpdater(string file, Stream assemblyStream)
-        {
-            if (!Version.TryParse(FileVersionInfo.GetVersionInfo(file).FileVersion, out var installedVersion))
-                return true;
-            var streamVersion = _metadataExtractor.InformationFromStream(assemblyStream).FileVersion;
-            if (streamVersion is null)
-                return true;
-            return streamVersion > installedVersion;
-        }
+        return true;
     }
 
     private string GetExternalUpdaterInstallLocation(IReadOnlyDictionary<string, string> productVariables, out bool nextToApp)

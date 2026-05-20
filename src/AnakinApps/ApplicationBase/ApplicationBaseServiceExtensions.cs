@@ -2,6 +2,7 @@ using System;
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework;
+using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -34,6 +35,9 @@ public static class ApplicationBaseServiceExtensions
         serviceCollection.AddSingleton(sp => new CertificateManager(sp));
 
         serviceCollection.AddUpdateFramework();
+        
+        serviceCollection.AddSingleton<IExternalUpdaterProvider>(sp =>
+            new CosturaExternalUpdaterProvider(applicationEnvironment, sp));
 
         return serviceCollection;
     }

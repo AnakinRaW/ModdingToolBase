@@ -2,6 +2,7 @@
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Update;
 using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.CommonUtilities.Registry;
 using CommandLine;
@@ -85,7 +86,10 @@ public abstract class SelfUpdateableAppLifecycle
         }
 
         logger?.LogInformation("Creating app services.");
-        var appServices = CreateAppServices(args); 
+        var appServices = CreateAppServices(args);
+
+        if (IsUpdateableApplication)
+            appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable();
 
         // ConfigureAwait cannot be set to false here, because WPF apps might expect the context of the main thread.
         return await RunAppAsync(args, appServices);

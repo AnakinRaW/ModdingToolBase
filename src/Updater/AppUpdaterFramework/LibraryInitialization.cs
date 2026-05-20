@@ -31,6 +31,8 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<ISignatureVerifier>(sp => new SignatureVerifier(sp));
         serviceCollection.AddSingleton<IManifestFetcher>(sp => new ManifestFetcher(sp));
 
+        serviceCollection.AddSingleton<IExternalUpdaterIntegrityCheck>(sp => new ExternalUpdaterIntegrityCheck(sp));
+
         serviceCollection.TryAddSingleton<IUpdateService>(sp => new UpdateService(sp));
         serviceCollection.TryAddSingleton<IComponentInstallationDetector>(sp => new ComponentInstallationDetector(sp));
         serviceCollection.TryAddSingleton<IPendingComponentStore>(sp => sp.GetRequiredService<IWritablePendingComponentStore>());
