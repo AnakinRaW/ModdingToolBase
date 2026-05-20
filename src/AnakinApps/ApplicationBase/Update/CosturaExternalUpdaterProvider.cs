@@ -47,6 +47,12 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
         if (!_fileSystem.Directory.Exists(installDirectory))
             _fileSystem.Directory.CreateDirectory(installDirectory);
 
+#if DEBUG
+        if (_fileSystem.File.Exists(resourceName))
+            return;
+#endif
+
+
         _resourceExtractor.Extract(resourceName, installDirectory, ShouldOverwrite);
         return;
 
@@ -75,9 +81,11 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
     private string RequireEmbeddedResource()
     {
         var resourceName = ExternalUpdaterConstants.GetExecutableFileName();
+#if !DEBUG
         if (!_resourceExtractor.Contains(resourceName))
             throw new InvalidOperationException(
                 $"The application is configured for self-update via Costura but the external updater ('{resourceName}') is not embedded as a resource.");
+#endif
         return resourceName;
     }
 }
