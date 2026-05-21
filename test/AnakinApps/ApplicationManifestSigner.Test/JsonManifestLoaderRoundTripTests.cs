@@ -3,7 +3,6 @@ using System.IO;
 using System.Text.Json;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Json;
-using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.AppUpdaterFramework.Security;
@@ -14,11 +13,6 @@ using Xunit;
 
 namespace AnakinRaW.ApplicationManifestSigner.Test;
 
-/// <summary>
-/// End-to-end signed-manifest tests: sign a real manifest with <see cref="ManifestSigner"/>,
-/// then hand the serialized bytes to <see cref="ManifestLoaderBase.LoadAndVerifyManifest"/> and assert the
-/// expected <see cref="VerificationResult"/> via the thrown <see cref="SignatureVerificationFailedException"/>.
-/// </summary>
 public class JsonManifestLoaderRoundTripTests : TestBaseForSigning
 {
     protected override void SetupServices(IServiceCollection serviceCollection)
@@ -100,7 +94,7 @@ public class JsonManifestLoaderRoundTripTests : TestBaseForSigning
             TrustStore.Add(cert);
             var signed = Sign(TestManifests.CreateSample(), key, cert, SignatureAlgorithm.ES256);
             var sigBytes = Convert.FromBase64String(signed.Signature!.Value);
-            sigBytes[sigBytes.Length - 1] ^= 0xFF;
+            sigBytes[^1] ^= 0xFF;
             var corrupted = signed with
             {
                 Signature = signed.Signature with { Value = Convert.ToBase64String(sigBytes) }

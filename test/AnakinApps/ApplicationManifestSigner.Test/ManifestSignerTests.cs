@@ -7,10 +7,6 @@ using Xunit;
 
 namespace AnakinRaW.ApplicationManifestSigner.Test;
 
-/// <summary>
-/// Signer-specific assertions. Sign+verify round-trips across the supported algorithms are covered
-/// by <see cref="JsonManifestVerifierSuite"/> (via the inherited <c>ManifestVerifierTestSuiteBase</c>).
-/// </summary>
 public class ManifestSignerTests : TestBaseForSigning
 {
     private readonly ManifestSigner _signer;
