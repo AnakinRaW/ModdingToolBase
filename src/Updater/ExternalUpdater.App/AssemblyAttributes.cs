@@ -1,4 +1,7 @@
-﻿using AnakinRaW.AppUpdaterFramework.Attributes;
+﻿using System.Runtime.CompilerServices;
+using AnakinRaW.AppUpdaterFramework.Attributes;
 using AnakinRaW.ExternalUpdater;
 
 [assembly:UpdateComponent(ExternalUpdaterConstants.ComponentIdentity, Name = "External Updater Application")]
+
+[assembly: InternalsVisibleTo("ExternalUpdater.App.Test")]

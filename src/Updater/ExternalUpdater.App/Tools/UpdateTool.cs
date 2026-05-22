@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.Logging;
@@ -10,22 +10,14 @@ internal sealed class UpdateTool(ExternalUpdateOptions options, IServiceProvider
 {
     public override async Task<ExternalUpdaterResult> Run()
     {
-        try
-        {
-            await WaitForProcessExitAsync().ConfigureAwait(false);
-            var updateItems = await Options.GetUpdateInformationAsync(ServiceProvider).ConfigureAwait(false);
-            
-            var updater = new Utilities.ExternalUpdater(updateItems, ServiceProvider);
-            var updateResult = await Task.Run(updater.Run).ConfigureAwait(false);
-            
-            Logger?.LogDebug("Updated with result: {Result}", updateResult);
-            StartProcess(updateResult);
-            return updateResult;
-        }
-        finally
-        {
-            if (!string.IsNullOrEmpty(Options.UpdateFile)) 
-                FileSystem.File.Delete(Options.UpdateFile!);
-        }
+        await WaitForProcessExitAsync().ConfigureAwait(false);
+        var updateItems = await Options.GetUpdateInformationAsync().ConfigureAwait(false);
+
+        var updater = new Utilities.ExternalUpdater(updateItems, ServiceProvider);
+        var updateResult = await Task.Run(updater.Run).ConfigureAwait(false);
+
+        Logger?.LogDebug("Updated with result: {Result}", updateResult);
+        StartProcess(updateResult);
+        return updateResult;
     }
 }

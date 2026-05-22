@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
+using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Tools;
 using AnakinRaW.ExternalUpdater.Utilities;
@@ -66,6 +67,7 @@ internal static class Program
         var services = new ServiceCollection();
         var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
+        services.AddSingleton<IHashingService>(sp => new HashingService(sp));
         services.AddSingleton<IProcessTools>(sp => new ProcessTools(sp));
 
         services.AddLogging(l =>
