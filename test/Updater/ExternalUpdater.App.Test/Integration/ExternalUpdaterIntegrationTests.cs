@@ -75,6 +75,194 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
+    [Theory]
+    [InlineData("SHA384")]
+    [InlineData("SHA512")]
+    [InlineData("SHA1")]
+    [InlineData("MD5")]
+    public void SingleMove_NonSha256Algorithm_FileMovedAndAppLaunchedWithSuccess(string algorithm)
+    {
+        var hashType = HashType(algorithm);
+        var bytes = "payload"u8.ToArray();
+        var source = _fixture.WriteFile("source.bin", bytes);
+        var dest = _fixture.PathInWorkDir("dest.bin");
+
+        var exit = _fixture.RunUpdater(new UpdateInformation
+        {
+            Update = new FileCopyInformation
+            {
+                File = source,
+                Destination = dest,
+                Integrity = _fixture.IntegrityOf(source, hashType),
+            },
+        });
+
+        Assert.Equal(0, exit);
+        Assert.True(_fixture.FileExists(dest));
+        Assert.Equal(bytes, _fixture.ReadAllBytes(dest));
+        _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
+    }
+
+    [Fact]
+    public void MixedAlgorithmsAcrossItems_AllAppliedAndAppLaunched()
+    {
+        var s1 = _fixture.WriteFile("sha256.bin", [0x10, 0x11]);
+        var s2 = _fixture.WriteFile("sha512.bin", [0x20, 0x21, 0x22]);
+        var s3 = _fixture.WriteFile("md5.bin",    [0x30]);
+        var d1 = _fixture.PathInWorkDir("sha256-dest.bin");
+        var d2 = _fixture.PathInWorkDir("sha512-dest.bin");
+        var d3 = _fixture.PathInWorkDir("md5-dest.bin");
+
+        var exit = _fixture.RunUpdater(
+            MoveWith(s1, d1, HashTypeKey.SHA256),
+            MoveWith(s2, d2, HashTypeKey.SHA512),
+            MoveWith(s3, d3, HashTypeKey.MD5));
+
+        Assert.Equal(0, exit);
+        Assert.True(_fixture.FileExists(d1));
+        Assert.True(_fixture.FileExists(d2));
+        Assert.True(_fixture.FileExists(d3));
+        _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
+    }
+
+    [Fact]
+    public void MixedAlgorithms_OneMismatched_AbortsBatchWithNoMoves()
+    {
+        var s1 = _fixture.WriteFile("ok-sha256.bin", [0x10]);
+        var s2 = _fixture.WriteFile("bad-sha512.bin", [0x20, 0x21]);
+        var d1 = _fixture.PathInWorkDir("ok-dest.bin");
+        var d2 = _fixture.PathInWorkDir("bad-dest.bin");
+
+        var sha512Bogus = new IntegrityInformation
+        {
+            HashType = HashTypeKey.SHA512.Name,
+            Hash = new string('0', 128),
+        };
+
+        var exit = _fixture.RunUpdater(
+            MoveWith(s1, d1, HashTypeKey.SHA256),
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation { File = s2, Destination = d2, Integrity = sha512Bogus },
+            });
+
+        Assert.Equal(0, exit);
+        Assert.False(_fixture.FileExists(d1));
+        Assert.False(_fixture.FileExists(d2));
+        _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
+    }
+
+    [Fact]
+    public void MidBatchFailure_Sha512Backup_RestoresUsingSha512Verification()
+    {
+        var oldBytes = "old-content"u8.ToArray();
+        var newBytes = "new-content"u8.ToArray();
+
+        var installedFile = _fixture.WriteFile("installed.bin", oldBytes);
+        var stagedNew = _fixture.WriteFile("staged-new.bin", newBytes);
+        var backupSource = _fixture.WriteFile("installed.bin.bak", oldBytes);
+
+        var doomedSource = _fixture.WriteFile("doomed-source.bin", "doomed"u8.ToArray());
+        var doomedDest = _fixture.PathInWorkDir("missing-dir/doomed-dest.bin");
+
+        var exit = _fixture.RunUpdater(
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = stagedNew,
+                    Destination = installedFile,
+                    Integrity = _fixture.IntegrityOf(stagedNew, HashTypeKey.SHA384),
+                },
+                Backup = new BackupInformation
+                {
+                    Destination = installedFile,
+                    Source = backupSource,
+                    Integrity = _fixture.IntegrityOf(backupSource, HashTypeKey.SHA512),
+                },
+            },
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = doomedSource,
+                    Destination = doomedDest,
+                    Integrity = _fixture.IntegrityOf(doomedSource, HashTypeKey.SHA512),
+                },
+            });
+
+        Assert.Equal(0, exit);
+        Assert.Equal(oldBytes, _fixture.ReadAllBytes(installedFile));
+        Assert.False(_fixture.FileExists(backupSource));
+        _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedWithRestore);
+    }
+
+    [Fact]
+    public void MidBatchFailure_BackupHashMismatchUnderSha512_RefusesRestore()
+    {
+        var newBytes = "new-content"u8.ToArray();
+        var installedFile = _fixture.WriteFile("installed.bin", "old-content"u8.ToArray());
+        var stagedNew = _fixture.WriteFile("staged-new.bin", newBytes);
+
+        var bytesForHash = _fixture.WriteFile("installed.bin.bak", "untampered"u8.ToArray());
+        var declared = _fixture.IntegrityOf(bytesForHash, HashTypeKey.SHA512);
+        var backupSource = _fixture.WriteFile("installed.bin.bak", "divergent-bytes"u8.ToArray());
+
+        var doomedSource = _fixture.WriteFile("doomed-source.bin", "doomed"u8.ToArray());
+        var doomedDest = _fixture.PathInWorkDir("missing-dir/doomed-dest.bin");
+
+        var exit = _fixture.RunUpdater(
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = stagedNew,
+                    Destination = installedFile,
+                    Integrity = _fixture.Sha256IntegrityOf(stagedNew),
+                },
+                Backup = new BackupInformation
+                {
+                    Destination = installedFile,
+                    Source = backupSource,
+                    Integrity = declared,
+                },
+            },
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = doomedSource,
+                    Destination = doomedDest,
+                    Integrity = _fixture.Sha256IntegrityOf(doomedSource),
+                },
+            });
+
+        Assert.Equal(0, exit);
+        Assert.Equal(newBytes, _fixture.ReadAllBytes(installedFile));
+        _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
+    }
+
+    private UpdateInformation MoveWith(string source, string dest, HashTypeKey hashType) =>
+        new()
+        {
+            Update = new FileCopyInformation
+            {
+                File = source,
+                Destination = dest,
+                Integrity = _fixture.IntegrityOf(source, hashType),
+            },
+        };
+
+    private static HashTypeKey HashType(string name) => name switch
+    {
+        "SHA256" => HashTypeKey.SHA256,
+        "SHA384" => HashTypeKey.SHA384,
+        "SHA512" => HashTypeKey.SHA512,
+        "SHA1" => HashTypeKey.SHA1,
+        "MD5" => HashTypeKey.MD5,
+        _ => throw new ArgumentOutOfRangeException(nameof(name)),
+    };
+
     [Fact]
     public void Delete_RemovesFile()
     {
@@ -88,7 +276,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
     }
 
     [Fact]
-    public void Sha256Mismatch_NoMovesAndAppLaunchedWithFailure()
+    public void IntegrityMismatch_NoMovesAndAppLaunchedWithFailure()
     {
         var source = _fixture.WriteFile("source.bin", [1, 2, 3]);
         var dest = _fixture.PathInWorkDir("dest.bin");
@@ -99,7 +287,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
             {
                 File = source,
                 Destination = dest,
-                Sha256 = new string('0', 64), // declared but won't match
+                Integrity = new IntegrityInformation { HashType = HashTypeKey.SHA256.Name, Hash = new string('0', 64) },
             },
         });
 
@@ -134,7 +322,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
             {
                 File = source,
                 Destination = dest,
-                Sha256 = _fixture.Sha256Hex(source),
+                Integrity = _fixture.Sha256IntegrityOf(source),
             },
             Backup = new BackupInformation { Destination = dest, Source = backupSource },
         });
@@ -168,13 +356,13 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                 {
                     File = stagedNew,
                     Destination = installedFile,
-                    Sha256 = _fixture.Sha256Hex(stagedNew),
+                    Integrity = _fixture.Sha256IntegrityOf(stagedNew),
                 },
                 Backup = new BackupInformation
                 {
                     Destination = installedFile,
                     Source = backupSource,
-                    Sha256 = _fixture.Sha256Hex(backupSource),
+                    Integrity = _fixture.Sha256IntegrityOf(backupSource),
                 },
             },
             new UpdateInformation
@@ -183,7 +371,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                 {
                     File = doomedSource,
                     Destination = doomedDest,
-                    Sha256 = _fixture.Sha256Hex(doomedSource),
+                    Integrity = _fixture.Sha256IntegrityOf(doomedSource),
                 },
             });
 
@@ -220,7 +408,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
 
         // Compute the declared hash from one set of bytes…
         var bytesForHash = _fixture.WriteFile("installed.bin.bak", oldBytes);
-        var declaredBackupSha = _fixture.Sha256Hex(bytesForHash);
+        var declaredBackupIntegrity = _fixture.Sha256IntegrityOf(bytesForHash);
 
         // …then overwrite the backup file with different bytes, so the declared hash no
         // longer matches what's on disk. The updater must catch this divergence.
@@ -236,13 +424,13 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                 {
                     File = stagedNew,
                     Destination = installedFile,
-                    Sha256 = _fixture.Sha256Hex(stagedNew),
+                    Integrity = _fixture.Sha256IntegrityOf(stagedNew),
                 },
                 Backup = new BackupInformation
                 {
                     Destination = installedFile,
                     Source = backupSource,
-                    Sha256 = declaredBackupSha,
+                    Integrity = declaredBackupIntegrity,
                 }
             },
             new UpdateInformation
@@ -251,7 +439,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                 {
                     File = doomedSource,
                     Destination = doomedDest,
-                    Sha256 = _fixture.Sha256Hex(doomedSource),
+                    Integrity = _fixture.Sha256IntegrityOf(doomedSource),
                 }
             });
 
@@ -288,9 +476,14 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                 {
                     File = stagedNew,
                     Destination = installedFile,
-                    Sha256 = _fixture.Sha256Hex(stagedNew),
+                    Integrity = _fixture.Sha256IntegrityOf(stagedNew),
                 },
-                Backup = new BackupInformation { Destination = installedFile, Source = missingBackupSource },
+                Backup = new BackupInformation
+                {
+                    Destination = installedFile,
+                    Source = missingBackupSource,
+                    Integrity = new IntegrityInformation { HashType = HashTypeKey.SHA256.Name, Hash = new string('a', 64) },
+                },
             },
             new UpdateInformation
             {
@@ -298,7 +491,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                 {
                     File = doomedSource,
                     Destination = doomedDest,
-                    Sha256 = _fixture.Sha256Hex(doomedSource),
+                    Integrity = _fixture.Sha256IntegrityOf(doomedSource),
                 },
             });
 

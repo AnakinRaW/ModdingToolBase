@@ -18,7 +18,6 @@ internal class ExternalUpdater
     private readonly IFileSystem _fileSystem;
     private readonly IHashingService _hashing;
 
-    // Layout - Key: Destination, Value: Source
     private readonly Dictionary<string, BackupEntry> _backups;
 
     private IReadOnlyCollection<UpdateInformation> UpdaterItems { get; }
@@ -36,7 +35,7 @@ internal class ExternalUpdater
 
         _backups = updaterItems.Where(x => x.Backup != null)
             .Select(x => x.Backup!)
-            .ToDictionary(x => x.Destination, x => new BackupEntry(x.Source, x.Sha256));
+            .ToDictionary(x => x.Destination, x => new BackupEntry(x.Source, x.Integrity));
 
         foreach (var pair in _backups)
             _logger?.LogTrace("Backup source added: {Backup}", pair);
@@ -46,7 +45,7 @@ internal class ExternalUpdater
     {
         try
         {
-            if (!ValidateSourceHashes())
+            if (!ValidateSourceIntegrity())
                 return ExternalUpdaterResult.UpdateFailedNoRestore;
 
             ApplyUpdates();
@@ -63,9 +62,7 @@ internal class ExternalUpdater
         }
     }
 
-    // Pre-validation pass: hash every source file with a declared sha256 BEFORE moving any
-    // of them. Any mismatch aborts the whole batch — no partial application.
-    private bool ValidateSourceHashes()
+    private bool ValidateSourceIntegrity()
     {
         foreach (var item in UpdaterItems)
         {
@@ -73,14 +70,13 @@ internal class ExternalUpdater
             if (update is null)
                 continue;
 
-            // Delete entries (Destination == null) have no source bytes to verify.
             if (string.IsNullOrEmpty(update.Destination))
                 continue;
 
-            if (string.IsNullOrEmpty(update.Sha256))
+            if (update.Integrity is null)
             {
                 _logger?.LogError(
-                    "Update entry for '{Destination}' has no sha256 declaration; refusing to apply.",
+                    "Update entry for '{Destination}' has no integrity declaration; refusing to apply.",
                     update.Destination);
                 return false;
             }
@@ -94,7 +90,7 @@ internal class ExternalUpdater
                 return false;
             }
 
-            if (!VerifyHash(sourceFile, update.Sha256!))
+            if (!VerifyHash(sourceFile, update.Integrity.Value))
             {
                 _logger?.LogCritical(
                     "Source hash mismatch for '{File}' → '{Destination}'. Aborting batch.",
@@ -110,7 +106,7 @@ internal class ExternalUpdater
         var itemsToUpdate = UpdaterItems
             .Where(u => u.Update is not null)
             .Select(x => x.Update!);
-        
+
         foreach (var item in itemsToUpdate)
         {
             _logger?.LogTrace("Processing item: {File}", item);
@@ -123,10 +119,6 @@ internal class ExternalUpdater
         }
     }
 
-    // Runs the restore loop. Each entry is verified before its bytes are moved over the
-    // destination. Returns UpdateFailedWithRestore if every entry restored cleanly,
-    // UpdateFailedNoRestore the moment any entry can't be safely restored (missing source,
-    // missing/mismatched hash, or a move that itself throws).
     private ExternalUpdaterResult RestoreBackups()
     {
         _logger?.LogDebug("Restoring backups");
@@ -149,16 +141,15 @@ internal class ExternalUpdater
 
     private bool RestoreOneEntry(string destination, BackupEntry entry)
     {
-        // Destination didn't exist pre-update, so restore = delete.
         if (string.IsNullOrEmpty(entry.Source))
         {
             _fileSystem.FileInfo.New(destination).DeleteWithRetry();
             return true;
         }
 
-        if (string.IsNullOrEmpty(entry.Sha256))
+        if (entry.Integrity is null)
         {
-            _logger?.LogCritical("Backup entry for '{Destination}' declares a Source ('{Source}') but no sha256.",
+            _logger?.LogCritical("Backup entry for '{Destination}' declares a Source ('{Source}') but no integrity.",
                 destination, entry.Source);
             return false;
         }
@@ -171,7 +162,7 @@ internal class ExternalUpdater
             return false;
         }
 
-        if (!VerifyHash(sourceFile, entry.Sha256!))
+        if (!VerifyHash(sourceFile, entry.Integrity.Value))
         {
             _logger?.LogCritical("Backup source hash mismatch for '{Source}' → '{Destination}'.",
                 entry.Source, destination);
@@ -182,12 +173,34 @@ internal class ExternalUpdater
         return true;
     }
 
-    private bool VerifyHash(IFileInfo file, string expectedHex)
+    private bool VerifyHash(IFileInfo file, IntegrityInformation integrity)
     {
+        var hashType = ResolveHashType(integrity.HashType);
+        if (hashType is null)
+        {
+            _logger?.LogCritical("Unsupported hash type '{HashType}' for '{File}'.", integrity.HashType, file.FullName);
+            return false;
+        }
+
         using var stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
-        var actual = _hashing.GetHash(stream, HashTypeKey.SHA256);
-        var expected = HexToBytes(expectedHex);
+        var actual = _hashing.GetHash(stream, hashType.Value);
+        var expected = HexToBytes(integrity.Hash);
         return actual.SequenceEqual(expected);
+    }
+
+    private static HashTypeKey? ResolveHashType(string name)
+    {
+        if (string.Equals(name, HashTypeKey.SHA256.Name, StringComparison.OrdinalIgnoreCase)) 
+            return HashTypeKey.SHA256;
+        if (string.Equals(name, HashTypeKey.SHA384.Name, StringComparison.OrdinalIgnoreCase))
+            return HashTypeKey.SHA384;
+        if (string.Equals(name, HashTypeKey.SHA512.Name, StringComparison.OrdinalIgnoreCase)) 
+            return HashTypeKey.SHA512;
+        if (string.Equals(name, HashTypeKey.SHA1.Name, StringComparison.OrdinalIgnoreCase)) 
+            return HashTypeKey.SHA1;
+        if (string.Equals(name, HashTypeKey.MD5.Name, StringComparison.OrdinalIgnoreCase))
+            return HashTypeKey.MD5;
+        return null;
     }
 
     private static byte[] HexToBytes(string hex)
@@ -221,9 +234,9 @@ internal class ExternalUpdater
         }
     }
 
-    private readonly struct BackupEntry(string? source, string? sha256)
+    private readonly struct BackupEntry(string? source, IntegrityInformation? integrity)
     {
         public string? Source { get; } = source;
-        public string? Sha256 { get; } = sha256;
+        public IntegrityInformation? Integrity { get; } = integrity;
     }
 }

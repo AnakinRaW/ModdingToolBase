@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace AnakinRaW.ExternalUpdater.Models;
 
@@ -11,8 +11,7 @@ public record BackupInformation
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Source { get; init; }
 
-    // SHA-256 of the backup source bytes. Null only when Source is also null
-    [JsonPropertyName("sha256")]
+    [JsonPropertyName("integrity")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Sha256 { get; init; }
+    public IntegrityInformation? Integrity { get; init; }
 }

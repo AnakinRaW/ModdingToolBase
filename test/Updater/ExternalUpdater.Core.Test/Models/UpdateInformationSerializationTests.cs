@@ -6,6 +6,8 @@ namespace AnakinRaW.ExternalUpdater.Core.Test.Models;
 
 public class UpdateInformationSerializationTests
 {
+    private static readonly IntegrityInformation Sha256AbcIntegrity = new() { HashType = "SHA256", Hash = "abc123" };
+
     [Fact]
     public void FileCopyInformation_WithAllFields_RoundTrips()
     {
@@ -13,21 +15,23 @@ public class UpdateInformationSerializationTests
         {
             File = @"C:\src\a.bin",
             Destination = @"C:\dest\a.bin",
-            Sha256 = "abc123",
+            Integrity = Sha256AbcIntegrity,
         };
 
         var json = JsonSerializer.Serialize(original);
 
         Assert.Contains(@"""file"":""C:\\src\\a.bin""", json);
         Assert.Contains(@"""destination"":""C:\\dest\\a.bin""", json);
-        Assert.Contains(@"""sha256"":""abc123""", json);
+        Assert.Contains(@"""integrity"":{", json);
+        Assert.Contains(@"""hashType"":""SHA256""", json);
+        Assert.Contains(@"""hash"":""abc123""", json);
 
         var parsed = JsonSerializer.Deserialize<FileCopyInformation>(json);
 
         Assert.NotNull(parsed);
         Assert.Equal(original.File, parsed.File);
         Assert.Equal(original.Destination, parsed.Destination);
-        Assert.Equal(original.Sha256, parsed.Sha256);
+        Assert.Equal(original.Integrity, parsed.Integrity);
     }
 
     [Fact]
@@ -39,7 +43,33 @@ public class UpdateInformationSerializationTests
 
         Assert.Contains("\"file\":", json);
         Assert.DoesNotContain("\"destination\":", json);
-        Assert.DoesNotContain("\"sha256\":", json);
+        Assert.DoesNotContain("\"integrity\":", json);
+    }
+
+    [Theory]
+    [InlineData("SHA256", "abc")]
+    [InlineData("SHA384", "11223344")]
+    [InlineData("SHA512", "deadbeef")]
+    [InlineData("SHA1", "0123abcd")]
+    [InlineData("MD5", "feedface")]
+    public void FileCopyInformation_AnyHashType_RoundTrips(string hashType, string hash)
+    {
+        var integrity = new IntegrityInformation { HashType = hashType, Hash = hash };
+        var original = new FileCopyInformation
+        {
+            File = "f",
+            Destination = "d",
+            Integrity = integrity,
+        };
+
+        var json = JsonSerializer.Serialize(original);
+
+        Assert.Contains($"\"hashType\":\"{hashType}\"", json);
+        Assert.Contains($"\"hash\":\"{hash}\"", json);
+
+        var parsed = JsonSerializer.Deserialize<FileCopyInformation>(json);
+        Assert.NotNull(parsed);
+        Assert.Equal(integrity, parsed.Integrity);
     }
 
     [Fact]
@@ -75,7 +105,7 @@ public class UpdateInformationSerializationTests
     {
         var entry = new UpdateInformation
         {
-            Update = new FileCopyInformation { File = "f", Destination = "d", Sha256 = "abc" },
+            Update = new FileCopyInformation { File = "f", Destination = "d", Integrity = Sha256AbcIntegrity },
         };
 
         var json = JsonSerializer.Serialize(entry);
@@ -103,7 +133,7 @@ public class UpdateInformationSerializationTests
     {
         var original = new UpdateInformation
         {
-            Update = new FileCopyInformation { File = "f", Destination = "d", Sha256 = "abc" },
+            Update = new FileCopyInformation { File = "f", Destination = "d", Integrity = Sha256AbcIntegrity },
             Backup = new BackupInformation { Destination = "d", Source = "s" },
         };
 
@@ -115,7 +145,7 @@ public class UpdateInformationSerializationTests
         Assert.NotNull(parsed.Backup);
         Assert.Equal("f", parsed.Update!.File);
         Assert.Equal("d", parsed.Update.Destination);
-        Assert.Equal("abc", parsed.Update.Sha256);
+        Assert.Equal(Sha256AbcIntegrity, parsed.Update.Integrity);
         Assert.Equal("d", parsed.Backup!.Destination);
         Assert.Equal("s", parsed.Backup.Source);
     }

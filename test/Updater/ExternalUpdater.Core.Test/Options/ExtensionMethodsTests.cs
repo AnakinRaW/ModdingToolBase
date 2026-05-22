@@ -24,7 +24,7 @@ public class ExtensionMethodsTests
         {
             new UpdateInformation
             { 
-                Update = new FileCopyInformation { File = "a", Destination = "d", Sha256 = "h" }
+                Update = new FileCopyInformation { File = "a", Destination = "d", Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "h" } }
             }
         };
 
@@ -35,7 +35,7 @@ public class ExtensionMethodsTests
         var item = Assert.Single(parsed!);
         Assert.Equal("a", item.Update?.File);
         Assert.Equal("d", item.Update?.Destination);
-        Assert.Equal("h", item.Update?.Sha256);
+        Assert.Equal(new IntegrityInformation { HashType = "SHA256", Hash = "h" }, item.Update?.Integrity);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class ExtensionMethodsTests
     {
         var items = new[]
         {
-            new UpdateInformation { Update = new FileCopyInformation { File = "a", Destination = "ad", Sha256 = "h1" } },
+            new UpdateInformation { Update = new FileCopyInformation { File = "a", Destination = "ad", Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "h1" } } },
             new UpdateInformation { Update = new FileCopyInformation { File = "b" } },
             new UpdateInformation { Backup = new BackupInformation { Destination = "x", Source = "xs" } },
         };

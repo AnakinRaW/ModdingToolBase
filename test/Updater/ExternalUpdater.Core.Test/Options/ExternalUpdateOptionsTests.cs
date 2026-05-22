@@ -44,7 +44,7 @@ public class ExternalUpdateOptionsTests
                 {
                     File = @"C:\src\a.bin",
                     Destination = @"C:\dest\a.bin",
-                    Sha256 = "abc",
+                    Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "abc" },
                 },
             },
         };
@@ -56,7 +56,7 @@ public class ExternalUpdateOptionsTests
         Assert.NotNull(item.Update);
         Assert.Equal(@"C:\src\a.bin", item.Update!.File);
         Assert.Equal(@"C:\dest\a.bin", item.Update.Destination);
-        Assert.Equal("abc", item.Update.Sha256);
+        Assert.Equal(new IntegrityInformation { HashType = "SHA256", Hash = "abc" }, item.Update.Integrity);
         Assert.Null(item.Backup);
     }
 
@@ -65,8 +65,8 @@ public class ExternalUpdateOptionsTests
     {
         var source = new[]
         {
-            new UpdateInformation { Update = new FileCopyInformation { File = "a", Destination = "ad", Sha256 = "h1" } },
-            new UpdateInformation { Update = new FileCopyInformation { File = "b", Destination = "bd", Sha256 = "h2" } },
+            new UpdateInformation { Update = new FileCopyInformation { File = "a", Destination = "ad", Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "h1" } } },
+            new UpdateInformation { Update = new FileCopyInformation { File = "b", Destination = "bd", Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "h2" } } },
             new UpdateInformation { Backup = new BackupInformation { Destination = "x", Source = "xs" } },
         };
         var options = OptionsWith(source.ToPayload());
@@ -77,6 +77,46 @@ public class ExternalUpdateOptionsTests
             i => Assert.Equal("a", i.Update?.File),
             i => Assert.Equal("b", i.Update?.File),
             i => Assert.Equal("x", i.Backup?.Destination));
+    }
+
+    [Fact]
+    public async Task GetUpdateInformationAsync_MixedHashTypes_DecodedPerEntry()
+    {
+        var source = new[]
+        {
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = "a", Destination = "ad",
+                    Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "h256" },
+                },
+            },
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = "b", Destination = "bd",
+                    Integrity = new IntegrityInformation { HashType = "SHA512", Hash = "h512" },
+                },
+            },
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = "c", Destination = "cd",
+                    Integrity = new IntegrityInformation { HashType = "MD5", Hash = "hmd5" },
+                },
+            },
+        };
+        var options = OptionsWith(source.ToPayload());
+
+        var items = await options.GetUpdateInformationAsync();
+
+        Assert.Collection(items,
+            i => Assert.Equal(new IntegrityInformation { HashType = "SHA256", Hash = "h256" }, i.Update?.Integrity),
+            i => Assert.Equal(new IntegrityInformation { HashType = "SHA512", Hash = "h512" }, i.Update?.Integrity),
+            i => Assert.Equal(new IntegrityInformation { HashType = "MD5",    Hash = "hmd5" }, i.Update?.Integrity));
     }
 
     [Fact]
@@ -97,7 +137,7 @@ public class ExternalUpdateOptionsTests
         Assert.NotNull(item.Update);
         Assert.Equal(@"C:\dead.bin", item.Update!.File);
         Assert.Null(item.Update.Destination);
-        Assert.Null(item.Update.Sha256);
+        Assert.Null(item.Update.Integrity);
     }
 
     [Fact]
@@ -105,7 +145,7 @@ public class ExternalUpdateOptionsTests
     {
         var source = new[]
         {
-            new UpdateInformation { Update = new FileCopyInformation { File = "a", Destination = "d", Sha256 = "h" } },
+            new UpdateInformation { Update = new FileCopyInformation { File = "a", Destination = "d", Integrity = new IntegrityInformation { HashType = "SHA256", Hash = "h" } } },
         };
         var options = OptionsWith(source.ToPayload());
 

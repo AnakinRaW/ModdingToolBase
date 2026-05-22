@@ -50,10 +50,10 @@ public class UpdateToolTests : TestBaseWithFileSystem
         var bytes = "new-content"u8.ToArray();
         var source = WriteFile("staged.bin", bytes);
         var dest = FileSystem.Path.Combine(_workDir, "installed.bin");
-        var sha = Hex(await _hashing.GetHashAsync(FileSystem.FileInfo.New(source), HashTypeKey.SHA256, TestContext.Current.CancellationToken));
+        var integrity = await Sha256OfAsync(source);
 
         var options = MakeOptions(
-            new UpdateInformation { Update = new FileCopyInformation { File = source, Destination = dest, Sha256 = sha } });
+            new UpdateInformation { Update = new FileCopyInformation { File = source, Destination = dest, Integrity = integrity } });
 
         var tool = new UpdateTool(options, ServiceProvider);
         var result = await tool.Run();
@@ -78,7 +78,12 @@ public class UpdateToolTests : TestBaseWithFileSystem
 
         var options = MakeOptions(new UpdateInformation
         {
-            Update = new FileCopyInformation { File = source, Destination = dest, Sha256 = new string('0', 64) }
+            Update = new FileCopyInformation
+            {
+                File = source,
+                Destination = dest,
+                Integrity = new IntegrityInformation { HashType = HashTypeKey.SHA256.Name, Hash = new string('0', 64) },
+            }
         });
 
         var tool = new UpdateTool(options, ServiceProvider);
@@ -139,6 +144,12 @@ public class UpdateToolTests : TestBaseWithFileSystem
         var path = FileSystem.Path.Combine(_workDir, name);
         FileSystem.File.WriteAllBytes(path, bytes);
         return path;
+    }
+
+    private async Task<IntegrityInformation> Sha256OfAsync(string path)
+    {
+        var hash = await _hashing.GetHashAsync(FileSystem.FileInfo.New(path), HashTypeKey.SHA256, TestContext.Current.CancellationToken);
+        return new IntegrityInformation { HashType = HashTypeKey.SHA256.Name, Hash = Hex(hash) };
     }
 
     private static string Hex(byte[] bytes)

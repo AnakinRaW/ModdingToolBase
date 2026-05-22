@@ -46,9 +46,19 @@ internal sealed class IntegrationFixture : IDisposable
         return _fileSystem.Path.Combine(_workDir, name);
     }
 
-    public string Sha256Hex(string filePath)
+    public IntegrityInformation Sha256IntegrityOf(string filePath)
     {
-        var hash = _hashing.GetHash(_fileSystem.FileInfo.New(filePath), HashTypeKey.SHA256);
+        return IntegrityOf(filePath, HashTypeKey.SHA256);
+    }
+
+    public IntegrityInformation IntegrityOf(string filePath, HashTypeKey hashType)
+    {
+        return new IntegrityInformation { HashType = hashType.Name, Hash = Hex(filePath, hashType) };
+    }
+
+    private string Hex(string filePath, HashTypeKey hashType)
+    {
+        var hash = _hashing.GetHash(_fileSystem.FileInfo.New(filePath), hashType);
         var sb = new StringBuilder(hash.Length * 2);
         foreach (var b in hash)
             sb.Append(b.ToString("x2"));
@@ -73,7 +83,7 @@ internal sealed class IntegrationFixture : IDisposable
             {
                 File = source,
                 Destination = dest,
-                Sha256 = Sha256Hex(source),
+                Integrity = Sha256IntegrityOf(source),
             },
         };
     }

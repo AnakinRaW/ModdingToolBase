@@ -32,11 +32,10 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
         var bytes = "hello world"u8.ToArray();
         var sourcePath = WriteFile("a.bin", bytes);
         var destPath = FileSystem.Path.Combine(_workDir, "a-dest.bin");
-        var sha = Hex(_hashing.GetHash(FileSystem.FileInfo.New(sourcePath), HashTypeKey.SHA256));
 
         var result = Run(new UpdateInformation
         {
-            Update = new FileCopyInformation { File = sourcePath, Destination = destPath, Sha256 = sha }
+            Update = new FileCopyInformation { File = sourcePath, Destination = destPath, Integrity = Sha256Of(sourcePath) }
         });
 
         Assert.Equal(ExternalUpdaterResult.UpdateSuccess, result);
@@ -52,8 +51,7 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
 
         var result = Run(new UpdateInformation
         {
-            // No Destination + no Sha256 means delete the file at File.
-            Update = new FileCopyInformation { File = target, Destination = null, Sha256 = null }
+            Update = new FileCopyInformation { File = target, Destination = null, Integrity = null }
         });
 
         Assert.Equal(ExternalUpdaterResult.UpdateSuccess, result);
@@ -61,7 +59,7 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
     }
 
     [Fact]
-    public void Run_Sha256Mismatch_AbortsBatchWithoutMoving()
+    public void Run_IntegrityMismatch_AbortsBatchWithoutMoving()
     {
         var aBytes = "AAA"u8.ToArray();
         var bBytes = "BBB"u8.ToArray();
@@ -69,28 +67,26 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
         var bSource = WriteFile("b.bin", bBytes);
         var aDest = FileSystem.Path.Combine(_workDir, "a-dest.bin");
         var bDest = FileSystem.Path.Combine(_workDir, "b-dest.bin");
-        var aShaWrong = new string('0', 64);                                                              // declared, won't match
-        var bSha = Hex(_hashing.GetHash(FileSystem.FileInfo.New(bSource), HashTypeKey.SHA256));
+        var aWrong = new IntegrityInformation { HashType = HashTypeKey.SHA256.Name, Hash = new string('0', 64) };
 
         var result = Run(
-            new UpdateInformation { Update = new FileCopyInformation { File = aSource, Destination = aDest, Sha256 = aShaWrong } },
-            new UpdateInformation { Update = new FileCopyInformation { File = bSource, Destination = bDest, Sha256 = bSha } });
+            new UpdateInformation { Update = new FileCopyInformation { File = aSource, Destination = aDest, Integrity = aWrong } },
+            new UpdateInformation { Update = new FileCopyInformation { File = bSource, Destination = bDest, Integrity = Sha256Of(bSource) } });
 
         Assert.Equal(ExternalUpdaterResult.UpdateFailedNoRestore, result);
-        // Neither destination should have been created — the batch aborted before any move.
         Assert.False(FileSystem.File.Exists(aDest));
         Assert.False(FileSystem.File.Exists(bDest));
     }
 
     [Fact]
-    public void Run_MissingSha256OnMoveEntry_AbortsBatch()
+    public void Run_MissingIntegrityOnMoveEntry_AbortsBatch()
     {
         var source = WriteFile("x.bin", [9, 9, 9]);
         var dest = FileSystem.Path.Combine(_workDir, "x-dest.bin");
 
         var result = Run(new UpdateInformation
         {
-            Update = new FileCopyInformation { File = source, Destination = dest, Sha256 = null } // null sha on a move
+            Update = new FileCopyInformation { File = source, Destination = dest, Integrity = null }
         });
 
         Assert.Equal(ExternalUpdaterResult.UpdateFailedNoRestore, result);
@@ -109,7 +105,7 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
             {
                 File = ghost,
                 Destination = dest,
-                Sha256 = new string('a', 64),
+                Integrity = new IntegrityInformation { HashType = HashTypeKey.SHA256.Name, Hash = new string('a', 64) },
             }
         });
 
@@ -123,11 +119,11 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
         var bytes = "payload"u8.ToArray();
         var source = WriteFile("u.bin", bytes);
         var dest = FileSystem.Path.Combine(_workDir, "u-dest.bin");
-        var sha = Hex(_hashing.GetHash(FileSystem.FileInfo.New(source), HashTypeKey.SHA256)).ToUpperInvariant();
+        var declared = Sha256Of(source) with { Hash = Sha256Of(source).Hash.ToUpperInvariant() };
 
         var result = Run(new UpdateInformation
         {
-            Update = new FileCopyInformation { File = source, Destination = dest, Sha256 = sha }
+            Update = new FileCopyInformation { File = source, Destination = dest, Integrity = declared }
         });
 
         Assert.Equal(ExternalUpdaterResult.UpdateSuccess, result);
@@ -135,16 +131,53 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
     }
 
     [Fact]
+    public void Run_Sha512Algorithm_MovesWhenHashMatches()
+    {
+        var bytes = "payload-512"u8.ToArray();
+        var source = WriteFile("s.bin", bytes);
+        var dest = FileSystem.Path.Combine(_workDir, "s-dest.bin");
+        var integrity = new IntegrityInformation
+        {
+            HashType = HashTypeKey.SHA512.Name,
+            Hash = Hex(_hashing.GetHash(FileSystem.FileInfo.New(source), HashTypeKey.SHA512)),
+        };
+
+        var result = Run(new UpdateInformation
+        {
+            Update = new FileCopyInformation { File = source, Destination = dest, Integrity = integrity }
+        });
+
+        Assert.Equal(ExternalUpdaterResult.UpdateSuccess, result);
+        Assert.True(FileSystem.File.Exists(dest));
+    }
+
+    [Fact]
+    public void Run_UnsupportedHashType_AbortsBatch()
+    {
+        var source = WriteFile("x.bin", [1, 2, 3]);
+        var dest = FileSystem.Path.Combine(_workDir, "x-dest.bin");
+        var integrity = new IntegrityInformation { HashType = "BOGUS", Hash = new string('a', 64) };
+
+        var result = Run(new UpdateInformation
+        {
+            Update = new FileCopyInformation { File = source, Destination = dest, Integrity = integrity }
+        });
+
+        Assert.Equal(ExternalUpdaterResult.UpdateFailedNoRestore, result);
+        Assert.False(FileSystem.File.Exists(dest));
+    }
+
+    [Fact]
     public void Run_MultipleValidItems_AllApplied()
     {
-        var (s1, d1, sha1) = MakeMoveTarget("one.bin", [0x10]);
-        var (s2, d2, sha2) = MakeMoveTarget("two.bin", [0x20, 0x21]);
-        var (s3, d3, sha3) = MakeMoveTarget("three.bin", [0x30, 0x31, 0x32]);
+        var (s1, d1, i1) = MakeMoveTarget("one.bin", [0x10]);
+        var (s2, d2, i2) = MakeMoveTarget("two.bin", [0x20, 0x21]);
+        var (s3, d3, i3) = MakeMoveTarget("three.bin", [0x30, 0x31, 0x32]);
 
         var result = Run(
-            new UpdateInformation { Update = new FileCopyInformation { File = s1, Destination = d1, Sha256 = sha1 } },
-            new UpdateInformation { Update = new FileCopyInformation { File = s2, Destination = d2, Sha256 = sha2 } },
-            new UpdateInformation { Update = new FileCopyInformation { File = s3, Destination = d3, Sha256 = sha3 } });
+            new UpdateInformation { Update = new FileCopyInformation { File = s1, Destination = d1, Integrity = i1 } },
+            new UpdateInformation { Update = new FileCopyInformation { File = s2, Destination = d2, Integrity = i2 } },
+            new UpdateInformation { Update = new FileCopyInformation { File = s3, Destination = d3, Integrity = i3 } });
 
         Assert.Equal(ExternalUpdaterResult.UpdateSuccess, result);
         Assert.True(FileSystem.File.Exists(d1));
@@ -174,13 +207,19 @@ public class ExternalUpdaterTests : TestBaseWithFileSystem
         return path;
     }
 
-    private (string source, string dest, string sha) MakeMoveTarget(string name, byte[] bytes)
+    private (string source, string dest, IntegrityInformation integrity) MakeMoveTarget(string name, byte[] bytes)
     {
         var source = WriteFile(name, bytes);
         var dest = FileSystem.Path.Combine(_workDir, name + ".dest");
-        var sha = Hex(_hashing.GetHash(FileSystem.FileInfo.New(source), HashTypeKey.SHA256));
-        return (source, dest, sha);
+        return (source, dest, Sha256Of(source));
     }
+
+    private IntegrityInformation Sha256Of(string path) =>
+        new()
+        {
+            HashType = HashTypeKey.SHA256.Name,
+            Hash = Hex(_hashing.GetHash(FileSystem.FileInfo.New(path), HashTypeKey.SHA256)),
+        };
 
     private static string Hex(byte[] bytes)
     {
