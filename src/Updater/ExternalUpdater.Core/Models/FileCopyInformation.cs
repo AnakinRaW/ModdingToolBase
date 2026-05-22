@@ -11,7 +11,7 @@ public record FileCopyInformation
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Destination { get; init; }
 
-    // SHA-256 of the source bytes, hex-encoded (lower-case). Null only for delete entries
+    // SHA-256 of the source bytes. Null only for delete entries
     [JsonPropertyName("sha256")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Sha256 { get; init; }

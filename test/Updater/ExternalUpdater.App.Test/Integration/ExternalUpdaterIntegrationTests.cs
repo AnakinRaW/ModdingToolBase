@@ -170,7 +170,12 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
                     Destination = installedFile,
                     Sha256 = _fixture.Sha256Hex(stagedNew),
                 },
-                Backup = new BackupInformation { Destination = installedFile, Source = backupSource },
+                Backup = new BackupInformation
+                {
+                    Destination = installedFile,
+                    Source = backupSource,
+                    Sha256 = _fixture.Sha256Hex(backupSource),
+                },
             },
             new UpdateInformation
             {
@@ -194,6 +199,69 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         Assert.False(_fixture.FileExists(doomedDest));
 
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedWithRestore);
+    }
+
+    [Fact]
+    public void BackupSourceHashMismatch_RestoreRefusedAndAppLaunchedWithFailedNoRestore()
+    {
+        // Item 1 succeeds (overwrites installed.bin with NEW bytes). The BackupInformation
+        // declares a sha256 that does NOT match the bytes at the backup source on disk —
+        // the payload's declared hash and the bytes the updater would actually copy back
+        // diverge. When item 2 fails and the restore loop runs, the updater hashes the
+        // backup source, sees the mismatch, refuses the restore, and returns
+        // UpdateFailedNoRestore. Observable as "installed.bin still has the NEW bytes
+        // from item 1" — the mismatched backup never reached the destination.
+        var oldBytes = "old-content"u8.ToArray();
+        var newBytes = "new-content"u8.ToArray();
+        var divergentBytes = "divergent-bytes"u8.ToArray();
+
+        var installedFile = _fixture.WriteFile("installed.bin", oldBytes);
+        var stagedNew = _fixture.WriteFile("staged-new.bin", newBytes);
+
+        // Compute the declared hash from one set of bytes…
+        var bytesForHash = _fixture.WriteFile("installed.bin.bak", oldBytes);
+        var declaredBackupSha = _fixture.Sha256Hex(bytesForHash);
+
+        // …then overwrite the backup file with different bytes, so the declared hash no
+        // longer matches what's on disk. The updater must catch this divergence.
+        var backupSource = _fixture.WriteFile("installed.bin.bak", divergentBytes);
+
+        var doomedSource = _fixture.WriteFile("doomed-source.bin", "doomed"u8.ToArray());
+        var doomedDest = _fixture.PathInWorkDir("missing-dir/doomed-dest.bin");
+
+        var exit = _fixture.RunUpdater(
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = stagedNew,
+                    Destination = installedFile,
+                    Sha256 = _fixture.Sha256Hex(stagedNew),
+                },
+                Backup = new BackupInformation
+                {
+                    Destination = installedFile,
+                    Source = backupSource,
+                    Sha256 = declaredBackupSha,
+                }
+            },
+            new UpdateInformation
+            {
+                Update = new FileCopyInformation
+                {
+                    File = doomedSource,
+                    Destination = doomedDest,
+                    Sha256 = _fixture.Sha256Hex(doomedSource),
+                }
+            });
+
+        Assert.Equal(0, exit);
+
+        // installed.bin retains the NEW bytes from item 1 — the mismatched backup was
+        // rejected and never moved over the destination.
+        Assert.Equal(newBytes, _fixture.ReadAllBytes(installedFile));
+
+        _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
     }
 
     [Fact]
