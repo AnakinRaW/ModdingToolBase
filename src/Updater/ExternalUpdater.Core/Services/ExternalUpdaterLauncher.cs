@@ -28,7 +28,7 @@ public sealed class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : 
     }
 
 
-    private ProcessStartInfo CreateStartInfo(string updater, ExternalUpdaterOptions options)
+    private static ProcessStartInfo CreateStartInfo(string updater, ExternalUpdaterOptions options)
     {
         var externalUpdateStartInfo = new ProcessStartInfo(updater)
         {

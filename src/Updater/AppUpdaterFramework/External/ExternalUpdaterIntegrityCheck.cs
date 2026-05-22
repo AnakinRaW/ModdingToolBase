@@ -24,19 +24,16 @@ internal sealed class ExternalUpdaterIntegrityCheck : IExternalUpdaterIntegrityC
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterIntegrityCheck));
     }
 
-    public void EnsureMatchesAny(IFileInfo updater, IReadOnlyCollection<ComponentIntegrityInformation> acceptable)
+    public void EnsureMatchesAny(Stream openHandle, IReadOnlyCollection<ComponentIntegrityInformation> integrityInformation)
     {
-        if (updater is null)
-            throw new ArgumentNullException(nameof(updater));
-        if (acceptable is null)
-            throw new ArgumentNullException(nameof(acceptable));
-
-        if (!updater.Exists)
-            throw new FileNotFoundException("External updater binary not found.", updater.FullName);
+        if (openHandle is null)
+            throw new ArgumentNullException(nameof(openHandle));
+        if (integrityInformation is null)
+            throw new ArgumentNullException(nameof(integrityInformation));
 
         var enforceable = new List<ComponentIntegrityInformation>();
         var hasPolicyWaiver = false;
-        foreach (var i in acceptable)
+        foreach (var i in integrityInformation)
         {
             if (i.HashType == HashTypeKey.None || i.Hash is null)
                 hasPolicyWaiver = true;
@@ -46,11 +43,10 @@ internal sealed class ExternalUpdaterIntegrityCheck : IExternalUpdaterIntegrityC
 
         if (enforceable.Count > 0)
         {
-            using var stream = updater.Open(FileMode.Open, FileAccess.Read);
             foreach (var group in enforceable.GroupBy(i => i.HashType))
             {
-                stream.Seek(0, SeekOrigin.Begin);
-                var actual = _hashingService.GetHash(stream, group.Key);
+                openHandle.Seek(0, SeekOrigin.Begin);
+                var actual = _hashingService.GetHash(openHandle, group.Key);
                 foreach (var integrity in group)
                 {
                     if (actual.SequenceEqual(integrity.Hash!))
@@ -59,15 +55,26 @@ internal sealed class ExternalUpdaterIntegrityCheck : IExternalUpdaterIntegrityC
             }
         }
 
-        if (hasPolicyWaiver || acceptable.Count == 0)
+        var filePath = TryGetPath(openHandle);
+        
+        if (hasPolicyWaiver || integrityInformation.Count == 0)
         {
             _logger?.LogWarning(
-                "External updater at '{Path}' not verified against any enforced hash; a trust source waives integrity (signing not required by policy). Launching.",
-                updater.FullName);
+                "External updater at '{Path}' not verified against any enforced hash; a trust source waives integrity. Launching.",
+                filePath);
             return;
         }
 
-        throw new SecurityException(
-            $"External updater bytes at '{updater.FullName}' match none of the trusted hashes from the bundled provider or the pending update manifest. Refusing to launch.");
+        throw new SecurityException($"External updater bytes at '{filePath}' match none of the trusted hashes. Refusing to launch.");
+    }
+
+    private static string? TryGetPath(Stream stream)
+    {
+        return stream switch
+        {
+            FileStream fileStream => fileStream.Name,
+            FileSystemStream fileSystemStream => fileSystemStream.Name,
+            _ => null
+        };
     }
 }

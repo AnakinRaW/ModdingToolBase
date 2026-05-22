@@ -37,6 +37,11 @@ public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDispo
             FileSystem.File.Delete(_tempFile);
     }
 
+    private Stream OpenForCheck()
+    {
+        return FileSystem.File.Open(_tempFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+    }
+
     [Fact]
     public void EnsureMatchesAny_HashMatchesSingleAcceptable_DoesNotThrow()
     {
@@ -45,7 +50,8 @@ public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDispo
         var file = FileSystem.FileInfo.New(_tempFile);
         var expected = _hashingService.GetHash(file, HashTypeKey.SHA256);
 
-        _check.EnsureMatchesAny(file, [new ComponentIntegrityInformation(expected, HashTypeKey.SHA256)]);
+        using var s = OpenForCheck();
+        _check.EnsureMatchesAny(s, [new ComponentIntegrityInformation(expected, HashTypeKey.SHA256)]);
     }
 
     [Fact]
@@ -56,22 +62,23 @@ public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDispo
         var file = FileSystem.FileInfo.New(_tempFile);
         var actual = _hashingService.GetHash(file, HashTypeKey.SHA256);
 
+        using var s = OpenForCheck();
         _check.EnsureMatchesAny(
-            file,
+            s,
             [
                 new ComponentIntegrityInformation(new byte[32], HashTypeKey.SHA256),
-                new ComponentIntegrityInformation(actual, HashTypeKey.SHA256),
+                new ComponentIntegrityInformation(actual, HashTypeKey.SHA256)
             ]);
     }
 
     [Fact]
     public void EnsureMatchesAny_NoEnforceableMatchButWaiverPresent_AcceptsWithWarning()
     {
-        FileSystem.File.WriteAllBytes(_tempFile, new byte[] { 0x10, 0x20, 0x30 });
-        var file = FileSystem.FileInfo.New(_tempFile);
+        FileSystem.File.WriteAllBytes(_tempFile, [0x10, 0x20, 0x30]);
 
+        using var s = OpenForCheck();
         _check.EnsureMatchesAny(
-            file,
+            s,
             [
                 new ComponentIntegrityInformation(new byte[32], HashTypeKey.SHA256),    // enforceable, won't match
                 ComponentIntegrityInformation.None,                                         // waiver
@@ -81,11 +88,11 @@ public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDispo
     [Fact]
     public void EnsureMatchesAny_HashMatchesNone_ThrowsSecurityException()
     {
-        FileSystem.File.WriteAllBytes(_tempFile, new byte[] { 1, 2, 3, 4, 5 });
-        var file = FileSystem.FileInfo.New(_tempFile);
+        FileSystem.File.WriteAllBytes(_tempFile, [1, 2, 3, 4, 5]);
 
+        using var s = OpenForCheck();
         Assert.Throws<SecurityException>(() => _check.EnsureMatchesAny(
-            file,
+            s,
             [
                 new ComponentIntegrityInformation(new byte[32], HashTypeKey.SHA256),
                 new ComponentIntegrityInformation(new byte[32], HashTypeKey.SHA256),
@@ -93,36 +100,27 @@ public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDispo
     }
 
     [Fact]
-    public void EnsureMatchesAny_FileMissing_ThrowsFileNotFoundException()
-    {
-        var file = FileSystem.FileInfo.New(_tempFile);
-        Assert.Throws<FileNotFoundException>(() => _check.EnsureMatchesAny(
-            file,
-            [new ComponentIntegrityInformation(new byte[32], HashTypeKey.SHA256)]));
-    }
-
-    [Fact]
     public void EnsureMatchesAny_EmptyAcceptable_IsNoOp()
     {
-        FileSystem.File.WriteAllBytes(_tempFile, new byte[] { 0xAA });
-        var file = FileSystem.FileInfo.New(_tempFile);
+        FileSystem.File.WriteAllBytes(_tempFile, [0xAA]);
 
-        _check.EnsureMatchesAny(file, []);
+        using var s = OpenForCheck();
+        _check.EnsureMatchesAny(s, []);
     }
 
     [Fact]
     public void EnsureMatchesAny_AllAcceptablesAreNoIntegrity_IsNoOp()
     {
-        FileSystem.File.WriteAllBytes(_tempFile, new byte[] { 0xAA });
-        var file = FileSystem.FileInfo.New(_tempFile);
+        FileSystem.File.WriteAllBytes(_tempFile, [0xAA]);
 
+        using var s = OpenForCheck();
         _check.EnsureMatchesAny(
-            file,
+            s,
             [ComponentIntegrityInformation.None, new ComponentIntegrityInformation(null, HashTypeKey.SHA256)]);
     }
 
     [Fact]
-    public void EnsureMatchesAny_NullUpdater_Throws()
+    public void EnsureMatchesAny_NullStream_Throws()
     {
         Assert.Throws<ArgumentNullException>(() => _check.EnsureMatchesAny(null!, []));
     }
@@ -130,8 +128,9 @@ public class ExternalUpdaterIntegrityCheckTests : TestBaseWithFileSystem, IDispo
     [Fact]
     public void EnsureMatchesAny_NullAcceptable_Throws()
     {
-        var file = FileSystem.FileInfo.New(_tempFile);
-        Assert.Throws<ArgumentNullException>(() => _check.EnsureMatchesAny(file, null!));
+        FileSystem.File.WriteAllBytes(_tempFile, [0xAA]);
+        using var s = OpenForCheck();
+        Assert.Throws<ArgumentNullException>(() => _check.EnsureMatchesAny(s, null!));
     }
 
     [Fact]

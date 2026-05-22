@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.Threading;
@@ -23,7 +24,7 @@ internal class BackupManager : IBackupManager
     private readonly IProductService _productService;
     private readonly IHashingService _hashingService;
 
-    //[field: AllowNull]
+    [field: AllowNull]
     private IFileRepository FileRepository => LazyInitializer.EnsureInitialized(ref field, CreateRepository);
 
     public IDictionary<InstallableComponent, BackupValueData> Backups => new Dictionary<InstallableComponent, BackupValueData>(_backups);
@@ -63,9 +64,15 @@ internal class BackupManager : IBackupManager
 
         try
         {
-            var backup = backupData.Backup;
-            backup!.Directory!.Create();
+            var backup = backupData.Backup!;
+            backup.Directory!.Create();
             backupData.Destination.CopyWithRetry(backup.FullName);
+
+            _backups[component] = new BackupValueData(backupData.Destination)
+            {
+                Backup = backup,
+                BackupHash = _hashingService.GetHash(backup, HashTypeKey.SHA256),
+            };
         }
         catch (Exception)
         {

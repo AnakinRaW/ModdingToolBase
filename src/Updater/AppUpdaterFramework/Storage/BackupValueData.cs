@@ -8,7 +8,9 @@ internal sealed class BackupValueData(IFileInfo destination) : IEquatable<Backup
     public IFileInfo Destination { get; } = destination;
 
     public IFileInfo? Backup { get; init; }
-    
+
+    public byte[]? BackupHash { get; init; }
+
     public bool IsOriginallyMissing()
     {
         return Backup is null;

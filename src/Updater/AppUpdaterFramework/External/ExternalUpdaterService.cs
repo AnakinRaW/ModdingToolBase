@@ -9,15 +9,18 @@ using AnakinRaW.CommonUtilities;
 using AnakinRaW.CommonUtilities.FileSystem.Normalization;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.ExternalUpdater;
+using AnakinRaW.ExternalUpdater.Models;
 using AnakinRaW.ExternalUpdater.Options;
 using AnakinRaW.ExternalUpdater.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Text;
 using IServiceProvider = System.IServiceProvider;
 
 namespace AnakinRaW.AppUpdaterFramework.External;
@@ -33,6 +36,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly UpdateConfiguration _updateConfig;
     private readonly IExternalUpdaterProvider _updaterProvider;
     private readonly IExternalUpdaterIntegrityCheck _integrityCheck;
+    private readonly IHashingService _hashingService;
     private readonly string _tempPath;
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
@@ -44,7 +48,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
         _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetReadOnlyRepository();
         _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
-        serviceProvider.GetRequiredService<IHashingService>();
+        _hashingService = serviceProvider.GetRequiredService<IHashingService>();
         _updaterProvider = serviceProvider.GetRequiredService<IExternalUpdaterProvider>();
         _integrityCheck = serviceProvider.GetRequiredService<IExternalUpdaterIntegrityCheck>();
         serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterService));
@@ -58,14 +62,13 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         var cpi = CurrentProcessInfo.Current;
         if (string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
-        var updateInformationFile = WriteToTempFile(CollectUpdateInformation());
 
         return new ExternalUpdateOptions
         {
             AppToStart = cpi.ProcessFilePath!,
             AppToStartArguments = CreateAppStartArguments(),
             Pid = cpi.Id,
-            UpdateFile = updateInformationFile,
+            Payload = CollectUpdateInformation().ToPayload(),
             LoggingDirectory = _tempPath,
 #if DEBUG
             Timeout = 90,
@@ -97,11 +100,27 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return ResolveExternalUpdaterFile();
     }
 
+    public void BackupPendingComponents()
+    {
+        if (_updateConfig.BackupPolicy == BackupPolicy.Disable)
+            return;
+
+        var backupManager = _serviceProvider.GetRequiredService<IBackupManager>();
+        foreach (var pending in _pendingComponentStore.PendingComponents)
+            backupManager.BackupComponent(pending.Component);
+    }
+
     public void Launch(ExternalUpdaterOptions options)
     {
         var file = ResolveExternalUpdaterFile();
+        if (!file.Exists)
+            throw new FileNotFoundException("External updater binary not found.", file.FullName);
+
         var integrityInformation = GetTrustedIntegrityInformation();
-        _integrityCheck.EnsureMatchesAny(file, integrityInformation);
+
+        // Open with FileShare.Read and keep the handle alive across Process.Start
+        using var verifiedHandle = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+        _integrityCheck.EnsureMatchesAny(verifiedHandle, integrityInformation);
 
         var launcher = _serviceProvider.GetRequiredService<IExternalUpdaterLauncher>();
         using var _ = launcher.Start(file, options);
@@ -197,25 +216,20 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return updateInformation;
     }
 
-    private string WriteToTempFile(IEnumerable<UpdateInformation> updateInformation)
-    {
-        var fileName = _fileSystem.Path.GetRandomFileName();
-        var tempFilePath = _fileSystem.Path.Combine(_tempPath, fileName);
-
-        using var fs = _fileSystem.FileStream.New(tempFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-        using var writer = new StreamWriter(fs);
-        writer.Write(updateInformation.Serialize());
-
-        return tempFilePath;
-    }
-
     private static BackupInformation CreateFromBackup(BackupValueData backup)
     {
         return new BackupInformation
         {
             Destination = backup.Destination.FullName,
-            Source = backup.Backup?.FullName
+            Source = backup.Backup?.FullName,
+            Sha256 = backup.Backup is null ? null : RequireBackupHash(backup.BackupHash!),
         };
+    }
+
+    private static string RequireBackupHash(byte[] backupHash)
+    {
+        Debug.Assert(backupHash is not null);
+        return BytesToHex(backupHash!);
     }
 
     private FileCopyInformation CreateFromComponent(PhysicallyInstallableComponent component, UpdateAction action)
@@ -227,18 +241,20 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
         string? destination;
         string source;
+        string? sha256;
 
         switch (action)
         {
             case UpdateAction.Update:
                 source = _downloadFileRepository.GetComponent(component)?.FullName ??
-                         throw new InvalidOperationException(
-                             $"Unable to find source location for component: {component}");
+                         throw new InvalidOperationException($"Unable to find source location for component: {component}");
                 destination = componentLocation;
+                sha256 = ResolveSha256(component, source);
                 break;
             case UpdateAction.Delete:
                 source = componentLocation;
                 destination = null;
+                sha256 = null;
                 break;
             case UpdateAction.Keep:
                 throw new NotSupportedException("UpdateAction Keep is not supported");
@@ -248,8 +264,30 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return new FileCopyInformation
         {
             Destination = destination,
-            File = source
+            File = source,
+            Sha256 = sha256
         };
+    }
+
+    private string ResolveSha256(PhysicallyInstallableComponent component, string sourceFile)
+    {
+        var integrity = component.OriginInfo?.IntegrityInformation;
+        if (integrity is not null && integrity.Value.HashType == HashTypeKey.SHA256 && integrity.Value.Hash is not null)
+            return BytesToHex(integrity.Value.Hash);
+
+        if (_updateConfig.ManifestSigningConfiguration.Policy == SignaturePolicy.Required)
+            throw new InvalidOperationException($"Component '{component.Id}' has no SHA-256 declaration but signing is required.");
+
+        using var stream = _fileSystem.FileStream.New(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return BytesToHex(_hashingService.GetHash(stream, HashTypeKey.SHA256));
+    }
+
+    private static string BytesToHex(byte[] bytes)
+    {
+        var sb = new StringBuilder(bytes.Length * 2);
+        foreach (var b in bytes)
+            sb.Append(b.ToString("x2"));
+        return sb.ToString();
     }
 
     private string? CreateAppStartArguments()
