@@ -16,7 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -222,14 +221,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         {
             Destination = backup.Destination.FullName,
             Source = backup.Backup?.FullName,
-            Sha256 = backup.Backup is null ? null : RequireBackupHash(backup.BackupHash!),
+            Integrity = backup.Backup is null ? null : ToUpdaterIntegrity(backup.BackupIntegrity),
         };
-    }
-
-    private static string RequireBackupHash(byte[] backupHash)
-    {
-        Debug.Assert(backupHash is not null);
-        return BytesToHex(backupHash!);
     }
 
     private FileCopyInformation CreateFromComponent(PhysicallyInstallableComponent component, UpdateAction action)
@@ -241,7 +234,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
         string? destination;
         string source;
-        string? sha256;
+        IntegrityInformation? integrity;
 
         switch (action)
         {
@@ -249,12 +242,12 @@ internal class ExternalUpdaterService : IExternalUpdaterService
                 source = _downloadFileRepository.GetComponent(component)?.FullName ??
                          throw new InvalidOperationException($"Unable to find source location for component: {component}");
                 destination = componentLocation;
-                sha256 = ResolveSha256(component, source);
+                integrity = ResolveIntegrity(component, source);
                 break;
             case UpdateAction.Delete:
                 source = componentLocation;
                 destination = null;
-                sha256 = null;
+                integrity = null;
                 break;
             case UpdateAction.Keep:
                 throw new NotSupportedException("UpdateAction Keep is not supported");
@@ -265,21 +258,35 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         {
             Destination = destination,
             File = source,
-            Sha256 = sha256
+            Integrity = integrity,
         };
     }
 
-    private string ResolveSha256(PhysicallyInstallableComponent component, string sourceFile)
+    private IntegrityInformation ResolveIntegrity(PhysicallyInstallableComponent component, string sourceFile)
     {
         var integrity = component.OriginInfo?.IntegrityInformation;
-        if (integrity is not null && integrity.Value.HashType == HashTypeKey.SHA256 && integrity.Value.Hash is not null)
-            return BytesToHex(integrity.Value.Hash);
+        if (integrity is not null && integrity.Value.HashType != HashTypeKey.None && integrity.Value.Hash is not null)
+            return ToUpdaterIntegrity(integrity.Value);
 
         if (_updateConfig.ManifestSigningConfiguration.Policy == SignaturePolicy.Required)
-            throw new InvalidOperationException($"Component '{component.Id}' has no SHA-256 declaration but signing is required.");
+            throw new InvalidOperationException($"Component '{component.Id}' has no integrity declaration but signing is required.");
 
+        var hashType = HashTypeKey.SHA256;
         using var stream = _fileSystem.FileStream.New(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-        return BytesToHex(_hashingService.GetHash(stream, HashTypeKey.SHA256));
+        return new IntegrityInformation
+        {
+            HashType = hashType.Name,
+            Hash = BytesToHex(_hashingService.GetHash(stream, hashType)),
+        };
+    }
+
+    private static IntegrityInformation ToUpdaterIntegrity(ComponentIntegrityInformation source)
+    {
+        return new IntegrityInformation
+        {
+            HashType = source.HashType.Name,
+            Hash = BytesToHex(source.Hash!),
+        };
     }
 
     private static string BytesToHex(byte[] bytes)

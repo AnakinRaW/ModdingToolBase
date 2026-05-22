@@ -68,10 +68,13 @@ internal class BackupManager : IBackupManager
             backup.Directory!.Create();
             backupData.Destination.CopyWithRetry(backup.FullName);
 
+            var hashType = HashTypeKey.SHA256;
             _backups[component] = new BackupValueData(backupData.Destination)
             {
                 Backup = backup,
-                BackupHash = _hashingService.GetHash(backup, HashTypeKey.SHA256),
+                BackupIntegrity = new ComponentIntegrityInformation(
+                    _hashingService.GetHash(backup, hashType),
+                    hashType),
             };
         }
         catch (Exception)

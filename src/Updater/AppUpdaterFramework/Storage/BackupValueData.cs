@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
@@ -9,7 +10,7 @@ internal sealed class BackupValueData(IFileInfo destination) : IEquatable<Backup
 
     public IFileInfo? Backup { get; init; }
 
-    public byte[]? BackupHash { get; init; }
+    public ComponentIntegrityInformation BackupIntegrity { get; init; } = ComponentIntegrityInformation.None;
 
     public bool IsOriginallyMissing()
     {
