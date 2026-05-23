@@ -128,10 +128,10 @@ internal class InstallStep : PipelineStep, IComponentStep
                 restartManager.SetRestart(RestartType.ApplicationRestart);
                 Logger?.LogWarning("Component '{Name}' get scheduled for installation after a restart.", Component.GetDisplayName());
                 
-                var pendingComponentStore = Services.GetRequiredService<IWritablePendingComponentStore>();
-                pendingComponentStore.AddComponent(new PendingComponent
+                var pendingUpdate = Services.GetRequiredService<IPendingUpdateService>();
+                pendingUpdate.AddPendingComponent(new PendingComponent
                 {
-                    Component = Component, 
+                    Component = Component,
                     Action = _action
                 });
             }

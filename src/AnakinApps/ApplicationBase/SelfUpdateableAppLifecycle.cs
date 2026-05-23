@@ -24,7 +24,6 @@ namespace AnakinRaW.ApplicationBase;
 public abstract class SelfUpdateableAppLifecycle
 {
     private IServiceProvider _bootstrapperServices = null!;
-    private string? _bootstrapperLoggingDir;
 
     protected ILoggerFactory? BootstrapLoggerFactory { get; private set; }
 
@@ -72,7 +71,7 @@ public abstract class SelfUpdateableAppLifecycle
         }
         else
         {
-            // There is no reason to continue a formally pending update if we reset the application before.
+            // There is no reason to continue a pending update if we reset the application before.
             HandlePendingUpdate(args);
         }
 
@@ -125,6 +124,7 @@ public abstract class SelfUpdateableAppLifecycle
             return;
         using var updateRegistry = new ApplicationUpdateRegistry(Registry, updateEnv);
         updateRegistry.Reset();
+        new PendingUpdateStore(updateEnv, FileSystem, BootstrapLoggerFactory).Delete();
     }
 
     protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyList<string> args)
@@ -151,8 +151,7 @@ public abstract class SelfUpdateableAppLifecycle
 
             using var updateBootstrapper = new SelfUpdateRestartHandler(
                 updatableApplicationEnvironment,
-                _bootstrapperServices,
-                _bootstrapperLoggingDir);
+                _bootstrapperServices);
             var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
 
             if (selfUpdateResult == SelfUpdateResult.Reset)
@@ -168,7 +167,7 @@ public abstract class SelfUpdateableAppLifecycle
         }
     }
 
-    private IServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)
+    private ServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)
     {
         var serviceCollection = new ServiceCollection();
         
@@ -207,11 +206,12 @@ public abstract class SelfUpdateableAppLifecycle
             var fileSystem = FileSystem;
 
             var tempDir = fileSystem.Path.GetTempPath();
-            var tempSubFolderName = EncodeDirectoryName(ApplicationEnvironment.ApplicationName);
+            
+            var encodedAppName = EncodeDirectoryName(ApplicationEnvironment.ApplicationName);
 
-            var loggingDir = _bootstrapperLoggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, tempSubFolderName));
+            var loggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, encodedAppName));
 
-            var filePath = FileSystem.Path.Combine(loggingDir, "appBootstrap.log");
+            var filePath = FileSystem.Path.Combine(loggingDir, $"{encodedAppName}-Bootstrap.log");
 
             var fileLogger = new LoggerConfiguration()
                 .WriteTo.File(filePath, rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: logLevel)
