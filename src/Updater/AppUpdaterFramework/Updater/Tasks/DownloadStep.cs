@@ -14,6 +14,7 @@ using AnakinRaW.AppUpdaterFramework.Updater.Progress;
 using AnakinRaW.AppUpdaterFramework.Utilities;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Validation;
+using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.SimplePipeline.Progress;
 using AnakinRaW.CommonUtilities.SimplePipeline.Steps;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +49,7 @@ internal class DownloadStep(
 
     public override string ToString()
     {
-        return $"Downloading component '{Component.GetUniqueId()}' form \"{Uri}\"";
+        return $"Downloading component '{Component.GetUniqueId()}' form '{Uri}' to '{DownloadPath.FullName}'";
     }
 
     protected override async Task RunCoreAsync(CancellationToken token)
@@ -89,8 +90,11 @@ internal class DownloadStep(
 
         try
         {
-            var downloadPath = _downloadRepositoryFactory.GetRepository().AddComponent(Component, productVariables);
-            DownloadPath = downloadPath;
+            DownloadPath = _downloadRepositoryFactory.GetRepository()
+                .AddComponent(Component, productVariables);
+
+            if (TryReuseCachedDownload())
+                return null;
 
             var downloadRetryCount = 1 + _updateConfiguration.DownloadRetryCount;
 
@@ -149,6 +153,35 @@ internal class DownloadStep(
         }
 
         return lastException;
+    }
+
+    private bool TryReuseCachedDownload()
+    {
+        var integrity = Component.OriginInfo?.IntegrityInformation;
+        if (integrity is null || integrity.Value.HashType == HashTypeKey.None || integrity.Value.Hash is null)
+            return false;
+
+        DownloadPath.Refresh();
+        if (!DownloadPath.Exists)
+            return false;
+        if (DownloadPath.Length != Component.DownloadSize)
+            return false;
+
+        try
+        {
+            var hashing = Services.GetRequiredService<IHashingService>();
+            var actual = hashing.GetHash(DownloadPath, integrity.Value.HashType);
+            if (!actual.SequenceEqual(integrity.Value.Hash))
+                return false;
+        }
+        catch (Exception ex)
+        {
+            Logger?.LogTrace(ex, "Cached download check failed for '{Path}'; will redownload.", DownloadPath.FullName);
+            return false;
+        }
+
+        Logger?.LogInformation("Reusing cached download at '{Path}'.", DownloadPath.FullName);
+        return true;
     }
 
     private async Task DownloadAndVerifyAsync(IFileInfo destination, CancellationToken token)
