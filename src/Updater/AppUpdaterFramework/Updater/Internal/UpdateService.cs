@@ -79,6 +79,18 @@ internal class UpdateService : IUpdateService
         }
     }
 
+    public async Task<UpdateResult?> UpdateAsync(ProductManifest manifest, CancellationToken token = default)
+    {
+        if (manifest is null)
+            throw new ArgumentNullException(nameof(manifest));
+
+        var productService = _serviceProvider.GetRequiredService<IProductService>();
+        productService.UpdateComponentDetectionState();
+        var currentInstance = productService.GetCurrentInstance();
+        var catalog = new UpdateCatalogFactory(_serviceProvider).Create(currentInstance, manifest);
+        return await UpdateAsync(catalog, token).ConfigureAwait(false);
+    }
+
     public async Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default)
     {
         lock (_syncLock)

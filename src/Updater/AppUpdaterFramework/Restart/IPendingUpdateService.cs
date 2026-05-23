@@ -4,26 +4,32 @@ namespace AnakinRaW.AppUpdaterFramework.Restart;
 
 public interface IPendingUpdateService : IPendingUpdateState
 {
+    /// <summary>
+    /// Stores the bytes of an update manifest and the optional branch to the pending update state.
+    /// </summary>
+    /// <param name="bytes">The bytes of the update manifest.</param>
+    /// <param name="branch">The optional branch of the update manifest.</param>
     void SetFetchedManifest(byte[] bytes, string? branch);
 
+    /// <summary>
+    /// Adds a pending component to the pending update state.
+    /// </summary>
+    /// <param name="component">The pending component to add.</param>
     void AddPendingComponent(PendingComponent component);
 
     /// <summary>
-    /// Replaces <see cref="IPendingUpdateState.PendingComponents"/> with the supplied set.
+    /// Replaces the pending components in the pending update state with a new collection.
     /// </summary>
-    /// <remarks>
-    /// Used by the resume-pending-update path to repopulate the in-memory store from a
-    /// previously persisted snapshot after the app has re-verified the manifest.
-    /// </remarks>
+    /// <param name="components">The new collection of pending components.</param>
     void ReplacePendingComponents(IEnumerable<PendingComponent> components);
 
+    /// <summary>
+    /// Resets the pending update state to its initial empty state.
+    /// </summary>
     void Clear();
 
     /// <summary>
-    /// Creates a physical backup for every component currently in <see cref="IPendingUpdateState.PendingComponents"/>.
+    /// Creates a physical backup for every component in the pending update state.
     /// </summary>
-    /// <remarks>
-    /// No-op when <see cref="Configuration.UpdateConfiguration.BackupPolicy"/> is <see cref="Configuration.BackupPolicy.Disable"/>.
-    /// </remarks>
     void BackupPendingComponents();
 }
