@@ -29,7 +29,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IServiceProvider _serviceProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IProductService _productService;
-    private readonly IPendingComponentStore _pendingComponentStore;
+    private readonly IPendingUpdateState _pendingState;
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyFileRepository _downloadFileRepository;
     private readonly UpdateConfiguration _updateConfig;
@@ -43,7 +43,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _serviceProvider = serviceProvider;
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _pendingComponentStore = serviceProvider.GetRequiredService<IPendingComponentStore>();
+        _pendingState = serviceProvider.GetRequiredService<IPendingUpdateState>();
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
         _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetReadOnlyRepository();
         _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
@@ -99,16 +99,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return ResolveExternalUpdaterFile();
     }
 
-    public void BackupPendingComponents()
-    {
-        if (_updateConfig.BackupPolicy == BackupPolicy.Disable)
-            return;
-
-        var backupManager = _serviceProvider.GetRequiredService<IBackupManager>();
-        foreach (var pending in _pendingComponentStore.PendingComponents)
-            backupManager.BackupComponent(pending.Component);
-    }
-
     public void Launch(ExternalUpdaterOptions options)
     {
         var file = ResolveExternalUpdaterFile();
@@ -150,7 +140,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         
         acceptable.Add(trusted);
 
-        var pending = _pendingComponentStore.PendingComponents
+        var pending = _pendingState.PendingComponents
             .Select(p => p.Component)
             .OfType<SingleFileComponent>()
             .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
@@ -172,7 +162,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
 
     private List<UpdateInformation> CollectUpdateInformation()
     {
-        var pendingComponents = _pendingComponentStore.PendingComponents;
+        var pendingComponents = _pendingState.PendingComponents;
         var backups = _backupManager.Backups;
 
         var updateInformation = new List<UpdateInformation>();

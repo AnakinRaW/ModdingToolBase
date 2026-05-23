@@ -12,13 +12,4 @@ public interface IExternalUpdaterService
     IFileInfo GetExternalUpdater();
 
     void Launch(ExternalUpdaterOptions options);
-
-    /// <summary>
-    /// Creates a backup for every component currently in <see cref="Restart.IPendingComponentStore"/>.
-    /// </summary>
-    /// <remarks>
-    /// No-op when <see cref="Configuration.UpdateConfiguration.BackupPolicy"/> is
-    /// <see cref="Configuration.BackupPolicy.Disable"/>.
-    /// </remarks>
-    void BackupPendingComponents();
 }
