@@ -12,7 +12,7 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 
 internal sealed class FileRepository : IFileRepository
 {
-    private readonly ConcurrentDictionary<InstallableComponent, IFileInfo> _componentStore = new(ProductComponentIdentityComparer.Default);
+    private readonly ConcurrentDictionary<InstallableComponent, string> _componentStore = new(ProductComponentIdentityComparer.Default);
     private readonly IFileSystem _fileSystem;
 
     private string NewFileExtension { get; }
@@ -32,14 +32,14 @@ internal sealed class FileRepository : IFileRepository
         Root.Create();
     }
 
-    public IFileInfo AddComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    public string AddComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
-        if (component == null)
-            throw new ArgumentNullException(nameof(component));
-        return _componentStore.GetOrAdd(component, c => CreateComponentFile(c, variables));
+        return component == null ?
+            throw new ArgumentNullException(nameof(component)) :
+            _componentStore.GetOrAdd(component, c => _fileSystem.Path.GetFullPath(ResolveComponentFile(c, variables)));
     }
 
-    public IFileInfo? GetComponent(InstallableComponent component)
+    public string? GetComponent(InstallableComponent component)
     {
         if (component == null) 
             throw new ArgumentNullException(nameof(component));
@@ -47,43 +47,29 @@ internal sealed class FileRepository : IFileRepository
         return file;
     }
 
-    public IDictionary<InstallableComponent, IFileInfo> GetComponents()
+    public IDictionary<InstallableComponent, string> GetComponents()
     {
-        return new Dictionary<InstallableComponent, IFileInfo>(_componentStore, ProductComponentIdentityComparer.Default);
+        return new Dictionary<InstallableComponent, string>(_componentStore, ProductComponentIdentityComparer.Default);
     }
 
     public void RemoveComponent(InstallableComponent component)
     {
         if (!_componentStore.TryRemove(component, out var file))
             return;
-        file.DeleteWithRetry();
+        _fileSystem.File.DeleteWithRetry(file);
     }
 
-    private IFileInfo CreateComponentFile(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
-    {
-        var file = ResolveComponentFile(component, variables);
-
-        if (file.Exists)
-            return file;
-
-        file.Create().Dispose();
-        file.Refresh();
-        if (!file.Exists)
-            throw new InvalidOperationException();
-        return file;
-    }
-
-    private IFileInfo ResolveComponentFile(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    private string ResolveComponentFile(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         var deterministicName = CreateDeterministicFileName(component, variables);
         if (deterministicName is not null)
-            return _fileSystem.FileInfo.New(_fileSystem.Path.Combine(Root.FullName, deterministicName));
+            return _fileSystem.Path.Combine(Root.FullName, deterministicName);
 
         var prefix = GetNamePrefix(component, variables);
         for (var i = 0; i < 10; i++)
         {
-            var file = _fileSystem.FileInfo.New(CreateRandomFilePath(prefix));
-            if (!file.Exists)
+            var file = CreateRandomFilePath(prefix);
+            if (!_fileSystem.File.Exists(file))
                 return file;
         }
         throw new InvalidOperationException("Unable to create a new random file after 10 retries");

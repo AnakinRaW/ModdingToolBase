@@ -32,12 +32,13 @@ internal class DownloadStep(
 {
     private readonly UpdateConfiguration _updateConfiguration = updateConfiguration ?? throw new ArgumentNullException(nameof(updateConfiguration));
     private readonly IDownloadRepositoryFactory _downloadRepositoryFactory = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>();
+    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
 
     public event EventHandler<ProgressEventArgs<ComponentProgressInfo>>? Progress;
 
     public ProgressType Type => ProgressTypes.Download;
 
-    public IFileInfo DownloadPath { get; private set; } = null!;
+    public string DownloadPath { get; private set; } = null!;
 
     public long Size { get; } = installable.DownloadSize;
 
@@ -49,7 +50,7 @@ internal class DownloadStep(
 
     public override string ToString()
     {
-        return $"Downloading component '{Component.GetUniqueId()}' form '{Uri}' to '{DownloadPath.FullName}'";
+        return $"Downloading component '{Component.GetUniqueId()}' form '{Uri}' to '{DownloadPath}'";
     }
 
     protected override async Task RunCoreAsync(CancellationToken token)
@@ -106,13 +107,14 @@ internal class DownloadStep(
                 try
                 {
                     await DownloadAndVerifyAsync(DownloadPath, token).ConfigureAwait(false);
-                    DownloadPath.Refresh();
-                    if (!DownloadPath.Exists)
+                    
+                    if (!_fileSystem.File.Exists(DownloadPath))
                     {
                         var message = "Source not found after being successfully downloaded and verified: " +
                                       DownloadPath + ", package: " + Component.GetDisplayName();
                         Logger?.LogWarning(message);
-                        throw new FileNotFoundException(message, DownloadPath.FullName);
+                        throw new FileNotFoundException(message, DownloadPath);
+
                     }
                     
                     lastException = null;
@@ -161,38 +163,41 @@ internal class DownloadStep(
         if (integrity is null || integrity.Value.HashType == HashTypeKey.None || integrity.Value.Hash is null)
             return false;
 
-        DownloadPath.Refresh();
-        if (!DownloadPath.Exists)
+        var fileInfo = _fileSystem.FileInfo.New(DownloadPath);
+
+        if (!fileInfo.Exists)
             return false;
-        if (DownloadPath.Length != Component.DownloadSize)
+       
+        
+        if (fileInfo.Length != Component.DownloadSize)
             return false;
 
         try
         {
             var hashing = Services.GetRequiredService<IHashingService>();
-            var actual = hashing.GetHash(DownloadPath, integrity.Value.HashType);
+            var actual = hashing.GetHash(fileInfo, integrity.Value.HashType);
             if (!actual.SequenceEqual(integrity.Value.Hash))
                 return false;
         }
         catch (Exception ex)
         {
-            Logger?.LogTrace(ex, "Cached download check failed for '{Path}'; will redownload.", DownloadPath.FullName);
+            Logger?.LogTrace(ex, "Cached download check failed for '{Path}'; will redownload.", DownloadPath);
             return false;
         }
 
-        Logger?.LogInformation("Reusing cached download at '{Path}'.", DownloadPath.FullName);
+        Logger?.LogInformation("Reusing cached download at '{Path}'.", DownloadPath);
         return true;
     }
 
-    private async Task DownloadAndVerifyAsync(IFileInfo destination, CancellationToken token)
+    private async Task DownloadAndVerifyAsync(string destination, CancellationToken token)
     {
         var integrityInformation = Component.OriginInfo!.IntegrityInformation;
         try
         {
 #if NETSTANDARD2_1
-            await using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            await using var file = _fileSystem.FileStream.New(destination, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 #else
-            using var file = destination.Open(FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            using var file = _fileSystem.FileStream.New(destination, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 #endif
             await downloadManager.DownloadAsync(Uri, file, OnProgress, null,
                 new HashDownloadValidator(integrityInformation.Hash, integrityInformation.HashType, Services), token)
@@ -205,7 +210,7 @@ internal class DownloadStep(
             {
                 Logger?.LogTrace(
                     "Deleting potentially partially downloaded file '{FileInfo}' generated as a result of operation cancellation.", destination);
-                destination.Delete();
+                _fileSystem.File.Delete(destination);
             }
             catch (Exception e)
             {

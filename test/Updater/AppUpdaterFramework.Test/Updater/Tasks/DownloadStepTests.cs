@@ -63,7 +63,7 @@ public class DownloadStepTests : TestBaseWithFileSystem, IDisposable
 
         Assert.Equal(0, dm.DownloadCallCount);
         Assert.Equal(content, FileSystem.File.ReadAllBytes(stagedPath));
-        Assert.Equal(stagedPath, step.DownloadPath.FullName);
+        Assert.Equal(stagedPath, step.DownloadPath);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class DownloadStepTests : TestBaseWithFileSystem, IDisposable
         await step.RunAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(1, dm.DownloadCallCount);
-        Assert.Equal(declared, FileSystem.File.ReadAllBytes(step.DownloadPath.FullName));
+        Assert.Equal(declared, FileSystem.File.ReadAllBytes(step.DownloadPath));
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class DownloadStepTests : TestBaseWithFileSystem, IDisposable
         await step.RunAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(1, dm.DownloadCallCount);
-        Assert.Equal(declared, FileSystem.File.ReadAllBytes(step.DownloadPath.FullName));
+        Assert.Equal(declared, FileSystem.File.ReadAllBytes(step.DownloadPath));
     }
 
     [Fact]

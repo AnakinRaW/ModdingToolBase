@@ -205,12 +205,12 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         return updateInformation;
     }
 
-    private static BackupInformation CreateFromBackup(BackupValueData backup)
+    private BackupInformation CreateFromBackup(BackupValueData backup)
     {
         return new BackupInformation
         {
-            Destination = backup.Destination.FullName,
-            Source = backup.Backup?.FullName,
+            Destination = _fileSystem.Path.GetFullPath(backup.Destination),
+            Source = string.IsNullOrEmpty(backup.Backup) ? null : _fileSystem.Path.GetFullPath(backup.Backup!),
             Integrity = backup.Backup is null ? null : ToUpdaterIntegrity(backup.BackupIntegrity),
         };
     }
@@ -229,7 +229,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         switch (action)
         {
             case UpdateAction.Update:
-                source = _downloadFileRepository.GetComponent(component)?.FullName ??
+                source = _downloadFileRepository.GetComponent(component) ??
                          throw new InvalidOperationException($"Unable to find source location for component: {component}");
                 destination = componentLocation;
                 integrity = ResolveIntegrity(component, source);
