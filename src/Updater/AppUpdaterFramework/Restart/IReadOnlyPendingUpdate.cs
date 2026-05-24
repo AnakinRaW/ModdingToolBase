@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace AnakinRaW.AppUpdaterFramework.Restart;
 
-public interface IPendingUpdateState
+public interface IReadOnlyPendingUpdate
 {
     /// <summary>
     /// Gets the raw bytes of the fetched manifest, or <see langword="null"/> if none was fetched.
@@ -15,7 +15,7 @@ public interface IPendingUpdateState
     string? FetchedBranch { get; }
 
     /// <summary>
-    /// Gets the components whose installation was deferred until after an application restart.
+    /// Gets the components whose installation is deferred until after an application restart.
     /// </summary>
     IReadOnlyCollection<PendingComponent> PendingComponents { get; }
 }

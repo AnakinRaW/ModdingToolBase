@@ -26,8 +26,7 @@ public static class LibraryInitialization
         serviceCollection.AddSingleton<IDownloadRepositoryFactory>(sp => new DownloadRepositoryFactory(sp));
         serviceCollection.AddSingleton<ILockedFileHandler>(sp => new LockedFileHandler(sp));
         serviceCollection.AddSingleton<IRestartManager>(_ => new RestartManager());
-        serviceCollection.AddSingleton<IPendingUpdateService>(sp => new PendingUpdateService(sp));
-        serviceCollection.AddSingleton<IPendingUpdateState>(sp => sp.GetRequiredService<IPendingUpdateService>());
+        serviceCollection.AddPendingUpdate();
 
         serviceCollection.AddSingleton<ISignatureVerifier>(sp => new SignatureVerifier(sp));
         serviceCollection.AddSingleton<IManifestFetcher>(sp => new ManifestFetcher(sp));
@@ -42,5 +41,12 @@ public static class LibraryInitialization
         serviceCollection.TryAddSingleton<ILockedFileInteractionHandler>(sp => new DefaultLockedFileInteractionHandler(sp));
 
         serviceCollection.AddSingleton<ICertificateStore>(sp => new CertificateStore(sp));
+    }
+
+    public static IServiceCollection AddPendingUpdate(this IServiceCollection serviceCollection)
+    {
+        serviceCollection.TryAddSingleton<IPendingUpdate>(sp => new PendingUpdate(sp));
+        serviceCollection.TryAddSingleton<IReadOnlyPendingUpdate>(sp => sp.GetRequiredService<IPendingUpdate>());
+        return serviceCollection;
     }
 }

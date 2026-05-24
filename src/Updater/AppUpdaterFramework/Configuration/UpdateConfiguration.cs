@@ -34,6 +34,16 @@ public class UpdateConfiguration
 
     public string? BackupLocation { get; init; }
 
+    /// <summary>
+    /// Gets the directory used to persist a fetched manifest across process restarts so a pending update can be resumed on the next launch.
+    /// Defaults to <see cref="DownloadLocation"/> when not explicitly set.
+    /// </summary>
+    public string PendingUpdateLocation
+    {
+        get => field ?? DownloadLocation;
+        init;
+    }
+
     public UpdateRestartConfiguration RestartConfiguration { get; init; } = new();
 
     /// <summary>

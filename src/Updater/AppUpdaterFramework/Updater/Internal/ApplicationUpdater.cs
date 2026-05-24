@@ -114,7 +114,7 @@ internal class ApplicationUpdater(UpdateCatalog updateCatalog, IServiceProvider 
             }
             catch (Exception ex)
             {
-                _serviceProvider.GetRequiredService<IPendingUpdateService>().Clear();
+                _serviceProvider.GetRequiredService<IPendingUpdate>().Clear();
                 _serviceProvider.GetRequiredService<IRestartManager>().SetRestart(RestartType.ApplicationRestart);
 
                var e = new FailedRestoreException(ex);

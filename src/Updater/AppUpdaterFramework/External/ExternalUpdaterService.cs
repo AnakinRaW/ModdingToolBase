@@ -29,7 +29,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly IServiceProvider _serviceProvider;
     private readonly IFileSystem _fileSystem;
     private readonly IProductService _productService;
-    private readonly IPendingUpdateState _pendingState;
+    private readonly IReadOnlyPendingUpdate _pendingState;
     private readonly IReadOnlyBackupManager _backupManager;
     private readonly IReadOnlyFileRepository _downloadFileRepository;
     private readonly UpdateConfiguration _updateConfig;
@@ -43,7 +43,7 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _serviceProvider = serviceProvider;
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _productService = serviceProvider.GetRequiredService<IProductService>();
-        _pendingState = serviceProvider.GetRequiredService<IPendingUpdateState>();
+        _pendingState = serviceProvider.GetRequiredService<IReadOnlyPendingUpdate>();
         _backupManager = serviceProvider.GetRequiredService<IReadOnlyBackupManager>();
         _downloadFileRepository = serviceProvider.GetRequiredService<IDownloadRepositoryFactory>().GetReadOnlyRepository();
         _updateConfig = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();

@@ -22,7 +22,7 @@ internal class ManifestFetcher : IManifestFetcher
     private readonly IFileSystem _fileSystem;
     private readonly IDownloadManager _downloadManager;
     private readonly ManifestLoaderBase _manifestLoader;
-    private readonly IPendingUpdateService _pendingUpdate;
+    private readonly IPendingUpdate _pendingUpdate;
     private readonly ILogger? _logger;
 
     public ManifestFetcher(IServiceProvider serviceProvider)
@@ -31,7 +31,7 @@ internal class ManifestFetcher : IManifestFetcher
             throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _manifestLoader = serviceProvider.GetRequiredService<IManifestLoaderProvider>().Loader;
-        _pendingUpdate = serviceProvider.GetRequiredService<IPendingUpdateService>();
+        _pendingUpdate = serviceProvider.GetRequiredService<IPendingUpdate>();
         var config = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
         EnsureConsistentConfiguration(config);
         _downloadManager = new DownloadManager(config.ManifestDownloadConfiguration.ToDownloadManagerConfiguration(), serviceProvider);
