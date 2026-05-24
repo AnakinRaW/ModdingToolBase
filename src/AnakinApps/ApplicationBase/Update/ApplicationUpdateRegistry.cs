@@ -1,11 +1,13 @@
-﻿using System;
-using System.IO.Abstractions;
+using System;
 using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.CommonUtilities.Registry;
-using AnakinRaW.ExternalUpdater.Options;
 
 namespace AnakinRaW.ApplicationBase.Update;
 
+// HKCU keys for the deferred-update resume gate:
+//   - RequiresUpdate (bool)   — the resume gate itself
+//   - UpdateBranch   (string) — branch name; lets the framework pick the right mirror for re-download if needed
+//   - ResetApp       (bool)   — request a full app reset on next launch
 public sealed class ApplicationUpdateRegistry : IDisposable
 {
     private readonly IRegistryKey _registryKey;
@@ -19,37 +21,13 @@ public sealed class ApplicationUpdateRegistry : IDisposable
     public bool RequiresUpdate
     {
         get => _registryKey.GetValueOrDefault(nameof(RequiresUpdate), false, out _);
-        private set => _registryKey.SetValue(nameof(RequiresUpdate), value);
-    }
-
-    public string? UpdateCommandArgs
-    {
-        get => _registryKey.GetValueOrDefault<string?>(nameof(UpdateCommandArgs), null, out _);
-        private set
-        {
-            if (string.IsNullOrEmpty(value))
-                _registryKey.DeleteValue(nameof(UpdateCommandArgs));
-            else
-                _registryKey.SetValue(nameof(UpdateCommandArgs), value!);
-        }
-    }
-
-    public string? UpdaterPath
-    {
-        get => _registryKey.GetValueOrDefault<string?>(nameof(UpdaterPath), null, out _);
-        private set
-        {
-            if (string.IsNullOrEmpty(value))
-                _registryKey.DeleteValue(nameof(UpdaterPath));
-            else
-                _registryKey.SetValue(nameof(UpdaterPath), value!);
-        }
+        set => _registryKey.SetValue(nameof(RequiresUpdate), value);
     }
 
     public string? UpdateBranch
     {
         get => _registryKey.GetValueOrDefault<string?>(nameof(UpdateBranch), null, out _);
-        private set
+        set
         {
             if (string.IsNullOrEmpty(value))
                 _registryKey.DeleteValue(nameof(UpdateBranch));
@@ -60,37 +38,19 @@ public sealed class ApplicationUpdateRegistry : IDisposable
 
     public ApplicationUpdateRegistry(IRegistry registry, UpdatableApplicationEnvironment appEnvironment)
     {
-        if (registry == null) 
-            throw new ArgumentNullException(nameof(registry));
-        if (appEnvironment is null) 
-            throw new ArgumentNullException(nameof(appEnvironment));
+        if (registry is null) throw new ArgumentNullException(nameof(registry));
+        if (appEnvironment is null) throw new ArgumentNullException(nameof(appEnvironment));
+
         var baseKey = registry.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
-        var registryKey = baseKey.CreateSubKey(appEnvironment.UpdateRegistryPath);
-        _registryKey = registryKey ?? throw new InvalidOperationException("Unable to create registry. Missing rights?");
+        _registryKey = baseKey.CreateSubKey(appEnvironment.UpdateRegistryPath)
+                        ?? throw new InvalidOperationException("Unable to create registry. Missing rights?");
     }
-    
+
     public void Reset()
     {
         _registryKey.DeleteValue(nameof(ResetApp));
         _registryKey.DeleteValue(nameof(RequiresUpdate));
-        _registryKey.DeleteValue(nameof(UpdateCommandArgs));
-        _registryKey.DeleteValue(nameof(UpdaterPath));
-    }
-
-    public void ScheduleUpdate(IFileInfo updater, ExternalUpdaterOptions options)
-    {
-        if (updater == null)
-            throw new ArgumentNullException(nameof(updater));
-        if (options == null)
-            throw new ArgumentNullException(nameof(options));
-        RequiresUpdate = true;
-        UpdaterPath = updater.FullName;
-
-        // We don't want to store the current arguments in the registry, as they are only relevant for immediate restart.
-        // Adding them for delayed updates might cause usability and security issues.
-        var optionsWithoutCurrentArgs = options with { AppToStartArguments = null };
-
-        UpdateCommandArgs = optionsWithoutCurrentArgs.ToArgs();
+        _registryKey.DeleteValue(nameof(UpdateBranch));
     }
 
     public void ScheduleReset()
@@ -101,10 +61,5 @@ public sealed class ApplicationUpdateRegistry : IDisposable
     public void Dispose()
     {
         _registryKey.Dispose();
-    }
-
-    public void SetBranch(string? branchName)
-    {
-        UpdateBranch = branchName;
     }
 }

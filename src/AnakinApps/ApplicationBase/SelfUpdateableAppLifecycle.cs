@@ -1,9 +1,10 @@
 ﻿using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Update;
+using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.External;
-using AnakinRaW.AppUpdaterFramework.Handlers;
+using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.CommonUtilities.Registry;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,18 +65,13 @@ public abstract class SelfUpdateableAppLifecycle
         logger?.LogTrace("Application started with raw arguments: '{Args}'", System.Environment.CommandLine);
         Logger = logger;
 
-        if (ShouldPreBootstrapResetApp(args))
+        var resetRequested = ShouldPreBootstrapResetApp(args);
+        if (resetRequested)
         {
             logger?.LogWarning("The application was requested to reset itself.");
             ResetApp();
         }
-        else
-        {
-            // There is no reason to continue a pending update if we reset the application before.
-            HandlePendingUpdate(args);
-        }
 
-        // Initialization of the app must happen after completing the self-update process.
         logger?.LogInformation("Initializing application.");
         var initResult = await InitializeAppAsync(args, _bootstrapperServices);
         if (initResult != 0)
@@ -89,6 +85,12 @@ public abstract class SelfUpdateableAppLifecycle
 
         if (IsUpdateableApplication)
             appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable();
+
+        if (!resetRequested)
+        {
+            // There is no reason to continue a pending update if we reset the application before.
+            await HandlePendingUpdateAsync(args, appServices).ConfigureAwait(false);
+        }
 
         // ConfigureAwait cannot be set to false here, because WPF apps might expect the context of the main thread.
         return await RunAppAsync(args, appServices);
@@ -124,7 +126,7 @@ public abstract class SelfUpdateableAppLifecycle
             return;
         using var updateRegistry = new ApplicationUpdateRegistry(Registry, updateEnv);
         updateRegistry.Reset();
-        new PendingUpdateStore(updateEnv, FileSystem, BootstrapLoggerFactory).Delete();
+        _bootstrapperServices.GetRequiredService<IPendingUpdate>().Clear();
     }
 
     protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyList<string> args)
@@ -143,26 +145,21 @@ public abstract class SelfUpdateableAppLifecycle
         return false;
     }
 
-    private void HandlePendingUpdate(string[] args)
+    private async Task HandlePendingUpdateAsync(string[] args, IServiceProvider appServices)
     {
         if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
             Logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
 
-            using var updateBootstrapper = new SelfUpdateRestartHandler(
+            using var updateBootstrapper = new SelfUpdateBootstrapper(
                 updatableApplicationEnvironment,
-                _bootstrapperServices);
-            var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
+                appServices);
+            var selfUpdateResult = await updateBootstrapper.UpdateAsync(args).ConfigureAwait(false);
 
             if (selfUpdateResult == SelfUpdateResult.Reset)
             {
                 Logger?.LogWarning("Self update failed ungracefully. Resetting application...");
                 ResetApp();
-            }
-            if (selfUpdateResult == SelfUpdateResult.RestartRequired)
-            {
-                Logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
-                System.Environment.Exit(RestartConstants.RestartRequiredCode);
             }
         }
     }
@@ -170,10 +167,16 @@ public abstract class SelfUpdateableAppLifecycle
     private ServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)
     {
         var serviceCollection = new ServiceCollection();
-        
+
         serviceCollection.AddSingleton(FileSystem);
         serviceCollection.AddSingleton(Registry);
         serviceCollection.AddSingleton(ApplicationEnvironment);
+
+        if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplication)
+        {
+            serviceCollection.AddSingleton<IUpdateConfigurationProvider>(updatableApplication);
+            serviceCollection.AddPendingUpdate();
+        }
 
         var verboseLogging = false;
 

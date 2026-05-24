@@ -79,7 +79,7 @@ internal class UpdateService : IUpdateService
         }
     }
 
-    public async Task<UpdateResult?> UpdateAsync(ProductManifest manifest, CancellationToken token = default)
+    public async Task<UpdateResult> UpdateAsync(ProductManifest manifest, CancellationToken token = default)
     {
         if (manifest is null)
             throw new ArgumentNullException(nameof(manifest));
@@ -91,12 +91,12 @@ internal class UpdateService : IUpdateService
         return await UpdateAsync(catalog, token).ConfigureAwait(false);
     }
 
-    public async Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default)
+    public async Task<UpdateResult> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default)
     {
         lock (_syncLock)
         {
             if (IsUpdating)
-                return null;
+                throw new InvalidOperationException("An update is already in progress.");
             IsUpdating = true;
         }
 

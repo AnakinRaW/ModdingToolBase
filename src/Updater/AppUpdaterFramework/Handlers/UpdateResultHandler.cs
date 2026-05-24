@@ -79,6 +79,7 @@ public class UpdateResultHandler
     
     protected virtual void Shutdown()
     {
+        Logger?.LogInformation("Closing application with return code: {ReturnCode}", RestartConstants.RestartRequiredCode);
         Environment.Exit(RestartConstants.RestartRequiredCode);
     }
 

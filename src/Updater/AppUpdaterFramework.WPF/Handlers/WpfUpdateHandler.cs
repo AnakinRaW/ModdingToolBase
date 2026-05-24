@@ -34,7 +34,7 @@ public class WpfUpdateHandler : IUpdateHandler
 
     public async Task UpdateAsync(UpdateCatalog updateCatalog)
     {
-        UpdateResult? updateResult;
+        UpdateResult updateResult;
         try
         {
             updateResult = await _updateService.UpdateAsync(updateCatalog).ConfigureAwait(false);
@@ -49,8 +49,6 @@ public class WpfUpdateHandler : IUpdateHandler
             };
         }
 
-        if (updateResult is null)
-            return;
         await _resultHandler.Handle(updateResult).ConfigureAwait(false);
     }
 

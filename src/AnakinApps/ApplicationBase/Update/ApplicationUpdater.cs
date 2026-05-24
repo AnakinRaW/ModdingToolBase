@@ -42,9 +42,9 @@ public abstract class ApplicationUpdater
         {
             if (setRegistry)
             {
-                updateRegistry.SetBranch(ProductBranch.BranchNamEqualityComparer.Equals(overrideBranchName!, stableBranchName)
+                updateRegistry.UpdateBranch = ProductBranch.BranchNamEqualityComparer.Equals(overrideBranchName!, stableBranchName)
                     ? null
-                    : overrideBranchName);
+                    : overrideBranchName;
             }
             return overrideBranchName!;
         }

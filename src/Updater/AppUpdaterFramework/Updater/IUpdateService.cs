@@ -23,7 +23,7 @@ public interface IUpdateService
 
     Task<UpdateCatalog?> CheckForUpdatesAsync(ProductReference productReference, CancellationToken token = default);
 
-    Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default);
+    Task<UpdateResult> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default);
 
     /// <summary>
     /// Updates the application using the provided update manifest asynchronously.
@@ -34,5 +34,6 @@ public interface IUpdateService
     /// A task that represents the asynchronous update operation.
     /// The task result contains an <see cref="UpdateResult"/> indicating the outcome of the update process.
     /// </returns>
-    Task<UpdateResult?> UpdateAsync(ProductManifest manifest, CancellationToken token = default);
+    /// <exception cref="InvalidOperationException">Another update is already in progress.</exception>
+    Task<UpdateResult> UpdateAsync(ProductManifest manifest, CancellationToken token = default);
 }
