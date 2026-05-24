@@ -148,7 +148,7 @@ internal class InstallStep : PipelineStep, IComponentStep
             if (Result == InstallResult.Cancel)
                 throw new OperationCanceledException();
 
-            if (_updateConfiguration.ValidateInstallation)
+            if (Result is InstallResult.Success && _updateConfiguration.ValidateInstallation)
                 Result = ValidateInstall();
 
         }
