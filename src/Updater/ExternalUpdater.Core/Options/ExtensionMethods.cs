@@ -1,4 +1,4 @@
-﻿using AnakinRaW.ExternalUpdater.Models;
+using AnakinRaW.ExternalUpdater.Models;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -9,10 +9,16 @@ using System.Threading.Tasks;
 
 namespace AnakinRaW.ExternalUpdater.Options;
 
+/// <summary>Provides extension members that convert update payloads between their in-memory and Base64-encoded JSON representations.</summary>
 public static class ExtensionMethods
 {
     extension(IEnumerable<UpdateInformation> updateInformation)
     {
+        /// <summary>
+        /// Serializes the sequence of update operations as JSON and encodes the result as a
+        /// Base64 string suitable for use as an <see cref="ExternalUpdateOptions.Payload"/> value.
+        /// </summary>
+        /// <returns>The Base64-encoded UTF-8 JSON representation of the update operations.</returns>
         public string ToPayload()
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(updateInformation.Serialize()));

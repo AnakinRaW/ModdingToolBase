@@ -1,4 +1,4 @@
-﻿using AnakinRaW.CommonUtilities;
+using AnakinRaW.CommonUtilities;
 using AnakinRaW.ExternalUpdater.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,13 +9,18 @@ using System.IO.Abstractions;
 
 namespace AnakinRaW.ExternalUpdater.Services;
 
+/// <summary>
+/// Default <see cref="IExternalUpdaterLauncher"/> implementation that launches the external updater
+/// via <see cref="Process.Start(ProcessStartInfo)"/> and elevates the new process when the current one is elevated.
+/// </summary>
 public sealed class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : IExternalUpdaterLauncher
 {
     private readonly ILogger? _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterLauncher));
 
+    /// <inheritdoc/>
     public Process Start(IFileInfo updater, ExternalUpdaterOptions options)
     {
-        if (updater == null) 
+        if (updater == null)
             throw new ArgumentNullException(nameof(updater));
         if (options == null)
             throw new ArgumentNullException(nameof(options));
@@ -26,7 +31,6 @@ public sealed class ExternalUpdaterLauncher(IServiceProvider serviceProvider) : 
         _logger?.LogTrace("Starting external update with process info: {FileName} {Args}", startInfo.FileName, startInfo.Arguments);
         return Process.Start(startInfo)!;
     }
-
 
     private static ProcessStartInfo CreateStartInfo(string updater, ExternalUpdaterOptions options)
     {
