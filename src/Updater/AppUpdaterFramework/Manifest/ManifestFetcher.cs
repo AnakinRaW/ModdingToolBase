@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.CommonUtilities.DownloadManager;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
@@ -21,6 +22,7 @@ internal class ManifestFetcher : IManifestFetcher
     private readonly IFileSystem _fileSystem;
     private readonly IDownloadManager _downloadManager;
     private readonly ManifestLoaderBase _manifestLoader;
+    private readonly IPendingUpdateService _pendingUpdate;
     private readonly ILogger? _logger;
 
     public ManifestFetcher(IServiceProvider serviceProvider)
@@ -29,6 +31,7 @@ internal class ManifestFetcher : IManifestFetcher
             throw new ArgumentNullException(nameof(serviceProvider));
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _manifestLoader = serviceProvider.GetRequiredService<IManifestLoaderProvider>().Loader;
+        _pendingUpdate = serviceProvider.GetRequiredService<IPendingUpdateService>();
         var config = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
         EnsureConsistentConfiguration(config);
         _downloadManager = new DownloadManager(config.ManifestDownloadConfiguration.ToDownloadManagerConfiguration(), serviceProvider);
@@ -98,7 +101,9 @@ internal class ManifestFetcher : IManifestFetcher
     }
     
     protected virtual Task DownloadCoreAsync(Uri uri, Stream destination, CancellationToken cancellationToken)
-        => _downloadManager.DownloadAsync(uri, destination, null, null, null, cancellationToken);
+    {
+        return _downloadManager.DownloadAsync(uri, destination, null, null, null, cancellationToken);
+    }
 
     private async Task<ProductManifest> DownloadAndVerifyAsync(Uri manifestUri, IDirectoryInfo tempDir, CancellationToken token)
     {
@@ -110,7 +115,14 @@ internal class ManifestFetcher : IManifestFetcher
         _logger?.LogDebug("Downloading manifest from '{Source}' to '{Destination}'.", manifestUri.AbsolutePath, destPath);
         await DownloadCoreAsync(manifestUri, fileStream, token).ConfigureAwait(false);
         fileStream.Position = 0;
-        return _manifestLoader.LoadAndVerifyManifest(fileStream);
+        var manifest = _manifestLoader.LoadAndVerifyManifest(fileStream);
+
+        fileStream.Position = 0;
+        using var copy = new MemoryStream();
+        await fileStream.CopyToAsync(copy);
+        _pendingUpdate.SetFetchedManifest(copy.ToArray(), manifest.Product.Branch?.Name);
+
+        return manifest;
     }
 
     private string CreateRandomFile(IDirectoryInfo tempDir)

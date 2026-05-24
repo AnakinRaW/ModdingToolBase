@@ -8,6 +8,7 @@ using AnakinRaW.AppUpdaterFramework.Configuration;
 using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
+using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.AppUpdaterFramework.Security;
 using AnakinRaW.CommonUtilities.DownloadManager.Configuration;
 using AnakinRaW.CommonUtilities.Hashing;
@@ -22,7 +23,7 @@ public class ManifestFetcherTests
     [Fact]
     public async Task FetchAsync_FirstLocationSucceeds_ReturnsImmediately()
     {
-        var (fetcher, loader) = Build([SequencedLoader.Outcome.Ok], _ => Task.CompletedTask);
+        var (fetcher, loader, pending) = Build([SequencedLoader.Outcome.Ok], _ => Task.CompletedTask);
         var reference = MakeReference(2);
 
         var manifest = await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken);
@@ -30,12 +31,13 @@ public class ManifestFetcherTests
         Assert.NotNull(manifest);
         Assert.Equal(1, loader.CallCount);
         Assert.Equal(1, fetcher.DownloadCallCount);
+        Assert.NotNull(pending.FetchedManifestBytes);
     }
 
     [Fact]
     public async Task FetchAsync_SignatureFailureOnFirst_TriesNextMirror()
     {
-        var (fetcher, loader) = Build(
+        var (fetcher, loader, pending) = Build(
             [SequencedLoader.Outcome.SignatureFail, SequencedLoader.Outcome.Ok],
             _ => Task.CompletedTask);
         var reference = MakeReference(2);
@@ -45,12 +47,13 @@ public class ManifestFetcherTests
         Assert.NotNull(manifest);
         Assert.Equal(2, loader.CallCount);
         Assert.Equal(2, fetcher.DownloadCallCount);
+        Assert.NotNull(pending.FetchedManifestBytes);
     }
 
     [Fact]
-    public async Task FetchAsync_AllMirrorsFailSignature_ThrowsManifestDownloadException()
+    public async Task FetchAsync_AllMirrorsFailSignature_SignatureVerificationFailedException()
     {
-        var (fetcher, loader) = Build(
+        var (fetcher, loader, pending) = Build(
             [SequencedLoader.Outcome.SignatureFail, SequencedLoader.Outcome.SignatureFail],
             _ => Task.CompletedTask);
         var reference = MakeReference(2);
@@ -59,13 +62,14 @@ public class ManifestFetcherTests
             async () => await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken));
         Assert.IsType<SignatureVerificationFailedException>(ex.InnerException);
         Assert.Equal(2, loader.CallCount);
+        Assert.Null(pending.FetchedManifestBytes);
     }
 
     [Fact]
     public async Task FetchAsync_DownloadFails_TriesNextMirror()
     {
         var attempt = 0;
-        var (fetcher, loader) = Build(
+        var (fetcher, loader, _) = Build(
             [SequencedLoader.Outcome.Ok],
             _ => attempt++ == 0
                 ? throw new IOException("simulated download failure")
@@ -80,10 +84,26 @@ public class ManifestFetcherTests
     [Fact]
     public async Task FetchAsync_NoLocations_Throws()
     {
-        var (fetcher, _) = Build([], _ => Task.CompletedTask);
+        var (fetcher, _, _) = Build([], _ => Task.CompletedTask);
         var reference = MakeReference(0);
 
         await Assert.ThrowsAsync<ManifestDownloadException>(() => fetcher.FetchAsync(reference, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task FetchAsync_OnSuccess_LandsBytesAndBranchInPendingStore()
+    {
+        var (fetcher, _, pending) = Build(
+            [SequencedLoader.Outcome.Ok],
+            _ => Task.CompletedTask,
+            manifestBranch: "stable");
+        var reference = MakeReference(1);
+
+        await fetcher.FetchAsync(reference, TestContext.Current.CancellationToken);
+
+        Assert.NotNull(pending.FetchedManifestBytes);
+        Assert.NotEmpty(pending.FetchedManifestBytes!);
+        Assert.Equal("stable", pending.FetchedBranch);
     }
 
     [Fact]
@@ -96,6 +116,7 @@ public class ManifestFetcherTests
         services.AddSingleton<ISignatureVerifier>(new AlwaysOkSigVerifier());
         services.AddSingleton<IUpdateConfigurationProvider>(new InconsistentConfigProvider());
         services.AddSingleton<IManifestLoaderProvider>(sp => new ManifestLoaderProvider(new SequencedLoader(sp, [])));
+        services.AddSingleton<IPendingUpdateService>(sp => new PendingUpdateService(sp));
         var sp = services.BuildServiceProvider();
 
         var ex = Assert.Throws<InvalidOperationException>(() => new ManifestFetcher(sp));
@@ -115,9 +136,10 @@ public class ManifestFetcherTests
         };
     }
 
-    private static (TestFetcher fetcher, SequencedLoader loader) Build(
+    private static (TestFetcher fetcher, SequencedLoader loader, IPendingUpdateService pending) Build(
         IReadOnlyList<SequencedLoader.Outcome> outcomes,
-        Func<Uri, Task> downloadBehavior)
+        Func<Uri, Task> downloadBehavior,
+        string? manifestBranch = null)
     {
         var services = new ServiceCollection();
         services.AddSingleton<IFileSystem>(new RealFileSystem());
@@ -128,13 +150,15 @@ public class ManifestFetcherTests
         SequencedLoader? createdLoader;
         services.AddSingleton<IManifestLoaderProvider>(sp =>
         {
-            createdLoader = new SequencedLoader(sp, outcomes);
+            createdLoader = new SequencedLoader(sp, outcomes, manifestBranch);
             return new ManifestLoaderProvider(createdLoader);
         });
+        services.AddSingleton<IPendingUpdateService>(sp => new PendingUpdateService(sp));
         var sp = services.BuildServiceProvider();
         var fetcher = new TestFetcher(sp, downloadBehavior);
         var loader = (SequencedLoader)sp.GetRequiredService<IManifestLoaderProvider>().Loader;
-        return (fetcher, loader);
+        var pending = sp.GetRequiredService<IPendingUpdateService>();
+        return (fetcher, loader, pending);
     }
 
     private static ProductReference MakeReference(int locationCount)
@@ -163,7 +187,7 @@ public class ManifestFetcherTests
         public VerificationResult Verify(ParsedSignature parsed) => VerificationResult.Ok;
     }
 
-    private sealed class SequencedLoader(IServiceProvider sp, IReadOnlyList<SequencedLoader.Outcome> outcomes)
+    private sealed class SequencedLoader(IServiceProvider sp, IReadOnlyList<SequencedLoader.Outcome> outcomes, string? branch = null)
         : ManifestLoaderBase(sp)
     {
         public enum Outcome { Ok, SignatureFail }
@@ -181,7 +205,8 @@ public class ManifestFetcherTests
                 Outcome.SignatureFail => null,
                 _ => throw new InvalidOperationException()
             };
-            return new ProductManifest(new ProductReference("TestApp", null, null), []);
+            var productBranch = branch is null ? null : new ProductBranch(branch, [], true);
+            return new ProductManifest(new ProductReference("TestApp", null, productBranch), []);
         }
     }
 
