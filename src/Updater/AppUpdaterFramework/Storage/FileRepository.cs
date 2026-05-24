@@ -32,7 +32,7 @@ internal sealed class FileRepository : IFileRepository
         Root.Create();
     }
 
-    public string AddComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
+    public string RegisterComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables)
     {
         return component == null ?
             throw new ArgumentNullException(nameof(component)) :

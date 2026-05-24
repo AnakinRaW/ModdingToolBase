@@ -5,7 +5,7 @@ namespace AnakinRaW.AppUpdaterFramework.Storage;
 
 internal interface IFileRepository : IReadOnlyFileRepository
 {
-    string AddComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables);
+    string RegisterComponent(InstallableComponent component, IReadOnlyDictionary<string, string> variables);
 
     void RemoveComponent(InstallableComponent component);
 }

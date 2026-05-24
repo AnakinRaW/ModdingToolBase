@@ -92,7 +92,7 @@ internal class DownloadStep(
         try
         {
             DownloadPath = _downloadRepositoryFactory.GetRepository()
-                .AddComponent(Component, productVariables);
+                .RegisterComponent(Component, productVariables);
 
             if (TryReuseCachedDownload())
                 return null;

@@ -167,7 +167,7 @@ internal class BackupManager : IBackupManager
 
         return new BackupValueData(destination)
         {
-            Backup = FileRepository.AddComponent(component, variables)
+            Backup = FileRepository.RegisterComponent(component, variables)
         };
     }
 }
