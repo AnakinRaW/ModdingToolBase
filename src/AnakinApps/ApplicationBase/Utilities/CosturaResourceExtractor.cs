@@ -76,7 +76,12 @@ internal sealed class CosturaResourceExtractor
     public async ValueTask<Stream> GetResourceStreamAsync(string resourceName)
     {
         if (!TryGetResourceName(resourceName, out var actualResourceName, out var compressed))
+        {
+#if DEBUG
+            return _fileSystem.File.Open(resourceName, FileMode.Open, FileAccess.Read, FileShare.Read);
+#endif
             throw new IOException($"Could not find embedded resource '{resourceName}'");
+        }
 
         var assemblyResourceStream = _appAssembly.GetManifestResourceStream(actualResourceName);
         if (assemblyResourceStream is null)

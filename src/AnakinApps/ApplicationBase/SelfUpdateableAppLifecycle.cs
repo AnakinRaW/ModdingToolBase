@@ -86,6 +86,9 @@ public abstract class SelfUpdateableAppLifecycle
         if (IsUpdateableApplication)
             appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable();
 
+        // Trust must be populated before the resume path verifies any persisted manifest.
+        RegisterTrustedCertificates(appServices);
+
         if (!resetRequested)
         {
             // There is no reason to continue a pending update if we reset the application before.
@@ -130,6 +133,13 @@ public abstract class SelfUpdateableAppLifecycle
     }
 
     protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyList<string> args)
+    {
+    }
+
+    /// <summary>
+    /// Populates the framework's trust store before the deferred-update resume path verifies the persisted manifest.
+    /// </summary>
+    protected virtual void RegisterTrustedCertificates(IServiceProvider appServices)
     {
     }
     
