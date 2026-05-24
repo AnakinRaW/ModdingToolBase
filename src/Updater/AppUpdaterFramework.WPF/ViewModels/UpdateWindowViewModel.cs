@@ -139,7 +139,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
         InfoBarViewModel.Dispose();
     }
 
-    private async Task LoadInstalledProductInformation(IUpdateCatalog? updateCatalog)
+    private async Task LoadInstalledProductInformation(UpdateCatalog? updateCatalog)
     {
         await _semaphoreLock.WaitAsync();
         try
@@ -292,7 +292,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
         OnPropertyChanged(nameof(CanSwitchBranches));
     }
 
-    private void OnUpdateCheckCompleted(object sender, IUpdateCatalog? e)
+    private void OnUpdateCheckCompleted(object sender, UpdateCatalog? e)
     {
         LoadInstalledProductInformation(e).Forget();
     }
@@ -304,7 +304,7 @@ public partial class UpdateWindowViewModel : ModalWindowViewModel, IUpdateWindow
         LoadUpdatingProductInformation(e).Forget();
     }
 
-    private void OnUpdateCompleted(object sender, EventArgs e)
+    private void OnUpdateCompleted(object sender, UpdateResult? e)
     {
         IsUpdating = false;
         _currentUpdateSession = null;

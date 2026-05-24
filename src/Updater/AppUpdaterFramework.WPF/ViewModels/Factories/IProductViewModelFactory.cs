@@ -6,7 +6,7 @@ namespace AnakinRaW.AppUpdaterFramework.ViewModels.Factories;
 
 internal interface IProductViewModelFactory
 {
-    IProductViewModel Create(IInstalledProduct product, IUpdateCatalog? updateCatalog);
+    IProductViewModel Create(InstalledProduct product, UpdateCatalog? updateCatalog);
 
     IProductViewModel Create(IUpdateSession updateSession);
 }

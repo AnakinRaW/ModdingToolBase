@@ -34,7 +34,7 @@ public abstract class WpfBootstrapper : BootstrapperBase
         serviceCollection.AddSingleton<IShowUpdateWindowCommandHandler>(sp => new ShowUpdateWindowCommandHandler(sp));
         serviceCollection.AddSingleton<IUpdateDialogViewModelFactory>(sp => new ApplicationUpdateInteractionFactory(sp));
 
-        serviceCollection.AddSingleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp));
+        serviceCollection.AddSingleton<IUpdateHandler>(sp => new WpfUpdateHandler(sp));
 
         serviceCollection.Replace(ServiceDescriptor.Singleton<IModalWindowFactory>(sp => new ApplicationModalWindowFactory(sp)));
         serviceCollection.Replace(ServiceDescriptor.Singleton<IDialogFactory>(sp => new ApplicationDialogFactory(sp)));

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -11,7 +11,7 @@ namespace AnakinRaW.AppUpdaterFramework.Commands;
 
 internal class UpdateCommand : CommandDefinition
 {
-    public IUpdateCatalog UpdateCatalog { get; }
+    public UpdateCatalog UpdateCatalog { get; }
 
     public override ImageKey Image => default;
 
@@ -21,7 +21,7 @@ internal class UpdateCommand : CommandDefinition
 
     public override string? Tooltip => null;
 
-    public UpdateCommand(IUpdateCatalog updateCatalog, IServiceProvider serviceProvider, bool isRepair)
+    public UpdateCommand(UpdateCatalog updateCatalog, IServiceProvider serviceProvider, bool isRepair)
     {
         var handler = serviceProvider.GetRequiredService<IUpdateHandler>();
 

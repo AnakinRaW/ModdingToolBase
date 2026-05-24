@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO.Abstractions;
+using System.Collections.Generic;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
@@ -12,5 +11,5 @@ public interface IUpdateDialogViewModelFactory
 
     IDialogViewModel CreateRestartViewModel(RestartReason reason);
 
-    IDialogViewModel CreateKillProcessesViewModel(IFileInfo file, IEnumerable<ILockingProcess> lockingProcesses);
+    IDialogViewModel CreateKillProcessesViewModel(string file, IEnumerable<ILockingProcess> lockingProcesses);
 }

@@ -1,4 +1,4 @@
-﻿using AnakinRaW.AppUpdaterFramework.Commands.Factories;
+using AnakinRaW.AppUpdaterFramework.Commands.Factories;
 using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Imaging;
@@ -17,17 +17,11 @@ public static class LibraryInitialization
         ImageLibrary.Instance.LoadCatalog(ImageCatalog.Instance);
         AppIconHolder.ApplicationIcon = applicationIcon;
 
-        // All internal
         serviceCollection.AddSingleton<IProductViewModelFactory>(sp => new ProductViewModelFactory(sp));
         serviceCollection.AddSingleton<IUpdateCommandsFactory>(sp => new UpdateCommandsFactory(sp));
 
-        // Internal implementation
-        serviceCollection.AddSingleton<IUpdateResultInteractionHandler>(sp => new DialogResultInteractionHandler(sp));
-
-        serviceCollection.Replace(ServiceDescriptor.Singleton<IUpdateHandler>(sp => new CommandUpdateHandler(sp)));
+        serviceCollection.TryAddSingleton<IUpdateHandler>(sp => new WpfUpdateHandler(sp));
         serviceCollection.Replace(ServiceDescriptor.Singleton<ILockedFileInteractionHandler>(sp => new DialogUpdateInteractionHandler(sp)));
-
-        // Overrides
-        serviceCollection.Replace(ServiceDescriptor.Singleton<IRestartHandler>(sp => new UpdateRestartCommandHandler(sp)));
+        serviceCollection.TryAddSingleton<IUpdateResultHandler>(sp => new WpfUpdateResultHandler(sp));
     }
 }

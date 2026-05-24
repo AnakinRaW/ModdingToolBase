@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Threading.Tasks;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
@@ -21,7 +20,7 @@ internal class DialogUpdateInteractionHandler : ILockedFileInteractionHandler
         _viewModelFactory = serviceProvider.GetRequiredService<IUpdateDialogViewModelFactory>();
     }
 
-    public LockedFileHandlerInteractionResult HandleLockedFile(IFileInfo file, IEnumerable<ILockingProcess> lockingProcesses)
+    public LockedFileHandlerInteractionResult HandleLockedFile(string file, IEnumerable<ILockingProcess> lockingProcesses)
     {
         var model = _viewModelFactory.CreateKillProcessesViewModel(file, lockingProcesses);
         var result = ShowDialog(model);

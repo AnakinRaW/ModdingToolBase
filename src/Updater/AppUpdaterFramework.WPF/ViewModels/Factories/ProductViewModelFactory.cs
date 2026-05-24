@@ -20,7 +20,7 @@ internal class ProductViewModelFactory(IServiceProvider serviceProvider) : IProd
     private readonly IUpdateCommandsFactory _commandsFactory = serviceProvider.GetRequiredService<IUpdateCommandsFactory>();
     private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
 
-    public IProductViewModel Create(IInstalledProduct product, IUpdateCatalog? updateCatalog)
+    public IProductViewModel Create(InstalledProduct product, UpdateCatalog? updateCatalog)
     {
         IProductStateViewModel stateViewModel;
         ICommandDefinition? action = null;

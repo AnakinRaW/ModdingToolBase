@@ -6,12 +6,12 @@ using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.ViewModels;
 namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 
 public class UpdateAvailableStateViewModel(
-    IInstalledProduct installedProduct,
-    IUpdateCatalog updateCatalog,
+    InstalledProduct installedProduct,
+    UpdateCatalog updateCatalog,
     IServiceProvider serviceProvider)
     : ViewModelBase(serviceProvider), IUpdateAvailableStateViewModel
 {
-    public IUpdateCatalog UpdateCatalog { get; } = updateCatalog ?? throw new ArgumentNullException(nameof(updateCatalog));
+    public UpdateCatalog UpdateCatalog { get; } = updateCatalog ?? throw new ArgumentNullException(nameof(updateCatalog));
 
     public string? CurrentVersion { get; } = installedProduct.Version?.ToString();
 

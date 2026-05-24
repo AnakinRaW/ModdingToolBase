@@ -4,7 +4,7 @@ namespace AnakinRaW.AppUpdaterFramework.ViewModels.ProductStates;
 
 public interface IUpdateAvailableStateViewModel : IProductStateViewModel
 {
-    IUpdateCatalog UpdateCatalog { get; }
+    UpdateCatalog UpdateCatalog { get; }
 
     string? CurrentVersion { get; }
 

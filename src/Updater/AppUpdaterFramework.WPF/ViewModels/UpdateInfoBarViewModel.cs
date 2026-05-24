@@ -48,7 +48,7 @@ public partial class UpdateInfoBarViewModel : ViewModelBase, IUpdateInfoBarViewM
         updateService.UpdateCompleted += OnUpdateCompleted!;
     }
 
-    private void OnUpdateCompleted(object sender, EventArgs e)
+    private void OnUpdateCompleted(object sender, UpdateResult? e)
     {
         Refresh(null).Forget();
     }
@@ -59,7 +59,7 @@ public partial class UpdateInfoBarViewModel : ViewModelBase, IUpdateInfoBarViewM
         _dispatcher.BeginInvoke(DispatcherPriority.Background, CommandManager.InvalidateRequerySuggested);
     }
 
-    private Task Refresh(IUpdateCatalog? e)
+    private Task Refresh(UpdateCatalog? e)
     {
         return Task.Run(() =>
         {
@@ -72,7 +72,7 @@ public partial class UpdateInfoBarViewModel : ViewModelBase, IUpdateInfoBarViewM
         });
     }
 
-    private void OnCheckingUpdatesCompleted(object sender, IUpdateCatalog? e)
+    private void OnCheckingUpdatesCompleted(object sender, UpdateCatalog? e)
     {
         Refresh(e).Forget();
     }
