@@ -20,8 +20,6 @@ public class WindowBase : Window
     private bool _updatingZOrder;
     private IntPtr _ownerForActivate;
 
-    private static uint _notifyOwnerActivate;
-
     private protected HwndSource? HwndSource;
 
     public static readonly DependencyProperty HasMaximizeButtonProperty = DependencyProperty.Register(
@@ -81,9 +79,9 @@ public class WindowBase : Window
     {
         get
         {
-            if (_notifyOwnerActivate == 0)
-                _notifyOwnerActivate = User32.RegisterWindowMessage("NotifyOwnerActive{A982313C-756C-4da9-8BD0-0C375A45784B}");
-            return _notifyOwnerActivate;
+            if (field == 0)
+                field = User32.RegisterWindowMessage("NotifyOwnerActive{A982313C-756C-4da9-8BD0-0C375A45784B}");
+            return field;
         }
     }
 
@@ -181,7 +179,7 @@ public class WindowBase : Window
                 handled = true;
                 break;
             case 274:
-                WmSysCommand(hwnd, wParam, lParam);
+                WmSysCommand(hwnd, wParam);
                 break;
             case 561:
                 _isDragging = true;
@@ -359,7 +357,7 @@ public class WindowBase : Window
         }
     }
 
-    private void WmSysCommand(IntPtr hWnd, IntPtr wParam, IntPtr lParam)
+    private void WmSysCommand(IntPtr hWnd, IntPtr wParam)
     {
         var scWparam = (int)wParam & 65520;
         if (scWparam is 61488 or 61472 or 61456 or 61440 && WindowState == WindowState.Normal && !IsAeroSnappedToMonitor(hWnd))
@@ -372,6 +370,7 @@ public class WindowBase : Window
         Width = _logicalSizeForRestore.Width;
         Height = _logicalSizeForRestore.Height;
         _useLogicalSizeForRestore = true;
+        return;
 
         bool IsAeroSnappedToMonitor(IntPtr hWnd)
         {

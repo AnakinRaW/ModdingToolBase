@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using AnakinRaW.CommonUtilities.Wpf.Converters;
 using AnakinRaW.CommonUtilities.Wpf.Utilities;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Controls;
@@ -28,9 +27,6 @@ public class ThemedContextMenu : ContextMenu
     public static readonly DependencyProperty IsInsideContextMenuProperty = IsInsideContextMenuPropertyKey.DependencyProperty;
     public static readonly DependencyProperty? ShowKeyboardCuesProperty = FetchShowKeyboardCuesProperty();
 
-    private static readonly BrushToColorConverter BrushToColorConverter = new();
-
-    private bool _isCommandInExecution;
     private ScrollViewer? _scrollViewer;
     private double _horizontalOffset = double.MinValue;
 
@@ -58,16 +54,16 @@ public class ThemedContextMenu : ContextMenu
 
     public bool IsCommandInExecution
     {
-        get => _isCommandInExecution;
+        get;
         private set
         {
-            if (_isCommandInExecution == value)
+            if (field == value)
                 return;
-            _isCommandInExecution = value;
+            field = value;
             OnIsCommandInExecutionChanged(EventArgs.Empty);
         }
     }
-    
+
     public static bool GetIsInsideContextMenu(DependencyObject element)
     {
         if (element == null)
