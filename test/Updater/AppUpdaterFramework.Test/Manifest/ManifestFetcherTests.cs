@@ -116,7 +116,7 @@ public class ManifestFetcherTests
         services.AddSingleton<ISignatureVerifier>(new AlwaysOkSigVerifier());
         services.AddSingleton<IUpdateConfigurationProvider>(new InconsistentConfigProvider());
         services.AddSingleton<IManifestLoaderProvider>(sp => new ManifestLoaderProvider(new SequencedLoader(sp, [])));
-        services.AddSingleton<IPendingUpdateService>(sp => new PendingUpdateService(sp));
+        services.AddSingleton<IPendingUpdate>(sp => new PendingUpdate(sp));
         var sp = services.BuildServiceProvider();
 
         var ex = Assert.Throws<InvalidOperationException>(() => new ManifestFetcher(sp));
@@ -136,7 +136,7 @@ public class ManifestFetcherTests
         };
     }
 
-    private static (TestFetcher fetcher, SequencedLoader loader, IPendingUpdateService pending) Build(
+    private static (TestFetcher fetcher, SequencedLoader loader, IPendingUpdate pending) Build(
         IReadOnlyList<SequencedLoader.Outcome> outcomes,
         Func<Uri, Task> downloadBehavior,
         string? manifestBranch = null)
@@ -153,11 +153,11 @@ public class ManifestFetcherTests
             createdLoader = new SequencedLoader(sp, outcomes, manifestBranch);
             return new ManifestLoaderProvider(createdLoader);
         });
-        services.AddSingleton<IPendingUpdateService>(sp => new PendingUpdateService(sp));
+        services.AddSingleton<IPendingUpdate>(sp => new PendingUpdate(sp));
         var sp = services.BuildServiceProvider();
         var fetcher = new TestFetcher(sp, downloadBehavior);
         var loader = (SequencedLoader)sp.GetRequiredService<IManifestLoaderProvider>().Loader;
-        var pending = sp.GetRequiredService<IPendingUpdateService>();
+        var pending = sp.GetRequiredService<IPendingUpdate>();
         return (fetcher, loader, pending);
     }
 
