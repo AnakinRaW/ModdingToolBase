@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Reflection;
@@ -91,16 +92,26 @@ public sealed class CertificateManager
     }
 
     /// <summary>
-    /// Registers trust certificates from the app's embedded resource and, when supplied, an
+    /// Registers trust certificates from the app's embedded resources and, when supplied, an
     /// additional file (typically a local-deploy / developer cert). Logs a warning when no
-    /// certificate was registered from either source.
+    /// certificate was registered from any source.
     /// </summary>
-    /// <param name="assembly">Assembly to look up <paramref name="embeddedResourceName"/> in.</param>
-    /// <param name="embeddedResourceName">Embedded resource name for the production trust cert.</param>
+    /// <param name="assembly">Assembly to look up <paramref name="embeddedResourceNames"/> in.</param>
+    /// <param name="embeddedResourceNames">
+    /// Embedded resource names for trust anchors. Pass more than one when carrying multiple
+    /// anchors through a bridge release (old root + new root for a planned root rotation).
+    /// </param>
     /// <param name="developerCertFilePath">Optional path to a developer/local-deploy cert; pass <see langword="null"/> to skip.</param>
-    public void RegisterTrustedCertificates(Assembly assembly, string embeddedResourceName, string? developerCertFilePath)
+    public void RegisterTrustedCertificates(Assembly assembly, IEnumerable<string> embeddedResourceNames, string? developerCertFilePath)
     {
-        var anyRegistered = TryRegisterFromEmbeddedResource(assembly, embeddedResourceName);
+        if (assembly is null)
+            throw new ArgumentNullException(nameof(assembly));
+        if (embeddedResourceNames is null)
+            throw new ArgumentNullException(nameof(embeddedResourceNames));
+
+        var anyRegistered = false;
+        foreach (var name in embeddedResourceNames)
+            anyRegistered |= TryRegisterFromEmbeddedResource(assembly, name);
         if (developerCertFilePath is not null)
             anyRegistered |= TryRegisterFromFile(developerCertFilePath);
         if (!anyRegistered)
