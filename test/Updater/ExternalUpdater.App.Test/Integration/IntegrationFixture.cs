@@ -70,9 +70,31 @@ internal sealed class IntegrationFixture : IDisposable
         return _fileSystem.File.Exists(path);
     }
 
+    // Reads a file just produced by the external updater. Retries on transient sharing-violation
+    // I/O errors that occasionally surface when antivirus or the kernel's asynchronous file-handle
+    // cleanup briefly holds the freshly-written file open. ~5×100ms is enough in practice.
     public byte[] ReadAllBytes(string path)
     {
-        return _fileSystem.File.ReadAllBytes(path);
+        return RetryIO(() => _fileSystem.File.ReadAllBytes(path));
+    }
+
+    private static T RetryIO<T>(Func<T> action, int maxAttempts = 5, int delayMs = 100)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                return action();
+            }
+            catch (System.IO.IOException) when (attempt < maxAttempts)
+            {
+                Thread.Sleep(delayMs);
+            }
+            catch (UnauthorizedAccessException) when (attempt < maxAttempts)
+            {
+                Thread.Sleep(delayMs);
+            }
+        }
     }
 
     public UpdateInformation MoveEntry(string source, string dest)
@@ -208,7 +230,7 @@ internal sealed class IntegrationFixture : IDisposable
     {
         Assert.True(WaitForMarker(), $"AppToStart did not run within {MarkerWaitTimeout.TotalSeconds:F0}s after the updater exited.");
 
-        var marker = _fileSystem.File.ReadAllText(_markerPath);
+        var marker = RetryIO(() => _fileSystem.File.ReadAllText(_markerPath));
         Assert.Contains("--externalUpdaterResult", marker);
         Assert.Contains(expected.ToString(), marker);
         foreach (var token in appArgsMustContain)
@@ -242,14 +264,33 @@ internal sealed class IntegrationFixture : IDisposable
 
     private bool WaitForMarker()
     {
+        // File.Exists returns true the instant cmd.exe opens the marker for stdout redirection,
+        // which is BEFORE the echo finishes and the handle is closed. The subsequent ReadAllText
+        // would then race the stub. Require the file to be openable for shared read — that proves
+        // cmd has released its exclusive write handle.
         var deadline = DateTime.UtcNow + MarkerWaitTimeout;
         while (DateTime.UtcNow < deadline)
         {
-            if (_fileSystem.File.Exists(_markerPath))
+            if (IsMarkerReadable())
                 return true;
             Thread.Sleep(50);
         }
-        return _fileSystem.File.Exists(_markerPath);
+        return IsMarkerReadable();
+    }
+
+    private bool IsMarkerReadable()
+    {
+        if (!_fileSystem.File.Exists(_markerPath))
+            return false;
+        try
+        {
+            using var stream = _fileSystem.File.Open(_markerPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+            return true;
+        }
+        catch (System.IO.IOException)
+        {
+            return false;
+        }
     }
 
     private static string ResolveUpdaterExe()
