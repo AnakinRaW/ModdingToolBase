@@ -12,6 +12,16 @@
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 
+	<!--
+	The whole test suite spawns the real net481 ExternalUpdater.exe and uses Windows-only
+	helpers (ping.exe, cmd .bat stubs). On Linux `dotnet test` would otherwise try to invoke
+	the net481 test exe through mono, which isn't installed in CI runners.
+	-->
+	<PropertyGroup Condition="$([MSBuild]::IsOsUnixLike())">
+		<IsTestable>false</IsTestable>
+		<IsTestProject>false</IsTestProject>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.18" />
 		<PackageReference Include="AnakinRaW.CommonUtilities.Testing" Version="13.0.18" />
