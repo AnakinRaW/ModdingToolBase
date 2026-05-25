@@ -24,4 +24,10 @@ public sealed class ApplicationUpdateOptions
     [Option("verboseUpdateLogging", Default = false, Required = false,
         HelpText = "Enables verbose logging of the update procedure")]
     public bool Verbose { get; init; }
+
+    [Option("noRestart", Default = false, Required = false,
+        HelpText = "Apply the update without relaunching the application after it completes. " +
+                   "When the update needs an out-of-process file swap, the external updater " +
+                   "applies it and exits; the application is not restarted.")]
+    public bool NoRestart { get; init; }
 }

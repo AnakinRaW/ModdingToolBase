@@ -18,6 +18,15 @@ public class UpdateResultHandler
     protected readonly IExternalUpdaterService ExternalUpdaterService;
     protected readonly ILogger? Logger;
 
+    /// <summary>
+    /// Gets a value whether, after an <see cref="RestartReason.Update"/> handoff to the external updater, the host should be relaunched.
+    /// </summary>
+    /// <remarks>
+    /// Subclasses override to opt into "update and shutdown" semantics.
+    /// Always-restart paths — <see cref="RestartReason.Elevation"/>, <see cref="RestartReason.RestoreFailed"/> — are unaffected.
+    /// </remarks>
+    protected virtual bool RestartHostAfterUpdate => true;
+
     public UpdateResultHandler(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
@@ -69,7 +78,7 @@ public class UpdateResultHandler
     {
         return Task.FromResult(UpdateConfiguration.RestartConfiguration.SupportsRestart);
     }
-
+    
     protected virtual void RestartApplication(RestartReason reason)
     {
         var restartOptions = CreateOptions(reason);
@@ -113,7 +122,7 @@ public class UpdateResultHandler
         {
             RestartReason.RestoreFailed => ExternalUpdaterService.CreateRestartOptions(),
             RestartReason.Elevation => ExternalUpdaterService.CreateRestartOptions(true),
-            RestartReason.Update => ExternalUpdaterService.CreateUpdateOptions(),
+            RestartReason.Update => ExternalUpdaterService.CreateUpdateOptions(restartHost: RestartHostAfterUpdate),
             _ => throw new ArgumentOutOfRangeException(nameof(restartReason), restartReason, null)
         };
     }
