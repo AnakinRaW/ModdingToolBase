@@ -67,7 +67,9 @@ if ((Test-Path $rootPfx) -or (Test-Path $trustCer)) {
     throw "Refusing to overwrite existing root files in '$outputDir'. Move or delete them first."
 }
 
-$pwd = Read-Host "Root PFX password (write this down — losing it = losing the root)" -AsSecureString
+# Plaintext entry on purpose: a mistyped root passphrase is unrecoverable, so the
+# operator must be able to read what they're typing.
+$pwd = Read-Host "Root PFX password (write this down — losing it = losing the root)"
 
 Write-Host "`nAbout to generate:" -ForegroundColor Cyan
 Write-Host "  Subject:    $subject"

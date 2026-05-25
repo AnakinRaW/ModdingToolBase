@@ -78,8 +78,11 @@ if (Test-Path $outPath) {
     throw "Refusing to overwrite existing intermediate '$outPath'. Move or delete it first."
 }
 
-$rootPwd = Read-Host "Root PFX password" -AsSecureString
-$intPwd  = Read-Host "Intermediate PFX password (will go to GitHub Secrets)" -AsSecureString
+# Plaintext entry on purpose: a mistyped passphrase locks the operator out of the
+# root PFX or seeds the GitHub secret with the wrong value, so the typed characters
+# must be visible.
+$rootPwd = Read-Host "Root PFX password"
+$intPwd  = Read-Host "Intermediate PFX password (will go to GitHub Secrets)"
 
 Write-Host "`nAbout to issue:" -ForegroundColor Cyan
 Write-Host "  Root PFX:    $rootPfxPath"
@@ -88,13 +91,11 @@ Write-Host "  Output PFX:  $outPath"
 Write-Host "  Validity:    $months months"
 if (-not (Confirm-Yes "Proceed?")) { Write-Host "Aborted." ; return }
 
-$rootPwdPlain = [System.Net.NetworkCredential]::new("", $rootPwd).Password
 $rootBytes = [IO.File]::ReadAllBytes($rootPfxPath)
 $rootCert = [System.Security.Cryptography.X509Certificates.X509CertificateLoader]::LoadPkcs12(
     $rootBytes,
-    $rootPwdPlain,
+    $rootPwd,
     [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::EphemeralKeySet)
-$rootPwdPlain = $null
 
 $intEcdsa = [System.Security.Cryptography.ECDsa]::Create(
     [System.Security.Cryptography.ECCurve+NamedCurves]::nistP256)

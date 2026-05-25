@@ -66,16 +66,16 @@ $rootPfxPath  = Read-ExistingFile         "Root PFX path             (e.g. '.\mo
 $testSubject  = Read-X500Name             "Test cert subject DN      (e.g. 'CN=Annual Test - DELETE ME')"
 $embeddedCer  = Read-OptionalExistingFile "Embedded trust cert path  (leave empty to skip cross-check)"
 
-$rootPwd = Read-Host "Root PFX password (annual test)" -AsSecureString
-$rootPwdPlain = [System.Net.NetworkCredential]::new("", $rootPwd).Password
+# Plaintext entry on purpose: a mistyped root passphrase silently fails the test,
+# so the operator must be able to read what they're typing.
+$rootPwd = Read-Host "Root PFX password (annual test)"
 
 try {
     $rootBytes = [IO.File]::ReadAllBytes($rootPfxPath)
     $rootCert = [System.Security.Cryptography.X509Certificates.X509CertificateLoader]::LoadPkcs12(
         $rootBytes,
-        $rootPwdPlain,
+        $rootPwd,
         [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::EphemeralKeySet)
-    $rootPwdPlain = $null
 
     Write-Host "`nRoot loaded:"
     Write-Host "  Subject:     $($rootCert.Subject)"
