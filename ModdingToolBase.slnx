@@ -24,6 +24,11 @@
     <Project Path="src/Updater/ExternalUpdater.App/ExternalUpdater.App.csproj" />
     <Project Path="src/Updater/ExternalUpdater.Core/ExternalUpdater.Core.csproj" />
   </Folder>
+  <Folder Name="/Scripts/">
+    <File Path="scripts/Publish-LocalRelease.ps1" />
+    <File Path="scripts/Publish-Release.ps1" />
+    <File Path="scripts/Test-LocalUpdateCycle.ps1" />
+  </Folder>
   <Folder Name="/Test/">
     <Project Path="test/AnakinApps/ApplicationManifestSigner.Test/ApplicationManifestSigner.Test.csproj" />
     <Project Path="test/Updater/AppUpdaterFramework.Manifest.Test/AppUpdaterFramework.Manifest.Test.csproj" />
