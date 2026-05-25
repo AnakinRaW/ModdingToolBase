@@ -525,12 +525,42 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
     }
 
     [Fact]
+    public void UpdateAndExit_NoAppToStart_PayloadAppliedAndNoAppLaunched()
+    {
+        // The "update and shutdown" path: caller deliberately omits --appToStart, so the
+        // updater applies the payload and exits. Nothing should be launched on the way out.
+        var bytes = "payload"u8.ToArray();
+        var source = _fixture.WriteFile("source.bin", bytes);
+        var dest = _fixture.PathInWorkDir("dest.bin");
+
+        var exit = _fixture.RunUpdaterWithoutAppToStart(_fixture.MoveEntry(source, dest));
+
+        Assert.Equal(0, exit);
+        Assert.True(_fixture.FileExists(dest), $"Destination '{dest}' should have been created.");
+        Assert.Equal(bytes, _fixture.ReadAllBytes(dest));
+        _fixture.AssertNoAppLaunched();
+    }
+
+    [Fact]
+    public void RestartVerb_NoAppToStart_ExitsWithErrorAndNoAppLaunched()
+    {
+        // The `restart` verb's whole purpose is to relaunch something. Without --appToStart
+        // it has nothing to do, so RestartTool throws InvalidOperationException. The updater's
+        // top-level catch logs and returns the exception's HResult — non-zero exit, no app
+        // launched.
+        var exit = _fixture.RunRestartVerbWithoutAppToStart();
+
+        Assert.NotEqual(0, exit);
+        _fixture.AssertNoAppLaunched();
+    }
+
+    [Fact]
     public void Pid_WaitsForParentProcessToExitBeforeApplying()
     {
         var bytes = "payload"u8.ToArray();
         var source = _fixture.WriteFile("source.bin", bytes);
         var dest = _fixture.PathInWorkDir("dest.bin");
-        
+
         // Spawn ping.exe directly (not via cmd /c) so that parent.Kill() terminates the
         // actual long-running process. With cmd.exe as the wrapper, killing cmd leaves
         // ping running as an orphan because Windows doesn't tear down child processes

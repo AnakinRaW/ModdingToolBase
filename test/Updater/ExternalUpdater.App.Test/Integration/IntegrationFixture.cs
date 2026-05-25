@@ -99,7 +99,7 @@ internal sealed class IntegrationFixture : IDisposable
     // Runs the staged updater synchronously, returns its exit code.
     public int RunUpdater(params UpdateInformation[] items)
     {
-        return RunUpdaterCore(pid: null, appToStartArgs: null, items);
+        return RunUpdaterCore(pid: null, appToStartArgs: null, includeAppToStart: true, items);
     }
 
     // Like RunUpdater but also forwards <paramref name="appToStartArgs"/> to the launched
@@ -107,12 +107,24 @@ internal sealed class IntegrationFixture : IDisposable
     // then assert these tokens landed in the marker via AssertAppLaunchedWith.
     public int RunUpdaterWithAppArgs(string appToStartArgs, params UpdateInformation[] items)
     {
-        return RunUpdaterCore(pid: null, appToStartArgs, items);
+        return RunUpdaterCore(pid: null, appToStartArgs, includeAppToStart: true, items);
     }
 
-    private int RunUpdaterCore(int? pid, string? appToStartArgs, UpdateInformation[] items)
+    // Runs the `update` verb without --appToStart, exercising the "update-and-shutdown"
+    public int RunUpdaterWithoutAppToStart(params UpdateInformation[] items)
     {
-        using var proc = StartUpdater(pid, appToStartArgs, items);
+        return RunUpdaterCore(pid: null, appToStartArgs: null, includeAppToStart: false, items);
+    }
+
+    // Runs the `restart` verb without --appToStart.
+    public int RunRestartVerbWithoutAppToStart()
+    {
+        return RunRaw("restart");
+    }
+
+    private int RunUpdaterCore(int? pid, string? appToStartArgs, bool includeAppToStart, UpdateInformation[] items)
+    {
+        using var proc = StartUpdater(pid, appToStartArgs, includeAppToStart, items);
         if (!proc.WaitForExit((int)UpdaterTimeout.TotalMilliseconds))
         {
             try
@@ -131,14 +143,17 @@ internal sealed class IntegrationFixture : IDisposable
     // Starts the updater asynchronously. Caller owns the returned Process and is responsible for WaitForExit + disposal.
     public Process StartUpdater(int? pid, params UpdateInformation[] items)
     {
-        return StartUpdater(pid, appToStartArgs: null, items);
+        return StartUpdater(pid, appToStartArgs: null, includeAppToStart: true, items);
     }
 
-    private Process StartUpdater(int? pid, string? appToStartArgs, UpdateInformation[] items)
+    private Process StartUpdater(int? pid, string? appToStartArgs, bool includeAppToStart, UpdateInformation[] items)
     {
         var payload = items.ToPayload();
 
-        var sb = new StringBuilder($"update --appToStart \"{_appCmd}\" --updatePayload {payload}");
+        var sb = new StringBuilder("update");
+        if (includeAppToStart)
+            sb.Append($" --appToStart \"{_appCmd}\"");
+        sb.Append($" --updatePayload {payload}");
         if (pid.HasValue)
             sb.Append($" --pid {pid.Value}");
         if (!string.IsNullOrEmpty(appToStartArgs))
@@ -147,14 +162,43 @@ internal sealed class IntegrationFixture : IDisposable
             sb.Append($" --appToStartArgs {b64}");
         }
 
-        var psi = new ProcessStartInfo(_updaterExe, sb.ToString())
+        return Spawn(sb.ToString());
+    }
+
+    private int RunRaw(string commandLine)
+    {
+        using var proc = Spawn(commandLine);
+        if (!proc.WaitForExit((int)UpdaterTimeout.TotalMilliseconds))
+        {
+            try
+            {
+                proc.Kill();
+            }
+            catch
+            {
+                // Ignore
+            }
+            throw new TimeoutException($"External updater did not exit within {UpdaterTimeout.TotalSeconds:F0}s.");
+        }
+        return proc.ExitCode;
+    }
+
+    private Process Spawn(string commandLine)
+    {
+        var psi = new ProcessStartInfo(_updaterExe, commandLine)
         {
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            // The updater has a DEBUG-only Console.ReadLine() in its top-level catch block to
+            // pause on errors during interactive debugging. Redirect stdin and close it so
+            // ReadLine returns EOF immediately and tests don't hang on the throw paths.
+            RedirectStandardInput = true,
         };
-        return Process.Start(psi) ?? throw new InvalidOperationException("Process.Start returned null.");
+        var proc = Process.Start(psi) ?? throw new InvalidOperationException("Process.Start returned null.");
+        proc.StandardInput.Close();
+        return proc;
     }
 
     // Asserts the appToStart stub ran, the marker carries the expected ExternalUpdaterResult,
@@ -169,6 +213,18 @@ internal sealed class IntegrationFixture : IDisposable
         Assert.Contains(expected.ToString(), marker);
         foreach (var token in appArgsMustContain)
             Assert.Contains(token, marker);
+    }
+
+    // Asserts nothing was launched: the appToStart stub writes the marker file as its first
+    // step, so the marker's absence proves StartProcess was skipped.
+    public void AssertNoAppLaunched()
+    {
+        // Brief settle window in case Process.Start succeeded but the stub hadn't written
+        // the marker yet at the moment of the updater's exit. This is generous — the marker
+        // write is the .cmd's first line.
+        Thread.Sleep(250);
+        Assert.False(_fileSystem.File.Exists(_markerPath),
+            $"AppToStart was NOT expected to run, but the marker file at '{_markerPath}' was created.");
     }
 
     public void Dispose()
