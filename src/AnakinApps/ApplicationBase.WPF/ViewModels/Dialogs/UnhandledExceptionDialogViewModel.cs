@@ -1,12 +1,9 @@
-﻿using System;
-using System.Diagnostics;
+using System;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using AnakinRaW.ApplicationBase.Imaging;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using AnakinRaW.CommonUtilities.Wpf.Controls;
-using AnakinRaW.CommonUtilities.Wpf.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,8 +11,6 @@ namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 
 public partial class UnhandledExceptionDialogViewModel : ModalWindowViewModel, IUnhandledExceptionDialogViewModel
 {
-    private readonly string? _repositoryUrl;
-
     [ObservableProperty]
     private Exception _exception = null!;
 
@@ -23,13 +18,13 @@ public partial class UnhandledExceptionDialogViewModel : ModalWindowViewModel, I
 
     public string Header => "Oh no, something went wrong!";
 
-    public string HandlerDescription => "If the problem keeps appearing you can file an issue on GitHub.com";
+    public string HandlerDescription => string.Empty;
 
-    public ICommand? Handler { get; }
+    public ICommand? Handler => null;
 
-    public ImageSource? HandlerIcon { get; }
-    
-    public string HandlerName => "Create _Issue...";
+    public ImageSource? HandlerIcon => null;
+
+    public string HandlerName => string.Empty;
 
     public UnhandledExceptionDialogViewModel(Exception exception, IServiceProvider serviceProvider)
     {
@@ -38,24 +33,7 @@ public partial class UnhandledExceptionDialogViewModel : ModalWindowViewModel, I
         HasMinimizeButton = false;
         IsResizable = false;
         IsCloseButtonEnabled = false;
-        var env = serviceProvider.GetRequiredService<IApplicationEnvironment>();
+        var env = serviceProvider.GetRequiredService<ApplicationEnvironment>();
         WindowCaption = env.ApplicationName;
-
-        if (env.RepositoryUrl != null)
-        {
-            _repositoryUrl = env.RepositoryUrl.AbsoluteUri;
-            Handler = new DelegateCommand(OnCreateIssue);
-            if (env.RepositoryUrl.Host.Equals("github", StringComparison.OrdinalIgnoreCase))
-                HandlerIcon = new BitmapImage(ImageCatalog.GithubDefinition.Source);
-        }
-
-       
-    }
-
-    private void OnCreateIssue()
-    {
-        if (string.IsNullOrEmpty(_repositoryUrl))
-            return;
-        Process.Start(_repositoryUrl!);
     }
 }

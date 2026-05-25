@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using AnakinRaW.AppUpdaterFramework.FileLocking.Interaction;
+using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.Converters;
 
 namespace AnakinRaW.ApplicationBase.Converters;

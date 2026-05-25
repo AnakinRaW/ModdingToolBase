@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Windows;
+using AnakinRaW.ApplicationBase.Utilities;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using UnhandledExceptionDialogViewModel = AnakinRaW.ApplicationBase.ViewModels.Dialogs.UnhandledExceptionDialogViewModel;
 
@@ -8,7 +9,7 @@ namespace AnakinRaW.ApplicationBase.Services;
 
 internal class WpfUnhandledExceptionHandler(IServiceProvider services) : UnhandledExceptionHandler(services)
 {
-    protected override void HandleGlobalException(Exception e)
+    protected override void HandleGlobalException(Exception e, bool terminating)
     {
         if (Debugger.IsAttached)
             return;

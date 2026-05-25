@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using AnakinRaW.ApplicationBase.Commands.Handlers;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
@@ -18,7 +19,7 @@ public class UpdateWindowCommandDefinition : ICommandDefinition
     public UpdateWindowCommandDefinition(IServiceProvider serviceProvider)
     {
         var handler = serviceProvider.GetRequiredService<IShowUpdateWindowCommandHandler>();
-        var appName = serviceProvider.GetRequiredService<IApplicationEnvironment>().ApplicationName;
+        var appName = serviceProvider.GetRequiredService<ApplicationEnvironment>().ApplicationName;
         Text = $"Update {appName}";
         Command = handler.Command;
     }

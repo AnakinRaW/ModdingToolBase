@@ -1,4 +1,5 @@
 ﻿using System;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +19,7 @@ public class ApplicationAboutDialogViewModel : DialogViewModel
         HasDialogFrame = true;
         AdditionalInformation = new ApplicationVersionViewModel(serviceProvider);
 
-        var appName = serviceProvider.GetRequiredService<IApplicationEnvironment>().ApplicationName;
+        var appName = serviceProvider.GetRequiredService<ApplicationEnvironment>().ApplicationName;
         Title = $"About {appName}";
     }
 }

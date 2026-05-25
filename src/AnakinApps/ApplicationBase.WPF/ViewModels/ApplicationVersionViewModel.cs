@@ -1,4 +1,5 @@
 ﻿using System;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,6 @@ internal class ApplicationVersionViewModel : ObservableObject, IDialogAdditional
     {
         if (serviceProvider == null) 
             throw new ArgumentNullException(nameof(serviceProvider));
-        Version = serviceProvider.GetRequiredService<IApplicationEnvironment>().AssemblyInfo.InformationalVersion ?? "NO VERSION";
+        Version = serviceProvider.GetRequiredService<ApplicationEnvironment>().AssemblyInfo.InformationalVersion ?? "NO VERSION";
     }
 }
