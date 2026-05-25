@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO.Abstractions;
 using AnakinRaW.CommonUtilities.Hashing;
 using AnakinRaW.CommonUtilities.Testing;
+using AnakinRaW.CommonUtilities.Testing.Attributes;
 using AnakinRaW.ExternalUpdater.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Testably.Abstractions;
@@ -38,7 +39,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.Dispose();
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void SingleMove_WithValidHash_FileMovedAndAppLaunchedWithSuccess()
     {
         var bytes = "payload"u8.ToArray();
@@ -53,7 +54,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MultipleMoves_AllAppliedAndAppLaunched()
     {
         var s1 = _fixture.WriteFile("a.bin", [0x10]);
@@ -75,7 +76,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Theory]
+    [PlatformSpecificTheory(TestPlatformIdentifier.Windows)]
     [InlineData("SHA384")]
     [InlineData("SHA512")]
     [InlineData("SHA1")]
@@ -103,7 +104,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MixedAlgorithmsAcrossItems_AllAppliedAndAppLaunched()
     {
         var s1 = _fixture.WriteFile("sha256.bin", [0x10, 0x11]);
@@ -125,7 +126,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MixedAlgorithms_OneMismatched_AbortsBatchWithNoMoves()
     {
         var s1 = _fixture.WriteFile("ok-sha256.bin", [0x10]);
@@ -152,7 +153,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MidBatchFailure_Sha512Backup_RestoresUsingSha512Verification()
     {
         var oldBytes = "old-content"u8.ToArray();
@@ -197,7 +198,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedWithRestore);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MidBatchFailure_BackupHashMismatchUnderSha512_RefusesRestore()
     {
         var newBytes = "new-content"u8.ToArray();
@@ -262,8 +263,8 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         "MD5" => HashTypeKey.MD5,
         _ => throw new ArgumentOutOfRangeException(nameof(name)),
     };
-
-    [Fact]
+    
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void Delete_RemovesFile()
     {
         var target = _fixture.WriteFile("delete-me.bin", [1, 2, 3]);
@@ -275,7 +276,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void IntegrityMismatch_NoMovesAndAppLaunchedWithFailure()
     {
         var source = _fixture.WriteFile("source.bin", [1, 2, 3]);
@@ -296,7 +297,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void EmptyPayload_LaunchesAppWithSuccessAndNoFileMutation()
     {
         var bystander = _fixture.WriteFile("bystander.bin", [9, 9, 9]);
@@ -308,7 +309,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MoveWithBackup_RoundTripsAndAppLaunched()
     {
         var sourceBytes = "new-content"u8.ToArray();
@@ -332,7 +333,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateSuccess);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MidBatchFailure_RestoresBackupAndLaunchesAppWithFailedWithRestore()
     {
         // Item 1 successfully overwrites installed.bin with NEW bytes. Item 2 then fails
@@ -389,7 +390,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedWithRestore);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void BackupSourceHashMismatch_RestoreRefusedAndAppLaunchedWithFailedNoRestore()
     {
         // Item 1 succeeds (overwrites installed.bin with NEW bytes). The BackupInformation
@@ -452,7 +453,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void MidBatchFailureAndBackupSourceMissing_LaunchesAppWithFailedNoRestore()
     {
         // Item 1 succeeds (overwrites installed.bin with NEW bytes) but declares a backup
@@ -504,7 +505,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertAppLaunchedWith(ExternalUpdaterResult.UpdateFailedNoRestore);
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void AppToStartArgs_ForwardedVerbatimToLaunchedApp()
     {
         var source = _fixture.WriteFile("source.bin", "payload"u8.ToArray());
@@ -524,7 +525,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
             "--foo", "bar", "--baz", "qux");
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void UpdateAndExit_NoAppToStart_PayloadAppliedAndNoAppLaunched()
     {
         // The "update and shutdown" path: caller deliberately omits --appToStart, so the
@@ -541,7 +542,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertNoAppLaunched();
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void RestartVerb_NoAppToStart_ExitsWithErrorAndNoAppLaunched()
     {
         // The `restart` verb's whole purpose is to relaunch something. Without --appToStart
@@ -554,7 +555,7 @@ public class ExternalUpdaterIntegrationTests : TestBaseWithFileSystem, IDisposab
         _fixture.AssertNoAppLaunched();
     }
 
-    [Fact]
+    [PlatformSpecificFact(TestPlatformIdentifier.Windows)]
     public void Pid_WaitsForParentProcessToExitBeforeApplying()
     {
         var bytes = "payload"u8.ToArray();

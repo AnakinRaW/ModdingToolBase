@@ -1,7 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!--
+	The whole test suite spawns the real net481 ExternalUpdater.exe and uses Windows-only
+	helpers (ping.exe, cmd .bat stubs). On Linux:
+	  * The project targets net10.0 instead of net481 so `dotnet test` runs it under .NET 10
+	    (no mono needed).
+	  * All source files are excluded — the test scenarios reference net481-only types
+	    (ExternalUpdater.App is net481-only) and use Windows APIs.
+	  * The reference to ExternalUpdater.App is dropped (net10.0 → net481 reference would fail).
+	The result on Linux is an empty test exe that `dotnet test` invokes successfully and finds
+	no tests in.
+	-->
 	<PropertyGroup>
-		<TargetFrameworks>net481</TargetFrameworks>
+		<TargetFrameworks Condition="!$([MSBuild]::IsOsUnixLike())">net481</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOsUnixLike())">net10.0</TargetFrameworks>
 		<RootNamespace>AnakinRaW.ExternalUpdater.Test</RootNamespace>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
@@ -12,15 +24,9 @@
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 
-	<!--
-	The whole test suite spawns the real net481 ExternalUpdater.exe and uses Windows-only
-	helpers (ping.exe, cmd .bat stubs). On Linux `dotnet test` would otherwise try to invoke
-	the net481 test exe through mono, which isn't installed in CI runners.
-	-->
-	<PropertyGroup Condition="$([MSBuild]::IsOsUnixLike())">
-		<IsTestable>false</IsTestable>
-		<IsTestProject>false</IsTestProject>
-	</PropertyGroup>
+	<ItemGroup Condition="$([MSBuild]::IsOsUnixLike())">
+		<Compile Remove="@(Compile)" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.18" />
@@ -42,7 +48,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\src\Updater\ExternalUpdater.App\ExternalUpdater.App.csproj" />
+		<!-- ExternalUpdater.App is net481-only; can only be referenced from a net481 consumer. -->
+		<ProjectReference Include="..\..\..\src\Updater\ExternalUpdater.App\ExternalUpdater.App.csproj"
+		                  Condition="!$([MSBuild]::IsOsUnixLike())" />
 		<ProjectReference Include="..\..\..\src\Updater\ExternalUpdater.Core\ExternalUpdater.Core.csproj" />
 	</ItemGroup>
 
