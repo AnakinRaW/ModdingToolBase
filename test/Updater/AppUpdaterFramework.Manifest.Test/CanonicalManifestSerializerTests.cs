@@ -61,4 +61,17 @@ public class CanonicalManifestSerializerTests
         var signedBytes = CanonicalManifestSerializer.SerializeForDigest(signed);
         Assert.Equal(unsignedBytes, signedBytes);
     }
+
+    // The canonical form must not contain any line breaks: Utf8JsonWriter's indented output
+    // emits Environment.NewLine on .NET 9+ but hardcoded "\n" on .NET Framework / older runtimes,
+    // so signer (net10) and verifier (net481) would otherwise produce different bytes for the
+    // same model and the signature would never verify in production.
+    [Fact]
+    public void Serialize_OutputContainsNoLineBreaks()
+    {
+        var manifest = CreateSample();
+        var bytes = CanonicalManifestSerializer.SerializeForDigest(manifest);
+        Assert.DoesNotContain((byte)'\n', bytes);
+        Assert.DoesNotContain((byte)'\r', bytes);
+    }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AnakinRaW.AppUpdaterFramework.Json;
 
@@ -15,6 +16,17 @@ namespace AnakinRaW.AppUpdaterFramework.Json;
 /// </remarks>
 public static class CanonicalManifestSerializer
 {
+    // Not indented: Utf8JsonWriter's indented output is not portable across runtimes (since
+    // .NET 9 it emits Environment.NewLine, earlier versions and .NET Framework emit "\n"),
+    // so signer and verifier on different platforms would compute different bytes for the
+    // same model and verification would fail.
+    private static readonly JsonSerializerOptions DigestOptions = new()
+    {
+        WriteIndented = false,
+        Converters = { new JsonStringEnumConverter() },
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+
     /// <summary>
     /// Serializes <paramref name="manifest"/> to its canonical UTF-8 byte form for digest
     /// computation. The <see cref="ApplicationManifest.Signature"/> property is cleared on a copy
@@ -28,6 +40,6 @@ public static class CanonicalManifestSerializer
         if (manifest is null)
             throw new ArgumentNullException(nameof(manifest));
         var unsigned = manifest with { Signature = null };
-        return JsonSerializer.SerializeToUtf8Bytes(unsigned, ManifestJsonOptions.Default);
+        return JsonSerializer.SerializeToUtf8Bytes(unsigned, DigestOptions);
     }
 }
