@@ -56,16 +56,16 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _tempPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
     }
 
-    public ExternalUpdateOptions CreateUpdateOptions()
+    public ExternalUpdateOptions CreateUpdateOptions(bool restartHost = true)
     {
         var cpi = CurrentProcessInfo.Current;
-        if (string.IsNullOrEmpty(cpi.ProcessFilePath))
+        if (restartHost && string.IsNullOrEmpty(cpi.ProcessFilePath))
             throw new InvalidOperationException("The current process is not running from a file");
 
         return new ExternalUpdateOptions
         {
-            AppToStart = cpi.ProcessFilePath!,
-            AppToStartArguments = CreateAppStartArguments(),
+            AppToStart = restartHost ? cpi.ProcessFilePath : null,
+            AppToStartArguments = restartHost ? CreateAppStartArguments() : null,
             Pid = cpi.Id,
             Payload = CollectUpdateInformation().ToPayload(),
             LoggingDirectory = _tempPath,

@@ -6,9 +6,17 @@ namespace AnakinRaW.ExternalUpdater.Options;
 public record ExternalUpdaterOptions
 {
     /// <summary>Gets the absolute path of the application to start after the external updater has finished its work.</summary>
-    /// <value>The absolute path of the executable to launch.</value>
-    [Option("appToStart", Required = true, HelpText = "The absolute path of the application to start.")]
-    public required string AppToStart { get; init; }
+    /// <remarks>
+    /// <para>
+    /// The verb <c>restart</c> requires the value to be non-<see langword="null"/>.
+    /// </para>
+    /// <para>
+    /// The verb <c>update</c> treats a <see langword="null"/> value as "apply the update and exit".
+    /// </para>
+    /// </remarks>
+    /// <value>The absolute path of the executable to launch, or <see langword="null"/> to skip the relaunch step.</value>
+    [Option("appToStart", Required = false, HelpText = "The absolute path of the application to start after the operation. Omit to skip the relaunch step.")]
+    public string? AppToStart { get; init; }
 
     /// <summary>Gets the command-line arguments, encoded as Base64, that are forwarded to <see cref="AppToStart"/> when it is launched.</summary>
     /// <value>The Base64-encoded argument string, or <see langword="null"/> when no arguments are forwarded.</value>
