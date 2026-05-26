@@ -29,7 +29,7 @@ internal class Program
 
     private static async Task<int> CreateManifest(ManifestCreatorOptions opts)
     {
-        var services = CreateServices(opts);
+        var services = CreateServices();
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
@@ -39,22 +39,17 @@ internal class Program
         }
         catch (Exception e)
         {
-            return await Task.Run(() =>
-            {
-                logger?.LogCritical(e, e.Message);
-                return e.HResult;
-            });
+            logger?.LogCritical(e, e.Message);
+            return e.HResult;
         }
     }
 
-    private static IServiceProvider CreateServices(ManifestCreatorOptions options)
+    private static ServiceProvider CreateServices()
     {
         var services = new ServiceCollection();
         var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IHashingService>(sp => new HashingService(sp));
-
-        services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
 
         services.AddLogging(l =>
         {

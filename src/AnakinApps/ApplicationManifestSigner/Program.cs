@@ -61,7 +61,7 @@ internal static class Program
         await JsonSerializer.SerializeAsync(stream, manifest, ManifestJsonOptions.Default);
     }
 
-    private static IServiceProvider ConfigureServices()
+    private static ServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
         services.AddSingleton<IFileSystem>(new RealFileSystem());

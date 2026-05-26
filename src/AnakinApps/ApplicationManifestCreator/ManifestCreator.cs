@@ -27,19 +27,19 @@ internal class ManifestCreator
 
     public ManifestCreator(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null)
-            throw new ArgumentNullException(nameof(serviceProvider));
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(serviceProvider);
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _metadataExtractor = new AssemblyMetadataExtractor(serviceProvider);
-        _branchManager = serviceProvider.GetRequiredService<AppManifestCreatorBranchManager>();
+        _branchManager = new AppManifestCreatorBranchManager(options, serviceProvider);
 
-        Options = options ?? throw new ArgumentNullException(nameof(options));
+        Options = options;
     }
 
     public async Task<int> Run()
     {
-        var branch = _branchManager.GetBranchFromName(Options.Branch ?? _branchManager.StableBranchName);
+        var branch = _branchManager.GetBranchFromName(Options.Branch ?? AppManifestCreatorBranchManager.StableBranchName);
         var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
 
         productReference = new ProductReference(productReference.Name, productReference.Version, branch);
