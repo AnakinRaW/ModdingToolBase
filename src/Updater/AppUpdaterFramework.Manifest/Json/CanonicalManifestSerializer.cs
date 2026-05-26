@@ -16,10 +16,8 @@ namespace AnakinRaW.AppUpdaterFramework.Json;
 /// </remarks>
 public static class CanonicalManifestSerializer
 {
-    // Not indented: Utf8JsonWriter's indented output is not portable across runtimes (since
-    // .NET 9 it emits Environment.NewLine, earlier versions and .NET Framework emit "\n"),
-    // so signer and verifier on different platforms would compute different bytes for the
-    // same model and verification would fail.
+    // Not indented: indented output uses Environment.NewLine (.NET 9+), so signer-on-Linux
+    // and verifier-on-Windows would canonicalize to different bytes.
     private static readonly JsonSerializerOptions DigestOptions = new()
     {
         WriteIndented = false,

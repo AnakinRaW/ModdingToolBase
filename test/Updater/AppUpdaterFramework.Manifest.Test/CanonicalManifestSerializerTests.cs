@@ -1,3 +1,5 @@
+using System;
+using System.Security.Cryptography;
 using AnakinRaW.AppUpdaterFramework.Json;
 using Xunit;
 using ComponentType = AnakinRaW.AppUpdaterFramework.Metadata.Component.ComponentType;
@@ -62,10 +64,7 @@ public class CanonicalManifestSerializerTests
         Assert.Equal(unsignedBytes, signedBytes);
     }
 
-    // The canonical form must not contain any line breaks: Utf8JsonWriter's indented output
-    // emits Environment.NewLine on .NET 9+ but hardcoded "\n" on .NET Framework / older runtimes,
-    // so signer (net10) and verifier (net481) would otherwise produce different bytes for the
-    // same model and the signature would never verify in production.
+    // Guard against indented output: that would re-introduce Linux/Windows newline drift.
     [Fact]
     public void Serialize_OutputContainsNoLineBreaks()
     {
@@ -73,5 +72,25 @@ public class CanonicalManifestSerializerTests
         var bytes = CanonicalManifestSerializer.SerializeForDigest(manifest);
         Assert.DoesNotContain((byte)'\n', bytes);
         Assert.DoesNotContain((byte)'\r', bytes);
+    }
+
+    // Pin canonical bytes: any model/serialization shift trips this. Cross-OS drift needs a
+    // CI matrix (ubuntu + windows) — this single-machine test won't catch that on its own.
+    //
+    // If a deliberate model/serialization change makes this test fail, recompute the hash by
+    // temporarily printing it with the helper below and update the constant — but doing so
+    // means any already-deployed signed manifests become unverifiable, so re-signing is required.
+    private const string GoldenSha256 =
+        "78c1680f2d4cc14d6aa591f149c9a4a5d3812e49bdda2d6d521e2cb8920fddfc";
+
+    [Fact]
+    public void Serialize_GoldenHash_Pinned()
+    {
+        var manifest = CreateSample();
+        var bytes = CanonicalManifestSerializer.SerializeForDigest(manifest);
+        using var sha = SHA256.Create();
+        var hash = sha.ComputeHash(bytes);
+        var hex = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        Assert.Equal(GoldenSha256, hex);
     }
 }
