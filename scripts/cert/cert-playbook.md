@@ -51,7 +51,7 @@ Then proceed with section 1.
 .\scripts\cert\New-RootCertificate.ps1
 ```
 
-ModVerify: Subject `CN=ModVerify Root CA`, PFX `modverify-root.pfx`, CER `modverify-trust.cer`, Years `20`.
+ModVerify: Subject `CN=ModVerify Root CA`, Output base `.\modverify-root`, Years `20`. Writes `modverify-root.pfx` (private) and `modverify-root.cer` (trust cert to commit).
 
 After:
 1. Strong passphrase. Memorize *and* record.
@@ -68,7 +68,7 @@ After:
 .\scripts\cert\New-IntermediateCertificate.ps1
 ```
 
-ModVerify (substitute current YYYY-MM): Root PFX `.\modverify-root.pfx`, Subject `CN=ModVerify Signing 2026-05`, Filename `modverify-int-202605.pfx`, Months `12`.
+ModVerify (substitute current YYYY-MM): Root PFX `.\modverify-root.pfx`, Subject `CN=ModVerify Signing 2026-05`, Output base `.\modverify-int-202605`, Months `12`.
 
 After:
 1. GitHub → Settings → Secrets → Actions: paste the base64 the script printed into `UPDATER_SIGNING_PFX_B64`; set `UPDATER_SIGNING_PFX_PASSWORD` to the intermediate password you entered.
@@ -98,7 +98,7 @@ Fails → section 4 path B.
 - Old key lost or compromised → **path B (catastrophic)**.
 
 Shared first steps:
-1. New root via `New-RootCertificate.ps1` with distinct filenames (e.g. `modverify-v2-root.pfx` / `modverify-v2-trust.cer`).
+1. New root via `New-RootCertificate.ps1` with a distinct output base (e.g. `.\modverify-v2-root` → `modverify-v2-root.pfx` / `modverify-v2-root.cer`).
 2. New intermediate under the new root via `New-IntermediateCertificate.ps1`.
 
 ### Path A — Bridge (old key intact)

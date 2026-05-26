@@ -52,19 +52,25 @@ function Confirm-Yes {
 
 Write-Host "=== Root CA generation ===`n" -ForegroundColor Cyan
 
-$subject      = Read-X500Name "Subject DN          (e.g. 'CN=ModVerify Root CA')"
-$outputDir    = Read-Required "Output directory    (will be created if missing)"
-$rootPfxName  = Read-Required "Root PFX filename   (e.g. 'modverify-root.pfx')"
-$trustCerName = Read-Required "Trust CER filename  (e.g. 'modverify-trust.cer')"
-$years        = Read-PositiveInt "Validity in years   (e.g. 20)"
+$subject    = Read-X500Name    "Subject DN        (e.g. 'CN=ModVerify Root CA')"
+$outputBase = Read-Required    "Output path base  (e.g. '.\modverify-root' — script appends .pfx and .cer)"
+$years      = Read-PositiveInt "Validity in years (e.g. 20)"
 
-if (-not (Test-Path $outputDir)) { New-Item -ItemType Directory -Path $outputDir | Out-Null }
-$outputDir = (Resolve-Path $outputDir).Path
-$rootPfx  = Join-Path $outputDir $rootPfxName
-$trustCer = Join-Path $outputDir $trustCerName
+# Tolerate the user typing a .pfx/.cer suffix; we'll add the correct extension.
+$outputBase = $outputBase -replace '\.(pfx|cer|crt)$', ''
 
-if ((Test-Path $rootPfx) -or (Test-Path $trustCer)) {
-    throw "Refusing to overwrite existing root files in '$outputDir'. Move or delete them first."
+$baseDir  = [IO.Path]::GetDirectoryName($outputBase)
+$baseName = [IO.Path]::GetFileName($outputBase)
+if (-not $baseName) { throw "Output path base must include a filename, got: $outputBase" }
+if (-not $baseDir)  { $baseDir = '.' }
+if (-not (Test-Path -LiteralPath $baseDir)) { New-Item -ItemType Directory -Path $baseDir | Out-Null }
+$baseDir = (Resolve-Path -LiteralPath $baseDir).Path
+
+$rootPfx  = Join-Path $baseDir "$baseName.pfx"
+$trustCer = Join-Path $baseDir "$baseName.cer"
+
+if ((Test-Path -LiteralPath $rootPfx) -or (Test-Path -LiteralPath $trustCer)) {
+    throw "Refusing to overwrite existing '$baseName.pfx' or '$baseName.cer' in '$baseDir'. Move or delete them first."
 }
 
 # Plaintext entry on purpose: a mistyped root passphrase is unrecoverable, so the

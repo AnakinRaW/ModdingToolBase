@@ -67,14 +67,21 @@ Write-Host "=== Intermediate signing cert generation ===`n" -ForegroundColor Cya
 
 $rootPfxPath = Read-ExistingFile "Root PFX path           (e.g. '.\modverify-root.pfx')"
 $subject     = Read-X500Name     "Intermediate subject DN (e.g. 'CN=ModVerify Signing 2026-05')"
-$outputDir   = Read-Required     "Output directory        (will be created if missing)"
-$intPfxName  = Read-Required     "Intermediate PFX name   (e.g. 'modverify-int-202605.pfx')"
+$outputBase  = Read-Required     "Output path base        (e.g. '.\modverify-int-202605' — script appends .pfx)"
 $months      = Read-PositiveInt  "Validity in months      (e.g. 12)"
 
-if (-not (Test-Path $outputDir)) { New-Item -ItemType Directory -Path $outputDir | Out-Null }
-$outputDir = (Resolve-Path $outputDir).Path
-$outPath = Join-Path $outputDir $intPfxName
-if (Test-Path $outPath) {
+# Tolerate the user typing a .pfx suffix; we'll add it.
+$outputBase = $outputBase -replace '\.pfx$', ''
+
+$baseDir  = [IO.Path]::GetDirectoryName($outputBase)
+$baseName = [IO.Path]::GetFileName($outputBase)
+if (-not $baseName) { throw "Output path base must include a filename, got: $outputBase" }
+if (-not $baseDir)  { $baseDir = '.' }
+if (-not (Test-Path -LiteralPath $baseDir)) { New-Item -ItemType Directory -Path $baseDir | Out-Null }
+$baseDir = (Resolve-Path -LiteralPath $baseDir).Path
+
+$outPath = Join-Path $baseDir "$baseName.pfx"
+if (Test-Path -LiteralPath $outPath) {
     throw "Refusing to overwrite existing intermediate '$outPath'. Move or delete it first."
 }
 
