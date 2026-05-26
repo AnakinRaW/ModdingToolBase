@@ -56,8 +56,10 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
         _resourceExtractor.Extract(resourceName, installDirectory, ShouldOverwrite);
         return;
 
-        // This prevents a "double update" case where a main-app upgrade replaces ModVerify.exe but leaves an
-        // older updater on disk, forcing a second update cycle just to bring the updater forward.
+        // This prevents a "double update" case which could happen during transitioning a breaking change of the external updater.
+        // Scenario: The (old) external updates the main-app. The new main-app contains the updated external updater as embedded resource.
+        // If the embedded, new external updater would not be overwritten, the new app would immediately trigger an update cycle
+        // to update the external updater on disk.
         bool ShouldOverwrite(string file, Stream embeddedStream)
         {
             if (!Version.TryParse(FileVersionInfo.GetVersionInfo(file).FileVersion, out var installedVersion))
