@@ -18,7 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.18" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.23" />
 		<PackageReference Include="System.Collections.Immutable" Version="10.0.8" PrivateAssets="all" />
 		<PackageReference Include="Vanara.PInvoke.Gdi32" Version="5.0.5" PrivateAssets="all" />
 		<PackageReference Include="Vanara.PInvoke.SHCore" Version="5.0.5" PrivateAssets="all" />
