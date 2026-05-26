@@ -19,10 +19,13 @@ internal abstract class ProcessTool<T>(T options, IServiceProvider serviceProvid
 
     protected void StartProcess(ExternalUpdaterResult operationResult)
     {
-        var processToStart = FileSystem.FileInfo.New(Options.AppToStart);
+        if (string.IsNullOrEmpty(Options.AppToStart))
+            return;
+
+        var processToStart = FileSystem.FileInfo.New(Options.AppToStart!);
         if (!processToStart.Exists)
             throw new FileNotFoundException("Could not find application to restart.", processToStart.FullName);
-        
+
         var options = new ExternalUpdaterResultOptions { Result = operationResult };
         ProcessTools.StartApplication(processToStart, options, Options.AppToStartArguments, Options.Elevate);
     }

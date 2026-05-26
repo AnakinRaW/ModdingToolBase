@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Imaging;
 using AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
@@ -22,7 +23,7 @@ public class AboutDialogCommandDefinition : ICommandDefinition
     {
         _serviceProvider = serviceProvider;
         Command = new DelegateCommand(OpenAboutDialog);
-        var appName = serviceProvider.GetRequiredService<IApplicationEnvironment>().ApplicationName;
+        var appName = serviceProvider.GetRequiredService<ApplicationEnvironment>().ApplicationName;
         Text = $"About {appName}";
     }
 

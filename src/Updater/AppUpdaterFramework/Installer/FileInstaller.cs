@@ -20,7 +20,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
 
     protected override InstallResult InstallCore(
         InstallableComponent component, 
-        IFileInfo source,
+        string source,
         IReadOnlyDictionary<string, string> variables, 
         CancellationToken token)
     {
@@ -30,7 +30,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         if (component is not SingleFileComponent singleFileComponent)
             throw new ArgumentException($"Component must be of type {nameof(SingleFileComponent)}");
 
-        var filePath = singleFileComponent.GetFile(_fileSystem, variables);
+        var filePath = singleFileComponent.GetFile(_fileSystem, variables).FullName;
 
         return ExecuteWithInteractiveRetry(component,
             () => CopyFile(filePath, source),
@@ -46,31 +46,33 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         if (component is not SingleFileComponent singleFileComponent)
             throw new NotSupportedException($"Component must be of type {nameof(SingleFileComponent)}");
 
-        var filePath = singleFileComponent.GetFile(_fileSystem, variables);
+        var filePath = singleFileComponent.GetFile(_fileSystem, variables).FullName;
         return ExecuteWithInteractiveRetry(component,
             () => DeleteFile(filePath),
             interaction => HandlerInteraction(filePath, interaction),
             token);
     }
 
-    private InstallOperationResult CopyFile(IFileInfo destination, IFileInfo source)
+    private InstallOperationResult CopyFile(string destination, string source)
     {
-        if (!source.Exists)
-            throw new FileNotFoundException($"Source file '{destination.FullName}' not found.");
+        if (!_fileSystem.File.Exists(source))
+            throw new FileNotFoundException($"Source file '{source}' not found.");
 
-        if (destination.Directory is null)
+        var destinationDirectory = _fileSystem.Path.GetDirectoryName(destination);
+        if (destinationDirectory is null)
+
             throw new InvalidOperationException("destination directory must not be null");
 
-        destination.Directory.Create();
+        _fileSystem.Directory.CreateDirectory(destinationDirectory);
 
         Stream? destinationStream = null;
 
         var fileCreateResult = DoFileAction(destination, InstallAction.Remove, file =>
         {
-            destinationStream = _fileSystem.CreateFileWithRetry(destination.FullName);
+            destinationStream = _fileSystem.CreateFileWithRetry(destination);
             if (destinationStream is null)
             {
-                Logger?.LogTrace("Creation of file '{FilePath}' failed.", file.FullName);
+                Logger?.LogTrace("Creation of file '{FilePath}' failed.", file);
                 return InstallOperationResult.Failed;
             }
             return InstallOperationResult.Success;
@@ -84,16 +86,16 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
 
         using (destinationStream)
         {
-            using var sourceStream = source.OpenRead();
+            using var sourceStream = _fileSystem.File.OpenRead(source);
             sourceStream.CopyTo(destinationStream!);
         }
         
         return InstallOperationResult.Success;
     }
 
-    private InstallOperationResult DeleteFile(IFileInfo file)
+    private InstallOperationResult DeleteFile(string file)
     {
-        if (!file.Exists)
+        if (!_fileSystem.File.Exists(file))
         {
             Logger?.LogTrace("'{FileInfo}' file is already deleted.", file);
             return InstallOperationResult.Success;
@@ -101,7 +103,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
 
         return DoFileAction(file, InstallAction.Remove, fileToDelete =>
         {
-            var deleteSuccess = fileToDelete.TryDeleteWithRetry(2, 500, (ex, _) =>
+            var deleteSuccess = _fileSystem.File.TryDeleteWithRetry(fileToDelete, 2, 500, (ex, _) =>
             {
                 Logger?.LogTrace(
                     "Error occurred while deleting file '{FileToDelete}'. Error details: {Message}. Retrying after {Retry} seconds...", fileToDelete, ex.Message, 0.5f);
@@ -112,7 +114,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         });
     }
 
-    private InstallOperationResult DoFileAction(IFileInfo file, InstallAction action, Func<IFileInfo, InstallOperationResult> fileOperation)
+    private InstallOperationResult DoFileAction(string file, InstallAction action, Func<string, InstallOperationResult> fileOperation)
     {
         try
         {
@@ -135,7 +137,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         }
     }
 
-    private InstallerInteractionResult HandlerInteraction(IFileInfo file, InstallOperationResult operationResult)
+    private InstallerInteractionResult HandlerInteraction(string file, InstallOperationResult operationResult)
     {
         return operationResult switch
         {
@@ -147,7 +149,7 @@ internal class FileInstaller(IServiceProvider serviceProvider) : InstallerBase(s
         };
     }
 
-    private InstallerInteractionResult HandleLockedFile(IFileInfo file)
+    private InstallerInteractionResult HandleLockedFile(string file)
     { 
         try
         {

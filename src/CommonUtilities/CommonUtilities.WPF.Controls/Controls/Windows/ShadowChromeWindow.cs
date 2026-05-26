@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AnakinRaW.CommonUtilities.Wpf.DPI;
+using AnakinRaW.CommonUtilities.Wpf.NativeMethods;
+using AnakinRaW.CommonUtilities.Wpf.Utilities;
+using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -7,9 +10,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using AnakinRaW.CommonUtilities.Wpf.DPI;
-using AnakinRaW.CommonUtilities.Wpf.NativeMethods;
-using AnakinRaW.CommonUtilities.Wpf.Utilities;
 using Vanara.PInvoke;
 
 namespace AnakinRaW.CommonUtilities.Wpf.Controls;
@@ -18,13 +18,13 @@ public class ShadowChromeWindow : WindowBase
 {
     public static readonly Size LogicalResizeBorder = new(6.0, 6.0);
 
-    public static readonly DependencyProperty ActiveGlowColorProperty = DependencyProperty.Register(
-        nameof(ActiveGlowColor), typeof(Color), typeof(ShadowChromeWindow),
-        new FrameworkPropertyMetadata(Colors.Transparent, OnGlowColorChanged));
+    public static readonly DependencyProperty ActiveShadowColorProperty = DependencyProperty.Register(
+        nameof(ActiveShadowColor), typeof(Color), typeof(ShadowChromeWindow),
+        new FrameworkPropertyMetadata(Colors.Transparent, OnShadowColorChanged));
 
-    public static readonly DependencyProperty InactiveGlowColorProperty = DependencyProperty.Register(
-        nameof(InactiveGlowColor), typeof(Color), typeof(ShadowChromeWindow),
-        new FrameworkPropertyMetadata(Colors.Transparent, OnGlowColorChanged));
+    public static readonly DependencyProperty InactiveShadowColorProperty = DependencyProperty.Register(
+        nameof(InactiveShadowColor), typeof(Color), typeof(ShadowChromeWindow),
+        new FrameworkPropertyMetadata(Colors.Transparent, OnShadowColorChanged));
 
     private static readonly DependencyPropertyKey DwmOwnsBorderPropertyKey = DependencyProperty.RegisterReadOnly(
         nameof(DwmOwnsBorder), typeof(bool), typeof(ShadowChromeWindow),
@@ -42,16 +42,16 @@ public class ShadowChromeWindow : WindowBase
 
     private ShadowBorder? BottomBorder { get; set; }
 
-    public Color ActiveGlowColor
+    public Color ActiveShadowColor
     {
-        get => (Color)GetValue(ActiveGlowColorProperty);
-        set => SetValue(ActiveGlowColorProperty, value);
+        get => (Color)GetValue(ActiveShadowColorProperty);
+        set => SetValue(ActiveShadowColorProperty, value);
     }
 
-    public Color InactiveGlowColor
+    public Color InactiveShadowColor
     {
-        get => (Color)GetValue(InactiveGlowColorProperty);
-        set => SetValue(InactiveGlowColorProperty, value);
+        get => (Color)GetValue(InactiveShadowColorProperty);
+        set => SetValue(InactiveShadowColorProperty, value);
     }
 
     public bool DwmOwnsBorder
@@ -99,15 +99,15 @@ public class ShadowChromeWindow : WindowBase
         var windowPlacement = GetWindowPlacement(source.Handle);
         using (new SuppressRedrawScope(source.Handle))
         {
-            var minFalg = canMinimize ? User32.MenuFlags.MF_ENABLED : User32.MenuFlags.MF_GRAYED;
-            var maxFalg = canMaximize ? User32.MenuFlags.MF_ENABLED : User32.MenuFlags.MF_GRAYED;
+            var minFlag = canMinimize ? User32.MenuFlags.MF_ENABLED : User32.MenuFlags.MF_GRAYED;
+            var maxFlag = canMaximize ? User32.MenuFlags.MF_ENABLED : User32.MenuFlags.MF_GRAYED;
             if (windowPlacement.showCmd == ShowWindowCommand.SW_SHOWNORMAL)
             {
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_RESTORE, User32.MenuFlags.MF_GRAYED);
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MOVE, User32.MenuFlags.MF_ENABLED);
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_SIZE, User32.MenuFlags.MF_ENABLED);
-                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MAXIMIZE, User32.MenuFlags.MF_ENABLED | maxFalg);
-                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MINIMIZE, User32.MenuFlags.MF_ENABLED | minFalg);
+                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MAXIMIZE, User32.MenuFlags.MF_ENABLED | maxFlag);
+                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MINIMIZE, User32.MenuFlags.MF_ENABLED | minFlag);
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_CLOSE, User32.MenuFlags.MF_STRING);
             }
             else if (windowPlacement.showCmd == ShowWindowCommand.SW_MAXIMIZE)
@@ -115,8 +115,8 @@ public class ShadowChromeWindow : WindowBase
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_RESTORE, User32.MenuFlags.MF_ENABLED);
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MOVE, User32.MenuFlags.MF_GRAYED);
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_SIZE, User32.MenuFlags.MF_GRAYED);
-                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MAXIMIZE, User32.MenuFlags.MF_GRAYED | maxFalg);
-                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MINIMIZE, User32.MenuFlags.MF_ENABLED | minFalg);
+                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MAXIMIZE, User32.MenuFlags.MF_GRAYED | maxFlag);
+                User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_MINIMIZE, User32.MenuFlags.MF_ENABLED | minFlag);
                 User32.EnableMenuItem(systemMenu, (uint)User32.SysCommand.SC_CLOSE, User32.MenuFlags.MF_ENABLED);
             }
         }
@@ -136,12 +136,12 @@ public class ShadowChromeWindow : WindowBase
         return User32.IsWindowVisible(hWnd) && !User32.IsZoomed(hWnd) && !User32.IsIconic(hWnd);
     }
 
-    protected unsafe void UpdateGlowBorder(bool activate, bool maximized)
+    protected unsafe void UpdateShadowBorder(bool activate, bool maximized)
     {
         
         if (WindowHelper.Handle == IntPtr.Zero)
             return;
-        var color = activate ? ActiveGlowColor : InactiveGlowColor;
+        var color = activate ? ActiveShadowColor : InactiveShadowColor;
         var colorRef = maximized ? new(0xFFFFFFFE) : new COLORREF(color.R, color.G, color.B);
         DwmApi.DwmSetWindowAttribute(WindowHelper.Handle, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_BORDER_COLOR,
             new IntPtr(&colorRef), sizeof(uint));
@@ -158,7 +158,7 @@ public class ShadowChromeWindow : WindowBase
         switch (msg)
         {
             case 6:
-                WmActivate(hwnd, wParam, lParam);
+                WmActivate(hwnd, wParam);
                 break;
             case 71:
                 WmWindowPosChanged(hwnd, lParam);
@@ -186,11 +186,11 @@ public class ShadowChromeWindow : WindowBase
         return IntPtr.Zero;
     }
 
-    private static void OnGlowColorChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+    private static void OnShadowColorChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
     {
         var customChromeWindow = (ShadowChromeWindow)obj;
         var maximized = customChromeWindow.WindowState == WindowState.Maximized;
-        customChromeWindow.UpdateGlowBorder(customChromeWindow.IsActive, maximized);
+        customChromeWindow.UpdateShadowBorder(customChromeWindow.IsActive, maximized);
     }
 
     private static void DwmOwnsBorderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -217,18 +217,9 @@ public class ShadowChromeWindow : WindowBase
         }
     }
 
-    private static IntPtr CallDefWindowProcWithoutRedraw(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    private void WmActivate(IntPtr hWnd, IntPtr wParam)
     {
-        using (new SuppressRedrawScope(hWnd))
-        {
-            handled = true;
-            return User32.DefWindowProc(hWnd, (uint)msg, wParam, lParam);
-        }
-    }
-
-    private void WmActivate(IntPtr hWnd, IntPtr wParam, IntPtr lParam)
-    {
-        UpdateGlowBorder(Convert.ToBoolean(wParam.ToInt64()), User32.IsZoomed(hWnd));
+        UpdateShadowBorder(Convert.ToBoolean(wParam.ToInt64()), User32.IsZoomed(hWnd));
     }
 
     private IntPtr WmNcCalcSize(IntPtr hWnd, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -236,7 +227,7 @@ public class ShadowChromeWindow : WindowBase
         handled = true;
         var structure = (RECT)Marshal.PtrToStructure(lParam, typeof(RECT))!;
         var maximized = User32.IsZoomed(hWnd);
-        UpdateGlowBorder(IsActive, maximized);
+        UpdateShadowBorder(IsActive, maximized);
         if (maximized)
         {
             User32.DefWindowProc(hWnd, 131, wParam, lParam);
@@ -295,24 +286,29 @@ public class ShadowChromeWindow : WindowBase
             visualHit = target.VisualHit;
             return HitTestResultBehavior.Stop;
         }, new PointHitTestParameters(point2));
-        var num1 = 0;
+        var hitTest = 0;
         for (; visualHit != null; visualHit = visualHit.GetVisualOrLogicalParent())
         {
             if (visualHit is INonClientArea nonClientArea)
             {
-                num1 = nonClientArea.HitTest(point1);
-                if (num1 != 0)
+                hitTest = nonClientArea.HitTest(point1);
+                if (hitTest != 0)
                     break;
             }
         }
 
-        if (num1 == 0)
+        if (ShouldTrackMouse(hitTest))
+            NCButtonManager.TrackMouse(hWnd);
+        else
+            NCButtonManager.ClearTrackedButton();
+
+        if (hitTest == 0)
         {
             if (point2.Y <= BorderThickness.Top)
             {
                 if (WindowState == WindowState.Maximized)
                 {
-                    num1 = 1;
+                    hitTest = 1;
                 }
                 else
                 {
@@ -321,14 +317,14 @@ public class ShadowChromeWindow : WindowBase
                     var width = logicalResizeBorder.Width;
                     if (x1 <= width)
                     {
-                        num1 = 13;
+                        hitTest = 13;
                     }
                     else
                     {
                         var x2 = point2.X;
                         logicalResizeBorder = LogicalResizeBorder;
                         var num2 = 3.0 * logicalResizeBorder.Width;
-                        num1 = x2 + num2 < ActualWidth ? 12 : 14;
+                        hitTest = x2 + num2 < ActualWidth ? 12 : 14;
                     }
                 }
             }
@@ -340,7 +336,16 @@ public class ShadowChromeWindow : WindowBase
         }
 
         handled = true;
-        return new IntPtr(num1);
+        return new IntPtr(hitTest);
+
+        static bool ShouldTrackMouse(int hitTest)
+        {
+            return hitTest switch
+            {
+                8 or 9 or 20 => true,
+                _ => false
+            };
+        }
     }
 
     private void WmWindowPosChanged(IntPtr hWnd, IntPtr lParam)
@@ -368,6 +373,8 @@ public class ShadowChromeWindow : WindowBase
         catch (Win32Exception)
         {
         }
+
+        return;
 
         void UpdateBorderPlacement(int borderThickness)
         {
@@ -408,7 +415,7 @@ public class ShadowChromeWindow : WindowBase
             WindowStyle = WindowStyle.None;
             SetBinding(BackgroundProperty, new Binding
             {
-                Path = new PropertyPath("BorderBrush", Array.Empty<object>()),
+                Path = new PropertyPath("BorderBrush"),
                 Source = Owner
             });
         }
@@ -479,11 +486,13 @@ public class ShadowChromeWindow : WindowBase
     private class NonClientButtonManager(Window window)
     {
         private WindowTitleBarButton? _trackedButton;
+        private bool _isTrackingMouse;
 
         private Window Owner { get; } = window ?? throw new ArgumentNullException(nameof(window));
 
         public void ClearTrackedButton()
         {
+            _isTrackingMouse = false;
             if (_trackedButton == null)
                 return;
             _trackedButton.IsNCMouseOver = false;
@@ -514,8 +523,7 @@ public class ShadowChromeWindow : WindowBase
             }
 
             _trackedButton = buttonUnderMouse;
-            if (_trackedButton != null)
-                _trackedButton.IsNCMouseOver = true;
+            _trackedButton?.IsNCMouseOver = true;
             return true;
         }
 
@@ -525,6 +533,15 @@ public class ShadowChromeWindow : WindowBase
                 return false;
             _trackedButton.IsNCPressed = true;
             return true;
+        }
+
+        public void TrackMouse(IntPtr hwnd)
+        {
+            if (_isTrackingMouse)
+                return;
+            _isTrackingMouse = true;
+            var lpEventTrack = new User32.TRACKMOUSEEVENT(hwnd, User32.TME.TME_LEAVE | User32.TME.TME_NONCLIENT, 0);
+            User32.TrackMouseEvent(ref lpEventTrack);
         }
 
         private WindowTitleBarButton? GetButtonUnderMouse(IntPtr lParam)

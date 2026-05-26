@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using AnakinRaW.ApplicationBase.Environment;
-using AnakinRaW.AppUpdaterFramework.External;
 using AnakinRaW.AppUpdaterFramework.Handlers;
+using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.CommonUtilities.Registry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,11 +22,7 @@ public abstract class ApplicationUpdateResultHandler(UpdatableApplicationEnviron
         {
             case RestartReason.Update:
             {
-                var externalUpdaterService = _serviceProvider.GetRequiredService<IExternalUpdaterService>();
-                var updateOptions = externalUpdaterService.CreateUpdateOptions();
-                var updater = externalUpdaterService.GetExternalUpdater(); 
-                Logger?.LogTrace("Scheduling update in registry.");
-                updaterRegistry.ScheduleUpdate(updater, updateOptions);
+                ScheduleDeferredUpdate(updaterRegistry);
                 break;
             }
             case RestartReason.RestoreFailed:
@@ -36,5 +32,29 @@ public abstract class ApplicationUpdateResultHandler(UpdatableApplicationEnviron
         }
 
         base.RestartApplication(reason);
+    }
+
+    private void ScheduleDeferredUpdate(ApplicationUpdateRegistry updaterRegistry)
+    {
+        var pending = _serviceProvider.GetRequiredService<IPendingUpdate>();
+        var branch = pending.FetchedBranch;
+
+        if (string.IsNullOrEmpty(branch))
+        {
+            Logger?.LogError("Fetched manifest has no branch name; cannot schedule a deferred update. Falling back to a registry reset to recover from a possibly dirty install.");
+            updaterRegistry.ScheduleReset();
+            return;
+        }
+
+        if (!pending.PersistForResume())
+        {
+            Logger?.LogError("Failed to persist pending-update manifest. Falling back to a registry reset to recover from a possibly dirty install.");
+            updaterRegistry.ScheduleReset();
+            return;
+        }
+
+        Logger?.LogTrace("Scheduling deferred update on branch '{Branch}'.", branch);
+        updaterRegistry.UpdateBranch = branch;
+        updaterRegistry.RequiresUpdate = true;
     }
 }

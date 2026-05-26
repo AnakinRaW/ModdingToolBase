@@ -17,10 +17,11 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
     private readonly UpdateConfiguration _updateConfiguration = serviceProvider.GetRequiredService<IUpdateConfigurationProvider>().GetConfiguration();
     private readonly ILogger? _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(LockedFileHandler));
     private readonly ILockedFileInteractionHandler _updateInteractionHandler = serviceProvider.GetRequiredService<ILockedFileInteractionHandler>();
+    private readonly IFileSystem _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
 
-    public ILockedFileHandler.Result Handle(IFileInfo file)
+    public ILockedFileHandler.Result Handle(string file)
     {
-        if (!file.Exists)
+        if (!_fileSystem.File.Exists(file))
             throw new InvalidOperationException($"Expected '{file}' to exist.");
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -30,7 +31,7 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
         }
 
         using var lockingProcessManager = WindowsLockingProcessManager.Create();
-        lockingProcessManager.Register([file.FullName]);
+        lockingProcessManager.Register([file]);
 
         var lockingProcesses = lockingProcessManager.GetProcesses().ToList();
 
@@ -102,7 +103,7 @@ internal sealed class LockedFileHandler(IServiceProvider serviceProvider) : ILoc
         _updateInteractionHandler.HandleError(message);
     }
 
-    private LockedFileHandlerInteractionResult PromptProcessKill(IFileInfo file, IEnumerable<LockingProcessInfo> lockingProcesses)
+    private LockedFileHandlerInteractionResult PromptProcessKill(string file, IEnumerable<LockingProcessInfo> lockingProcesses)
     {
         var processes = lockingProcesses.Select(x => (ILockingProcess) new ILockingProcess.LockingProcess(x.Description, x.Id));
         return _updateInteractionHandler.HandleLockedFile(file, processes);

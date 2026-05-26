@@ -126,12 +126,12 @@ internal class InstallStep : PipelineStep, IComponentStep
             {
                 var restartManager = Services.GetRequiredService<IRestartManager>();
                 restartManager.SetRestart(RestartType.ApplicationRestart);
-                Logger?.LogWarning("Component '{Name}' get scheduled for installation after a restart.", Component.GetDisplayName());
+                Logger?.LogWarning("Component {Name} got scheduled for installation after a restart.", Component.GetDisplayName());
                 
-                var pendingComponentStore = Services.GetRequiredService<IWritablePendingComponentStore>();
-                pendingComponentStore.AddComponent(new PendingComponent
+                var pendingUpdate = Services.GetRequiredService<IPendingUpdate>();
+                pendingUpdate.AddPendingComponent(new PendingComponent
                 {
-                    Component = Component, 
+                    Component = Component,
                     Action = _action
                 });
             }
@@ -148,7 +148,7 @@ internal class InstallStep : PipelineStep, IComponentStep
             if (Result == InstallResult.Cancel)
                 throw new OperationCanceledException();
 
-            if (_updateConfiguration.ValidateInstallation)
+            if (Result is InstallResult.Success && _updateConfiguration.ValidateInstallation)
                 Result = ValidateInstall();
 
         }

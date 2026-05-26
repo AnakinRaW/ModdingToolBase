@@ -12,7 +12,7 @@ public class DesignerUpdateAvailableStateViewModel : IUpdateAvailableStateViewMo
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public IUpdateCatalog UpdateCatalog { get; } = null!;
+    public UpdateCatalog UpdateCatalog { get; } = null!;
     public string? CurrentVersion { get; } = "1.2.3.4";
     public string? AvailableVersion { get; } = "4.3.2.1";
 

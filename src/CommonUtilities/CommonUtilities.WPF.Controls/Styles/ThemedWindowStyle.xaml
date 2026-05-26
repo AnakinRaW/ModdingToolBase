@@ -37,9 +37,9 @@
         </Setter>
         <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
         <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
-        <Setter Property="ActiveGlowColor"
+        <Setter Property="ActiveShadowColor"
                 Value="{DynamicResource {x:Static colors:WindowColors.MainWindowActiveDefaultBorder}}"/>
-        <Setter Property="InactiveGlowColor"
+        <Setter Property="InactiveShadowColor"
                 Value="{DynamicResource {x:Static colors:WindowColors.MainWindowInactiveBorder}}"/>
         <Setter Property="Template">
             <Setter.Value>

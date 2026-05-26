@@ -2,12 +2,6 @@
 
 namespace AnakinRaW.FtpUploader;
 
-[Verb("local", HelpText = "Upload to a local repository.")]
-internal class LocalUploadOptions : UploadOptions
-{
-    public override bool IsLocal => true;
-}
-
 [Verb("ftp", HelpText = "Upload to an SFTP repository.")]
 internal class FtpUploadOptions : UploadOptions
 {

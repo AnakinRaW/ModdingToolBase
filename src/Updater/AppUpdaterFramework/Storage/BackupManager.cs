@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.Threading;
@@ -23,7 +25,7 @@ internal class BackupManager : IBackupManager
     private readonly IProductService _productService;
     private readonly IHashingService _hashingService;
 
-    //[field: AllowNull]
+    [field: AllowNull]
     private IFileRepository FileRepository => LazyInitializer.EnsureInitialized(ref field, CreateRepository);
 
     public IDictionary<InstallableComponent, BackupValueData> Backups => new Dictionary<InstallableComponent, BackupValueData>(_backups);
@@ -60,12 +62,27 @@ internal class BackupManager : IBackupManager
         // Check whether the component is actually present
         if (backupData.IsOriginallyMissing())
             return;
+        
+        Debug.Assert(backupData.Backup is not null);
 
         try
         {
-            var backup = backupData.Backup;
-            backup!.Directory!.Create();
-            backupData.Destination.CopyWithRetry(backup.FullName);
+            var backup = backupData.Backup!;
+
+            var directory = _fileSystem.Path.GetDirectoryName(backup);
+            if (!string.IsNullOrEmpty(directory))
+                _fileSystem.Directory.CreateDirectory(directory!);
+            
+            _fileSystem.File.CopyWithRetry(backupData.Destination, backup);
+            
+            var hashType = HashTypeKey.SHA256;
+            _backups[component] = new BackupValueData(backupData.Destination)
+            {
+                Backup = backup,
+                BackupIntegrity = new ComponentIntegrityInformation(
+                    _hashingService.GetHash(_fileSystem.FileInfo.New(backup), hashType),
+                    hashType),
+            };
         }
         catch (Exception)
         {
@@ -84,33 +101,33 @@ internal class BackupManager : IBackupManager
 
         var destination = backupData.Destination;
 
-        destination.Refresh();
-
         if (backupData.IsOriginallyMissing())
         {
-            if (!destination.Exists)
+            if (!_fileSystem.File.Exists(destination))
                 return;
-            if (destination.TryDeleteWithRetry())
+            if (_fileSystem.File.TryDeleteWithRetry(destination))
                 return;
             throw new IOException("Unable to restore the backup. Please restart your computer!");
         }
 
         var backup = backupData.Backup;
-        backup!.Refresh();
-        if (!backup.Exists)
-            throw new FileNotFoundException("Source file not found", backup.FullName);
+        
+        Debug.Assert(backup is not null);
+        
+        if (!_fileSystem.File.Exists(backup))
+            throw new FileNotFoundException("Source file not found", backup);
 
         try
         {
-            if (destination.Exists)
+            if (_fileSystem.File.Exists(destination))
             {
-                var backHash = _hashingService.GetHash(backup, HashTypeKey.SHA256);
-                var sourceHash = _hashingService.GetHash(destination, HashTypeKey.SHA256);
+                var backHash = _hashingService.GetHash(_fileSystem.FileInfo.New(backup), HashTypeKey.SHA256);
+                var sourceHash = _hashingService.GetHash(_fileSystem.FileInfo.New(destination), HashTypeKey.SHA256);
                 if (backHash.SequenceEqual(sourceHash))
                     return;
             }
 
-            backupData.Backup!.CopyWithRetry(backupData.Destination.FullName);
+            _fileSystem.File.CopyWithRetry(backup, backupData.Destination);
         }
         finally
         {
@@ -136,12 +153,12 @@ internal class BackupManager : IBackupManager
             throw new NotSupportedException($"option '{nameof(component)}' must be of type '{nameof(SingleFileComponent)}'");
 
         var variables = _productService.GetCurrentInstance().Variables;
-        var destination = singleFileComponent.GetFile(_fileSystem, variables);
+        var destination = singleFileComponent.GetFile(_fileSystem, variables).FullName;
 
         if (component.DetectedState == DetectionState.Absent)
             return new BackupValueData(destination);
 
-        if (!destination.Exists)
+        if (!_fileSystem.File.Exists(destination))
         {
             var e = new FileNotFoundException("Could not find source file to backup.");
             _logger?.LogError(e, e.Message);
@@ -150,7 +167,7 @@ internal class BackupManager : IBackupManager
 
         return new BackupValueData(destination)
         {
-            Backup = FileRepository.AddComponent(component, variables)
+            Backup = FileRepository.RegisterComponent(component, variables)
         };
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Product;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
@@ -51,8 +52,8 @@ internal class UpdateService : IUpdateService
             if (productReference.Branch is null)
                 throw new ManifestException("Product reference does not have a branch.");
 
-            var manifestRepo = _serviceProvider.GetRequiredService<IBranchManager>();
-            var manifest = await manifestRepo.GetManifestAsync(productReference, token).ConfigureAwait(false);
+            var fetcher = _serviceProvider.GetRequiredService<IManifestFetcher>();
+            var manifest = await fetcher.FetchAsync(productReference, token).ConfigureAwait(false);
 
             var productService = _serviceProvider.GetRequiredService<IProductService>();
             
@@ -78,12 +79,24 @@ internal class UpdateService : IUpdateService
         }
     }
 
-    public async Task<UpdateResult?> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default)
+    public async Task<UpdateResult> UpdateAsync(ProductManifest manifest, CancellationToken token = default)
+    {
+        if (manifest is null)
+            throw new ArgumentNullException(nameof(manifest));
+
+        var productService = _serviceProvider.GetRequiredService<IProductService>();
+        productService.UpdateComponentDetectionState();
+        var currentInstance = productService.GetCurrentInstance();
+        var catalog = new UpdateCatalogFactory(_serviceProvider).Create(currentInstance, manifest);
+        return await UpdateAsync(catalog, token).ConfigureAwait(false);
+    }
+
+    public async Task<UpdateResult> UpdateAsync(UpdateCatalog updateCatalog, CancellationToken token = default)
     {
         lock (_syncLock)
         {
             if (IsUpdating)
-                return null;
+                throw new InvalidOperationException("An update is already in progress.");
             IsUpdating = true;
         }
 

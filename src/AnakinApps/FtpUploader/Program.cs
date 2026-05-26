@@ -36,7 +36,7 @@ internal class Program
         {
             UploaderBase uploader = opts.IsLocal
                 ? new LocalUploader((LocalUploadOptions)opts, services)
-                : new SftpUploader((FtpUploadOptions)opts, services) as UploaderBase;
+                : new SftpUploader((FtpUploadOptions)opts, services);
 
             await using (uploader)
             {
@@ -56,7 +56,7 @@ internal class Program
         }
     }
 
-    private static IServiceProvider CreateServices()
+    private static ServiceProvider CreateServices()
     {
         var services = new ServiceCollection();
         var fileSystem = new RealFileSystem();

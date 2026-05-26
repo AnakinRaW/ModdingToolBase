@@ -2,11 +2,10 @@
   <Folder Name="/AnakinApps/">
     <Project Path="src/AnakinApps/ApplicationBase.CommandLine/ApplicationBase.CommandLine.csproj" />
     <Project Path="src/AnakinApps/ApplicationBase.Shared/ApplicationBase.Shared.shproj" />
-    <Project Path="src/AnakinApps/ApplicationBase.WPF/ApplicationBase.WPF.csproj">
-      <Build Solution="Debug|*" Project="false" />
-    </Project>
+    <Project Path="src/AnakinApps/ApplicationBase.WPF/ApplicationBase.WPF.csproj" />
     <Project Path="src/AnakinApps/ApplicationBase/ApplicationBase.csproj" />
     <Project Path="src/AnakinApps/ApplicationManifestCreator/ApplicationManifestCreator.csproj" />
+    <Project Path="src/AnakinApps/ApplicationManifestSigner/ApplicationManifestSigner.csproj" />
     <Project Path="src/AnakinApps/FtpUploader/FtpUploader.csproj" />
   </Folder>
   <Folder Name="/CommonUtilities/">
@@ -19,11 +18,22 @@
   <Folder Name="/Updater/">
     <Project Path="src/Updater/AppUpdaterFramework.Attributes/AppUpdaterFramework.Attributes.csproj" />
     <Project Path="src/Updater/AppUpdaterFramework.Manifest/AppUpdaterFramework.Manifest.csproj" />
-    <Project Path="src/Updater/AppUpdaterFramework.WPF/AppUpdaterFramework.WPF.csproj">
-      <Build Solution="Debug|*" Project="false" />
-    </Project>
+    <Project Path="src/Updater/AppUpdaterFramework.Signing.Testing/AppUpdaterFramework.Signing.Testing.csproj" />
+    <Project Path="src/Updater/AppUpdaterFramework.WPF/AppUpdaterFramework.WPF.csproj" />
     <Project Path="src/Updater/AppUpdaterFramework/AppUpdaterFramework.csproj" />
     <Project Path="src/Updater/ExternalUpdater.App/ExternalUpdater.App.csproj" />
     <Project Path="src/Updater/ExternalUpdater.Core/ExternalUpdater.Core.csproj" />
+  </Folder>
+  <Folder Name="/Scripts/">
+    <File Path="scripts/Publish-LocalRelease.ps1" />
+    <File Path="scripts/Publish-Release.ps1" />
+    <File Path="scripts/Test-LocalUpdateCycle.ps1" />
+  </Folder>
+  <Folder Name="/Test/">
+    <Project Path="test/AnakinApps/ApplicationManifestSigner.Test/ApplicationManifestSigner.Test.csproj" />
+    <Project Path="test/Updater/AppUpdaterFramework.Manifest.Test/AppUpdaterFramework.Manifest.Test.csproj" />
+    <Project Path="test/Updater/AppUpdaterFramework.Test/AppUpdaterFramework.Test.csproj" />
+    <Project Path="test/Updater/ExternalUpdater.App.Test/ExternalUpdater.App.Test.csproj" />
+    <Project Path="test/Updater/ExternalUpdater.Core.Test/ExternalUpdater.Core.Test.csproj" />
   </Folder>
 </Solution>

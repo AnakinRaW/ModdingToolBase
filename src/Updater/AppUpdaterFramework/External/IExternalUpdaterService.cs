@@ -5,7 +5,7 @@ namespace AnakinRaW.AppUpdaterFramework.External;
 
 public interface IExternalUpdaterService
 {
-    ExternalUpdateOptions CreateUpdateOptions();
+    ExternalUpdateOptions CreateUpdateOptions(bool restartHost = true);
 
     ExternalRestartOptions CreateRestartOptions(bool elevate = false);
 

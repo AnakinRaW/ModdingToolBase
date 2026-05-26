@@ -1,14 +1,16 @@
 ﻿using System;
-using System.IO.Abstractions;
+using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 
 namespace AnakinRaW.AppUpdaterFramework.Storage;
 
-internal sealed class BackupValueData(IFileInfo destination) : IEquatable<BackupValueData>
+internal sealed class BackupValueData(string destination) : IEquatable<BackupValueData>
 {
-    public IFileInfo Destination { get; } = destination;
+    public string Destination { get; } = destination ?? throw new ArgumentNullException(nameof(destination));
 
-    public IFileInfo? Backup { get; init; }
-    
+    public string? Backup { get; init; }
+
+    public ComponentIntegrityInformation BackupIntegrity { get; init; } = ComponentIntegrityInformation.None;
+
     public bool IsOriginallyMissing()
     {
         return Backup is null;

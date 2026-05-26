@@ -9,6 +9,9 @@ internal sealed class RestartTool(ExternalRestartOptions options, IServiceProvid
 {
     public override async Task<ExternalUpdaterResult> Run()
     {
+        if (string.IsNullOrEmpty(Options.AppToStart))
+            throw new InvalidOperationException("The 'restart' verb requires --appToStart to be set.");
+
         await WaitForProcessExitAsync();
         StartProcess(ExternalUpdaterResult.Restarted);
         return ExternalUpdaterResult.Restarted;

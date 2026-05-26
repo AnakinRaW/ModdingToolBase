@@ -1,8 +1,10 @@
 ﻿using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Options;
 using AnakinRaW.ApplicationBase.Update;
+using AnakinRaW.AppUpdaterFramework;
 using AnakinRaW.AppUpdaterFramework.Configuration;
-using AnakinRaW.AppUpdaterFramework.Handlers;
+using AnakinRaW.AppUpdaterFramework.External;
+using AnakinRaW.AppUpdaterFramework.Restart;
 using AnakinRaW.CommonUtilities.Registry;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +25,6 @@ namespace AnakinRaW.ApplicationBase;
 public abstract class SelfUpdateableAppLifecycle
 {
     private IServiceProvider _bootstrapperServices = null!;
-    private string? _bootstrapperLoggingDir;
 
     protected ILoggerFactory? BootstrapLoggerFactory { get; private set; }
 
@@ -64,18 +65,13 @@ public abstract class SelfUpdateableAppLifecycle
         logger?.LogTrace("Application started with raw arguments: '{Args}'", System.Environment.CommandLine);
         Logger = logger;
 
-        if (ShouldPreBootstrapResetApp(args))
+        var resetRequested = ShouldPreBootstrapResetApp(args);
+        if (resetRequested)
         {
             logger?.LogWarning("The application was requested to reset itself.");
             ResetApp();
         }
-        else
-        {
-            // There is no reason to continue a formally pending update if we reset the application before.
-            HandlePendingUpdate(args);
-        }
 
-        // Initialization of the app must happen after completing the self-update process.
         logger?.LogInformation("Initializing application.");
         var initResult = await InitializeAppAsync(args, _bootstrapperServices);
         if (initResult != 0)
@@ -85,7 +81,19 @@ public abstract class SelfUpdateableAppLifecycle
         }
 
         logger?.LogInformation("Creating app services.");
-        var appServices = CreateAppServices(args); 
+        var appServices = CreateAppServices(args);
+
+        if (IsUpdateableApplication)
+            appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable();
+
+        // Trust must be populated before the resume path verifies any persisted manifest.
+        RegisterTrustedCertificates(appServices);
+
+        if (!resetRequested)
+        {
+            // There is no reason to continue a pending update if we reset the application before.
+            await HandlePendingUpdateAsync(args, appServices).ConfigureAwait(false);
+        }
 
         // ConfigureAwait cannot be set to false here, because WPF apps might expect the context of the main thread.
         return await RunAppAsync(args, appServices);
@@ -121,9 +129,17 @@ public abstract class SelfUpdateableAppLifecycle
             return;
         using var updateRegistry = new ApplicationUpdateRegistry(Registry, updateEnv);
         updateRegistry.Reset();
+        _bootstrapperServices.GetRequiredService<IPendingUpdate>().Clear();
     }
 
     protected virtual void CreateAppServices(IServiceCollection services, IReadOnlyList<string> args)
+    {
+    }
+
+    /// <summary>
+    /// Populates the framework's trust store before the deferred-update resume path verifies the persisted manifest.
+    /// </summary>
+    protected virtual void RegisterTrustedCertificates(IServiceProvider appServices)
     {
     }
     
@@ -139,38 +155,38 @@ public abstract class SelfUpdateableAppLifecycle
         return false;
     }
 
-    private void HandlePendingUpdate(string[] args)
+    private async Task HandlePendingUpdateAsync(string[] args, IServiceProvider appServices)
     {
         if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplicationEnvironment)
         {
             Logger?.LogInformation($"App environment is of type '{nameof(Environment.UpdatableApplicationEnvironment)}'. Executing update finalization routine.");
 
-            using var updateBootstrapper = new SelfUpdateRestartHandler(
+            using var updateBootstrapper = new SelfUpdateBootstrapper(
                 updatableApplicationEnvironment,
-                _bootstrapperServices,
-                _bootstrapperLoggingDir);
-            var selfUpdateResult = updateBootstrapper.HandleSelfUpdate(args);
+                appServices);
+            var selfUpdateResult = await updateBootstrapper.UpdateAsync(args).ConfigureAwait(false);
 
             if (selfUpdateResult == SelfUpdateResult.Reset)
             {
                 Logger?.LogWarning("Self update failed ungracefully. Resetting application...");
                 ResetApp();
             }
-            if (selfUpdateResult == SelfUpdateResult.RestartRequired)
-            {
-                Logger?.LogInformation("Self update in progress. ExternalUpdater running. Closing application!");
-                System.Environment.Exit(RestartConstants.RestartRequiredCode);
-            }
         }
     }
 
-    private IServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)
+    private ServiceProvider CreateBootstrapperServices(IReadOnlyList<string> args)
     {
         var serviceCollection = new ServiceCollection();
-        
+
         serviceCollection.AddSingleton(FileSystem);
         serviceCollection.AddSingleton(Registry);
         serviceCollection.AddSingleton(ApplicationEnvironment);
+
+        if (ApplicationEnvironment is UpdatableApplicationEnvironment updatableApplication)
+        {
+            serviceCollection.AddSingleton<IUpdateConfigurationProvider>(updatableApplication);
+            serviceCollection.AddPendingUpdate();
+        }
 
         var verboseLogging = false;
 
@@ -203,11 +219,12 @@ public abstract class SelfUpdateableAppLifecycle
             var fileSystem = FileSystem;
 
             var tempDir = fileSystem.Path.GetTempPath();
-            var tempSubFolderName = EncodeDirectoryName(ApplicationEnvironment.ApplicationName);
+            
+            var encodedAppName = EncodeDirectoryName(ApplicationEnvironment.ApplicationName);
 
-            var loggingDir = _bootstrapperLoggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, tempSubFolderName));
+            var loggingDir = fileSystem.Path.GetFullPath(fileSystem.Path.Combine(tempDir, encodedAppName));
 
-            var filePath = FileSystem.Path.Combine(loggingDir, "appBootstrap.log");
+            var filePath = FileSystem.Path.Combine(loggingDir, $"{encodedAppName}-Bootstrap.log");
 
             var fileLogger = new LoggerConfiguration()
                 .WriteTo.File(filePath, rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: logLevel)

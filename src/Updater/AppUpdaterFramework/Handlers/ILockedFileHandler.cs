@@ -1,10 +1,8 @@
-﻿using System.IO.Abstractions;
-
-namespace AnakinRaW.AppUpdaterFramework.Handlers;
+﻿namespace AnakinRaW.AppUpdaterFramework.Handlers;
 
 internal interface ILockedFileHandler
 {
-    Result Handle(IFileInfo file);
+    Result Handle(string file);
 
     public enum Result
     {

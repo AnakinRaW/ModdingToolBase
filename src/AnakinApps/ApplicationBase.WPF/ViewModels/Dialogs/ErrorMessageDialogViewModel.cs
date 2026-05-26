@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AnakinRaW.ApplicationBase.Environment;
 using AnakinRaW.ApplicationBase.Imaging;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
@@ -17,7 +18,7 @@ public class ErrorMessageDialogViewModel : DialogViewModel, IErrorMessageDialogV
 
     public ErrorMessageDialogViewModel(string header, string message, IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        Title = serviceProvider.GetRequiredService<IApplicationEnvironment>().ApplicationName;
+        Title = serviceProvider.GetRequiredService<ApplicationEnvironment>().ApplicationName;
         Header = header;
         Message = message;
         IsResizable = false;

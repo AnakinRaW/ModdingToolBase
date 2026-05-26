@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
-using AnakinRaW.AppUpdaterFramework;
-using AnakinRaW.AppUpdaterFramework.Product;
 using AnakinRaW.CommonUtilities.Hashing;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +29,7 @@ internal class Program
 
     private static async Task<int> CreateManifest(ManifestCreatorOptions opts)
     {
-        var services = CreateServices(opts);
+        var services = CreateServices();
         var logger = services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
         try
         {
@@ -41,25 +39,17 @@ internal class Program
         }
         catch (Exception e)
         {
-            return await Task.Run(() =>
-            {
-                logger?.LogCritical(e, e.Message);
-                return e.HResult;
-            });
+            logger?.LogCritical(e, e.Message);
+            return e.HResult;
         }
     }
 
-    private static IServiceProvider CreateServices(ManifestCreatorOptions options)
+    private static ServiceProvider CreateServices()
     {
         var services = new ServiceCollection();
         var fileSystem = new RealFileSystem();
         services.AddSingleton<IFileSystem>(fileSystem);
         services.AddSingleton<IHashingService>(sp => new HashingService(sp));
-
-        services.AddUpdateFramework();
-
-        services.AddSingleton(sp => new AppManifestCreatorBranchManager(options, sp));
-        services.AddSingleton<IBranchManager>(sp => sp.GetRequiredService<AppManifestCreatorBranchManager>());
 
         services.AddLogging(l =>
         {

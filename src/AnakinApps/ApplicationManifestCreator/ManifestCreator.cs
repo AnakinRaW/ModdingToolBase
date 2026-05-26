@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AnakinRaW.ApplicationBase;
 using AnakinRaW.AppUpdaterFramework.Json;
@@ -26,29 +25,21 @@ internal class ManifestCreator
 
     public ManifestCreatorOptions Options { get; }
 
-    private JsonSerializerOptions JsonOptions { get; }
-
     public ManifestCreator(ManifestCreatorOptions options, IServiceProvider serviceProvider)
     {
-        if (serviceProvider == null)
-            throw new ArgumentNullException(nameof(serviceProvider));
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(serviceProvider);
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
         _fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
         _metadataExtractor = new AssemblyMetadataExtractor(serviceProvider);
-        _branchManager = serviceProvider.GetRequiredService<AppManifestCreatorBranchManager>();
+        _branchManager = new AppManifestCreatorBranchManager(options, serviceProvider);
 
-        Options = options ?? throw new ArgumentNullException(nameof(options));
-        JsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Converters = { new JsonStringEnumConverter() },
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
+        Options = options;
     }
 
     public async Task<int> Run()
     {
-        var branch = _branchManager.GetBranchFromName(Options.Branch ?? _branchManager.StableBranchName);
+        var branch = _branchManager.GetBranchFromName(Options.Branch ?? AppManifestCreatorBranchManager.StableBranchName);
         var productReference = await _metadataExtractor.ProductReferenceFromFileAsync(_fileSystem.FileInfo.New(Options.ApplicationFile));
 
         productReference = new ProductReference(productReference.Name, productReference.Version, branch);
@@ -164,6 +155,6 @@ internal class ManifestCreator
         _logger?.LogTrace("Writing manifest to '{FilePath}'", outputFile.FullName);
 
         await using var fileStream = outputFile.Create();
-        await JsonSerializer.SerializeAsync(fileStream, manifest, JsonOptions);
+        await JsonSerializer.SerializeAsync(fileStream, manifest, ManifestJsonOptions.Default);
     }
 }

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using AnakinRaW.ApplicationBase.ViewModels.Dialogs;
+using AnakinRaW.AppUpdaterFramework.Handlers;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
 using AnakinRaW.AppUpdaterFramework.Interaction;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Dialog;
@@ -23,12 +23,12 @@ public class ApplicationUpdateInteractionFactory(IServiceProvider serviceProvide
         {
             RestartReason.Elevation => UpdateRestartDialog.CreateElevationRestart(_serviceProvider),
             RestartReason.Update => UpdateRestartDialog.CreateRestart(_serviceProvider),
-            RestartReason.FailedRestore => UpdateRestartDialog.CreateFailedRestore(_serviceProvider),
+            RestartReason.RestoreFailed => UpdateRestartDialog.CreateFailedRestore(_serviceProvider),
             _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
         };
     }
 
-    public IDialogViewModel CreateKillProcessesViewModel(IFileInfo file, IEnumerable<ILockingProcess> lockingProcesses)
+    public IDialogViewModel CreateKillProcessesViewModel(string file, IEnumerable<ILockingProcess> lockingProcesses)
     {
         return new KillProcessDialogViewModel(file, lockingProcesses, _serviceProvider);
     }

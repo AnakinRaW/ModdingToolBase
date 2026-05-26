@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Threading;
 
 namespace AnakinRaW.AppUpdaterFramework.Installer;
@@ -23,7 +22,7 @@ internal abstract class InstallerBase : IInstaller
         Logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public InstallResult Install(InstallableComponent component, IFileInfo? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
+    public InstallResult Install(InstallableComponent component, string? source, IReadOnlyDictionary<string, string> variables, CancellationToken token = default)
     {
         return ExecuteInstallerAction(component, source, InstallAction.Install, variables, token);
     }
@@ -35,10 +34,10 @@ internal abstract class InstallerBase : IInstaller
 
     protected abstract InstallResult RemoveCore(InstallableComponent component, IReadOnlyDictionary<string, string> variables, CancellationToken token);
 
-    protected abstract InstallResult InstallCore(InstallableComponent component, IFileInfo source, IReadOnlyDictionary<string, string> variables, CancellationToken token);
+    protected abstract InstallResult InstallCore(InstallableComponent component, string source, IReadOnlyDictionary<string, string> variables, CancellationToken token);
 
 
-    private InstallResult ExecuteInstallerAction(InstallableComponent component, IFileInfo? source, InstallAction action, IReadOnlyDictionary<string, string> variables, CancellationToken token)
+    private InstallResult ExecuteInstallerAction(InstallableComponent component, string? source, InstallAction action, IReadOnlyDictionary<string, string> variables, CancellationToken token)
     {
         try
         {

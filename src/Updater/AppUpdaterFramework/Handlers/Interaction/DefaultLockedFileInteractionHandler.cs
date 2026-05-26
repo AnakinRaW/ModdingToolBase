@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +14,7 @@ internal class DefaultLockedFileInteractionHandler : ILockedFileInteractionHandl
         _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(GetType());
     }
 
-    public LockedFileHandlerInteractionResult HandleLockedFile(IFileInfo file, IEnumerable<ILockingProcess> lockingProcesses)
+    public LockedFileHandlerInteractionResult HandleLockedFile(string file, IEnumerable<ILockingProcess> lockingProcesses)
     {
         _logger?.LogTrace("Interaction Result: {Result}", LockedFileHandlerInteractionResult.Cancel);
         return LockedFileHandlerInteractionResult.Cancel;

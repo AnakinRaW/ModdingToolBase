@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 using AnakinRaW.AppUpdaterFramework.Handlers;
-using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
+using AnakinRaW.AppUpdaterFramework.Restart;
+using AnakinRaW.AppUpdaterFramework.Updater;
 using AnakinRaW.CommonUtilities.Wpf.ApplicationFramework.Input;
 using AnakinRaW.CommonUtilities.Wpf.Imaging;
 using CommunityToolkit.Mvvm.Input;
@@ -18,8 +19,9 @@ internal class UpdateRestartCommand : CommandDefinition
 
     public UpdateRestartCommand(IServiceProvider serviceProvider)
     {
-        var options = RequiredRestartOptionsKind.Update;
-        var handler = serviceProvider.GetRequiredService<IRestartHandler>();
-        Command = new RelayCommand(() => handler.Restart(options), () => true);
+        var handler = serviceProvider.GetRequiredService<IUpdateResultHandler>();
+        Command = new AsyncRelayCommand(
+            () => handler.Handle(new UpdateResult { RestartType = RestartType.ApplicationRestart }),
+            () => true);
     }
 }

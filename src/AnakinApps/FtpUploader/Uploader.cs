@@ -77,7 +77,8 @@ internal abstract class UploaderBase : IAsyncDisposable
     private async Task<string> GetBranchName(IFileInfo manifestFile)
     {
         await using var fileStream = manifestFile.OpenRead();
-        var manifest = await new JsonManifestLoader(Services).DeserializeAsync(fileStream).ConfigureAwait(false);
+        var manifest = await System.Text.Json.JsonSerializer.DeserializeAsync<ApplicationManifest>(
+            fileStream, ManifestJsonOptions.Default).ConfigureAwait(false);
         return manifest is null
             ? throw new InvalidOperationException("Unable to deserialize manifest")
             : manifest.Branch ?? throw new InvalidOperationException("Manifest should contain branch name");

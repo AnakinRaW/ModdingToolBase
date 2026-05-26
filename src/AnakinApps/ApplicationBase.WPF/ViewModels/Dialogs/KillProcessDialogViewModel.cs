@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
+using System.IO;
 using System.Linq;
 using AnakinRaW.ApplicationBase.Imaging;
 using AnakinRaW.AppUpdaterFramework.Handlers.Interaction;
@@ -11,16 +11,16 @@ using AnakinRaW.CommonUtilities.Wpf.Imaging;
 namespace AnakinRaW.ApplicationBase.ViewModels.Dialogs;
 
 internal class KillProcessDialogViewModel(
-    IFileInfo lockedFile,
+    string lockedFile,
     IEnumerable<ILockingProcess> lockingProcesses,
     IServiceProvider serviceProvider)
     : UpdateImageDialog(serviceProvider), IKillProcessDialogViewModel
 {
     internal const string KillButtonIdentifier = "kill";
 
-    public string Header => $"Source '{LockedFile.Name}' is locked.";
+    public string Header => $"Source '{Path.GetFileName(LockedFile)}' is locked.";
 
-    public IFileInfo LockedFile { get; } = lockedFile;
+    public string LockedFile { get; } = lockedFile;
 
     public IEnumerable<ILockingProcess> LockingProcesses { get; } = lockingProcesses;
 

@@ -3,7 +3,7 @@ using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 
 namespace AnakinRaW.AppUpdaterFramework.Restart;
 
-public record PendingComponent
+public sealed record PendingComponent
 {
     public required InstallableComponent Component { get; init; }
 
