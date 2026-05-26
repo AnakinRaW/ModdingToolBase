@@ -10,7 +10,9 @@ namespace AnakinRaW.ApplicationBase.Update;
 //   - ResetApp       (bool)   — request a full app reset on next launch
 public sealed class ApplicationUpdateRegistry : IDisposable
 {
-    private readonly IRegistryKey _registryKey;
+    private readonly IRegistry _registry;
+    private readonly string _registryPath;
+    private IRegistryKey _registryKey;
 
     public bool ResetApp
     {
@@ -38,19 +40,28 @@ public sealed class ApplicationUpdateRegistry : IDisposable
 
     public ApplicationUpdateRegistry(IRegistry registry, UpdatableApplicationEnvironment appEnvironment)
     {
-        if (registry is null) throw new ArgumentNullException(nameof(registry));
-        if (appEnvironment is null) throw new ArgumentNullException(nameof(appEnvironment));
+        if (appEnvironment is null) 
+            throw new ArgumentNullException(nameof(appEnvironment));
 
-        var baseKey = registry.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
-        _registryKey = baseKey.CreateSubKey(appEnvironment.UpdateRegistryPath)
-                        ?? throw new InvalidOperationException("Unable to create registry. Missing rights?");
+        _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+        _registryPath = appEnvironment.UpdateRegistryPath;
+        _registryKey = OpenOrCreateKey();
     }
 
     public void Reset()
     {
-        _registryKey.DeleteValue(nameof(ResetApp));
-        _registryKey.DeleteValue(nameof(RequiresUpdate));
-        _registryKey.DeleteValue(nameof(UpdateBranch));
+        // Wipe the whole key (including any stale values or sub keys from a previous version)
+        // and recreate it empty so the live handle stays usable for subsequent reads/writes.
+        _registryKey.DeleteKey(string.Empty, recursive: true);
+        _registryKey.Dispose();
+        _registryKey = OpenOrCreateKey();
+    }
+
+    private IRegistryKey OpenOrCreateKey()
+    {
+        var baseKey = _registry.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default);
+        return baseKey.CreateSubKey(_registryPath)
+               ?? throw new InvalidOperationException("Unable to create registry. Missing rights?");
     }
 
     public void ScheduleReset()
