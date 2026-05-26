@@ -26,5 +26,8 @@ public interface IExternalUpdaterProvider
     /// <summary>
     /// Ensures that the external updater is available on disk.
     /// </summary>
-    void EnsureAvailable();
+    /// <param name="force">
+    /// When <see langword="true"/>, overwrite any on-disk updater unconditionally, regardless of its version.
+    /// </param>
+    void EnsureAvailable(bool force = false);
 }

@@ -84,7 +84,7 @@ public abstract class SelfUpdateableAppLifecycle
         var appServices = CreateAppServices(args);
 
         if (IsUpdateableApplication)
-            appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable();
+            appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable(resetRequested);
 
         // Trust must be populated before the resume path verifies any persisted manifest.
         RegisterTrustedCertificates(appServices);
@@ -170,6 +170,7 @@ public abstract class SelfUpdateableAppLifecycle
             {
                 Logger?.LogWarning("Self update failed ungracefully. Resetting application...");
                 ResetApp();
+                appServices.GetRequiredService<IExternalUpdaterProvider>().EnsureAvailable(force: true);
             }
         }
     }

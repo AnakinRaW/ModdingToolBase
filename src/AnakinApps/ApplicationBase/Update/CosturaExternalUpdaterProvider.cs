@@ -39,8 +39,8 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
 
     public ComponentIntegrityInformation GetIntegrity() => _integrity.Value;
 
-    // Extracts the embedded updater and overwrites a stale on-disk copy whenever the running exe's bundled version is newer. 
-    public void EnsureAvailable()
+    // Extracts the embedded updater and overwrites a stale on-disk copy whenever the running exe's bundled version is newer.
+    public void EnsureAvailable(bool force = false)
     {
         var resourceName = RequireEmbeddedResource();
         var installDirectory = _environment.ApplicationLocalPath;
@@ -48,18 +48,32 @@ internal sealed class CosturaExternalUpdaterProvider : IExternalUpdaterProvider
             _fileSystem.Directory.CreateDirectory(installDirectory);
 
 #if DEBUG
-        if (_fileSystem.File.Exists(resourceName))
+        if (!_resourceExtractor.Contains(resourceName))
+        {
+            var srcDir = _fileSystem.Path.GetDirectoryName(_environment.AssemblyInfo.Assembly.Location);
+            var src = srcDir is null 
+                ? null 
+                : _fileSystem.Path.Combine(srcDir, resourceName);
+            
+            if (src is null || !_fileSystem.File.Exists(src))
+                return;
+            var dst = _fileSystem.Path.Combine(installDirectory, resourceName);
+            if (!force && _fileSystem.File.Exists(dst))
+                return;
+            _fileSystem.File.Copy(src, dst, overwrite: true);
             return;
+        }
 #endif
 
-
-        _resourceExtractor.Extract(resourceName, installDirectory, ShouldOverwrite);
+        _resourceExtractor.Extract(resourceName, installDirectory, force ? (_, _) => true : ShouldOverwrite);
         return;
 
         // This prevents a "double update" case which could happen during transitioning a breaking change of the external updater.
         // Scenario: The (old) external updates the main-app. The new main-app contains the updated external updater as embedded resource.
         // If the embedded, new external updater would not be overwritten, the new app would immediately trigger an update cycle
         // to update the external updater on disk.
+        // On the other hand, it may be possible, e.g., in case of deferred updates, local external updater is newer.
+        // In that case we also don't want to overwrite the local updater with an older embedded version.
         bool ShouldOverwrite(string file, Stream embeddedStream)
         {
             if (!Version.TryParse(FileVersionInfo.GetVersionInfo(file).FileVersion, out var installedVersion))
