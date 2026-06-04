@@ -1,4 +1,5 @@
 ﻿using AnakinRaW.AppUpdaterFramework.Configuration;
+using AnakinRaW.AppUpdaterFramework.Manifest;
 using AnakinRaW.AppUpdaterFramework.Metadata.Component;
 using AnakinRaW.AppUpdaterFramework.Metadata.Update;
 using AnakinRaW.AppUpdaterFramework.Product;
@@ -35,7 +36,9 @@ internal class ExternalUpdaterService : IExternalUpdaterService
     private readonly UpdateConfiguration _updateConfig;
     private readonly IExternalUpdaterProvider _updaterProvider;
     private readonly IExternalUpdaterIntegrityCheck _integrityCheck;
+    private readonly ManifestLoaderBase _manifestLoader;
     private readonly IHashingService _hashingService;
+    private readonly ILogger? _logger;
     private readonly string _tempPath;
 
     public ExternalUpdaterService(IServiceProvider serviceProvider)
@@ -50,7 +53,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         _hashingService = serviceProvider.GetRequiredService<IHashingService>();
         _updaterProvider = serviceProvider.GetRequiredService<IExternalUpdaterProvider>();
         _integrityCheck = serviceProvider.GetRequiredService<IExternalUpdaterIntegrityCheck>();
-        serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterService));
+        _manifestLoader = serviceProvider.GetRequiredService<IManifestLoaderProvider>().Loader;
+        _logger = serviceProvider.GetService<ILoggerFactory>()?.CreateLogger(typeof(ExternalUpdaterService));
 
         // Must be trimmed as otherwise paths enclosed in quotes and a trailing separator cause commandline arg parsing errors
         _tempPath = PathNormalizer.Normalize(_fileSystem.Path.GetTempPath(), PathNormalizeOptions.TrimTrailingSeparators);
@@ -105,7 +109,8 @@ internal class ExternalUpdaterService : IExternalUpdaterService
         if (!file.Exists)
             throw new FileNotFoundException("External updater binary not found.", file.FullName);
 
-        var integrityInformation = GetTrustedIntegrityInformation();
+        var trustList = new ExternalUpdaterTrustList(_updaterProvider, _pendingState, _manifestLoader, _updateConfig, _logger);
+        var integrityInformation = trustList.GetTrustedIntegrityInformation();
 
         // Open with FileShare.Read and keep the handle alive across Process.Start
         using var verifiedHandle = file.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -128,36 +133,6 @@ internal class ExternalUpdaterService : IExternalUpdaterService
             .OfType<SingleFileComponent>()
             .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
         return updater ?? throw new InvalidOperationException("External updater component not registered to current product.");
-    }
-
-    private IReadOnlyCollection<ComponentIntegrityInformation> GetTrustedIntegrityInformation()
-    {
-        var acceptable = new List<ComponentIntegrityInformation>();
-
-        var trusted = _updaterProvider.GetIntegrity();
-        if (trusted.HashType == HashTypeKey.None || trusted.Hash is null)
-            throw new InvalidOperationException("Unable to get integrity information for external updater.");
-        
-        acceptable.Add(trusted);
-
-        var pending = _pendingState.PendingComponents
-            .Select(p => p.Component)
-            .OfType<SingleFileComponent>()
-            .FirstOrDefault(c => c.Id == ExternalUpdaterConstants.ComponentIdentity);
-        
-        if (pending is not null)
-        {
-            var pendingIntegrity = pending.OriginInfo?.IntegrityInformation ?? ComponentIntegrityInformation.None;
-            var signingRequired = _updateConfig.ManifestSigningConfiguration.Policy == SignaturePolicy.Required;
-            
-            if (signingRequired && (pendingIntegrity.HashType == HashTypeKey.None || pendingIntegrity.Hash is null))
-                throw new InvalidOperationException(
-                    "Update security policy requires signing, but the pending external updater component has no integrity declaration. The signed-manifest pipeline is expected to populate it.");
-            
-            acceptable.Add(pendingIntegrity);
-        }
-
-        return acceptable;
     }
 
     private List<UpdateInformation> CollectUpdateInformation()
