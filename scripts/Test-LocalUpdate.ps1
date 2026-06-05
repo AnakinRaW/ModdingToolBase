@@ -23,8 +23,9 @@
 param(
     [Parameter(Mandatory)] [string]$ConfigPath,
 
-    [string]$InstalledVersion = '0.0.1-local',
-    [string]$ServerVersion    = '99.99.99-local',
+    # Default to $DefaultInstalledVersion / $DefaultServerVersion (AppConfig.ps1) when omitted.
+    [string]$InstalledVersion,
+    [string]$ServerVersion,
 
     # Update channel to test. Defaults to the config's testUpdateBranch.
     [string]$Branch,
@@ -38,31 +39,24 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Get-RequiredConfig {
-    param([Parameter(Mandatory)] $Config, [Parameter(Mandatory)] [string]$Name)
-    $value = $Config.$Name
-    if ([string]::IsNullOrWhiteSpace([string]$value)) {
-        throw "Config '$ConfigPath' is missing required field '$Name'."
-    }
-    return $value
-}
+. (Join-Path $PSScriptRoot 'AppConfig.ps1')
+
+if (-not $InstalledVersion) { $InstalledVersion = $DefaultInstalledVersion }
+if (-not $ServerVersion)    { $ServerVersion    = $DefaultServerVersion }
 
 if ($CompatibilityUpdater -and -not $Dual) { throw "-CompatibilityUpdater requires -Dual." }
 
-if (-not (Test-Path $ConfigPath)) { throw "Config file not found at '$ConfigPath'." }
-$ConfigPath = (Resolve-Path $ConfigPath).Path
-$repoRoot   = Split-Path -Parent $ConfigPath
-$config     = Get-Content -Raw $ConfigPath | ConvertFrom-Json
-
-$appExe = Get-RequiredConfig $config 'appExe'
-if (-not $Branch) { $Branch = Get-RequiredConfig $config 'testUpdateBranch' }
+$cfg      = Import-AppConfig $ConfigPath
+$repoRoot = $cfg.RepoRoot
+$appExe   = Get-RequiredConfig $cfg 'appExe'
+if (-not $Branch) { $Branch = Get-RequiredConfig $cfg 'testUpdateBranch' }
 
 $deployScript = Join-Path $PSScriptRoot 'Build-LocalRelease.ps1'
 $cycleScript  = Join-Path $PSScriptRoot 'Test-LocalUpdateCycle.ps1'
 
 # --- 1. Stage the local deploy ---------------------------------------------------------------
 $deployArgs = @{
-    ConfigPath       = $ConfigPath
+    ConfigPath       = $cfg.Path
     InstalledVersion = $InstalledVersion
     ServerVersion    = $ServerVersion
 }

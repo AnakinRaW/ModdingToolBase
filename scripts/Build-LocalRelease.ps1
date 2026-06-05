@@ -28,8 +28,9 @@ param(
     # config paths are resolved relative to it.
     [Parameter(Mandatory)] [string]$ConfigPath,
 
-    [string]$InstalledVersion = "0.0.1-local",
-    [string]$ServerVersion    = "99.99.99-local",
+    # Default to $DefaultInstalledVersion / $DefaultServerVersion (AppConfig.ps1) when omitted.
+    [string]$InstalledVersion,
+    [string]$ServerVersion,
 
     # Target framework of the self-updating build. net481 is the only updatable TFM (the external
     # updater is a net481-only Windows binary), so this is effectively fixed and lives here as a
@@ -48,47 +49,43 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-function Get-RequiredConfig {
-    param([Parameter(Mandatory)] $Config, [Parameter(Mandatory)] [string]$Name)
-    $value = $Config.$Name
-    if ([string]::IsNullOrWhiteSpace([string]$value)) {
-        throw "Config '$ConfigPath' is missing required field '$Name'."
-    }
-    return $value
-}
-
-if (-not (Test-Path $ConfigPath)) { throw "Config file not found at '$ConfigPath'." }
-$ConfigPath = (Resolve-Path $ConfigPath).Path
-$repoRoot   = Split-Path -Parent $ConfigPath
-$config     = Get-Content -Raw $ConfigPath | ConvertFrom-Json
-
-$toolProjRel = Get-RequiredConfig $config 'toolProject'
-$appExe      = Get-RequiredConfig $config 'appExe'
-$updaterExe  = Get-RequiredConfig $config 'updaterExe'
-$branch      = Get-RequiredConfig $config 'testUpdateBranch'
-
+. (Join-Path $PSScriptRoot "AppConfig.ps1")
 . (Join-Path $PSScriptRoot "NbgvVersion.ps1")
-$baseScript = Join-Path $PSScriptRoot "Publish-LocalRelease.ps1"
 
+if (-not $InstalledVersion) { $InstalledVersion = $DefaultInstalledVersion }
+if (-not $ServerVersion)    { $ServerVersion    = $DefaultServerVersion }
+
+$cfg        = Import-AppConfig $ConfigPath
+$repoRoot   = $cfg.RepoRoot
+$appExe     = Get-RequiredConfig $cfg 'appExe'
+$updaterExe = Get-RequiredConfig $cfg 'updaterExe'
+$branch     = Get-RequiredConfig $cfg 'testUpdateBranch'
+$toolProj   = Join-Path $repoRoot (Get-RequiredConfig $cfg 'toolProject')
+
+$baseScript      = Join-Path $PSScriptRoot "Publish-LocalRelease.ps1"
 $deployRoot      = Join-Path $repoRoot ".local_deploy"
 $installBuildDir = Join-Path $deployRoot "bin\install"
 $serverBuildDir  = Join-Path $deployRoot "bin\tool"
-$toolProj        = Join-Path $repoRoot $toolProjRel
+
+# Builds the app at a given version into a given output dir (uses $toolProj / $TargetFramework /
+# $appExe / $nbgv from script scope).
+function Invoke-AppBuild {
+    param([string]$Version, [string]$OutputDir, [string]$Label)
+
+    Write-Host "--- Building $appExe ($TargetFramework) @ $Label v$Version ---" -ForegroundColor Cyan
+    Set-NbgvVersion -Snapshot $nbgv -Version $Version
+    dotnet build $toolProj --configuration Release -f $TargetFramework --output $OutputDir `
+        /p:DebugType=None /p:DebugSymbols=false /p:LocalDeploy=true
+    if ($LASTEXITCODE -ne 0) { throw "Build of '$toolProj' @ v$Version failed." }
+}
 
 if (Test-Path $deployRoot) { Remove-Item -Recurse -Force $deployRoot }
 New-Item -ItemType Directory -Path $deployRoot | Out-Null
 
 $nbgv = Backup-NbgvVersion -RepoRoot $repoRoot
 try {
-    Write-Host "--- Building $appExe ($TargetFramework) @ installed v$InstalledVersion ---" -ForegroundColor Cyan
-    Set-NbgvVersion -Snapshot $nbgv -Version $InstalledVersion
-    dotnet build $toolProj --configuration Release -f $TargetFramework --output $installBuildDir /p:DebugType=None /p:DebugSymbols=false /p:LocalDeploy=true
-    if ($LASTEXITCODE -ne 0) { throw "Build of '$toolProj' @ v$InstalledVersion failed." }
-
-    Write-Host "--- Building $appExe ($TargetFramework) @ server v$ServerVersion ---" -ForegroundColor Cyan
-    Set-NbgvVersion -Snapshot $nbgv -Version $ServerVersion
-    dotnet build $toolProj --configuration Release -f $TargetFramework --output $serverBuildDir /p:DebugType=None /p:DebugSymbols=false /p:LocalDeploy=true
-    if ($LASTEXITCODE -ne 0) { throw "Build of '$toolProj' @ v$ServerVersion failed." }
+    Invoke-AppBuild -Version $InstalledVersion -OutputDir $installBuildDir -Label 'installed'
+    Invoke-AppBuild -Version $ServerVersion    -OutputDir $serverBuildDir  -Label 'server'
 
     if ($PerturbServerUpdater) {
         # Make the server's updater differ byte-for-byte from the installed app's embedded copy.

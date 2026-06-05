@@ -17,15 +17,20 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string]$ConfigPath,
-    [string]$InstalledVersion = '0.0.1-local',
-    [string]$ServerVersion    = '99.99.99-local'
+    # Default to $DefaultInstalledVersion / $DefaultServerVersion (AppConfig.ps1) when omitted.
+    [string]$InstalledVersion,
+    [string]$ServerVersion
 )
 
 $ErrorActionPreference = 'Stop'
 
-if (-not (Test-Path $ConfigPath)) { throw "Config file not found at '$ConfigPath'." }
-$ConfigPath = (Resolve-Path $ConfigPath).Path
-$runner     = Join-Path $PSScriptRoot 'Test-LocalUpdate.ps1'
+. (Join-Path $PSScriptRoot 'AppConfig.ps1')
+
+if (-not $InstalledVersion) { $InstalledVersion = $DefaultInstalledVersion }
+if (-not $ServerVersion)    { $ServerVersion    = $DefaultServerVersion }
+
+$cfg    = Import-AppConfig $ConfigPath
+$runner = Join-Path $PSScriptRoot 'Test-LocalUpdate.ps1'
 
 $scenarios = @(
     @{ Name = 'single';           Extra = @() },
@@ -36,14 +41,16 @@ $scenarios = @(
 $failed = @()
 foreach ($s in $scenarios) {
     Write-Host "`n##################### Scenario: $($s.Name) #####################" -ForegroundColor Magenta
+    # Each scenario runs in its own pwsh process so its `exit` can't end the suite. Build the
+    # arg list and splat it ($s.Extra holds the scenario switch, if any).
     $callArgs = @(
         '-NoProfile', '-File', $runner,
-        '-ConfigPath',       $ConfigPath,
+        '-ConfigPath',       $cfg.Path,
         '-InstalledVersion', $InstalledVersion,
         '-ServerVersion',    $ServerVersion
     ) + $s.Extra
-
     & pwsh @callArgs
+
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Scenario '$($s.Name)' FAILED (exit $LASTEXITCODE)" -ForegroundColor Red
         $failed += $s.Name
@@ -54,17 +61,14 @@ foreach ($s in $scenarios) {
 
 if ($failed.Count -gt 0) {
     # The updater log is already echoed by Test-LocalUpdateCycle; also dump the app log here.
-    try {
-        $appLogDir = (Get-Content -Raw $ConfigPath | ConvertFrom-Json).appLogDir
-        if ($appLogDir) {
-            $appLogPath = Join-Path ([Environment]::GetFolderPath('ApplicationData')) $appLogDir
-            Get-ChildItem -Path $appLogPath -Filter '*.txt' -ErrorAction SilentlyContinue | ForEach-Object {
-                Write-Host "`n--- $($_.FullName) ---" -ForegroundColor Yellow
-                Get-Content -Raw $_.FullName | Write-Host
-            }
+    $appLogDir = $cfg.Values.appLogDir
+    if ($appLogDir) {
+        $appLogPath = Join-Path ([Environment]::GetFolderPath('ApplicationData')) $appLogDir
+        Get-ChildItem -Path $appLogPath -Filter '*.txt' -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "`n--- $($_.FullName) ---" -ForegroundColor Yellow
+            Get-Content -Raw $_.FullName | Write-Host
         }
-    } catch { Write-Host "(could not read app log: $_)" -ForegroundColor DarkYellow }
-
+    }
     throw "Integration suite failed: $($failed -join ', ')."
 }
 
