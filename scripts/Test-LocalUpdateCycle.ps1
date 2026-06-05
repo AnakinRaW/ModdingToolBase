@@ -9,18 +9,17 @@
 #      no errors.
 #   4. Assert the updater relaunched the freshly-installed exe with
 #      `--externalUpdaterResult UpdateSuccess` (evidence: updater's own log).
-#   5. Re-invoke `updateApplication` on the now-updated install and assert the
-#      caller-supplied "no update available" message in stdout.
+#   5. Re-invoke `updateApplication` on the now-updated install and assert it's a clean no-op:
+#      it exits 0 (no RestartRequiredCode) and leaves the on-disk exe version unchanged.
 #
 # The caller is responsible for staging the install dir + signed local server first
-# (typically via the app's `deploy-local.ps1`, which wraps `Publish-LocalRelease.ps1`).
+# (typically via `Build-LocalRelease.ps1`, which wraps `Publish-LocalRelease.ps1`).
 #
 # USAGE (from an app's CI script or wrapper)
 #
 #   Test-LocalUpdateCycle.ps1 -AppExePath <path>        `
 #                             -ServerUri <uri>          `
 #                             -Branch <name>            `
-#                             -NoUpdateMessage <string> `
 #                             [-ExpectedNewVersion <ver>]
 #
 # Windows-only (the external updater is a Windows-only binary; the net481 self-updating
@@ -40,10 +39,6 @@ param(
 
     # Branch name to update against; must match the one passed to Publish-LocalRelease.ps1.
     [Parameter(Mandatory)] [string]$Branch,
-
-    # Substring (or regex) the re-check pass should print on stdout when no update is
-    # available. App-specific because each host's update verb chooses its own wording.
-    [Parameter(Mandatory)] [string]$NoUpdateMessage,
 
     # When provided, the post-update ProductVersion must start with this string. Useful when
     # the caller knows the server-side version it just published. When omitted the test only
@@ -182,25 +177,22 @@ Assert-True $relaunchMatched  "Updater log records starting '$AppExePath' (targe
 Assert-True $resultArgMatched "Relaunch arguments include 'externalUpdaterResult UpdateSuccess'"
 
 # =========================================================================================
-Write-Host "`n=== [5/5] Re-run updateApplication; expect '$NoUpdateMessage' ===" -ForegroundColor Cyan
-# Capture stdout via a temp file because Start-Process -NoNewWindow doesn't pipe through
-# PowerShell's pipeline (and that pipe would re-break the spinner anyway).
-$recheckStdout = New-TemporaryFile
-try {
-    $recheckProc = Start-Process -FilePath $AppExePath `
-        -ArgumentList @('updateApplication', '--updateBranch', $Branch, '--updateServerUrl', $ServerUri) `
-        -NoNewWindow -Wait -PassThru `
-        -RedirectStandardOutput $recheckStdout
-    $recheckExit = $recheckProc.ExitCode
-    $recheckOut  = Get-Content -Raw $recheckStdout
-    Write-Host $recheckOut
-    Assert-True ($recheckExit -eq 0) "Re-check exited cleanly (got $recheckExit)"
-    Assert-True ($recheckOut -match [regex]::Escape($NoUpdateMessage)) `
-        "Re-check stdout contains '$NoUpdateMessage'"
-}
-finally {
-    Remove-Item -Force $recheckStdout -ErrorAction SilentlyContinue
-}
+Write-Host "`n=== [5/5] Re-run updateApplication; expect a clean no-op (no second update) ===" -ForegroundColor Cyan
+# Wording-independent assertion: re-running against the same server must find nothing to do. The
+# framework signals "update applied" by force-exiting with RestartRequiredCode ($restartRequiredCode)
+# and replacing the on-disk exe; "nothing to do" returns 0 and leaves the exe untouched. We assert
+# both, rather than scraping a host-specific "no update" string from stdout (each app words it
+# differently). The child's stdout still streams to the console for debugging.
+$recheckProc = Start-Process -FilePath $AppExePath `
+    -ArgumentList @('updateApplication', '--updateBranch', $Branch, '--updateServerUrl', $ServerUri) `
+    -NoNewWindow -Wait -PassThru
+$recheckExit = $recheckProc.ExitCode
+Assert-True ($recheckExit -eq 0) `
+    "Re-check exited 0 -- no RestartRequiredCode ($restartRequiredCode) raised (got $recheckExit)"
+
+$recheckVersion = (Get-Item $AppExePath).VersionInfo.ProductVersion
+Assert-True ($recheckVersion -eq $postVersion) `
+    "Installed exe unchanged on re-check (still $postVersion) -- no second update applied"
 
 Write-Host "`n=== ALL ASSERTIONS PASSED ===" -ForegroundColor Green
 exit 0

@@ -1,0 +1,28 @@
+name: Build & Test
+
+# Builds and tests ModdingToolBase on its own, so consuming apps don't have to pull its test
+# projects into their solutions. Also exposed via workflow_call so an app can gate on it if it
+# wants to.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Build & Test
+        shell: pwsh
+        run: ./scripts/Test-ModdingToolBase.ps1

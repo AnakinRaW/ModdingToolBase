@@ -7,7 +7,7 @@
 #   FTP (default)  — production releases. Provide -SftpHost / -SftpPort / -SftpUser /
 #                    -SftpPassword / -SftpBasePath.
 #
-#   Local          — dev/test deployments (deploy-local.ps1 etc.). Provide
+#   Local          — dev/test deployments (Build-LocalRelease.ps1 etc.). Provide
 #                    -LocalDeployTarget pointing at a local directory.
 #
 # Both modes support an optional next-generation channel (-NextOrigin paired with
