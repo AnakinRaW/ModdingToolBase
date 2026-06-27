@@ -11,12 +11,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="13.0.23" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="13.0.23" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="13.0.23" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.DownloadManager" Version="13.1.2" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.SimplePipeline" Version="13.1.2" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.FileSystem" Version="13.1.2" />
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
 		<PackageReference Include="Semver" Version="3.0.0" />
 	</ItemGroup>
 
