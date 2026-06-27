@@ -12,9 +12,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.0.23" />
-		<PackageReference Include="AnakinRaW.CommonUtilities.Testing" Version="13.0.23" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+		<PackageReference Include="AnakinRaW.CommonUtilities" Version="13.1.2" />
+		<PackageReference Include="AnakinRaW.CommonUtilities.Testing" Version="13.1.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
 		<PackageReference Include="Testably.Abstractions" Version="10.2.0" />
 		<PackageReference Include="xunit.v3.extensibility.core" Version="3.2.2" />
 	</ItemGroup>
